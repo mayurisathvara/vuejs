@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Models\Organization;
+use App\Models\Department;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Hash;
@@ -18,7 +19,7 @@ class UserController extends Controller
     public function index(Request $request): JsonResponse
     {
         $query = User::select([
-            'id', 'name', 'email', 'mobile', 'organization_id', 
+            'id', 'name', 'email', 'mobile', 'organization_id', 'department_id',
             'status', 'created_at', 'updated_at'
         ])->where('role', 'user');
 
@@ -39,6 +40,11 @@ class UserController extends Controller
             $query->where('organization_id', $request->organization_id);
         }
 
+        // Department filter
+        if ($request->has('department_id') && $request->department_id) {
+            $query->where('department_id', $request->department_id);
+        }
+
         // Role filter
         if ($request->has('role') && $request->role) {
             $query->where('role', $request->role);
@@ -54,7 +60,7 @@ class UserController extends Controller
 
         // Pagination with optimized relationship loading
         $perPage = min($request->get('per_page', 10), 50); // Cap at 50 items
-        $users = $query->with(['organization:id,name'])
+        $users = $query->with(['organization:id,name', 'department:id,name'])
                       ->paginate($perPage);
 
         return response()->json($users);
@@ -74,6 +80,30 @@ class UserController extends Controller
     }
 
     /**
+     * Get departments for a specific organization
+     */
+    public function getDepartmentsByOrganization(Request $request): JsonResponse
+    {
+        $validator = Validator::make($request->all(), [
+            'organization_id' => 'required|exists:organizations,id',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'message' => 'Validation failed',
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        $departments = Department::where('organization_id', $request->organization_id)
+            ->select('id', 'name')
+            ->orderBy('name')
+            ->get();
+
+        return response()->json($departments);
+    }
+
+    /**
      * Store a newly created user
      */
     public function store(Request $request): JsonResponse
@@ -84,6 +114,7 @@ class UserController extends Controller
             'mobile' => 'required|string|max:20',
             'password' => 'required|string|min:6',
             'organization_id' => 'required|exists:organizations,id',
+            'department_id' => 'nullable|exists:departments,id',
             'status' => 'required|in:active,inactive',
         ]);
 
@@ -101,8 +132,12 @@ class UserController extends Controller
             'password' => Hash::make($request->password),
             'role' => 'user', // Always set to user role
             'organization_id' => $request->organization_id,
+            'department_id' => $request->department_id,
             'status' => $request->status ?? 'active',
         ]);
+
+        // Load relationships for response
+        $user->load(['organization:id,name', 'department:id,name']);
 
         return response()->json($user, 201);
     }
@@ -112,6 +147,7 @@ class UserController extends Controller
      */
     public function show(User $user): JsonResponse
     {
+        $user->load(['organization:id,name', 'department:id,name']);
         return response()->json($user);
     }
 
@@ -126,6 +162,7 @@ class UserController extends Controller
             'mobile' => 'required|string|max:20',
             'password' => 'nullable|string|min:6',
             'organization_id' => 'required|exists:organizations,id',
+            'department_id' => 'nullable|exists:departments,id',
             'status' => 'required|in:active,inactive',
         ]);
 
@@ -142,6 +179,7 @@ class UserController extends Controller
             'mobile' => $request->mobile,
             'role' => 'user', // Always keep as user role
             'organization_id' => $request->organization_id,
+            'department_id' => $request->department_id,
             'status' => $request->status,
         ];
 
@@ -151,6 +189,9 @@ class UserController extends Controller
         }
 
         $user->update($updateData);
+        
+        // Load relationships for response
+        $user->load(['organization:id,name', 'department:id,name']);
 
         return response()->json($user);
     }

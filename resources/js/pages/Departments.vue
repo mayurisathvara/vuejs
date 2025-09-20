@@ -262,6 +262,7 @@ import Modal from '@/components/Modal.vue'
 import InputField from '@/components/InputField.vue'
 import Pagination from '@/components/Pagination.vue'
 import api from '@/services/api'
+import { showSuccess, showError } from '@/services/toast'
 
 // Data
 const departments = ref([])
@@ -334,6 +335,7 @@ const fetchDepartments = async (page = 1) => {
     pagination.total = response.data.total
   } catch (error) {
     console.error('Error fetching departments:', error)
+    showError('Failed to load departments. Please try again.')
   } finally {
     loading.value = false
   }
@@ -345,6 +347,7 @@ const fetchOrganizations = async () => {
     organizations.value = response.data
   } catch (error) {
     console.error('Error fetching organizations:', error)
+    showError('Failed to load organizations. Please try again.')
   }
 }
 
@@ -440,8 +443,10 @@ const handleSubmit = async () => {
     loading.value = true
     if (isEditing.value) {
       await api.put(`/departments/${departmentToDelete.value.id}`, departmentForm)
+      showSuccess('Department updated successfully!')
     } else {
       await api.post('/departments', departmentForm)
+      showSuccess('Department created successfully!')
     }
     closeDepartmentModal()
     fetchDepartments()
@@ -451,6 +456,7 @@ const handleSubmit = async () => {
       errors.value = error.response.data.errors
     } else {
       errorMessage.value = 'Error saving department. Please try again.'
+      showError('Failed to save department. Please try again.')
     }
   } finally {
     loading.value = false
@@ -461,10 +467,12 @@ const handleDelete = async () => {
   try {
     loading.value = true
     await api.delete(`/departments/${departmentToDelete.value.id}`)
+    showSuccess('Department deleted successfully!')
     closeDeleteModal()
     fetchDepartments()
   } catch (error) {
     console.error('Error deleting department:', error)
+    showError('Failed to delete department. Please try again.')
   } finally {
     loading.value = false
   }

@@ -41,6 +41,14 @@
           </option>
         </select>
       </div>
+      <div class="col-md-3">
+        <select v-model="departmentFilter" class="form-select" @change="handleDepartmentFilter">
+          <option value="">All Departments</option>
+          <option v-for="dept in departments" :key="dept.id" :value="dept.id">
+            {{ dept.name }}
+          </option>
+        </select>
+      </div>
       <div class="col-md-2">
         <select v-model="perPage" class="form-select" @change="handlePerPageChange">
           <option value="10">10 per page</option>
@@ -79,6 +87,10 @@
           </template>
           <template #cell-organization_name="{ row }">
             {{ row.organization ? row.organization.name : 'N/A' }}
+          </template>
+          <template #cell-department_name="{ row }">
+            <span v-if="row.department" class="badge bg-info">{{ row.department.name }}</span>
+            <span v-else class="text-muted">N/A</span>
           </template>
           <template #cell-status="{ value, row }">
             <div class="status-dropdown">
@@ -180,7 +192,7 @@
                 Organization
                 <span class="text-danger">*</span>
               </label>
-              <select v-model="userForm.organization_id" class="form-select" :class="{ 'is-invalid': errors.organization_id }" required>
+              <select v-model="userForm.organization_id" class="form-select" :class="{ 'is-invalid': errors.organization_id }" @change="handleOrganizationChange" required>
                 <option value="">Select Organization</option>
                 <option v-for="org in organizations" :key="org.id" :value="org.id">
                   {{ org.name }}
@@ -188,6 +200,20 @@
               </select>
               <div v-if="errors.organization_id" class="invalid-feedback d-block">
                 {{ getErrorMessage(errors.organization_id) }}
+              </div>
+            </div>
+          </div>
+          <div class="col-md-6 mb-3">
+            <div class="form-group">
+              <label class="form-label">Department</label>
+              <select v-model="userForm.department_id" class="form-select" :class="{ 'is-invalid': errors.department_id }" :disabled="!userForm.organization_id">
+                <option value="">Select Department</option>
+                <option v-for="dept in availableDepartments" :key="dept.id" :value="dept.id">
+                  {{ dept.name }}
+                </option>
+              </select>
+              <div v-if="errors.department_id" class="invalid-feedback d-block">
+                {{ getErrorMessage(errors.department_id) }}
               </div>
             </div>
           </div>
@@ -475,6 +501,7 @@ const usersStore = useUsersStore()
 // Search and filters
 const searchQuery = ref('')
 const organizationFilter = ref('')
+const departmentFilter = ref('')
 const perPage = ref(10)
 const searchTimeout = ref(null)
 
@@ -491,11 +518,14 @@ const userForm = reactive({
   mobile: '',
   password: '',
   organization_id: '',
+  department_id: '',
   status: 'active'
 })
 
 // Organizations data
 const organizations = ref([])
+const departments = ref([])
+const availableDepartments = ref([])
 
 // Helper function to get error message
 const getErrorMessage = (error) => {
@@ -515,6 +545,7 @@ const userHeaders = [
   { key: 'name', label: 'User', class: 'text-start' },
   { key: 'mobile', label: 'Mobile', class: 'text-center' },
   { key: 'organization_name', label: 'Organization', class: 'text-center' },
+  { key: 'department_name', label: 'Department', class: 'text-center' },
   { key: 'status', label: 'Status', class: 'text-center' },
   { key: 'created_at', label: 'Created', class: 'text-center' }
 ]
@@ -522,7 +553,7 @@ const userHeaders = [
 // Methods
 const fetchUsers = async () => {
   try {
-    await usersStore.fetchUsers(1, searchQuery.value, organizationFilter.value)
+    await usersStore.fetchUsers(1, searchQuery.value, organizationFilter.value, departmentFilter.value)
   } catch (error) {
     console.error('Error fetching users:', error)
   }
@@ -553,8 +584,48 @@ const handleSearch = () => {
   }, 500) // 500ms delay
 }
 
-const handleOrganizationFilter = () => {
+const handleOrganizationFilter = async () => {
+  // Reset department filter when organization changes
+  departmentFilter.value = ''
+  // Fetch departments for the selected organization
+  if (organizationFilter.value) {
+    await fetchDepartmentsByOrganization(organizationFilter.value)
+  } else {
+    departments.value = []
+  }
   fetchUsers()
+}
+
+const handleDepartmentFilter = () => {
+  fetchUsers()
+}
+
+const fetchDepartmentsByOrganization = async (organizationId) => {
+  try {
+    const response = await api.get(`/users/departments?organization_id=${organizationId}`)
+    departments.value = response.data
+  } catch (error) {
+    console.error('Error fetching departments:', error)
+    departments.value = []
+  }
+}
+
+const handleOrganizationChange = async () => {
+  // Reset department selection when organization changes
+  userForm.department_id = ''
+  
+  // Fetch departments for the selected organization
+  if (userForm.organization_id) {
+    try {
+      const response = await api.get(`/users/departments?organization_id=${userForm.organization_id}`)
+      availableDepartments.value = response.data
+    } catch (error) {
+      console.error('Error fetching departments:', error)
+      availableDepartments.value = []
+    }
+  } else {
+    availableDepartments.value = []
+  }
 }
 
 const handlePerPageChange = () => {
@@ -563,7 +634,7 @@ const handlePerPageChange = () => {
 }
 
 const handlePageChange = (page) => {
-  usersStore.fetchUsers(page, searchQuery.value, organizationFilter.value)
+  usersStore.fetchUsers(page, searchQuery.value, organizationFilter.value, departmentFilter.value)
 }
 
 const openCreateModal = () => {
@@ -572,15 +643,28 @@ const openCreateModal = () => {
   showUserModal.value = true
 }
 
-const openEditModal = (user) => {
+const openEditModal = async (user) => {
   isEditing.value = true
   userForm.name = user.name
   userForm.email = user.email
   userForm.mobile = user.mobile || ''
   userForm.organization_id = user.organization_id || ''
+  userForm.department_id = user.department_id || ''
   userForm.status = user.status || 'active'
   userForm.password = ''
   userToDelete.value = user
+  
+  // Fetch departments for the user's organization
+  if (userForm.organization_id) {
+    try {
+      const response = await api.get(`/users/departments?organization_id=${userForm.organization_id}`)
+      availableDepartments.value = response.data
+    } catch (error) {
+      console.error('Error fetching departments:', error)
+      availableDepartments.value = []
+    }
+  }
+  
   showUserModal.value = true
 }
 
@@ -605,7 +689,9 @@ const resetForm = () => {
   userForm.mobile = ''
   userForm.password = ''
   userForm.organization_id = ''
+  userForm.department_id = ''
   userForm.status = 'active'
+  availableDepartments.value = []
   errors.value = {}
   errorMessage.value = ''
 }

@@ -15,12 +15,13 @@ export const useUsersStore = defineStore('users', () => {
   })
 
   // Actions
-  const fetchUsers = async (page = 1, search = '', organization_id = '') => {
+  const fetchUsers = async (page = 1, search = '', organization_id = '', department_id = '') => {
     loading.value = true
     try {
       const params = { page, per_page: pagination.value.per_page }
       if (search) params.search = search
       if (organization_id) params.organization_id = organization_id
+      if (department_id) params.department_id = department_id
       
       const response = await api.get('/users', { params })
       users.value = response.data.data

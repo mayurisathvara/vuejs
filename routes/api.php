@@ -33,6 +33,7 @@ Route::middleware('auth:sanctum')->group(function () {
     
     // User management routes
     Route::get('/users/organizations', [UserController::class, 'getOrganizations']);
+    Route::get('/users/departments', [UserController::class, 'getDepartmentsByOrganization']);
     Route::put('/users/{user}/status', [UserController::class, 'updateStatus']);
     Route::apiResource('users', UserController::class);
     Route::get('/users', [UserController::class, 'index']);
