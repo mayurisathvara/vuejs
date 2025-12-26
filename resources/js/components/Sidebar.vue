@@ -30,35 +30,49 @@
             </router-link>
           </li>
           
-          <li class="nav-section">
+          <li v-if="!isUser" class="nav-section">
             <span class="sidebar-mini-icon">
               <i class="fa fa-ellipsis-h"></i>
             </span>
             <h4 class="text-section">Management</h4>
           </li>
           
-          <li class="nav-item" :class="{ active: $route.name === 'Users' }">
+          <li v-if="showUsers" class="nav-item" :class="{ active: $route.name === 'Users' || $route.name === 'assign-sims' }">
             <router-link to="/users" class="nav-link" @click="handleMenuClick">
               <i class="fas fa-users"></i>
               <p>Users</p>
             </router-link>
           </li>
           
-          <li class="nav-item" :class="{ active: $route.name === 'Organizations' }">
+          <li v-if="showOrganizations" class="nav-item" :class="{ active: $route.name === 'Organizations' }">
             <router-link to="/organizations" class="nav-link" @click="handleMenuClick">
               <i class="fas fa-building"></i>
               <p>Organizations</p>
             </router-link>
           </li>
           
-          <li class="nav-item" :class="{ active: $route.name === 'Departments' }">
+          <li v-if="showDepartments" class="nav-item" :class="{ active: $route.name === 'Departments' }">
             <router-link to="/departments" class="nav-link" @click="handleMenuClick">
               <i class="fas fa-sitemap"></i>
               <p>Departments</p>
             </router-link>
           </li>
           
-          <li class="nav-item">
+          <li v-if="showSims" class="nav-item" :class="{ active: $route.name === 'Sims' }">
+            <router-link to="/sims" class="nav-link" @click="handleMenuClick">
+              <i class="fas fa-mobile-alt"></i>
+              <p>SIM Cards</p>
+            </router-link>
+          </li>
+
+          <li v-if="showCallReports" class="nav-item" :class="{ active: $route.name === 'CallReports' }">
+            <router-link to="/call-reports" class="nav-link" @click="handleMenuClick">
+              <i class="fas fa-chart-bar"></i>
+              <p>Call Reports</p>
+            </router-link>
+          </li>
+          
+          <li v-if="showSettings" class="nav-item">
             <a href="#" class="nav-link" @click="handleMenuClick">
               <i class="fas fa-cog"></i>
               <p>Settings</p>
@@ -71,10 +85,27 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { useAuthStore } from '@/stores/auth'
 
+const authStore = useAuthStore()
 const sidebarCollapsed = ref(false)
 const isMobile = ref(false)
+
+// Computed properties for role-based menu visibility
+const userRole = computed(() => authStore.user?.role || 'user')
+const isAdmin = computed(() => userRole.value === 'admin')
+const isOrganization = computed(() => userRole.value === 'organization')
+const isManager = computed(() => userRole.value === 'manager')
+const isUser = computed(() => userRole.value === 'user')
+
+// Show menu items based on role
+const showUsers = computed(() => isAdmin.value || isOrganization.value || isManager.value)
+const showOrganizations = computed(() => isAdmin.value)
+const showDepartments = computed(() => isAdmin.value || isOrganization.value)
+const showSims = computed(() => isAdmin.value || isOrganization.value)
+const showSettings = computed(() => isAdmin.value)
+const showCallReports = computed(() => isAdmin.value || isOrganization.value || isManager.value || isUser.value)
 
 const checkMobile = () => {
   isMobile.value = window.innerWidth <= 991.5

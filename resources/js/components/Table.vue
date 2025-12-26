@@ -3,6 +3,14 @@
     <table class="table" :class="tableClasses">
       <thead v-if="headers.length" class="thead-light">
         <tr>
+          <th v-if="checkboxes" style="width: 50px;">
+            <input
+              type="checkbox"
+              class="form-check-input"
+              :checked="isAllSelected"
+              @change="toggleSelectAll"
+            />
+          </th>
           <th
             v-for="(header, index) in headers"
             :key="index"
@@ -16,18 +24,26 @@
       </thead>
       <tbody>
         <tr v-if="loading">
-          <td :colspan="headers.length + (actions ? 1 : 0)" class="text-center py-4">
+          <td :colspan="(checkboxes ? 1 : 0) + headers.length + (actions ? 1 : 0)" class="text-center py-4">
             <div class="spinner-border" role="status">
               <span class="visually-hidden">Loading...</span>
             </div>
           </td>
         </tr>
         <tr v-else-if="!data.length">
-          <td :colspan="headers.length + (actions ? 1 : 0)" class="text-center py-4 text-muted">
+          <td :colspan="(checkboxes ? 1 : 0) + headers.length + (actions ? 1 : 0)" class="text-center py-4 text-muted">
             No data available
           </td>
         </tr>
         <tr v-else v-for="(row, rowIndex) in data" :key="rowIndex">
+          <td v-if="checkboxes">
+            <input
+              type="checkbox"
+              class="form-check-input"
+              :checked="isRowSelected(row)"
+              @change="toggleRowSelection(row)"
+            />
+          </td>
           <td
             v-for="(header, colIndex) in headers"
             :key="colIndex"
@@ -46,14 +62,14 @@
             <slot name="actions" :row="row" :index="rowIndex">
               <div class="action-buttons">
                 <button
-                  v-if="actions.edit"
+                  v-if="typeof actions === 'object' && actions.edit"
                   class="action-btn edit-btn"
                   @click="$emit('edit', row, rowIndex)"
                 >
                   <i class="fas fa-edit"></i>
                 </button>
                 <button
-                  v-if="actions.delete"
+                  v-if="typeof actions === 'object' && actions.delete"
                   class="action-btn delete-btn"
                   @click="$emit('delete', row, rowIndex)"
                 >
@@ -76,14 +92,14 @@
 }
 
 .table td {
-  padding: 10px 12px !important;
+  padding: 8px 20px !important;
   vertical-align: middle;
   border-top: 1px solid #f8f9fc;
   font-size: 14px;
 }
 
 .table th {
-  padding: 12px 12px !important;
+  padding: 10px 20px !important;
   vertical-align: middle;
   font-weight: 600;
   font-size: 13px;
@@ -94,9 +110,42 @@
   background-color: #f8f9fc;
 }
 
-/* Reduce padding for action column specifically */
-.table td:last-child {
-  padding: 10px 16px 10px 8px !important;
+/* Checkbox styling for better visibility */
+.form-check-input {
+  width: 18px;
+  height: 18px;
+  border: 2px solid #d1d3e2;
+  border-radius: 4px;
+  background-color: #f8f9fc;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin: 0;
+}
+
+.form-check-input:hover {
+  border-color: #4e73df;
+  background-color: #e7f0ff;
+}
+
+.form-check-input:checked {
+  background-color: #4e73df;
+  border-color: #4e73df;
+}
+
+.form-check-input:focus {
+  box-shadow: 0 0 0 0.2rem rgba(78, 115, 223, 0.25);
+  border-color: #4e73df;
+}
+
+/* Add extra padding to first and last columns */
+.table td:first-child,
+.table th:first-child {
+  padding-left: 24px !important;
+}
+
+.table td:last-child,
+.table th:last-child {
+  padding-right: 24px !important;
 }
 
 /* Hover effect for table rows */
@@ -104,56 +153,78 @@
   background-color: #f8f9fc;
 }
 
-/* Compact row height */
+/* Reduced row height */
 .table tbody tr {
-  height: 60px;
+  height: 48px;
 }
 
 .action-buttons {
   display: flex;
-  gap: 8px;
+  gap: 6px;
   justify-content: flex-end;
   align-items: center;
 }
 
 .action-btn {
-  width: 24px;
-  height: 24px;
-  border: none;
+  width: 32px;
+  height: 32px;
+  border: 1px solid #e3e6f0;
+  border-radius: 6px;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   transition: all 0.2s ease;
-  font-size: 16px;
-  background: transparent;
+  font-size: 14px;
+  background: #fff;
   position: relative;
   padding: 0;
   margin: 0;
 }
 
 .action-btn:hover {
-  transform: scale(1.1);
+  transform: translateY(-2px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .action-btn:active {
-  transform: scale(0.95);
+  transform: translateY(0);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+}
+
+.assign-sim-btn {
+  color: #6f42c1 !important;
+  width: auto;
+  padding: 0 10px;
+  font-size: 12px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.assign-sim-btn:hover {
+  background: #6f42c1;
+  border-color: #6f42c1;
+  color: #fff !important;
 }
 
 .edit-btn {
-  color: #6c757d;
+  color: #4e73df !important;
 }
 
 .edit-btn:hover {
-  color: #4e73df;
+  background: #4e73df;
+  border-color: #4e73df;
+  color: #fff !important;
 }
 
 .delete-btn {
-  color: #6c757d;
+  color: #e74a3b !important;
 }
 
 .delete-btn:hover {
-  color: #e74a3b;
+  background: #e74a3b;
+  border-color: #e74a3b;
+  color: #fff !important;
 }
 
 
@@ -203,10 +274,18 @@ const props = defineProps({
   actions: {
     type: [Boolean, Object],
     default: false
+  },
+  checkboxes: {
+    type: Boolean,
+    default: false
+  },
+  selectedRows: {
+    type: Array,
+    default: () => []
   }
 })
 
-defineEmits(['edit', 'delete'])
+const emit = defineEmits(['edit', 'delete', 'selection-change'])
 
 const tableClasses = computed(() => {
   const classes = []
@@ -217,6 +296,35 @@ const tableClasses = computed(() => {
   
   return classes.join(' ')
 })
+
+const isAllSelected = computed(() => {
+  return props.data.length > 0 && props.selectedRows.length === props.data.length
+})
+
+const isRowSelected = (row) => {
+  return props.selectedRows.some(selected => selected.id === row.id)
+}
+
+const toggleSelectAll = () => {
+  if (isAllSelected.value) {
+    emit('selection-change', [])
+  } else {
+    emit('selection-change', [...props.data])
+  }
+}
+
+const toggleRowSelection = (row) => {
+  const selected = [...props.selectedRows]
+  const index = selected.findIndex(item => item.id === row.id)
+  
+  if (index > -1) {
+    selected.splice(index, 1)
+  } else {
+    selected.push(row)
+  }
+  
+  emit('selection-change', selected)
+}
 
 const getNestedValue = (obj, path) => {
   return path.split('.').reduce((current, key) => current?.[key], obj) || ''

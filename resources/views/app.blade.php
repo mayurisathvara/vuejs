@@ -30,7 +30,7 @@
     <!-- CSS Files -->
     <link rel="stylesheet" href="/assets/css/bootstrap.min.css" />
     <link rel="stylesheet" href="/assets/css/plugins.min.css" />
-    <link rel="stylesheet" href="/assets/css/kaiadmin.min.css" />
+    <link rel="stylesheet" href="/assets/css/adminpro.min.css" />
     <link rel="stylesheet" href="/assets/css/demo.css" />
     
     <!-- Scripts -->
@@ -50,7 +50,7 @@
     <script src="/assets/js/plugin/datatables/datatables.min.js"></script>
     <script src="/assets/js/plugin/bootstrap-notify/bootstrap-notify.min.js"></script>
     <script src="/assets/js/plugin/sweetalert/sweetalert.min.js"></script>
-    <script src="/assets/js/kaiadmin.min.js"></script>
+    <script src="/assets/js/adminpro.min.js"></script>
     <script src="/assets/js/demo.js"></script>
 </body>
 </html>

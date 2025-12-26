@@ -10,10 +10,13 @@ import Login from '@/pages/Login.vue'
 import Register from '@/pages/Register.vue'
 import Dashboard from '@/pages/Dashboard.vue'
 import Users from '@/pages/Users.vue'
+import AssignSims from '@/pages/AssignSims.vue'
 import Organizations from '@/pages/Organizations.vue'
 import Departments from '@/pages/Departments.vue'
+import Sims from '@/pages/Sims.vue'
 import Profile from '@/pages/Profile.vue'
 import ChangePassword from '@/pages/ChangePassword.vue'
+import CallReports from '@/pages/CallReports.vue'
 
 const routes = [
   {
@@ -64,7 +67,13 @@ const routes = [
         path: '',
         name: 'Users',
         component: Users,
-        meta: { requiresAuth: true }
+        meta: { requiresAuth: true, roles: ['admin', 'organization', 'manager'] }
+      },
+      {
+        path: ':userId/assign-sims',
+        name: 'assign-sims',
+        component: AssignSims,
+        meta: { requiresAuth: true, roles: ['admin', 'organization', 'manager'] }
       }
     ]
   },
@@ -76,7 +85,7 @@ const routes = [
         path: '',
         name: 'Organizations',
         component: Organizations,
-        meta: { requiresAuth: true }
+        meta: { requiresAuth: true, roles: ['admin'] }
       }
     ]
   },
@@ -88,7 +97,19 @@ const routes = [
         path: '',
         name: 'Departments',
         component: Departments,
-        meta: { requiresAuth: true }
+        meta: { requiresAuth: true, roles: ['admin', 'organization'] }
+      }
+    ]
+  },
+  {
+    path: '/sims',
+    component: DefaultLayout,
+    children: [
+      {
+        path: '',
+        name: 'Sims',
+        component: Sims,
+        meta: { requiresAuth: true, roles: ['admin', 'organization'] }
       }
     ]
   },
@@ -113,6 +134,18 @@ const routes = [
         name: 'ChangePassword',
         component: ChangePassword,
         meta: { requiresAuth: true }
+      }
+    ]
+  },
+  {
+    path: '/call-reports',
+    component: DefaultLayout,
+    children: [
+      {
+        path: '',
+        name: 'CallReports',
+        component: CallReports,
+        meta: { requiresAuth: true, roles: ['admin', 'organization', 'manager', 'user'] }
       }
     ]
   },
@@ -142,10 +175,18 @@ router.beforeEach(async (to, from, next) => {
 
   const requiresAuth = to.matched.some(record => record.meta.requiresAuth)
   const requiresGuest = to.matched.some(record => record.meta.requiresGuest)
+  
+  // Check role-based access
+  const requiredRoles = to.meta.roles
+  const userRole = authStore.userRole
 
   if (requiresAuth && !authStore.isAuthenticated) {
     next('/login')
   } else if (requiresGuest && authStore.isAuthenticated) {
+    next('/dashboard')
+  } else if (requiredRoles && !requiredRoles.includes(userRole)) {
+    // User doesn't have required role, redirect to dashboard
+    alert('You do not have permission to access this page.')
     next('/dashboard')
   } else {
     next()

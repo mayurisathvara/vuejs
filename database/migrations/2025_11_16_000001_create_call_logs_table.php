@@ -13,28 +13,44 @@ return new class extends Migration
     {
         Schema::create('call_logs', function (Blueprint $table) {
             $table->id();
+
+            $table->string('unique_id')->unique();
+
             $table->unsignedBigInteger('organization_id')->nullable();
-            $table->string('caller_id')->nullable();
+
+            $table->date('date')->nullable();
+            $table->time('time')->nullable();
             $table->timestamp('date_time')->nullable();
+
+            $table->string('call_type')->nullable();
             $table->string('call_status')->nullable();
             $table->string('caller_number')->nullable();
-            $table->string('call_type')->nullable();
-            $table->integer('caller_duration')->nullable()->comment('Duration in seconds');
-            $table->integer('conversation_duration')->nullable()->comment('Duration in seconds');
-            $table->integer('ring_duration')->nullable()->comment('Duration in seconds');
+
+            $table->time('caller_duration')->nullable();
+            $table->time('conversation_duration')->nullable();
+            $table->time('ring_duration')->nullable();
+
             $table->string('contact_status')->nullable();
+            $table->string('contact_name')->nullable();
+            $table->string('hangup_by')->nullable();
             $table->string('name')->nullable();
+            $table->string('department_name')->nullable();
+
             $table->timestamps();
             $table->softDeletes();
-            
-            // Add foreign key constraint
-            $table->foreign('organization_id')->references('id')->on('organizations')->onDelete('set null');
-            
-            // Add indexes for better performance
+
+            // Foreign key
+            $table->foreign('organization_id')
+                  ->references('id')
+                  ->on('organizations')
+                  ->onDelete('set null');
+
+            // Indexes for performance
             $table->index(['organization_id', 'date_time']);
             $table->index('caller_number');
             $table->index('call_status');
             $table->index('date_time');
+            $table->index('date');
         });
     }
 

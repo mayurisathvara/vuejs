@@ -1,14 +1,14 @@
 @import 'tailwindcss';
 
-/* Custom styles for Vue components */
+/* Custom admin dashboard styles */
 
-/* Ensure theme styles are applied */
+/* Global styles */
 body {
   font-family: 'Public Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
   background-color: #f8f9fa;
 }
 
-/* Override default form styles to match Kaiadmin theme */
+/* Override default form styles to match custom admin theme */
 .form-control {
   border: 1px solid #e1e5e9;
   border-radius: 6px;
@@ -279,8 +279,278 @@ body {
 }
 
 
-/* Responsive adjustments */
+/* ============================================
+   MODERN PAGE & FILTERS DESIGN
+   ============================================ */
+
+/* Page Container */
+.page-container {
+  padding: 0;
+}
+
+/* Modern Page Header */
+.page-header {
+  margin-bottom: 24px;
+  padding: 0;
+}
+
+.header-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.header-title {
+  flex: 1;
+  min-width: 200px;
+}
+
+.page-title {
+  font-size: 24px;
+  font-weight: 700;
+  color: #1a202c;
+  margin: 0;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+}
+
+.page-subtitle {
+  font-size: 14px;
+  color: #718096;
+  margin: 4px 0 0 0;
+  font-weight: 400;
+}
+
+.header-actions {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+/* Modern Buttons */
+.btn-modern {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  font-size: 14px;
+  font-weight: 500;
+  border-radius: 8px;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.btn-modern:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.btn-modern:active {
+  transform: translateY(0);
+}
+
+/* Filters Card */
+.filters-card {
+  background: #fff;
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 24px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  border: 1px solid #e9ecef;
+}
+
+.filters-container {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr auto;
+  gap: 16px;
+  align-items: center;
+}
+
+/* Simple 2-column layout for Organizations */
+.filters-container-simple {
+  grid-template-columns: 400px auto;
+  justify-content: start;
+}
+
+.filters-container-simple .filter-search {
+  max-width: 400px;
+}
+
+.filter-item {
+  position: relative;
+}
+
+.filter-search {
+  min-width: 0;
+}
+
+.filter-per-page {
+  min-width: 140px;
+}
+
+/* Modern Search Box */
+.search-box-modern {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.search-icon-modern {
+  position: absolute;
+  left: 16px;
+  color: #8692a6;
+  font-size: 14px;
+  pointer-events: none;
+  z-index: 2;
+  transition: color 0.2s ease;
+}
+
+.search-input-modern {
+  width: 100%;
+  padding: 11px 16px 11px 44px;
+  font-size: 14px;
+  border: 1px solid #e3e6f0;
+  border-radius: 10px;
+  background-color: #f8f9fa;
+  color: #2d3748;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.search-input-modern:focus {
+  background-color: #fff;
+  border-color: #4e73df;
+  box-shadow: 0 0 0 3px rgba(78, 115, 223, 0.1);
+  outline: none;
+}
+
+.search-input-modern:focus + .search-icon-modern,
+.search-box-modern:focus-within .search-icon-modern {
+  color: #4e73df;
+}
+
+.search-input-modern::placeholder {
+  color: #a0aec0;
+  font-size: 14px;
+}
+
+/* Modern Select Wrapper */
+.select-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.filter-icon {
+  position: absolute;
+  left: 14px;
+  color: #8692a6;
+  font-size: 13px;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.select-modern {
+  width: 100%;
+  padding: 11px 40px 11px 40px;
+  font-size: 14px;
+  border: 1px solid #e3e6f0;
+  border-radius: 10px;
+  background-color: #f8f9fa;
+  color: #2d3748;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%236c757d' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m1 6 7 7 7-7'/%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  background-size: 12px 10px;
+}
+
+.select-modern:focus {
+  background-color: #fff;
+  border-color: #4e73df;
+  box-shadow: 0 0 0 3px rgba(78, 115, 223, 0.1);
+  outline: none;
+}
+
+.select-modern:hover {
+  border-color: #cbd5e0;
+}
+
+/* Enhanced Card Round */
+.card-round {
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  border: 1px solid #e9ecef;
+  background: #fff;
+  margin-bottom: 24px;
+}
+
+/* Responsive Design */
+@media (max-width: 1200px) {
+  .filters-container {
+    grid-template-columns: 2fr 1fr 1fr auto;
+  }
+}
+
+@media (max-width: 992px) {
+  .filters-container {
+    grid-template-columns: 1fr 1fr;
+  }
+  
+  .filter-search {
+    grid-column: 1 / -1;
+  }
+  
+  .filter-per-page {
+    min-width: auto;
+  }
+}
+
 @media (max-width: 768px) {
+  .page-title {
+    font-size: 24px;
+  }
+  
+  .page-subtitle {
+    font-size: 13px;
+  }
+  
+  .header-content {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .header-actions {
+    width: 100%;
+  }
+  
+  .btn-modern {
+    flex: 1;
+    justify-content: center;
+  }
+  
+  .filters-card {
+    padding: 16px;
+  }
+  
+  .filters-container,
+  .filters-container-simple {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+  
+  .filters-container-simple .filter-search {
+    max-width: 100%;
+  }
+  
+  .filter-search {
+    grid-column: auto;
+  }
+  
   .sidebar {
     transform: translateX(-100%);
     transition: transform 0.3s ease;
@@ -288,6 +558,30 @@ body {
   
   .sidebar.show {
     transform: translateX(0);
+  }
+}
+
+@media (max-width: 576px) {
+  .page-title {
+    font-size: 20px;
+  }
+  
+  .header-actions {
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .btn-modern {
+    width: 100%;
+  }
+  
+  .btn-text {
+    display: inline;
+  }
+  
+  .search-input-modern,
+  .select-modern {
+    font-size: 13px;
   }
 }
 

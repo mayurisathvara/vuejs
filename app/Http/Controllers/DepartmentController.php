@@ -16,9 +16,19 @@ class DepartmentController extends Controller
      */
     public function index(Request $request): JsonResponse
     {
+        $user = auth()->user();
+        
         $query = Department::select([
             'id', 'name', 'organization_id', 'created_at', 'updated_at'
         ]);
+
+        // Role-based filtering
+        if ($user->role === 'organization') {
+            // Organization role: show only departments from their organization
+            $query->where('organization_id', $user->organization_id);
+        }
+        // Admin and Organization roles: filtering applied above
+        // Manager role: no access to departments module
 
         // Search functionality
         if ($request->has('search') && $request->search) {
@@ -30,8 +40,8 @@ class DepartmentController extends Controller
             }
         }
 
-        // Organization filter
-        if ($request->has('organization_id') && $request->organization_id) {
+        // Organization filter (only for admin)
+        if ($user->role === 'admin' && $request->has('organization_id') && $request->organization_id) {
             $query->where('organization_id', $request->organization_id);
         }
 
@@ -51,10 +61,18 @@ class DepartmentController extends Controller
      */
     public function getOrganizations(): JsonResponse
     {
-        $organizations = Organization::where('status', 'active')
+        $user = auth()->user();
+        
+        $query = Organization::where('status', 'active')
             ->select('id', 'name')
-            ->orderBy('name')
-            ->get();
+            ->orderBy('name');
+        
+        // For organization and manager roles, only return their organization
+        if ($user->role === 'organization' || $user->role === 'manager') {
+            $query->where('id', $user->organization_id);
+        }
+        
+        $organizations = $query->get();
 
         return response()->json($organizations);
     }
@@ -64,10 +82,23 @@ class DepartmentController extends Controller
      */
     public function store(Request $request): JsonResponse
     {
-        $validator = Validator::make($request->all(), [
+        $user = auth()->user();
+        
+        // For organization and manager roles, use their organization_id
+        $organizationId = ($user->role === 'organization' || $user->role === 'manager') 
+            ? $user->organization_id 
+            : $request->organization_id;
+        
+        $rules = [
             'name' => 'required|string|max:255',
-            'organization_id' => 'required|exists:organizations,id',
-        ]);
+        ];
+        
+        // Only require organization_id if user is admin
+        if ($user->role === 'admin') {
+            $rules['organization_id'] = 'required|exists:organizations,id';
+        }
+        
+        $validator = Validator::make($request->all(), $rules);
 
         if ($validator->fails()) {
             return response()->json([
@@ -78,7 +109,7 @@ class DepartmentController extends Controller
 
         $department = Department::create([
             'name' => $request->name,
-            'organization_id' => $request->organization_id,
+            'organization_id' => $organizationId,
         ]);
 
         // Load organization relationship for response
@@ -101,10 +132,23 @@ class DepartmentController extends Controller
      */
     public function update(Request $request, Department $department): JsonResponse
     {
-        $validator = Validator::make($request->all(), [
+        $user = auth()->user();
+        
+        // For organization and manager roles, use their organization_id
+        $organizationId = ($user->role === 'organization' || $user->role === 'manager') 
+            ? $user->organization_id 
+            : $request->organization_id;
+        
+        $rules = [
             'name' => 'required|string|max:255',
-            'organization_id' => 'required|exists:organizations,id',
-        ]);
+        ];
+        
+        // Only require organization_id if user is admin
+        if ($user->role === 'admin') {
+            $rules['organization_id'] = 'required|exists:organizations,id';
+        }
+        
+        $validator = Validator::make($request->all(), $rules);
 
         if ($validator->fails()) {
             return response()->json([
@@ -115,7 +159,7 @@ class DepartmentController extends Controller
 
         $department->update([
             'name' => $request->name,
-            'organization_id' => $request->organization_id,
+            'organization_id' => $organizationId,
         ]);
 
         // Load organization relationship for response

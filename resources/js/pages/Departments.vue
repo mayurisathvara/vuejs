@@ -1,52 +1,60 @@
 <template>
-  <div>
+  <div class="page-container">
     <!-- Page Header -->
-    <div class="d-flex align-items-left align-items-md-center flex-column flex-md-row pt-2 pb-4">
-      <div>
-        <h3 class="fw-bold mb-3">Departments Management</h3>
-      </div>
-      <div class="ms-md-auto py-2 py-md-0">
-        <Button variant="outline-info" class="me-2" @click="refreshDepartments">
-          <i class="fas fa-sync-alt me-1"></i>
-          Refresh
-        </Button>
-        <Button variant="primary" @click="openCreateModal">
-          <i class="fas fa-plus me-1"></i>
-          Add Department
-        </Button>
+    <div class="page-header">
+      <div class="header-content">
+        <div class="header-title">
+          <h3 class="page-title">Departments Management</h3>
+        </div>
+        <div class="header-actions">
+          <Button variant="outline-info" class="btn-modern me-2" @click="refreshDepartments">
+            <i class="fas fa-sync-alt me-2"></i>
+            <span class="btn-text">Refresh</span>
+          </Button>
+          <Button variant="primary" class="btn-modern" @click="openCreateModal">
+            <i class="fas fa-plus me-2"></i>
+            <span class="btn-text">Add Department</span>
+          </Button>
+        </div>
       </div>
     </div>
 
-    <!-- Search and Filters -->
-    <div class="row mb-4">
-      <div class="col-md-4">
-        <div class="search-box-wrapper">
-          <div class="search-icon">
-            <i class="fas fa-search"></i>
+    <!-- Filters Card -->
+    <div class="filters-card">
+      <div class="filters-container">
+        <div class="filter-item filter-search">
+          <div class="search-box-modern">
+            <i class="fas fa-search search-icon-modern"></i>
+            <input
+              v-model="searchQuery"
+              type="text"
+              class="form-control search-input-modern"
+              placeholder="Search departments by name..."
+              @input="handleSearch"
+            />
           </div>
-          <input
-            v-model="searchQuery"
-            type="text"
-            class="form-control search-input"
-            placeholder="Search departments by name..."
-            @input="handleSearch"
-          />
         </div>
-      </div>
-      <div class="col-md-3">
-        <select v-model="selectedOrganization" class="form-select" @change="handleOrganizationFilter">
-          <option value="">All Organizations</option>
-          <option v-for="org in organizations" :key="org.id" :value="org.id">
-            {{ org.name }}
-          </option>
-        </select>
-      </div>
-      <div class="col-md-2">
-        <select v-model="perPage" class="form-select" @change="handlePerPageChange">
-          <option value="10">10 per page</option>
-          <option value="25">25 per page</option>
-          <option value="50">50 per page</option>
-        </select>
+        <div v-if="isAdmin" class="filter-item">
+          <div class="select-wrapper">
+            <i class="fas fa-building filter-icon"></i>
+            <select v-model="selectedOrganization" class="form-select select-modern" @change="handleOrganizationFilter">
+              <option value="">All Organizations</option>
+              <option v-for="org in organizations" :key="org.id" :value="org.id">
+                {{ org.name }}
+              </option>
+            </select>
+          </div>
+        </div>
+        <div class="filter-item filter-per-page">
+          <div class="select-wrapper">
+            <i class="fas fa-list filter-icon"></i>
+            <select v-model="perPage" class="form-select select-modern" @change="handlePerPageChange">
+              <option value="10">10 per page</option>
+              <option value="25">25 per page</option>
+              <option value="50">50 per page</option>
+            </select>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -62,16 +70,9 @@
           @delete="openDeleteModal"
         >
           <template #cell-name="{ row }">
-            <div class="d-flex align-items-center">
-              <div class="avatar-sm me-2">
-                <div class="avatar-img rounded-circle bg-primary d-flex align-items-center justify-content-center text-white fw-bold" style="width: 32px; height: 32px;">
-                  {{ row.name?.charAt(0) || 'D' }}
-                </div>
-              </div>
-              <div>
-                <div class="fw-bold">{{ row.name }}</div>
-                <small class="text-muted">{{ row.organization?.name || 'N/A' }}</small>
-              </div>
+            <div>
+              <div class="fw-bold">{{ row.name }}</div>
+              <small class="text-muted">{{ row.organization?.name || 'N/A' }}</small>
             </div>
           </template>
           <template #cell-organization="{ value }">
@@ -117,7 +118,7 @@
               required
             />
           </div>
-          <div class="col-md-6 mb-3">
+          <div v-if="isAdmin" class="col-md-6 mb-3">
             <div class="form-group">
               <label class="form-label">Organization</label>
               <select v-model="departmentForm.organization_id" class="form-select" :class="{ 'is-invalid': errors.organization_id }">
@@ -245,8 +246,6 @@
   font-weight: 500;
   padding: 0.375rem 0.75rem;
   border-radius: 0.375rem;
-  text-transform: uppercase;
-  letter-spacing: 0.025em;
 }
 
 .badge.bg-info {
@@ -255,7 +254,8 @@
 </style>
 
 <script setup>
-import { ref, reactive, onMounted, onUnmounted, watch, nextTick } from 'vue'
+import { ref, reactive, computed, onMounted, onUnmounted, watch, nextTick } from 'vue'
+import { useAuthStore } from '@/stores/auth'
 import Button from '@/components/Button.vue'
 import Table from '@/components/Table.vue'
 import Modal from '@/components/Modal.vue'
@@ -263,6 +263,14 @@ import InputField from '@/components/InputField.vue'
 import Pagination from '@/components/Pagination.vue'
 import api from '@/services/api'
 import { showSuccess, showError } from '@/services/toast'
+
+const authStore = useAuthStore()
+
+// Role-based access
+const userRole = computed(() => authStore.user?.role || 'user')
+const isAdmin = computed(() => userRole.value === 'admin')
+const isOrganization = computed(() => userRole.value === 'organization')
+const isManager = computed(() => userRole.value === 'manager')
 
 // Data
 const departments = ref([])
@@ -304,11 +312,20 @@ const getErrorMessage = (error) => {
   return error
 }
 
-const departmentHeaders = [
-  { key: 'name', label: 'Department', class: 'text-start' },
-  { key: 'organization', label: 'Organization', class: 'text-center' },
-  { key: 'created_at', label: 'Created', class: 'text-center' }
-]
+const departmentHeaders = computed(() => {
+  const headers = [
+    { key: 'name', label: 'Department', class: 'text-start' },
+  ]
+  
+  // Show organization column only for admin
+  if (isAdmin.value) {
+    headers.push({ key: 'organization', label: 'Organization', class: 'text-center' })
+  }
+  
+  headers.push({ key: 'created_at', label: 'Created', class: 'text-center' })
+  
+  return headers
+})
 
 // Methods
 const fetchDepartments = async (page = 1) => {
@@ -345,6 +362,11 @@ const fetchOrganizations = async () => {
   try {
     const response = await api.get('/departments/organizations')
     organizations.value = response.data
+    
+    // Auto-set organization for organization and manager roles
+    if ((isOrganization.value || isManager.value) && organizations.value.length > 0) {
+      departmentForm.organization_id = organizations.value[0].id
+    }
   } catch (error) {
     console.error('Error fetching organizations:', error)
     showError('Failed to load organizations. Please try again.')
@@ -383,6 +405,12 @@ const handlePageChange = (page) => {
 const openCreateModal = () => {
   isEditing.value = false
   resetForm()
+  
+  // For non-admin users, auto-set organization
+  if ((isOrganization.value || isManager.value) && organizations.value.length > 0) {
+    departmentForm.organization_id = organizations.value[0].id
+  }
+  
   showDepartmentModal.value = true
 }
 
@@ -429,7 +457,8 @@ const handleSubmit = async () => {
     validationErrors.name = 'Department name must be at least 2 characters'
   }
   
-  if (!departmentForm.organization_id) {
+  // Only validate organization for admin
+  if (isAdmin.value && !departmentForm.organization_id) {
     validationErrors.organization_id = 'Organization is required'
   }
 

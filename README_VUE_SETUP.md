@@ -1,6 +1,6 @@
 # Vue 3 Admin Dashboard with Laravel Sanctum
 
-A complete Vue 3 admin dashboard application with Laravel Sanctum authentication, featuring a modern UI based on the Kaiadmin theme.
+A complete Vue 3 admin dashboard application with Laravel Sanctum authentication, featuring a modern custom admin UI.
 
 ## Features
 
@@ -9,7 +9,7 @@ A complete Vue 3 admin dashboard application with Laravel Sanctum authentication
 - **Pinia** for state management
 - **Vue Router** for navigation
 - **Tailwind CSS** for styling
-- **Bootstrap 5** theme integration
+- **Bootstrap 5** integration
 - **Responsive design** with mobile support
 
 ## Project Structure
@@ -148,7 +148,7 @@ npm run dev
 3. Create corresponding methods in the appropriate Pinia store
 
 ### Styling
-- The app uses Bootstrap 5 with custom Kaiadmin theme
+- The app uses Bootstrap 5 with custom AdminPro styles
 - Additional styles can be added in `resources/css/app.css`
 - Component-specific styles use scoped CSS
 
@@ -168,8 +168,8 @@ Make sure your Laravel CORS configuration allows requests from your frontend dom
 ### Token Issues
 Check that the Sanctum middleware is properly configured and the CSRF token is being sent with requests.
 
-### Theme Assets
-Ensure all theme assets are properly copied to the `public/assets` directory.
+### UI Assets
+Ensure all admin UI assets are properly placed in the `public/assets` directory.
 
 ## License
 

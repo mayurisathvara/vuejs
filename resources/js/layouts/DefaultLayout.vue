@@ -28,10 +28,10 @@ import Navbar from '@/components/Navbar.vue'
 import Footer from '@/components/Footer.vue'
 
 onMounted(() => {
-  // Initialize theme scripts if needed
+  // Initialize UI scripts if needed
   if (typeof window !== 'undefined' && window.$) {
-    // jQuery is available, initialize theme components
-    console.log('Theme initialized')
+    // jQuery is available, initialize UI components
+    console.log('Admin UI initialized')
   }
 })
 </script>

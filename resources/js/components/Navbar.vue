@@ -117,6 +117,11 @@
             </ul>
           </li>
 
+          <!-- Divider -->
+          <li class="nav-item d-none d-md-flex align-items-center" aria-hidden="true">
+            <span class="topbar-divider"></span>
+          </li>
+
           <!-- User Profile -->
           <li class="nav-item topbar-user dropdown hidden-caret">
             <a
@@ -168,7 +173,7 @@
                     <span>Account Setting</span>
                   </a>
                   <div class="dropdown-divider"></div>
-                  <a class="dropdown-item d-flex align-items-center py-2 text-danger" href="#" @click="logout">
+                  <a class="dropdown-item d-flex align-items-center py-2 text-danger" href="#" @click.prevent="logout">
                     <i class="fas fa-sign-out-alt me-3"></i>
                     <span>Logout</span>
                   </a>
@@ -210,6 +215,9 @@ const toggleSidebar = () => {
 }
 
 const logout = async () => {
+  const confirmed = window.confirm('Are you sure you want to logout?')
+  if (!confirmed) return
+
   await authStore.logout()
   router.push('/login')
 }
@@ -219,3 +227,12 @@ onMounted(() => {
   window.addEventListener('resize', checkMobile)
 })
 </script>
+
+<style scoped>
+.topbar-divider {
+  width: 1px;
+  height: 34px;
+  background: rgba(0, 0, 0, 0.14);
+  margin: 0 14px;
+}
+</style>

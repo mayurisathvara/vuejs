@@ -30,8 +30,18 @@ export default defineConfig({
                     return false;
                 }
                 return false;
-            }
+            },
+            output: {
+                manualChunks: {
+                    'vendor-vue': ['vue', 'vue-router', 'pinia', '@vueuse/core'],
+                    'vendor-axios': ['axios'],
+                    'vendor-charts': ['chart.js'],
+                    'vendor-flatpickr': ['flatpickr'],
+                },
+            },
         }
     },
-    publicDir: 'public',
+    // Laravel already serves `/public` directly; avoid copying public/ into public/build
+    // (Vite 7 warns when outDir is inside publicDir)
+    publicDir: false,
 });

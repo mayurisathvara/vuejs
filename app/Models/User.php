@@ -30,6 +30,10 @@ class User extends Authenticatable
         'profile_image',
         'description',
         'status',
+		'sim_verified_at',
+        'sim_verified_mobile',
+        'sim_subscription_id',
+		'allowed_department_ids'
     ];
 
     /**
@@ -52,6 +56,7 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+			'sim_verified_at' => 'datetime',
         ];
     }
 
@@ -69,5 +74,22 @@ class User extends Authenticatable
     public function department()
     {
         return $this->belongsTo(Department::class, 'department_id');
+    }
+
+    /**
+     * Get the SIM assignments for the user.
+     */
+    public function userSims()
+    {
+        return $this->hasMany(UserSim::class);
+    }
+
+    /**
+     * Get the SIMs assigned to the user.
+     */
+    public function sims()
+    {
+        return $this->belongsToMany(Sim::class, 'user_sims')
+            ->withTimestamps();
     }
 }

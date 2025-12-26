@@ -14,14 +14,14 @@ onMounted(() => {
   // Initialize authentication
   authStore.initializeAuth()
   
-  // Initialize theme after DOM is loaded
+  // Initialize admin panel after DOM is loaded
   if (typeof window !== 'undefined') {
     // Wait for fonts to load
     if (sessionStorage.fonts) {
       document.documentElement.classList.add('fonts-loaded')
     }
     
-    // Initialize theme components
+    // Initialize UI components
     setTimeout(() => {
       if (window.$ && window.$.fn.scrollbar) {
         $('.scrollbar-outer').scrollbar()

@@ -33,7 +33,7 @@
 </template>
 
 <style scoped>
-/* Global modal button styling for consistent theme */
+/* Global modal button styling for consistent design */
 .modal-footer .btn-secondary {
   background-color: #6f42c1 !important;
   border-color: #6f42c1 !important;

@@ -1,60 +1,71 @@
 <template>
-  <div>
+  <div class="page-container">
     <!-- Page Header -->
-    <div class="d-flex align-items-left align-items-md-center flex-column flex-md-row pt-2 pb-4">
-      <div>
-        <h3 class="fw-bold mb-3">Users Management</h3>
-      </div>
-      <div class="ms-md-auto py-2 py-md-0">
-        <Button variant="outline-info" class="me-2" @click="refreshUsers">
-          <i class="fas fa-sync-alt me-1"></i>
-          Refresh
-        </Button>
-        <Button variant="primary" @click="openCreateModal">
-          <i class="fas fa-plus me-1"></i>
-          Add User
-        </Button>
+    <div class="page-header">
+      <div class="header-content">
+        <div class="header-title">
+          <h3 class="page-title">Users Management</h3>
+        </div>
+        <div class="header-actions">
+          <Button variant="outline-info" class="btn-modern me-2" @click="refreshUsers">
+            <i class="fas fa-sync-alt me-2"></i>
+            <span class="btn-text">Refresh</span>
+          </Button>
+          <Button variant="primary" class="btn-modern" @click="openCreateModal">
+            <i class="fas fa-plus me-2"></i>
+            <span class="btn-text">Add User</span>
+          </Button>
+        </div>
       </div>
     </div>
 
-    <!-- Search and Filters -->
-    <div class="row mb-4">
-      <div class="col-md-4">
-        <div class="search-box-wrapper">
-          <div class="search-icon">
-            <i class="fas fa-search"></i>
+    <!-- Filters Card -->
+    <div class="filters-card">
+      <div class="filters-container">
+        <div class="filter-item filter-search">
+          <div class="search-box-modern">
+            <i class="fas fa-search search-icon-modern"></i>
+            <input
+              v-model="searchQuery"
+              type="text"
+              class="form-control search-input-modern"
+              placeholder="Search users by name, email, or mobile..."
+              @input="handleSearch"
+            />
           </div>
-          <input
-            v-model="searchQuery"
-            type="text"
-            class="form-control search-input"
-            placeholder="Search users by name, email, or mobile..."
-            @input="handleSearch"
-          />
         </div>
-      </div>
-      <div class="col-md-3">
-        <select v-model="organizationFilter" class="form-select" @change="handleOrganizationFilter">
-          <option value="">All Organizations</option>
-          <option v-for="org in organizations" :key="org.id" :value="org.id">
-            {{ org.name }}
-          </option>
-        </select>
-      </div>
-      <div class="col-md-3">
-        <select v-model="departmentFilter" class="form-select" @change="handleDepartmentFilter">
-          <option value="">All Departments</option>
-          <option v-for="dept in departments" :key="dept.id" :value="dept.id">
-            {{ dept.name }}
-          </option>
-        </select>
-      </div>
-      <div class="col-md-2">
-        <select v-model="perPage" class="form-select" @change="handlePerPageChange">
-          <option value="10">10 per page</option>
-          <option value="25">25 per page</option>
-          <option value="50">50 per page</option>
-        </select>
+        <div v-if="isAdmin" class="filter-item">
+          <div class="select-wrapper">
+            <i class="fas fa-building filter-icon"></i>
+            <select v-model="organizationFilter" class="form-select select-modern" @change="handleOrganizationFilter">
+              <option value="">All Organizations</option>
+              <option v-for="org in organizations" :key="org.id" :value="org.id">
+                {{ org.name }}
+              </option>
+            </select>
+          </div>
+        </div>
+        <div class="filter-item">
+          <div class="select-wrapper">
+            <i class="fas fa-sitemap filter-icon"></i>
+            <select v-model="departmentFilter" class="form-select select-modern" @change="handleDepartmentFilter">
+              <option value="">All Departments</option>
+              <option v-for="dept in departments" :key="dept.id" :value="dept.id">
+                {{ dept.name }}
+              </option>
+            </select>
+          </div>
+        </div>
+        <div class="filter-item filter-per-page">
+          <div class="select-wrapper">
+            <i class="fas fa-list filter-icon"></i>
+            <select v-model="perPage" class="form-select select-modern" @change="handlePerPageChange">
+              <option value="10">10 per page</option>
+              <option value="25">25 per page</option>
+              <option value="50">50 per page</option>
+            </select>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -65,10 +76,33 @@
           :data="usersStore.users"
           :headers="userHeaders"
           :loading="usersStore.loading"
-          :actions="{ edit: true, delete: true }"
-          @edit="openEditModal"
-          @delete="openDeleteModal"
+          :actions="true"
         >
+          <template #actions="{ row }">
+            <div class="action-buttons">
+              <button
+                class="action-btn assign-sim-btn"
+                @click="goToAssignSims(row)"
+                title="Assign SIMs"
+              >
+                Assign SIM
+              </button>
+              <button
+                class="action-btn edit-btn"
+                @click="openEditModal(row)"
+                title="Edit User"
+              >
+                <i class="fas fa-edit"></i>
+              </button>
+              <button
+                class="action-btn delete-btn"
+                @click="openDeleteModal(row)"
+                title="Delete User"
+              >
+                <i class="fas fa-trash"></i>
+              </button>
+            </div>
+          </template>
           <template #cell-name="{ row }">
             <div class="d-flex align-items-center">
               <div class="avatar-sm me-2">
@@ -85,6 +119,10 @@
           <template #cell-mobile="{ value }">
             {{ value || 'N/A' }}
           </template>
+          <template #cell-role="{ value }">
+            <span v-if="value === 'manager'" class="badge bg-primary">Manager</span>
+            <span v-else class="badge bg-secondary">User</span>
+          </template>
           <template #cell-organization_name="{ row }">
             {{ row.organization ? row.organization.name : 'N/A' }}
           </template>
@@ -94,35 +132,42 @@
           </template>
           <template #cell-status="{ value, row }">
             <div class="status-dropdown">
-              <div class="status-indicator">
-                <div class="status-dot" :class="getStatusDotClass(value)"></div>
-                <div 
-                  class="status-arrow" 
-                  @click="toggleStatusDropdown(row.id)"
-                >▼</div>
-              </div>
+              <button 
+                class="status-badge" 
+                :class="`status-${value}`"
+                @click="toggleStatusDropdown(row.id)"
+                type="button"
+              >
+                <span class="status-dot"></span>
+                <span class="status-text">{{ value.charAt(0).toUpperCase() + value.slice(1) }}</span>
+                <i class="fas fa-chevron-down status-icon"></i>
+              </button>
               <div 
                 v-if="activeDropdown === row.id" 
-                class="status-options"
+                class="status-dropdown-menu"
                 :data-dropdown-id="row.id"
                 @click.stop
               >
-                <div 
-                  class="status-option"
-                  :class="{ active: value === 'active' }"
+                <button 
+                  class="status-dropdown-item"
+                  :class="{ 'active': value === 'active' }"
                   @click="updateUserStatus(row.id, 'active')"
+                  type="button"
                 >
-                  <div class="status-dot active"></div>
+                  <span class="status-dot status-dot-active"></span>
                   <span>Active</span>
-                </div>
-                <div 
-                  class="status-option"
-                  :class="{ active: value === 'inactive' }"
+                  <i v-if="value === 'active'" class="fas fa-check ms-auto"></i>
+                </button>
+                <button 
+                  class="status-dropdown-item"
+                  :class="{ 'active': value === 'inactive' }"
                   @click="updateUserStatus(row.id, 'inactive')"
+                  type="button"
                 >
-                  <div class="status-dot inactive"></div>
+                  <span class="status-dot status-dot-inactive"></span>
                   <span>Inactive</span>
-                </div>
+                  <i v-if="value === 'inactive'" class="fas fa-check ms-auto"></i>
+                </button>
               </div>
             </div>
           </template>
@@ -186,7 +231,7 @@
               required
             />
           </div>
-          <div class="col-md-6 mb-3">
+          <div v-if="isAdmin" class="col-md-6 mb-3">
             <div class="form-group">
               <label class="form-label">
                 Organization
@@ -205,8 +250,11 @@
           </div>
           <div class="col-md-6 mb-3">
             <div class="form-group">
-              <label class="form-label">Department</label>
-              <select v-model="userForm.department_id" class="form-select" :class="{ 'is-invalid': errors.department_id }" :disabled="!userForm.organization_id">
+              <label class="form-label">
+                Department
+                <span class="text-danger">*</span>
+              </label>
+              <select v-model="userForm.department_id" class="form-select" :class="{ 'is-invalid': errors.department_id }" :disabled="!userForm.organization_id" required>
                 <option value="">Select Department</option>
                 <option v-for="dept in availableDepartments" :key="dept.id" :value="dept.id">
                   {{ dept.name }}
@@ -227,6 +275,21 @@
               :required="!isEditing"
               autocomplete="new-password"
             />
+          </div>
+          <div v-if="!isManager" class="col-md-6 mb-3">
+            <div class="form-group">
+              <label class="form-label">
+                Role
+                <span class="text-danger">*</span>
+              </label>
+              <select v-model="userForm.role" class="form-select" :class="{ 'is-invalid': errors.role }" required>
+                <option value="user">User</option>
+                <option value="manager">Manager</option>
+              </select>
+              <div v-if="errors.role" class="invalid-feedback d-block">
+                {{ getErrorMessage(errors.role) }}
+              </div>
+            </div>
           </div>
           <div class="col-md-6 mb-3">
             <div class="form-group">
@@ -266,12 +329,17 @@
       @close="closeDeleteModal"
       @confirm="handleDelete"
     >
-      <p>Are you sure you want to delete this user?</p>
-      <div v-if="userToDelete" class="alert alert-warning">
-        <strong>{{ userToDelete.name }}</strong><br>
-        <small>{{ userToDelete.email }}</small>
+      <div class="delete-modal-content">
+        <p class="delete-question">Are you sure you want to delete this user?</p>
+        <div v-if="userToDelete" class="user-info-card">
+          <div class="user-name">{{ userToDelete.name }}</div>
+          <div class="user-email">{{ userToDelete.email }}</div>
+        </div>
+        <p class="warning-text">
+          <i class="fas fa-exclamation-triangle me-2"></i>
+          This action cannot be undone.
+        </p>
       </div>
-      <p class="text-danger">This action cannot be undone.</p>
     </Modal>
   </div>
 </template>
@@ -337,6 +405,51 @@
 }
 
 /* Delete modal specific styling */
+.delete-modal-content {
+  padding: 8px 0;
+}
+
+.delete-question {
+  font-size: 15px;
+  color: #3a3b45;
+  margin-bottom: 20px;
+  font-weight: 500;
+  line-height: 1.5;
+}
+
+.user-info-card {
+  background-color: #f8f9fc;
+  border: 1px solid #e3e6f0;
+  border-radius: 8px;
+  padding: 16px 20px;
+  margin-bottom: 20px;
+}
+
+.user-name {
+  font-size: 16px;
+  font-weight: 600;
+  color: #2c2d3a;
+  margin-bottom: 6px;
+}
+
+.user-email {
+  font-size: 14px;
+  color: #6c757d;
+}
+
+.warning-text {
+  color: #dc3545;
+  font-size: 14px;
+  font-weight: 500;
+  margin: 0;
+  display: flex;
+  align-items: center;
+}
+
+.warning-text i {
+  color: #dc3545;
+}
+
 .modal-footer .btn-secondary:has(+ .btn-primary) {
   background-color: #6f42c1 !important;
   border-color: #6f42c1 !important;
@@ -367,8 +480,6 @@
   font-weight: 500;
   padding: 0.375rem 0.75rem;
   border-radius: 0.375rem;
-  text-transform: uppercase;
-  letter-spacing: 0.025em;
 }
 
 .badge.bg-success {
@@ -380,115 +491,228 @@
 }
 
 /* Status Dropdown Styles */
+/* Status Dropdown Styles */
 .status-dropdown {
   position: relative;
-  display: inline-block;
+  display: inline-flex;
+  justify-content: center;
 }
 
-.status-indicator {
-  display: flex;
+.status-badge {
+  display: inline-flex;
   align-items: center;
   gap: 4px;
-  padding: 2px;
-  width: 24px; /* Fixed width to prevent movement */
-  justify-content: space-between;
+  padding: 4px 10px;
+  border: none;
+  border-radius: 16px;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+  min-width: 80px;
+  justify-content: center;
 }
 
-.status-dot {
-  width: 12px;
-  height: 12px;
+.status-badge .status-dot {
+  width: 6px;
+  height: 6px;
   border-radius: 50%;
   flex-shrink: 0;
 }
 
-.status-dot.active {
+.status-badge .status-text {
+  flex: 1;
+  text-align: center;
+}
+
+.status-badge .status-icon {
+  font-size: 8px;
+  opacity: 0.7;
+  transition: transform 0.2s ease;
+}
+
+.status-badge:hover .status-icon {
+  opacity: 1;
+}
+
+.status-badge.status-active {
+  background-color: #d4edda;
+  color: #155724;
+}
+
+.status-badge.status-active .status-dot {
   background-color: #28a745;
 }
 
-.status-dot.inactive {
+.status-badge.status-active:hover {
+  background-color: #c3e6cb;
+  box-shadow: 0 2px 6px rgba(40, 167, 69, 0.2);
+}
+
+.status-badge.status-inactive {
+  background-color: #f8d7da;
+  color: #721c24;
+}
+
+.status-badge.status-inactive .status-dot {
   background-color: #dc3545;
 }
 
-.status-arrow {
-  width: 12px;
-  height: 12px;
-  font-size: 10px;
-  color: #6c757d;
-  cursor: pointer;
-  padding: 2px;
-  border-radius: 3px;
-  transition: all 0.2s ease;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  opacity: 0;
-  visibility: hidden;
+.status-badge.status-inactive:hover {
+  background-color: #f5c6cb;
+  box-shadow: 0 2px 6px rgba(220, 53, 69, 0.2);
 }
 
-.status-arrow:hover {
-  background-color: #f8f9fa;
-  color: #495057;
-}
-
-.status-indicator:hover .status-arrow {
-  opacity: 1;
-  visibility: visible;
-}
-
-.status-options {
+.status-dropdown-menu {
   position: fixed;
   background: white;
   border: 1px solid #e3e6f0;
-  border-radius: 6px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  border-radius: 8px;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
   z-index: 9999;
   overflow: hidden;
-  min-width: 100px;
-  max-height: 200px;
-  transform: translateY(0);
+  min-width: 140px;
+  padding: 4px;
+  animation: slideDown 0.2s ease;
 }
 
-/* Position dropdown below the indicator by default */
-.status-options[data-position="down"] {
-  top: var(--dropdown-top);
-  left: var(--dropdown-left);
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
-/* Position dropdown above the indicator when near bottom */
-.status-options[data-position="up"] {
-  bottom: var(--dropdown-bottom);
-  left: var(--dropdown-left);
-  top: auto;
-}
-
-.status-option {
+.status-dropdown-item {
   display: flex;
   align-items: center;
-  padding: 8px 12px;
-  cursor: pointer;
-  transition: background-color 0.2s ease;
   gap: 8px;
-  font-size: 12px;
+  padding: 10px 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 13px;
   font-weight: 500;
+  border: none;
+  background: transparent;
+  border-radius: 6px;
+  width: 100%;
+  text-align: left;
+  color: #495057;
 }
 
-.status-option:hover {
+.status-dropdown-item .status-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.status-dropdown-item .status-dot-active {
+  background-color: #28a745;
+}
+
+.status-dropdown-item .status-dot-inactive {
+  background-color: #dc3545;
+}
+
+.status-dropdown-item:hover {
   background-color: #f8f9fa;
+  color: #212529;
 }
 
-.status-option.active {
-  background-color: #e3f2fd;
-  color: #1976d2;
+.status-dropdown-item.active {
+  background-color: #e7f3ff;
+  color: #0066cc;
+  font-weight: 600;
 }
 
-.status-option.active .status-dot {
-  background-color: #1976d2;
+.status-dropdown-item .fa-check {
+  font-size: 12px;
+  color: #0066cc;
+}
+
+/* Action Button Styles */
+.action-buttons {
+  display: flex;
+  gap: 6px;
+  justify-content: flex-end;
+  align-items: center;
+}
+
+.action-btn {
+  width: 32px;
+  height: 32px;
+  border: 1px solid #e3e6f0;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 14px;
+  background: #fff;
+  position: relative;
+  padding: 0;
+  margin: 0;
+  color: #6c757d;
+}
+
+.action-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.action-btn:active {
+  transform: translateY(0);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+}
+
+.assign-sim-btn {
+  color: #6f42c1;
+  width: auto;
+  padding: 0 10px;
+  font-size: 12px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.assign-sim-btn:hover {
+  background: #6f42c1;
+  border-color: #6f42c1;
+  color: #fff;
+}
+
+.edit-btn {
+  color: #4e73df;
+}
+
+.edit-btn:hover {
+  background: #4e73df;
+  border-color: #4e73df;
+  color: #fff;
+}
+
+.delete-btn {
+  color: #e74a3b;
+}
+
+.delete-btn:hover {
+  background: #e74a3b;
+  border-color: #e74a3b;
+  color: #fff;
 }
 </style>
 
 <script setup>
-import { ref, reactive, onMounted, onUnmounted, watch, nextTick } from 'vue'
+import { ref, reactive, computed, onMounted, onUnmounted, watch, nextTick } from 'vue'
+import { useRouter } from 'vue-router'
 import { useUsersStore } from '@/stores/users'
+import { useAuthStore } from '@/stores/auth'
 import Button from '@/components/Button.vue'
 import Table from '@/components/Table.vue'
 import Modal from '@/components/Modal.vue'
@@ -496,7 +720,15 @@ import InputField from '@/components/InputField.vue'
 import Pagination from '@/components/Pagination.vue'
 import api from '@/services/api'
 
+const router = useRouter()
 const usersStore = useUsersStore()
+const authStore = useAuthStore()
+
+// Role-based access
+const userRole = computed(() => authStore.user?.role || 'user')
+const isAdmin = computed(() => userRole.value === 'admin')
+const isOrganization = computed(() => userRole.value === 'organization')
+const isManager = computed(() => userRole.value === 'manager')
 
 // Search and filters
 const searchQuery = ref('')
@@ -517,6 +749,7 @@ const userForm = reactive({
   email: '',
   mobile: '',
   password: '',
+  role: 'user',
   organization_id: '',
   department_id: '',
   status: 'active'
@@ -541,14 +774,25 @@ const activeDropdown = ref(null)
 const errors = ref({})
 const errorMessage = ref('')
 
-const userHeaders = [
-  { key: 'name', label: 'User', class: 'text-start' },
-  { key: 'mobile', label: 'Mobile', class: 'text-center' },
-  { key: 'organization_name', label: 'Organization', class: 'text-center' },
-  { key: 'department_name', label: 'Department', class: 'text-center' },
-  { key: 'status', label: 'Status', class: 'text-center' },
-  { key: 'created_at', label: 'Created', class: 'text-center' }
-]
+const userHeaders = computed(() => {
+  const headers = [
+    { key: 'name', label: 'User', class: 'text-start' },
+    { key: 'mobile', label: 'Mobile', class: 'text-center' },
+    { key: 'role', label: 'Role', class: 'text-center' },
+  ]
+  
+  // Show organization column only for admin
+  if (isAdmin.value) {
+    headers.push({ key: 'organization_name', label: 'Organization', class: 'text-center' })
+  }
+  
+  headers.push(
+    { key: 'department_name', label: 'Department', class: 'text-center' },
+    { key: 'status', label: 'Status', class: 'text-center' }
+  )
+  
+  return headers
+})
 
 // Methods
 const fetchUsers = async () => {
@@ -637,9 +881,16 @@ const handlePageChange = (page) => {
   usersStore.fetchUsers(page, searchQuery.value, organizationFilter.value, departmentFilter.value)
 }
 
-const openCreateModal = () => {
+const openCreateModal = async () => {
   isEditing.value = false
   resetForm()
+  
+  // For non-admin users, fetch departments after organization is auto-set
+  if ((isOrganization.value || isManager.value) && organizations.value.length > 0) {
+    userForm.organization_id = organizations.value[0].id
+    await handleOrganizationChange()
+  }
+  
   showUserModal.value = true
 }
 
@@ -648,6 +899,7 @@ const openEditModal = async (user) => {
   userForm.name = user.name
   userForm.email = user.email
   userForm.mobile = user.mobile || ''
+  userForm.role = user.role || 'user'
   userForm.organization_id = user.organization_id || ''
   userForm.department_id = user.department_id || ''
   userForm.status = user.status || 'active'
@@ -688,6 +940,7 @@ const resetForm = () => {
   userForm.email = ''
   userForm.mobile = ''
   userForm.password = ''
+  userForm.role = 'user'
   userForm.organization_id = ''
   userForm.department_id = ''
   userForm.status = 'active'
@@ -723,6 +976,14 @@ const handleSubmit = async () => {
   
   if (!userForm.organization_id) {
     validationErrors.organization_id = 'Organization is required'
+  }
+  
+  if (!userForm.department_id) {
+    validationErrors.department_id = 'Department is required'
+  }
+  
+  if (!userForm.role) {
+    validationErrors.role = 'Role is required'
   }
   
   if (!isEditing.value && !userForm.password) {
@@ -823,6 +1084,9 @@ const handleDelete = async () => {
   }
 }
 
+const goToAssignSims = (user) => {
+  router.push({ name: 'assign-sims', params: { userId: user.id } })
+}
 
 const formatDate = (date) => {
   return new Date(date).toLocaleDateString()
@@ -847,9 +1111,19 @@ const handleClickOutside = (event) => {
   }
 }
 
-onMounted(() => {
+onMounted(async () => {
+  // Start fetching users immediately (non-blocking)
   fetchUsers()
-  fetchOrganizations()
+  
+  // Fetch organizations and then departments for non-admin users
+  fetchOrganizations().then(() => {
+    // For non-admin users, fetch departments for their organization
+    if ((isOrganization.value || isManager.value) && organizations.value.length > 0) {
+      userForm.organization_id = organizations.value[0].id
+      fetchDepartmentsByOrganization(organizations.value[0].id)
+    }
+  })
+  
   document.addEventListener('click', handleClickOutside)
 })
 

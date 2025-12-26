@@ -45,6 +45,24 @@ api.interceptors.response.use(
       }
     }
     
+    // Handle 403 errors (forbidden - insufficient permissions)
+    if (error.response?.status === 403) {
+      // Show error message
+      const message = error.response?.data?.message || 'You do not have permission to access this resource.'
+      
+      // Use Vue's toast/notification if available, otherwise alert
+      if (window.$toast) {
+        window.$toast.error(message)
+      } else {
+        alert(message)
+      }
+      
+      // Redirect to dashboard
+      if (window.location.pathname !== '/dashboard') {
+        window.location.href = '/dashboard'
+      }
+    }
+    
     return Promise.reject(error)
   }
 )

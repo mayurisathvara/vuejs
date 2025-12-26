@@ -1,44 +1,49 @@
 <template>
-  <div>
+  <div class="page-container">
     <!-- Page Header -->
-    <div class="d-flex align-items-left align-items-md-center flex-column flex-md-row pt-2 pb-4">
-      <div>
-        <h3 class="fw-bold mb-3">Organizations Management</h3>
-      </div>
-      <div class="ms-md-auto py-2 py-md-0">
-        <Button variant="outline-info" class="me-2" @click="refreshOrganizations">
-          <i class="fas fa-sync-alt me-1"></i>
-          Refresh
-        </Button>
-        <Button variant="primary" @click="openCreateModal">
-          <i class="fas fa-plus me-1"></i>
-          Add Organization
-        </Button>
+    <div class="page-header">
+      <div class="header-content">
+        <div class="header-title">
+          <h3 class="page-title">Organizations Management</h3>
+        </div>
+        <div class="header-actions">
+          <Button variant="outline-info" class="btn-modern me-2" @click="refreshOrganizations">
+            <i class="fas fa-sync-alt me-2"></i>
+            <span class="btn-text">Refresh</span>
+          </Button>
+          <Button variant="primary" class="btn-modern" @click="openCreateModal">
+            <i class="fas fa-plus me-2"></i>
+            <span class="btn-text">Add Organization</span>
+          </Button>
+        </div>
       </div>
     </div>
 
-    <!-- Search and Filters -->
-    <div class="row mb-4">
-      <div class="col-md-4">
-        <div class="search-box-wrapper">
-          <div class="search-icon">
-            <i class="fas fa-search"></i>
+    <!-- Filters Card -->
+    <div class="filters-card">
+      <div class="filters-container filters-container-simple">
+        <div class="filter-item filter-search">
+          <div class="search-box-modern">
+            <i class="fas fa-search search-icon-modern"></i>
+            <input
+              v-model="searchQuery"
+              type="text"
+              class="form-control search-input-modern"
+              placeholder="Search organizations by name, email, or mobile..."
+              @input="handleSearch"
+            />
           </div>
-          <input
-            v-model="searchQuery"
-            type="text"
-            class="form-control search-input"
-            placeholder="Search organizations by name, email, or mobile..."
-            @input="handleSearch"
-          />
         </div>
-      </div>
-      <div class="col-md-2">
-        <select v-model="perPage" class="form-select" @change="handlePerPageChange">
-          <option value="10">10 per page</option>
-          <option value="25">25 per page</option>
-          <option value="50">50 per page</option>
-        </select>
+        <div class="filter-item filter-per-page">
+          <div class="select-wrapper">
+            <i class="fas fa-list filter-icon"></i>
+            <select v-model="perPage" class="form-select select-modern" @change="handlePerPageChange">
+              <option value="10">10 per page</option>
+              <option value="25">25 per page</option>
+              <option value="50">50 per page</option>
+            </select>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -54,6 +59,12 @@
           @delete="openDeleteModal"
         >
           <template #cell-name="{ row }">
+            <div>
+              <div class="fw-bold">{{ row.name }}</div>
+              <small class="text-muted">{{ row.email || 'N/A' }}</small>
+            </div>
+          </template>
+          <template #cell-contact_person="{ row }">
             <div class="d-flex align-items-center">
               <div class="avatar-sm me-2">
                 <div class="avatar-img rounded-circle bg-success d-flex align-items-center justify-content-center text-white fw-bold" style="width: 32px; height: 32px;">
@@ -71,35 +82,42 @@
           </template>
           <template #cell-status="{ value, row }">
             <div class="status-dropdown">
-              <div class="status-indicator">
-                <div class="status-dot" :class="getStatusDotClass(value)"></div>
-                <div 
-                  class="status-arrow" 
-                  @click="toggleStatusDropdown(row.id)"
-                >▼</div>
-              </div>
+              <button 
+                class="status-badge" 
+                :class="`status-${value}`"
+                @click="toggleStatusDropdown(row.id)"
+                type="button"
+              >
+                <span class="status-dot"></span>
+                <span class="status-text">{{ value.charAt(0).toUpperCase() + value.slice(1) }}</span>
+                <i class="fas fa-chevron-down status-icon"></i>
+              </button>
               <div 
                 v-if="activeDropdown === row.id" 
-                class="status-options"
+                class="status-dropdown-menu"
                 :data-dropdown-id="row.id"
                 @click.stop
               >
-                <div 
-                  class="status-option"
-                  :class="{ active: value === 'active' }"
+                <button 
+                  class="status-dropdown-item"
+                  :class="{ 'active': value === 'active' }"
                   @click="updateOrganizationStatus(row.id, 'active')"
+                  type="button"
                 >
-                  <div class="status-dot active"></div>
+                  <span class="status-dot status-dot-active"></span>
                   <span>Active</span>
-                </div>
-                <div 
-                  class="status-option"
-                  :class="{ active: value === 'inactive' }"
+                  <i v-if="value === 'active'" class="fas fa-check ms-auto"></i>
+                </button>
+                <button 
+                  class="status-dropdown-item"
+                  :class="{ 'active': value === 'inactive' }"
                   @click="updateOrganizationStatus(row.id, 'inactive')"
+                  type="button"
                 >
-                  <div class="status-dot inactive"></div>
+                  <span class="status-dot status-dot-inactive"></span>
                   <span>Inactive</span>
-                </div>
+                  <i v-if="value === 'inactive'" class="fas fa-check ms-auto"></i>
+                </button>
               </div>
             </div>
           </template>
@@ -227,17 +245,68 @@
       @close="closeDeleteModal"
       @confirm="handleDelete"
     >
-      <p>Are you sure you want to delete this organization?</p>
-      <div v-if="organizationToDelete" class="alert alert-warning">
-        <strong>{{ organizationToDelete.name }}</strong><br>
-        <small>{{ organizationToDelete.email }}</small>
+      <div class="delete-modal-content">
+        <p class="delete-question">Are you sure you want to delete this organization?</p>
+        <div v-if="organizationToDelete" class="info-card">
+          <div class="info-name">{{ organizationToDelete.name }}</div>
+          <div class="info-email">{{ organizationToDelete.email }}</div>
+        </div>
+        <p class="warning-text">
+          <i class="fas fa-exclamation-triangle me-2"></i>
+          This action cannot be undone.
+        </p>
       </div>
-      <p class="text-danger">This action cannot be undone.</p>
     </Modal>
   </div>
 </template>
 
 <style scoped>
+/* Delete modal specific styling */
+.delete-modal-content {
+  padding: 8px 0;
+}
+
+.delete-question {
+  font-size: 15px;
+  color: #3a3b45;
+  margin-bottom: 20px;
+  font-weight: 500;
+  line-height: 1.5;
+}
+
+.info-card {
+  background-color: #f8f9fc;
+  border: 1px solid #e3e6f0;
+  border-radius: 8px;
+  padding: 16px 20px;
+  margin-bottom: 20px;
+}
+
+.info-name {
+  font-size: 16px;
+  font-weight: 600;
+  color: #2c2d3a;
+  margin-bottom: 6px;
+}
+
+.info-email {
+  font-size: 14px;
+  color: #6c757d;
+}
+
+.warning-text {
+  color: #dc3545;
+  font-size: 14px;
+  font-weight: 500;
+  margin: 0;
+  display: flex;
+  align-items: center;
+}
+
+.warning-text i {
+  color: #dc3545;
+}
+
 .search-box-wrapper {
   position: relative;
   display: flex;
@@ -315,8 +384,6 @@
   font-weight: 500;
   padding: 0.375rem 0.75rem;
   border-radius: 0.375rem;
-  text-transform: uppercase;
-  letter-spacing: 0.025em;
 }
 
 .badge.bg-success {
@@ -328,109 +395,149 @@
 }
 
 /* Status Dropdown Styles */
+/* Status Dropdown Styles */
 .status-dropdown {
   position: relative;
-  display: inline-block;
+  display: inline-flex;
+  justify-content: center;
 }
 
-.status-indicator {
-  display: flex;
+.status-badge {
+  display: inline-flex;
   align-items: center;
   gap: 4px;
-  padding: 2px;
-  width: 24px; /* Fixed width to prevent movement */
-  justify-content: space-between;
+  padding: 4px 10px;
+  border: none;
+  border-radius: 16px;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+  min-width: 80px;
+  justify-content: center;
 }
 
-.status-dot {
-  width: 12px;
-  height: 12px;
+.status-badge .status-dot {
+  width: 6px;
+  height: 6px;
   border-radius: 50%;
   flex-shrink: 0;
 }
 
-.status-dot.active {
+.status-badge .status-text {
+  flex: 1;
+  text-align: center;
+}
+
+.status-badge .status-icon {
+  font-size: 8px;
+  opacity: 0.7;
+  transition: transform 0.2s ease;
+}
+
+.status-badge:hover .status-icon {
+  opacity: 1;
+}
+
+.status-badge.status-active {
+  background-color: #d4edda;
+  color: #155724;
+}
+
+.status-badge.status-active .status-dot {
   background-color: #28a745;
 }
 
-.status-dot.inactive {
+.status-badge.status-active:hover {
+  background-color: #c3e6cb;
+  box-shadow: 0 2px 6px rgba(40, 167, 69, 0.2);
+}
+
+.status-badge.status-inactive {
+  background-color: #f8d7da;
+  color: #721c24;
+}
+
+.status-badge.status-inactive .status-dot {
   background-color: #dc3545;
 }
 
-.status-arrow {
-  width: 12px;
-  height: 12px;
-  font-size: 10px;
-  color: #6c757d;
-  cursor: pointer;
-  padding: 2px;
-  border-radius: 3px;
-  transition: all 0.2s ease;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  opacity: 0;
-  visibility: hidden;
+.status-badge.status-inactive:hover {
+  background-color: #f5c6cb;
+  box-shadow: 0 2px 6px rgba(220, 53, 69, 0.2);
 }
 
-.status-arrow:hover {
-  background-color: #f8f9fa;
-  color: #495057;
-}
-
-.status-indicator:hover .status-arrow {
-  opacity: 1;
-  visibility: visible;
-}
-
-.status-options {
+.status-dropdown-menu {
   position: fixed;
   background: white;
   border: 1px solid #e3e6f0;
-  border-radius: 6px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  border-radius: 8px;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
   z-index: 9999;
   overflow: hidden;
-  min-width: 100px;
-  max-height: 200px;
-  transform: translateY(0);
+  min-width: 140px;
+  padding: 4px;
+  animation: slideDown 0.2s ease;
 }
 
-/* Position dropdown below the indicator by default */
-.status-options[data-position="down"] {
-  top: var(--dropdown-top);
-  left: var(--dropdown-left);
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
-/* Position dropdown above the indicator when near bottom */
-.status-options[data-position="up"] {
-  bottom: var(--dropdown-bottom);
-  left: var(--dropdown-left);
-  top: auto;
-}
-
-.status-option {
+.status-dropdown-item {
   display: flex;
   align-items: center;
-  padding: 8px 12px;
-  cursor: pointer;
-  transition: background-color 0.2s ease;
   gap: 8px;
-  font-size: 12px;
+  padding: 10px 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 13px;
   font-weight: 500;
+  border: none;
+  background: transparent;
+  border-radius: 6px;
+  width: 100%;
+  text-align: left;
+  color: #495057;
 }
 
-.status-option:hover {
+.status-dropdown-item .status-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.status-dropdown-item .status-dot-active {
+  background-color: #28a745;
+}
+
+.status-dropdown-item .status-dot-inactive {
+  background-color: #dc3545;
+}
+
+.status-dropdown-item:hover {
   background-color: #f8f9fa;
+  color: #212529;
 }
 
-.status-option.active {
-  background-color: #e3f2fd;
-  color: #1976d2;
+.status-dropdown-item.active {
+  background-color: #e7f3ff;
+  color: #0066cc;
+  font-weight: 600;
 }
 
-.status-option.active .status-dot {
-  background-color: #1976d2;
+.status-dropdown-item .fa-check {
+  font-size: 12px;
+  color: #0066cc;
 }
 </style>
 

@@ -18,10 +18,45 @@ class UserController extends Controller
      */
     public function index(Request $request): JsonResponse
     {
+        $user = auth()->user();
+        
         $query = User::select([
             'id', 'name', 'email', 'mobile', 'organization_id', 'department_id',
-            'status', 'created_at', 'updated_at'
-        ])->where('role', 'user');
+            'status', 'role', 'created_at', 'updated_at'
+        ])->whereIn('role', ['user', 'manager']);
+
+        // Role-based filtering
+        if ($user->role === 'organization') {
+            // Organization role: show only users from their organization
+            $query->where('organization_id', $user->organization_id);
+        } elseif ($user->role === 'manager') {
+            // Manager role: show only user role users from accessible departments
+            $query->where('organization_id', $user->organization_id);
+            $query->where('role', 'user'); // Only show user role users
+            
+            $accessibleDepartments = [];
+            
+            // Include manager's own department
+            if ($user->department_id) {
+                $accessibleDepartments[] = $user->department_id;
+            }
+            
+            // Include allowed departments
+            if ($user->allowed_department_ids) {
+                $allowedDepartments = is_string($user->allowed_department_ids) 
+                    ? json_decode($user->allowed_department_ids, true) 
+                    : $user->allowed_department_ids;
+                    
+                if (!empty($allowedDepartments)) {
+                    $accessibleDepartments = array_merge($accessibleDepartments, $allowedDepartments);
+                }
+            }
+            
+            if (!empty($accessibleDepartments)) {
+                $query->whereIn('department_id', array_unique($accessibleDepartments));
+            }
+        }
+        // Admin role: no filtering
 
         // Search functionality - optimized with full-text search
         if ($request->has('search') && $request->search) {
@@ -35,8 +70,8 @@ class UserController extends Controller
             }
         }
 
-        // Organization filter
-        if ($request->has('organization_id') && $request->organization_id) {
+        // Organization filter (only for admin)
+        if ($user->role === 'admin' && $request->has('organization_id') && $request->organization_id) {
             $query->where('organization_id', $request->organization_id);
         }
 
@@ -71,10 +106,18 @@ class UserController extends Controller
      */
     public function getOrganizations(): JsonResponse
     {
-        $organizations = Organization::where('status', 'active')
+        $authUser = auth()->user();
+        
+        $query = Organization::where('status', 'active')
             ->select('id', 'name')
-            ->orderBy('name')
-            ->get();
+            ->orderBy('name');
+        
+        // For organization and manager roles, only return their organization
+        if ($authUser->role === 'organization' || $authUser->role === 'manager') {
+            $query->where('id', $authUser->organization_id);
+        }
+        
+        $organizations = $query->get();
 
         return response()->json($organizations);
     }
@@ -84,21 +127,57 @@ class UserController extends Controller
      */
     public function getDepartmentsByOrganization(Request $request): JsonResponse
     {
-        $validator = Validator::make($request->all(), [
-            'organization_id' => 'required|exists:organizations,id',
-        ]);
+        $authUser = auth()->user();
+        
+        // For organization and manager roles, use their organization_id
+        $organizationId = ($authUser->role === 'organization' || $authUser->role === 'manager') 
+            ? $authUser->organization_id 
+            : $request->organization_id;
+        
+        // Only validate organization_id if user is admin
+        if ($authUser->role === 'admin') {
+            $validator = Validator::make($request->all(), [
+                'organization_id' => 'required|exists:organizations,id',
+            ]);
 
-        if ($validator->fails()) {
-            return response()->json([
-                'message' => 'Validation failed',
-                'errors' => $validator->errors()
-            ], 422);
+            if ($validator->fails()) {
+                return response()->json([
+                    'message' => 'Validation failed',
+                    'errors' => $validator->errors()
+                ], 422);
+            }
         }
 
-        $departments = Department::where('organization_id', $request->organization_id)
+        $query = Department::where('organization_id', $organizationId)
             ->select('id', 'name')
-            ->orderBy('name')
-            ->get();
+            ->orderBy('name');
+        
+        // For manager role, filter by accessible departments
+        if ($authUser->role === 'manager') {
+            $accessibleDepartments = [];
+            
+            // Include manager's own department
+            if ($authUser->department_id) {
+                $accessibleDepartments[] = $authUser->department_id;
+            }
+            
+            // Include allowed departments
+            if ($authUser->allowed_department_ids) {
+                $allowedDepartments = is_string($authUser->allowed_department_ids) 
+                    ? json_decode($authUser->allowed_department_ids, true) 
+                    : $authUser->allowed_department_ids;
+                    
+                if (!empty($allowedDepartments)) {
+                    $accessibleDepartments = array_merge($accessibleDepartments, $allowedDepartments);
+                }
+            }
+            
+            if (!empty($accessibleDepartments)) {
+                $query->whereIn('id', array_unique($accessibleDepartments));
+            }
+        }
+        
+        $departments = $query->get();
 
         return response()->json($departments);
     }
@@ -108,15 +187,33 @@ class UserController extends Controller
      */
     public function store(Request $request): JsonResponse
     {
-        $validator = Validator::make($request->all(), [
+        $authUser = auth()->user();
+        
+        // For organization and manager roles, use their organization_id
+        $organizationId = ($authUser->role === 'organization' || $authUser->role === 'manager') 
+            ? $authUser->organization_id 
+            : $request->organization_id;
+        
+        $rules = [
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
             'mobile' => 'required|string|max:20',
             'password' => 'required|string|min:6',
-            'organization_id' => 'required|exists:organizations,id',
-            'department_id' => 'nullable|exists:departments,id',
+            'department_id' => 'required|exists:departments,id',
             'status' => 'required|in:active,inactive',
-        ]);
+        ];
+        
+        // Manager can only create user role
+        if ($authUser->role !== 'manager') {
+            $rules['role'] = 'required|in:user,manager';
+        }
+        
+        // Only require organization_id if user is admin
+        if ($authUser->role === 'admin') {
+            $rules['organization_id'] = 'required|exists:organizations,id';
+        }
+        
+        $validator = Validator::make($request->all(), $rules);
 
         if ($validator->fails()) {
             return response()->json([
@@ -124,14 +221,17 @@ class UserController extends Controller
                 'errors' => $validator->errors()
             ], 422);
         }
+        
+        // Manager can only create user role, force role to 'user'
+        $userRole = ($authUser->role === 'manager') ? 'user' : ($request->role ?? 'user');
 
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
             'mobile' => $request->mobile,
             'password' => Hash::make($request->password),
-            'role' => 'user', // Always set to user role
-            'organization_id' => $request->organization_id,
+            'role' => $userRole,
+            'organization_id' => $organizationId,
             'department_id' => $request->department_id,
             'status' => $request->status ?? 'active',
         ]);
@@ -156,15 +256,29 @@ class UserController extends Controller
      */
     public function update(Request $request, User $user): JsonResponse
     {
-        $validator = Validator::make($request->all(), [
+        $authUser = auth()->user();
+        
+        // For organization and manager roles, use their organization_id
+        $organizationId = ($authUser->role === 'organization' || $authUser->role === 'manager') 
+            ? $authUser->organization_id 
+            : $request->organization_id;
+        
+        $rules = [
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users,email,' . $user->id,
             'mobile' => 'required|string|max:20',
             'password' => 'nullable|string|min:6',
-            'organization_id' => 'required|exists:organizations,id',
-            'department_id' => 'nullable|exists:departments,id',
+            'role' => 'required|in:user,manager',
+            'department_id' => 'required|exists:departments,id',
             'status' => 'required|in:active,inactive',
-        ]);
+        ];
+        
+        // Only require organization_id if user is admin
+        if ($authUser->role === 'admin') {
+            $rules['organization_id'] = 'required|exists:organizations,id';
+        }
+        
+        $validator = Validator::make($request->all(), $rules);
 
         if ($validator->fails()) {
             return response()->json([
@@ -177,8 +291,8 @@ class UserController extends Controller
             'name' => $request->name,
             'email' => $request->email,
             'mobile' => $request->mobile,
-            'role' => 'user', // Always keep as user role
-            'organization_id' => $request->organization_id,
+            'role' => $request->role ?? 'user',
+            'organization_id' => $organizationId,
             'department_id' => $request->department_id,
             'status' => $request->status,
         ];
@@ -230,5 +344,228 @@ class UserController extends Controller
         return response()->json([
             'message' => 'User deleted successfully'
         ]);
+    }
+
+    /**
+     * Get data for assign SIMs page
+     */
+    public function getAssignSimsData(User $user): JsonResponse
+    {
+        $authUser = auth()->user();
+        
+        // Load user with relationships
+        $user->load(['organization', 'department']);
+
+        // Get departments based on auth user role
+        $query = Department::where('organization_id', $user->organization_id)
+            ->select('id', 'name', 'organization_id')
+            ->orderBy('name');
+        
+        // For manager role, filter by accessible departments
+        if ($authUser->role === 'manager') {
+            $accessibleDepartments = [];
+            
+            // Include manager's own department
+            if ($authUser->department_id) {
+                $accessibleDepartments[] = $authUser->department_id;
+            }
+            
+            // Include allowed departments
+            if ($authUser->allowed_department_ids) {
+                $allowedDepartments = is_string($authUser->allowed_department_ids) 
+                    ? json_decode($authUser->allowed_department_ids, true) 
+                    : $authUser->allowed_department_ids;
+                    
+                if (!empty($allowedDepartments)) {
+                    $accessibleDepartments = array_merge($accessibleDepartments, $allowedDepartments);
+                }
+            }
+            
+            if (!empty($accessibleDepartments)) {
+                $query->whereIn('id', array_unique($accessibleDepartments));
+            }
+        }
+        
+        $departments = $query->get();
+
+        // Get currently assigned SIM IDs
+        $assignedSimIds = \App\Models\UserSim::where('user_id', $user->id)
+            ->pluck('sim_id')
+            ->toArray();
+
+        return response()->json([
+            'user' => $user,
+            'departments' => $departments,
+            'assigned_sim_ids' => $assignedSimIds,
+        ]);
+    }
+
+    /**
+     * Get SIMs filtered by departments
+     */
+    public function getSimsByDepartments(Request $request): JsonResponse
+    {
+        $validator = Validator::make($request->all(), [
+            'user_id' => 'required|exists:users,id',
+            'department_ids' => 'required|array',
+            'department_ids.*' => 'exists:departments,id',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'message' => 'Validation failed',
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        $user = User::findOrFail($request->user_id);
+        
+        // Get SIMs from selected departments and same organization
+        $sims = \App\Models\Sim::whereIn('department_id', $request->department_ids)
+            ->where('organization_id', $user->organization_id)
+            ->select('id', 'mobile', 'name', 'department_id', 'organization_id')
+            ->with('department:id,name')
+            ->orderBy('mobile')
+            ->get();
+
+        return response()->json($sims);
+    }
+
+    /**
+     * Get assigned SIMs for a user
+     */
+    public function getAssignedSims(User $user): JsonResponse
+    {
+        $assignedSims = \App\Models\Sim::whereHas('userSims', function ($query) use ($user) {
+            $query->where('user_id', $user->id);
+        })
+        ->select('id', 'mobile', 'name', 'department_id')
+        ->with('department:id,name')
+        ->get();
+
+        return response()->json($assignedSims);
+    }
+
+    /**
+     * Get available SIMs for a user based on selected departments
+     */
+    public function getAvailableSims(Request $request, User $user): JsonResponse
+    {
+        $validator = Validator::make($request->all(), [
+            'department_ids' => 'required|string',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'message' => 'Validation failed',
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        $departmentIds = explode(',', $request->department_ids);
+
+        // Get SIMs from selected departments and same organization
+        $sims = \App\Models\Sim::whereIn('department_id', $departmentIds)
+            ->where('organization_id', $user->organization_id)
+            ->select('id', 'mobile', 'name', 'department_id', 'organization_id')
+            ->with('department:id,name')
+            ->orderBy('mobile')
+            ->get();
+
+        return response()->json($sims);
+    }
+
+    /**
+     * Assign SIMs to a user
+     */
+    public function assignSims(Request $request, User $user): JsonResponse
+    {
+        $isManagerTarget = $user->role === 'manager';
+
+        $rules = [
+            'allowed_department_ids' => 'required|array|min:1',
+            'allowed_department_ids.*' => 'exists:departments,id',
+        ];
+
+        if ($isManagerTarget) {
+            // Managers should not have SIMs assigned.
+            $rules['sim_ids'] = 'sometimes|array|max:0';
+            $rules['sim_ids.*'] = 'prohibited';
+        } else {
+            $rules['sim_ids'] = 'required|array|min:1';
+            $rules['sim_ids.*'] = 'exists:sims,id';
+        }
+
+        $validator = Validator::make($request->all(), $rules);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'message' => 'Validation failed',
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        $selectedSims = collect();
+
+        if (!$isManagerTarget) {
+            // Validate that all selected SIMs belong to the selected departments
+            $selectedSims = \App\Models\Sim::whereIn('id', $request->sim_ids)
+                ->where('organization_id', $user->organization_id)
+                ->get();
+
+            foreach ($selectedSims as $sim) {
+                if (!in_array($sim->department_id, $request->allowed_department_ids)) {
+                    return response()->json([
+                        'message' => 'SIM must belong to one of the selected departments',
+                        'errors' => [
+                            'sim_ids' => ['SIM ' . $sim->mobile . ' does not belong to the selected departments']
+                        ]
+                    ], 422);
+                }
+            }
+        }
+
+        // Begin transaction
+        \DB::beginTransaction();
+        
+        try {
+            // Update user's allowed departments
+            $user->update([
+                'allowed_department_ids' => json_encode($request->allowed_department_ids)
+            ]);
+
+            // Delete existing SIM assignments
+            \App\Models\UserSim::where('user_id', $user->id)->delete();
+
+            $userSimsData = [];
+            if (!$isManagerTarget) {
+                // Insert new SIM assignments
+                foreach ($selectedSims as $sim) {
+                    $userSimsData[] = [
+                        'user_id' => $user->id,
+                        'sim_id' => $sim->id,
+                        'mobile' => $sim->mobile,
+                        'created_at' => now(),
+                        'updated_at' => now(),
+                    ];
+                }
+
+                \App\Models\UserSim::insert($userSimsData);
+            }
+
+            \DB::commit();
+
+            return response()->json([
+                'message' => $isManagerTarget ? 'Departments updated successfully' : 'SIMs assigned successfully',
+                'assigned_count' => count($userSimsData)
+            ]);
+        } catch (\Exception $e) {
+            \DB::rollBack();
+            
+            return response()->json([
+                'message' => 'Failed to assign SIMs',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 }
