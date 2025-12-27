@@ -82,6 +82,9 @@
           <template #cell-mobile="{ value }">
             {{ value || 'N/A' }}
           </template>
+          <template #cell-sims_count="{ value }">
+            {{ Number(value || 0).toLocaleString() }}
+          </template>
           <template #cell-status="{ value, row }">
             <div class="status-dropdown">
               <button 
@@ -644,6 +647,7 @@ const getErrorMessage = (error) => {
 const organizationHeaders = [
   { key: 'name', label: 'Organization', class: 'text-start' },
   { key: 'mobile', label: 'Mobile', class: 'text-center' },
+  { key: 'sims_count', label: 'SIMs', class: 'text-center' },
   { key: 'status', label: 'Status', class: 'text-center' },
   { key: 'created_at', label: 'Created', class: 'text-center' }
 ]

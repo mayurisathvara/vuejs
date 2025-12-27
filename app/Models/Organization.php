@@ -15,6 +15,7 @@ class Organization extends Model
         'email',
         'password',
         'mobile',
+		'app_login_code',
         'description',
         'status',
     ];
@@ -44,6 +45,14 @@ class Organization extends Model
     public function departments()
     {
         return $this->hasMany(Department::class, 'organization_id');
+    }
+
+    /**
+     * Get the SIMs that belong to this organization.
+     */
+    public function sims()
+    {
+        return $this->hasMany(Sim::class, 'organization_id');
     }
 
     /**

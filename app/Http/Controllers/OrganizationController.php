@@ -19,7 +19,7 @@ class OrganizationController extends Controller
         $query = Organization::select([
             'id', 'name', 'email', 'mobile', 'description', 
             'status', 'created_at', 'updated_at'
-        ]);
+        ])->withCount('sims');
 
         // Search functionality - optimized with full-text search
         if ($request->has('search') && $request->search) {

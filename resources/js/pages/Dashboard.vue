@@ -255,8 +255,12 @@
                 <p class="mb-0 opacity-75 small">All call activity</p>
               </div>
               <div
-                class="badge bg-white bg-opacity-25 rounded-pill px-2 py-1 fw-bold"
-                :class="(dashboardSummary.total_calls_change_pct ?? 0) >= 0 ? 'text-white' : 'text-danger'"
+                class="badge rounded-pill px-2 py-1 fw-bold border"
+                :class="
+                  (dashboardSummary.total_calls_change_pct ?? 0) >= 0
+                    ? 'bg-white bg-opacity-25 text-white border-white'
+                    : 'bg-white bg-opacity-100 text-danger border-danger'
+                "
               >
                 {{ dashboardSummary.total_calls_change_label || '0%' }}
               </div>

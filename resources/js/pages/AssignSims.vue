@@ -220,7 +220,7 @@
 
       <!-- Summary Sidebar -->
       <div class="col-lg-4">
-        <div class="card card-round sticky-top" style="top: 20px;">
+        <div class="card card-round sticky-top assign-summary-card">
           <div class="card-body">
             <h5 class="card-title mb-3">
               <i class="fas fa-info-circle me-2 text-info"></i>
@@ -717,6 +717,18 @@ onMounted(() => {
 
 .sticky-top {
   position: sticky;
+}
+
+.assign-summary-card {
+  top: 90px;
+  z-index: 1;
+}
+
+@media (max-width: 991.98px) {
+  .assign-summary-card {
+    position: static;
+    top: auto;
+  }
 }
 
 .badge {
