@@ -8,6 +8,11 @@ body {
   background-color: #f8f9fa;
 }
 
+/* Icon color helper (same tone as theme primary, but custom class name) */
+.icon-accent {
+  color: var(--bs-primary) !important;
+}
+
 /* Override default form styles to match custom admin theme */
 .form-control {
   border: 1px solid #e1e5e9;

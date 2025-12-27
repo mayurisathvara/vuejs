@@ -494,10 +494,7 @@ class DashboardAnalyticsController extends Controller
         } elseif ($role === 'user') {
             // Only their assigned SIMs
             if ($hasCallerIdColumn) {
-                $userSimMobiles = UserSim::where('user_id', $authUser->id)
-                    ->pluck('mobile')
-                    ->filter()
-                    ->toArray();
+                $userSimMobiles = $this->getUserSimMobilesForCallerId($authUser->id);
 
                 if (!empty($userSimMobiles)) {
                     $query->whereIn('call_logs.caller_id', $userSimMobiles);
@@ -521,10 +518,7 @@ class DashboardAnalyticsController extends Controller
                         ->toArray();
 
                     if (!empty($userIds)) {
-                        $managerSimMobiles = UserSim::whereIn('user_id', $userIds)
-                            ->pluck('mobile')
-                            ->filter()
-                            ->toArray();
+                        $managerSimMobiles = $this->getUserSimMobilesForCallerIdMany($userIds);
 
                         if (!empty($managerSimMobiles)) {
                             $query->whereIn('call_logs.caller_id', $managerSimMobiles);
@@ -614,10 +608,7 @@ class DashboardAnalyticsController extends Controller
             }
 
             if ($allowed && $hasCallerIdColumn) {
-                $userSimMobiles = UserSim::where('user_id', $selectedUserId)
-                    ->pluck('mobile')
-                    ->filter()
-                    ->toArray();
+                $userSimMobiles = $this->getUserSimMobilesForCallerId($selectedUserId);
 
                 if (!empty($userSimMobiles)) {
                     $query->whereIn('call_logs.caller_id', $userSimMobiles);
@@ -644,6 +635,41 @@ class DashboardAnalyticsController extends Controller
         }
 
         return $query;
+    }
+
+    private function getUserSimMobilesForCallerId(int $userId): array
+    {
+        return UserSim::query()
+            ->leftJoin('sims', 'sims.id', '=', 'user_sims.sim_id')
+            ->where('user_sims.user_id', $userId)
+            ->selectRaw('COALESCE(sims.mobile, user_sims.mobile) as mobile')
+            ->pluck('mobile')
+            ->filter()
+            ->map(fn ($v) => trim((string) $v))
+            ->filter(fn ($v) => $v !== '')
+            ->unique()
+            ->values()
+            ->toArray();
+    }
+
+    private function getUserSimMobilesForCallerIdMany(array $userIds): array
+    {
+        $userIds = array_values(array_filter(array_map('intval', $userIds)));
+        if (empty($userIds)) {
+            return [];
+        }
+
+        return UserSim::query()
+            ->leftJoin('sims', 'sims.id', '=', 'user_sims.sim_id')
+            ->whereIn('user_sims.user_id', $userIds)
+            ->selectRaw('COALESCE(sims.mobile, user_sims.mobile) as mobile')
+            ->pluck('mobile')
+            ->filter()
+            ->map(fn ($v) => trim((string) $v))
+            ->filter(fn ($v) => $v !== '')
+            ->unique()
+            ->values()
+            ->toArray();
     }
 
     private function formatDurationShort(int $seconds): string

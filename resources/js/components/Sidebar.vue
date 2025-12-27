@@ -22,7 +22,7 @@
     </div>
     <div class="sidebar-wrapper scrollbar scrollbar-inner">
       <div class="sidebar-content">
-        <ul class="nav nav-secondary">
+        <ul class="nav nav-primary">
           <li class="nav-item" :class="{ active: $route.name === 'Dashboard' }">
             <router-link to="/dashboard" class="nav-link" @click="handleMenuClick">
               <i class="fas fa-home"></i>

@@ -250,13 +250,13 @@
 
         <div class="col-12">
           <div class="d-flex gap-2 flex-wrap">
-            <Button variant="primary" class="btn-modern" :disabled="loading" @click="applySearch">
+            <button type="button" class="btn btn-primary btn-sm" :disabled="loading" @click="applySearch">
               <i class="fas fa-search me-2"></i>
               Search
-            </Button>
-            <Button variant="outline-secondary" class="btn-modern" :disabled="loading" @click="resetAll">
+            </button>
+            <button type="button" class="btn btn-outline-secondary btn-sm" :disabled="loading" @click="resetAll">
               Reset
-            </Button>
+            </button>
           </div>
         </div>
       </div>
@@ -276,7 +276,7 @@
             <label>entries</label>
           </div>
           <div class="datatable-actions">
-            <button class="action-icon-btn" :disabled="loading" @click="refresh" title="Refresh">
+            <button type="button" class="btn btn-light border btn-sm" :disabled="loading" @click="refresh" title="Refresh">
               <i class="fas fa-sync-alt"></i>
             </button>
             <button class="action-icon-btn" :disabled="exporting" @click="exportFile('excel')" title="Export Excel">
@@ -307,7 +307,7 @@
           <template #cell-call_status="{ row }">
             <!-- Outbound + Answered (Blue Icon) -->
             <span v-if="row.call_type === 'outbound' && row.call_status === 'Answered'" class="status-text">
-              <i class="fas fa-phone-volume text-primary"></i> Answered
+              <i class="fas fa-phone-volume icon-accent"></i> Answered
             </span>
             <!-- Outbound + No Answer (Orange/Yellow Icon) -->
             <span v-else-if="row.call_type === 'outbound' && row.call_status === 'No Answer'" class="status-text">

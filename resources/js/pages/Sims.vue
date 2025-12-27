@@ -7,19 +7,19 @@
           <h3 class="page-title">SIM Management</h3>
         </div>
         <div class="header-actions">
-          <Button variant="outline-info" class="btn-modern me-2" @click="refreshSims">
+          <button type="button" class="btn btn-light border btn-sm me-2" @click="refreshSims">
             <i class="fas fa-sync-alt me-2"></i>
             <span class="btn-text">Refresh</span>
-          </Button>
-          <Button 
+          </button>
+          <button
             v-if="selectedSims.length > 0" 
-            variant="danger" 
-            class="btn-modern me-2" 
+            type="button"
+            class="btn btn-danger btn-sm me-2"
             @click="openBulkDeleteModal"
           >
             <i class="fas fa-trash-alt me-2"></i>
             <span class="btn-text">Delete Selected ({{ selectedSims.length }})</span>
-          </Button>
+          </button>
           <button type="button" class="btn btn-sm sim-pill-btn sim-pill-success me-2" @click="handleExportCsv">
             <span class="btn-text">Export</span>
           </button>
@@ -27,10 +27,10 @@
             <i class="fas fa-file-import me-2"></i>
             <span class="btn-text">Import</span>
           </button>
-          <Button variant="primary" class="btn-modern" @click="openCreateModal">
+          <button type="button" class="btn btn-primary btn-sm" @click="openCreateModal">
             <i class="fas fa-plus me-2"></i>
-            <span class="btn-text">Add SIM</span>
-          </Button>
+            <span class="btn-text">Add</span>
+          </button>
         </div>
       </div>
     </div>

@@ -28,7 +28,6 @@ class CallReportController extends Controller
             'department_id',
             'user_id',
             'caller_number',
-            'caller_number',
             'call_back',
             'per_page',
             'page',
@@ -431,16 +430,17 @@ class CallReportController extends Controller
                 $query->where('organization_id', (int) $request->organization_id);
             }
         } elseif ($role === 'user') {
-            // For user role: filter by caller_id using their assigned SIMs from user_sims
-            $userSimMobiles = UserSim::where('user_id', $authUser->id)
-                ->pluck('mobile')
-                ->filter()
-                ->toArray();
-            
-            if (!empty($userSimMobiles)) {
-                $query->whereIn('call_logs.caller_id', $userSimMobiles);
-            } else {
+            // For user role: filter by caller_id using their assigned SIMs.
+            // Use COALESCE(sims.mobile, user_sims.mobile) so both assignment styles work.
+            if (!$hasCallerIdColumn) {
                 $query->whereRaw('1 = 0');
+            } else {
+                $userSimMobiles = $this->getUserSimMobilesForCallerId($authUser->id);
+                if (!empty($userSimMobiles)) {
+                    $query->whereIn('call_logs.caller_id', $userSimMobiles);
+                } else {
+                    $query->whereRaw('1 = 0');
+                }
             }
         } else {
             $query->where('organization_id', $authUser->organization_id);
@@ -448,29 +448,30 @@ class CallReportController extends Controller
 
         if ($role === 'manager') {
             // For manager role: get SIMs from users in accessible departments via user_sims
-            $accessible = $this->getManagerAccessibleDepartmentIds($authUser);
-            if (!empty($accessible)) {
-                $userIds = User::whereIn('department_id', $accessible)
-                    ->where('role', 'user')
-                    ->pluck('id')
-                    ->toArray();
-                
-                if (!empty($userIds)) {
-                    $managerSimMobiles = UserSim::whereIn('user_id', $userIds)
-                        ->pluck('mobile')
-                        ->filter()
+            if (!$hasCallerIdColumn) {
+                $query->whereRaw('1 = 0');
+            } else {
+                $accessible = $this->getManagerAccessibleDepartmentIds($authUser);
+                if (!empty($accessible)) {
+                    $userIds = User::whereIn('department_id', $accessible)
+                        ->where('role', 'user')
+                        ->pluck('id')
                         ->toArray();
-                    
-                    if (!empty($managerSimMobiles)) {
-                        $query->whereIn('call_logs.caller_id', $managerSimMobiles);
+
+                    if (!empty($userIds)) {
+                        $managerSimMobiles = $this->getUserSimMobilesForCallerIdMany($userIds);
+
+                        if (!empty($managerSimMobiles)) {
+                            $query->whereIn('call_logs.caller_id', $managerSimMobiles);
+                        } else {
+                            $query->whereRaw('1 = 0');
+                        }
                     } else {
                         $query->whereRaw('1 = 0');
                     }
                 } else {
                     $query->whereRaw('1 = 0');
                 }
-            } else {
-                $query->whereRaw('1 = 0');
             }
         }
 
@@ -498,11 +499,10 @@ class CallReportController extends Controller
                 }
             }
 
-            if ($allowed) {
-                $userSimMobiles = UserSim::where('user_id', $selectedUserId)
-                    ->pluck('mobile')
-                    ->filter()
-                    ->toArray();
+            if (!$hasCallerIdColumn) {
+                $query->whereRaw('1 = 0');
+            } elseif ($allowed) {
+                $userSimMobiles = $this->getUserSimMobilesForCallerId($selectedUserId);
 
                 if (!empty($userSimMobiles)) {
                     $query->whereIn('call_logs.caller_id', $userSimMobiles);
@@ -542,8 +542,8 @@ class CallReportController extends Controller
                 ->pluck('mobile')
                 ->filter()
                 ->toArray();
-            
-            if (!empty($departmentSimMobiles)) {
+
+            if ($hasCallerIdColumn && !empty($departmentSimMobiles)) {
                 $query->where(function (Builder $q) use ($departmentSimMobiles, $departmentId) {
                     // Filter by caller_id (SIMs from the department)
                     $q->whereIn('call_logs.caller_id', $departmentSimMobiles);
@@ -573,6 +573,9 @@ class CallReportController extends Controller
                 if (!empty($simMobiles)) {
                     $query->whereIn('call_logs.caller_id', $simMobiles);
                 }
+            } else {
+                // UI may send sim_mobile; if caller_id is not available, avoid SQL errors.
+                $query->whereRaw('1 = 0');
             }
         }
 
@@ -585,6 +588,41 @@ class CallReportController extends Controller
         }
 
         return $query->orderByDesc('call_logs.date_time');
+    }
+
+    private function getUserSimMobilesForCallerId(int $userId): array
+    {
+        return UserSim::query()
+            ->leftJoin('sims', 'sims.id', '=', 'user_sims.sim_id')
+            ->where('user_sims.user_id', $userId)
+            ->selectRaw('COALESCE(sims.mobile, user_sims.mobile) as mobile')
+            ->pluck('mobile')
+            ->filter()
+            ->map(fn ($v) => trim((string) $v))
+            ->filter(fn ($v) => $v !== '')
+            ->unique()
+            ->values()
+            ->toArray();
+    }
+
+    private function getUserSimMobilesForCallerIdMany(array $userIds): array
+    {
+        $userIds = array_values(array_filter(array_map('intval', $userIds)));
+        if (empty($userIds)) {
+            return [];
+        }
+
+        return UserSim::query()
+            ->leftJoin('sims', 'sims.id', '=', 'user_sims.sim_id')
+            ->whereIn('user_sims.user_id', $userIds)
+            ->selectRaw('COALESCE(sims.mobile, user_sims.mobile) as mobile')
+            ->pluck('mobile')
+            ->filter()
+            ->map(fn ($v) => trim((string) $v))
+            ->filter(fn ($v) => $v !== '')
+            ->unique()
+            ->values()
+            ->toArray();
     }
 
     private function getManagerAccessibleDepartmentIds($authUser): array

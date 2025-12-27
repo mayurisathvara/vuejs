@@ -173,7 +173,7 @@
                     <span>Account Setting</span>
                   </a>
                   <div class="dropdown-divider"></div>
-                  <a class="dropdown-item d-flex align-items-center py-2 text-danger" href="#" @click.prevent="logout">
+                  <a class="dropdown-item d-flex align-items-center py-2 text-danger" href="#" @click.prevent="openLogoutModal">
                     <i class="fas fa-sign-out-alt me-3"></i>
                     <span>Logout</span>
                   </a>
@@ -185,6 +185,27 @@
       </div>
     </nav>
     <!-- End Navbar -->
+
+    <!-- Logout Confirmation Modal (SweetAlert-style) -->
+    <Modal
+      :show="showLogoutModal"
+      title="Logout"
+      centered
+      @close="closeLogoutModal"
+      @confirm="confirmLogout"
+    >
+      <div class="logout-modal-content">
+        <p class="logout-question">Are you sure you want to logout?</p>
+        <div class="info-card">
+          <div class="info-name">{{ user?.name || 'User' }}</div>
+          <div class="info-email">{{ user?.email || '' }}</div>
+        </div>
+        <p class="warning-text">
+          <i class="fas fa-exclamation-triangle me-2"></i>
+          This will end your current session.
+        </p>
+      </div>
+    </Modal>
   </div>
 </template>
 
@@ -192,6 +213,7 @@
 import { ref, onMounted } from 'vue'
 import { useAuthStore } from '@/stores/auth'
 import { useRouter } from 'vue-router'
+import Modal from '@/components/Modal.vue'
 
 const authStore = useAuthStore()
 const router = useRouter()
@@ -199,6 +221,8 @@ const router = useRouter()
 const searchQuery = ref('')
 const user = authStore.user
 const isMobile = ref(false)
+
+const showLogoutModal = ref(false)
 
 const checkMobile = () => {
   isMobile.value = window.innerWidth <= 991.5
@@ -214,12 +238,21 @@ const toggleSidebar = () => {
   }
 }
 
-const logout = async () => {
-  const confirmed = window.confirm('Are you sure you want to logout?')
-  if (!confirmed) return
+const openLogoutModal = () => {
+  showLogoutModal.value = true
+}
 
-  await authStore.logout()
-  router.push('/login')
+const closeLogoutModal = () => {
+  showLogoutModal.value = false
+}
+
+const confirmLogout = async () => {
+  try {
+    await authStore.logout()
+  } finally {
+    showLogoutModal.value = false
+    router.push('/login')
+  }
 }
 
 onMounted(() => {
@@ -234,5 +267,51 @@ onMounted(() => {
   height: 34px;
   background: rgba(0, 0, 0, 0.14);
   margin: 0 14px;
+}
+
+/* Logout confirmation modal styling (matches existing delete confirmation look) */
+.logout-modal-content {
+  padding: 8px 0;
+}
+
+.logout-question {
+  font-size: 15px;
+  color: #3a3b45;
+  margin-bottom: 20px;
+  font-weight: 500;
+  line-height: 1.5;
+}
+
+.info-card {
+  background-color: #f8f9fc;
+  border: 1px solid #e3e6f0;
+  border-radius: 8px;
+  padding: 16px 20px;
+  margin-bottom: 20px;
+}
+
+.info-name {
+  font-size: 16px;
+  font-weight: 600;
+  color: #2c2d3a;
+  margin-bottom: 6px;
+}
+
+.info-email {
+  font-size: 14px;
+  color: #6c757d;
+}
+
+.warning-text {
+  color: #dc3545;
+  font-size: 14px;
+  font-weight: 500;
+  margin: 0;
+  display: flex;
+  align-items: center;
+}
+
+.warning-text i {
+  color: #dc3545;
 }
 </style>

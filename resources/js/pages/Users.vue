@@ -7,14 +7,14 @@
           <h3 class="page-title">Users Management</h3>
         </div>
         <div class="header-actions">
-          <Button variant="outline-info" class="btn-modern me-2" @click="refreshUsers">
+          <button type="button" class="btn btn-light border btn-sm me-2" @click="refreshUsers">
             <i class="fas fa-sync-alt me-2"></i>
             <span class="btn-text">Refresh</span>
-          </Button>
-          <Button variant="primary" class="btn-modern" @click="openCreateModal">
+          </button>
+          <button type="button" class="btn btn-primary btn-sm" @click="openCreateModal">
             <i class="fas fa-plus me-2"></i>
-            <span class="btn-text">Add User</span>
-          </Button>
+            <span class="btn-text">Add</span>
+          </button>
         </div>
       </div>
     </div>
@@ -120,8 +120,7 @@
             {{ value || 'N/A' }}
           </template>
           <template #cell-role="{ value }">
-            <span v-if="value === 'manager'" class="badge bg-primary">Manager</span>
-            <span v-else class="badge bg-secondary">User</span>
+            <span class="role-text">{{ String(value || '').toUpperCase() || 'N/A' }}</span>
           </template>
           <template #cell-organization_name="{ row }">
             {{ row.organization ? row.organization.name : 'N/A' }}
@@ -345,6 +344,13 @@
 </template>
 
 <style scoped>
+.role-text {
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  font-size: 12px;
+  color: #4b5563;
+}
+
 .search-box-wrapper {
   position: relative;
   display: flex;

@@ -1,30 +1,29 @@
 <template>
   <div
     v-if="show"
-    class="modal fade show d-block"
+    class="modal fade show d-block modal-backdrop-custom"
     tabindex="-1"
     role="dialog"
-    :style="{ backgroundColor: 'rgba(0,0,0,0.5)' }"
     @click.self="close"
   >
     <div class="modal-dialog" :class="modalClasses" role="document">
-      <div class="modal-content">
-        <div v-if="title" class="modal-header">
-          <h5 class="modal-title">{{ title }}</h5>
+      <div class="modal-content modal-content-modern">
+        <div v-if="title" class="modal-header modal-header-modern">
+          <h5 class="modal-title modal-title-modern">{{ title }}</h5>
           <button
             type="button"
-            class="btn-close"
+            class="btn-close modal-close-modern"
             aria-label="Close"
             @click="close"
           ></button>
         </div>
-        <div class="modal-body">
+        <div class="modal-body modal-body-modern">
           <slot></slot>
         </div>
-        <div v-if="showFooter" class="modal-footer">
+        <div v-if="showFooter" class="modal-footer modal-footer-modern">
           <slot name="footer">
-            <Button variant="secondary" @click="close">Cancel</Button>
-            <Button variant="primary" @click="confirm">Confirm</Button>
+            <Button variant="secondary" class="btn-min" @click="close">Cancel</Button>
+            <Button variant="primary" class="btn-min" @click="confirm">Confirm</Button>
           </slot>
         </div>
       </div>
@@ -33,7 +32,62 @@
 </template>
 
 <style scoped>
-/* Global modal button styling for consistent design */
+/* Backdrop */
+.modal-backdrop-custom {
+  background-color: rgba(17, 24, 39, 0.55);
+}
+
+/* Container */
+.modal-content-modern {
+  border: 0;
+  border-radius: 14px;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.24);
+  overflow: hidden;
+}
+
+/* Header */
+.modal-header-modern {
+  border: 0;
+  padding: 18px 20px 10px;
+  position: relative;
+  justify-content: center;
+}
+
+.modal-title-modern {
+  font-weight: 700;
+  font-size: 18px;
+  color: #111827;
+  margin: 0;
+  text-align: center;
+  width: 100%;
+  padding: 0 34px;
+}
+
+.modal-close-modern {
+  position: absolute;
+  right: 16px;
+  top: 16px;
+}
+
+/* Body */
+.modal-body-modern {
+  padding: 12px 20px 16px;
+}
+
+/* Footer */
+.modal-footer-modern {
+  border: 0;
+  padding: 14px 20px 18px;
+  gap: 10px;
+}
+
+.btn-min {
+  min-width: 110px;
+  border-radius: 10px;
+  font-weight: 600;
+}
+
+/* Button styling for consistent design */
 .modal-footer .btn-secondary {
   background-color: #6f42c1 !important;
   border-color: #6f42c1 !important;

@@ -7,14 +7,14 @@
           <h3 class="page-title">Organizations Management</h3>
         </div>
         <div class="header-actions">
-          <Button variant="outline-info" class="btn-modern me-2" @click="refreshOrganizations">
+          <button type="button" class="btn btn-light border btn-sm me-2" @click="refreshOrganizations">
             <i class="fas fa-sync-alt me-2"></i>
             <span class="btn-text">Refresh</span>
-          </Button>
-          <Button variant="primary" class="btn-modern" @click="openCreateModal">
+          </button>
+          <button type="button" class="btn btn-primary btn-sm" @click="openCreateModal">
             <i class="fas fa-plus me-2"></i>
-            <span class="btn-text">Add Organization</span>
-          </Button>
+            <span class="btn-text">Add</span>
+          </button>
         </div>
       </div>
     </div>

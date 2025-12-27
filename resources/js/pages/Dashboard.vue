@@ -241,7 +241,7 @@
     <div class="row gy-3 mb-0 align-items-stretch">
       <!-- Total Calls (Large Orange Card) -->
       <div class="col-md-6">
-        <div class="card card-round bg-orange-gradient text-white shadow-lg border-0 h-100">
+        <div class="card card-round bg-orange-gradient text-white shadow-lg border-0">
           <div class="card-body d-flex flex-column justify-content-between p-3">
             <div class="d-flex justify-content-between align-items-start">
               <div>
@@ -359,8 +359,8 @@
           <div class="card-body p-4">
             <div class="d-flex align-items-center justify-content-between">
               <div class="d-flex align-items-center">
-                <div class="icon-box bg-primary-light rounded-3 me-3">
-                  <i class="fas fa-users text-primary" style="font-size: 1.3rem;"></i>
+                <div class="icon-box bg-warning-light rounded-3 me-3">
+                  <i class="fas fa-users text-orange" style="font-size: 1.3rem;"></i>
                 </div>
                 <div>
                   <p class="text-muted mb-1">Unique Calls</p>
@@ -394,7 +394,7 @@
             <div class="breakdown-items mt-3">
               <div class="d-flex justify-content-between align-items-center py-2 border-bottom">
                 <div class="d-flex align-items-center">
-                  <i class="fas fa-phone text-primary me-2"></i>
+                  <i class="fas fa-phone icon-accent me-2"></i>
                   <span>Answered</span>
                 </div>
                 <span class="fw-bold">{{ dashboardSummary.breakdown.outbound.answered.toLocaleString() }}</span>
@@ -507,7 +507,7 @@
     <div class="row gy-3 mb-0">
       <!-- Peak Call Hours -->
       <div class="col-12 col-lg-6">
-        <div class="card card-round shadow-sm border-0 h-100">
+        <div class="card card-round shadow-sm border-0">
           <div class="card-header bg-transparent border-0 pt-4 px-4">
             <h5 class="fw-bold mb-0">Peak Call Hours</h5>
             <p class="text-muted small">Highest activity periods</p>
