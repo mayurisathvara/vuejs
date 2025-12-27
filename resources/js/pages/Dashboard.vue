@@ -254,8 +254,11 @@
                 <h1 class="display-5 fw-bold mb-0">{{ dashboardSummary.total_calls.toLocaleString() }}</h1>
                 <p class="mb-0 opacity-75 small">All call activity</p>
               </div>
-              <div class="badge bg-white bg-opacity-25 rounded-pill px-2 py-1">
-                +12%
+              <div
+                class="badge bg-white bg-opacity-25 rounded-pill px-2 py-1 fw-bold"
+                :class="(dashboardSummary.total_calls_change_pct ?? 0) >= 0 ? 'text-white' : 'text-danger'"
+              >
+                {{ dashboardSummary.total_calls_change_label || '0%' }}
               </div>
             </div>
             <div class="mt-2">
@@ -278,7 +281,12 @@
                   <div class="icon-box bg-success-light rounded-3">
                     <i class="fas fa-phone text-success small"></i>
                   </div>
-                  <span class="text-success fw-bold small">↑ +18%</span>
+                  <span
+                    class="fw-bold small"
+                    :class="(dashboardSummary.answer_rate_change_pct ?? 0) >= 0 ? 'text-success' : 'text-danger'"
+                  >
+                    {{ dashboardSummary.answer_rate_change_label || '0%' }}
+                  </span>
                 </div>
                 <h3 class="fw-bold mb-1">{{ dashboardSummary.answer_rate_pct }}%</h3>
                 <p class="text-muted mb-0 small">Answer Rate</p>
@@ -292,7 +300,12 @@
                   <div class="icon-box bg-warning-light rounded-3">
                     <i class="far fa-clock text-warning small"></i>
                   </div>
-                  <span class="text-warning fw-bold small">↑ +15%</span>
+                  <span
+                    class="fw-bold small"
+                    :class="(dashboardSummary.avg_duration_change_pct ?? 0) >= 0 ? 'text-success' : 'text-danger'"
+                  >
+                    {{ dashboardSummary.avg_duration_change_label || '0%' }}
+                  </span>
                 </div>
                 <h3 class="fw-bold mb-1">{{ dashboardSummary.avg_duration_display }}</h3>
                 <p class="text-muted mb-0 small">Avg Duration</p>
@@ -318,7 +331,12 @@
                   <h2 class="fw-bold mb-0">{{ dashboardSummary.outbound_calls.toLocaleString() }}</h2>
                 </div>
               </div>
-              <span class="text-success fw-bold">↑ +18%</span>
+              <span
+                class="fw-bold"
+                :class="(dashboardSummary.outbound_calls_change_pct ?? 0) >= 0 ? 'text-success' : 'text-danger'"
+              >
+                {{ dashboardSummary.outbound_calls_change_label || '0%' }}
+              </span>
             </div>
           </div>
         </div>
@@ -336,7 +354,12 @@
                   <h2 class="fw-bold mb-0">{{ dashboardSummary.inbound_calls.toLocaleString() }}</h2>
                 </div>
               </div>
-              <span class="text-success fw-bold">↑ +15%</span>
+              <span
+                class="fw-bold"
+                :class="(dashboardSummary.inbound_calls_change_pct ?? 0) >= 0 ? 'text-success' : 'text-danger'"
+              >
+                {{ dashboardSummary.inbound_calls_change_label || '0%' }}
+              </span>
             </div>
           </div>
         </div>
@@ -354,7 +377,12 @@
                   <h2 class="fw-bold mb-0">{{ dashboardSummary.missed_calls.toLocaleString() }}</h2>
                 </div>
               </div>
-              <span class="text-danger fw-bold">↑ +12%</span>
+              <span
+                class="fw-bold"
+                :class="(dashboardSummary.missed_calls_change_pct ?? 0) >= 0 ? 'text-success' : 'text-danger'"
+              >
+                {{ dashboardSummary.missed_calls_change_label || '0%' }}
+              </span>
             </div>
           </div>
         </div>
@@ -372,7 +400,12 @@
                   <h2 class="fw-bold mb-0">{{ dashboardSummary.unique_calls.toLocaleString() }}</h2>
                 </div>
               </div>
-              <span class="text-success fw-bold">↑ +22%</span>
+              <span
+                class="fw-bold"
+                :class="(dashboardSummary.unique_calls_change_pct ?? 0) >= 0 ? 'text-success' : 'text-danger'"
+              >
+                {{ dashboardSummary.unique_calls_change_label || '0%' }}
+              </span>
             </div>
           </div>
         </div>
@@ -644,13 +677,27 @@ const dashboardOptions = reactive({
 
 const dashboardSummary = reactive({
   total_calls: 0,
+  total_calls_change_pct: 0,
+  total_calls_change_label: '0%',
   answer_rate_pct: 0,
+  answer_rate_change_pct: 0,
+  answer_rate_change_label: '0%',
   avg_duration_seconds: 0,
   avg_duration_display: '0s',
+  avg_duration_change_pct: 0,
+  avg_duration_change_label: '0%',
   outbound_calls: 0,
+  outbound_calls_change_pct: 0,
+  outbound_calls_change_label: '0%',
   inbound_calls: 0,
+  inbound_calls_change_pct: 0,
+  inbound_calls_change_label: '0%',
   missed_calls: 0,
+  missed_calls_change_pct: 0,
+  missed_calls_change_label: '0%',
   unique_calls: 0,
+  unique_calls_change_pct: 0,
+  unique_calls_change_label: '0%',
   breakdown: {
     outbound: { answered: 0, no_answer: 0, total: 0 },
     inbound: { answered: 0, missed: 0, total: 0 }
@@ -948,13 +995,27 @@ const fetchDashboardSummary = async () => {
     const data = resp.data || {}
 
     dashboardSummary.total_calls = Number(data.total_calls || 0)
+    dashboardSummary.total_calls_change_pct = Number(data.total_calls_change_pct || 0)
+    dashboardSummary.total_calls_change_label = data.total_calls_change_label || '0%'
     dashboardSummary.answer_rate_pct = Number(data.answer_rate_pct || 0)
+    dashboardSummary.answer_rate_change_pct = Number(data.answer_rate_change_pct || 0)
+    dashboardSummary.answer_rate_change_label = data.answer_rate_change_label || '0%'
     dashboardSummary.avg_duration_seconds = Number(data.avg_duration_seconds || 0)
     dashboardSummary.avg_duration_display = data.avg_duration_display || '0s'
+    dashboardSummary.avg_duration_change_pct = Number(data.avg_duration_change_pct || 0)
+    dashboardSummary.avg_duration_change_label = data.avg_duration_change_label || '0%'
     dashboardSummary.outbound_calls = Number(data.outbound_calls || 0)
+    dashboardSummary.outbound_calls_change_pct = Number(data.outbound_calls_change_pct || 0)
+    dashboardSummary.outbound_calls_change_label = data.outbound_calls_change_label || '0%'
     dashboardSummary.inbound_calls = Number(data.inbound_calls || 0)
+    dashboardSummary.inbound_calls_change_pct = Number(data.inbound_calls_change_pct || 0)
+    dashboardSummary.inbound_calls_change_label = data.inbound_calls_change_label || '0%'
     dashboardSummary.missed_calls = Number(data.missed_calls || 0)
+    dashboardSummary.missed_calls_change_pct = Number(data.missed_calls_change_pct || 0)
+    dashboardSummary.missed_calls_change_label = data.missed_calls_change_label || '0%'
     dashboardSummary.unique_calls = Number(data.unique_calls || 0)
+    dashboardSummary.unique_calls_change_pct = Number(data.unique_calls_change_pct || 0)
+    dashboardSummary.unique_calls_change_label = data.unique_calls_change_label || '0%'
 
     dashboardSummary.breakdown = {
       outbound: {

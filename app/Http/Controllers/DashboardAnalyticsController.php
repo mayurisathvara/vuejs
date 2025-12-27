@@ -237,9 +237,39 @@ class DashboardAnalyticsController extends Controller
         $cacheKey = $this->dashboardCacheKey($authUser->id, 'summary', $request->all());
 
         $payload = Cache::remember($cacheKey, self::DASHBOARD_CACHE_TTL_SECONDS, function () use ($request) {
-            $baseQuery = $this->buildDashboardQuery($request);
+            // Normalize/ensure a stable date range (dashboard UI sends full-day ranges)
+            $start = $request->filled('start_date_time')
+                ? Carbon::parse($request->start_date_time)->startOfDay()
+                : Carbon::now()->startOfDay();
 
-            // Single aggregate query for summary metrics
+            $end = $request->filled('end_date_time')
+                ? Carbon::parse($request->end_date_time)->endOfDay()
+                : Carbon::now()->endOfDay();
+
+            if ($start->greaterThan($end)) {
+                [$start, $end] = [$end->copy()->startOfDay(), $start->copy()->endOfDay()];
+            }
+
+            $periodDays = $start->diffInDays($end) + 1;
+            $prevEnd = $start->copy()->subDay()->endOfDay();
+            $prevStart = $start->copy()->subDays($periodDays)->startOfDay();
+
+            $currentRequest = $request->duplicate();
+            $currentRequest->merge([
+                'start_date_time' => $start->toDateTimeString(),
+                'end_date_time' => $end->toDateTimeString(),
+            ]);
+
+            $previousRequest = $request->duplicate();
+            $previousRequest->merge([
+                'start_date_time' => $prevStart->toDateTimeString(),
+                'end_date_time' => $prevEnd->toDateTimeString(),
+            ]);
+
+            $baseQuery = $this->buildDashboardQuery($currentRequest);
+            $previousBaseQuery = $this->buildDashboardQuery($previousRequest);
+
+            // Aggregate query for summary metrics (current period)
             $row = (clone $baseQuery)
                 ->selectRaw('COUNT(*) as total_calls')
                 ->selectRaw("SUM(CASE WHEN call_logs.call_status = 'Answered' THEN 1 ELSE 0 END) as answered_calls")
@@ -256,6 +286,17 @@ class DashboardAnalyticsController extends Controller
                 ->selectRaw("AVG(TIME_TO_SEC(NULLIF(call_logs.caller_duration, ''))) as avg_seconds")
                 ->first();
 
+            // Same aggregates for previous period (for change %)
+            $prevRow = (clone $previousBaseQuery)
+                ->selectRaw('COUNT(*) as total_calls')
+                ->selectRaw("SUM(CASE WHEN call_logs.call_status = 'Answered' THEN 1 ELSE 0 END) as answered_calls")
+                ->selectRaw("SUM(CASE WHEN call_logs.call_type = 'outbound' THEN 1 ELSE 0 END) as outbound_calls")
+                ->selectRaw("SUM(CASE WHEN call_logs.call_type = 'inbound' THEN 1 ELSE 0 END) as inbound_calls")
+                ->selectRaw("SUM(CASE WHEN call_logs.call_status = 'Missed' THEN 1 ELSE 0 END) as missed_calls")
+                ->selectRaw("COUNT(DISTINCT NULLIF(TRIM(call_logs.caller_number), '')) as unique_calls")
+                ->selectRaw("AVG(TIME_TO_SEC(NULLIF(call_logs.caller_duration, ''))) as avg_seconds")
+                ->first();
+
             $totalCalls = (int) ($row->total_calls ?? 0);
             $answeredCalls = (int) ($row->answered_calls ?? 0);
             $outboundCalls = (int) ($row->outbound_calls ?? 0);
@@ -264,7 +305,27 @@ class DashboardAnalyticsController extends Controller
             $uniqueCalls = (int) ($row->unique_calls ?? 0);
             $avgSeconds = $row->avg_seconds !== null ? (int) round((float) $row->avg_seconds) : 0;
 
-            $answerRatePct = $totalCalls > 0 ? (int) round(($answeredCalls / $totalCalls) * 100) : 0;
+            $prevTotalCalls = (int) ($prevRow->total_calls ?? 0);
+            $prevAnsweredCalls = (int) ($prevRow->answered_calls ?? 0);
+            $prevOutboundCalls = (int) ($prevRow->outbound_calls ?? 0);
+            $prevInboundCalls = (int) ($prevRow->inbound_calls ?? 0);
+            $prevMissedCalls = (int) ($prevRow->missed_calls ?? 0);
+            $prevUniqueCalls = (int) ($prevRow->unique_calls ?? 0);
+            $prevAvgSeconds = $prevRow->avg_seconds !== null ? (int) round((float) $prevRow->avg_seconds) : 0;
+
+            $answerRate = $totalCalls > 0 ? ($answeredCalls / $totalCalls) * 100 : 0;
+            $prevAnswerRate = $prevTotalCalls > 0 ? ($prevAnsweredCalls / $prevTotalCalls) * 100 : 0;
+
+            $answerRatePct = (int) round($answerRate);
+
+            // Change % (mobile dashboard logic)
+            $totalCallsChange = $this->percentChange($totalCalls, $prevTotalCalls);
+            $answerRateChange = $this->percentChange($answerRate, $prevAnswerRate);
+            $avgDurationChange = $this->percentChange($avgSeconds, $prevAvgSeconds);
+            $outboundChange = $this->percentChange($outboundCalls, $prevOutboundCalls);
+            $inboundChange = $this->percentChange($inboundCalls, $prevInboundCalls);
+            $missedChange = $this->percentChange($missedCalls, $prevMissedCalls);
+            $uniqueChange = $this->percentChange($uniqueCalls, $prevUniqueCalls);
 
             // Peak Call Hours: top 2 two-hour windows
             $peakBuckets = (clone $baseQuery)
@@ -295,13 +356,27 @@ class DashboardAnalyticsController extends Controller
 
             return [
                 'total_calls' => $totalCalls,
+                'total_calls_change_pct' => $totalCallsChange,
+                'total_calls_change_label' => $this->formatChangeLabel($totalCallsChange),
                 'answer_rate_pct' => $answerRatePct,
+                'answer_rate_change_pct' => $answerRateChange,
+                'answer_rate_change_label' => $this->formatChangeLabel($answerRateChange),
                 'avg_duration_seconds' => $avgSeconds,
                 'avg_duration_display' => $this->formatDurationShort($avgSeconds),
+                'avg_duration_change_pct' => $avgDurationChange,
+                'avg_duration_change_label' => $this->formatChangeLabel($avgDurationChange),
                 'outbound_calls' => $outboundCalls,
+                'outbound_calls_change_pct' => $outboundChange,
+                'outbound_calls_change_label' => $this->formatChangeLabel($outboundChange),
                 'inbound_calls' => $inboundCalls,
+                'inbound_calls_change_pct' => $inboundChange,
+                'inbound_calls_change_label' => $this->formatChangeLabel($inboundChange),
                 'missed_calls' => $missedCalls,
+                'missed_calls_change_pct' => $missedChange,
+                'missed_calls_change_label' => $this->formatChangeLabel($missedChange),
                 'unique_calls' => $uniqueCalls,
+                'unique_calls_change_pct' => $uniqueChange,
+                'unique_calls_change_label' => $this->formatChangeLabel($uniqueChange),
                 'missed_analysis' => [
                     'returned_calls' => (int) ($row->missed_returned ?? 0),
                     'callback_pending' => (int) ($row->missed_pending ?? 0),
@@ -318,6 +393,12 @@ class DashboardAnalyticsController extends Controller
                         'missed' => (int) ($row->inbound_missed ?? 0),
                         'total' => $inboundCalls,
                     ],
+                ],
+                'period' => [
+                    'start_date_time' => $start->toDateTimeString(),
+                    'end_date_time' => $end->toDateTimeString(),
+                    'previous_start_date_time' => $prevStart->toDateTimeString(),
+                    'previous_end_date_time' => $prevEnd->toDateTimeString(),
                 ],
             ];
         });
@@ -654,6 +735,48 @@ class DashboardAnalyticsController extends Controller
         }
 
         return sprintf('%ds', $s);
+    }
+
+    /**
+     * Percent change helper (mobile dashboard logic).
+     * Returns int between -100 and +100.
+     */
+    private function percentChange($current, $previous): int
+    {
+        $cur = (float) $current;
+        $prev = (float) $previous;
+
+        if ($prev == 0.0) {
+            if ($cur == 0.0) {
+                return 0;
+            }
+            return 100;
+        }
+
+        $change = (($cur - $prev) / $prev) * 100;
+
+        if ($change > 100) {
+            $change = 100;
+        } elseif ($change < -100) {
+            $change = -100;
+        }
+
+        return (int) round($change);
+    }
+
+    /**
+     * Format change label with sign and percent (e.g. "+12%", "-5%", "0%")
+     */
+    private function formatChangeLabel($percent): string
+    {
+        $p = (int) $percent;
+        if ($p > 0) {
+            return '+' . $p . '%';
+        }
+        if ($p < 0) {
+            return (string) $p . '%';
+        }
+        return '0%';
     }
 
     private function getManagerAccessibleDepartmentIds($authUser): array
