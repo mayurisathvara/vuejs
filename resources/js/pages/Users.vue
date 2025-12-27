@@ -72,20 +72,24 @@
     <!-- Users Table -->
     <div class="card card-round">
       <div class="card-body p-0">
-        <Table
-          :data="usersStore.users"
-          :headers="userHeaders"
-          :loading="usersStore.loading"
-          :actions="true"
-        >
+        <div class="table-responsive-wrapper">
+          <div class="simple-table">
+            <Table
+              :data="usersStore.users"
+              :headers="userHeaders"
+              :loading="usersStore.loading"
+              :actions="true"
+            >
           <template #actions="{ row }">
             <div class="action-buttons">
               <button
-                class="action-btn assign-sim-btn"
+                type="button"
+                class="assign-sim-link"
                 @click="goToAssignSims(row)"
                 title="Assign SIMs"
               >
-                Assign SIM
+                <i class="fas fa-link"></i>
+                <span>Assign SIM</span>
               </button>
               <button
                 class="action-btn edit-btn"
@@ -173,7 +177,9 @@
           <template #cell-created_at="{ value }">
             {{ formatDate(value) }}
           </template>
-        </Table>
+            </Table>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -344,6 +350,55 @@
 </template>
 
 <style scoped>
+.table-responsive-wrapper {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Simple table look (match Call Reports) */
+.simple-table :deep(.table-responsive) {
+  border: 1px solid #e3e6f0;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.simple-table :deep(table.table) {
+  width: 100%;
+  min-width: 1200px;
+  border-collapse: collapse;
+  margin: 0;
+  font-size: 14px;
+}
+
+.simple-table :deep(table.table thead th) {
+  background: #f8f9fa;
+  color: #111827;
+  font-weight: 600;
+  text-transform: none !important;
+  letter-spacing: normal !important;
+  border-bottom: 1px solid #e3e6f0;
+  border-right: 1px solid #e3e6f0;
+  padding: 10px 12px !important;
+  vertical-align: middle;
+  white-space: nowrap;
+}
+
+.simple-table :deep(table.table tbody td) {
+  border-top: 1px solid #e3e6f0;
+  border-right: 1px solid #e3e6f0;
+  padding: 10px 12px !important;
+  vertical-align: middle;
+  background: #fff;
+}
+
+.simple-table :deep(table.table thead th:last-child),
+.simple-table :deep(table.table tbody td:last-child) {
+  border-right: none;
+}
+
+.simple-table :deep(table.table tbody tr:hover) {
+  background: transparent;
+}
 .role-text {
   font-weight: 700;
   letter-spacing: 0.04em;
@@ -678,19 +733,30 @@
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
 }
 
-.assign-sim-btn {
-  color: #6f42c1;
-  width: auto;
-  padding: 0 10px;
-  font-size: 12px;
-  font-weight: 700;
+.assign-sim-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: none;
+  background: transparent;
+  padding: 0;
+  margin-right: 4px;
+  color: var(--bs-primary);
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  line-height: 1;
+  cursor: pointer;
   white-space: nowrap;
 }
 
-.assign-sim-btn:hover {
-  background: #6f42c1;
-  border-color: #6f42c1;
-  color: #fff;
+.assign-sim-link i {
+  font-size: 14px;
+}
+
+.assign-sim-link:hover {
+  color: var(--bs-primary);
+  opacity: 0.9;
 }
 
 .edit-btn {

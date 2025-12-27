@@ -1,14 +1,26 @@
 <template>
   <div class="page-container">
     <div class="page-header">
-      <div class="header-content">
+      <div class="header-content d-flex align-items-center gap-2 flex-wrap">
         <div class="header-title">
           <h3 class="page-title">Call Reports</h3>
+        </div>
+
+        <div class="header-actions d-flex align-items-center gap-2">
+          <button
+            type="button"
+            class="btn btn-white border shadow-sm btn-sm"
+            @click="toggleFilters"
+            :aria-expanded="filtersOpen ? 'true' : 'false'"
+          >
+            <i class="fas fa-filter text-orange me-2"></i>
+            Filters
+          </button>
         </div>
       </div>
     </div>
 
-    <div class="filters-card" @mousedown="onFiltersMousedown">
+    <div v-show="filtersOpen" class="filters-card" @mousedown="onFiltersMousedown">
       <div class="row g-3">
         <div class="col-12 col-md-3">
           <div class="search-box-modern">
@@ -254,7 +266,8 @@
               <i class="fas fa-search me-2"></i>
               Search
             </button>
-            <button type="button" class="btn btn-outline-secondary btn-sm" :disabled="loading" @click="resetAll">
+            <button type="button" class="btn btn-white border shadow-sm btn-sm" :disabled="loading" @click="resetAll">
+              <i class="fas fa-undo me-2"></i>
               Reset
             </button>
           </div>
@@ -409,6 +422,8 @@ const filters = ref({
 
 const perPage = ref('10')
 
+const filtersOpen = ref(false)
+
 // Multiselect dropdown state
 const simDropdownOpen = ref(false)
 const simTriggerEl = ref(null)
@@ -508,6 +523,14 @@ const toggleSimDropdown = () => {
   simDropdownOpen.value = !simDropdownOpen.value
 }
 
+const toggleFilters = () => {
+  filtersOpen.value = !filtersOpen.value
+  if (!filtersOpen.value) {
+    simDropdownOpen.value = false
+    timeDropdownOpen.value = null
+  }
+}
+
 /**
  * Helper to check if event target is within a given element
  */
@@ -570,6 +593,35 @@ const applyDefaultTodayRange = () => {
   filters.value.date_range = `${today} - ${today}`
   filters.value.start_time = '00:00'
   filters.value.end_time = '23:59'
+}
+
+const forceDateRangeToToday = async () => {
+  const todayStr = formatTodayDmy()
+  const display = `${todayStr} - ${todayStr}`
+
+  // Update reactive model first (so UI has a value even if flatpickr is not ready)
+  filters.value.date_range = display
+
+  await nextTick()
+
+  try {
+    const today = new Date()
+    dateRangePicker?.setDate?.([today, today], true)
+    dateRangePicker?.close?.()
+  } catch {
+    // ignore
+  }
+
+  // Extra safety: ensure the input shows the value immediately
+  try {
+    if (dateRangeEl.value) {
+      dateRangeEl.value.value = display
+      dateRangeEl.value.dispatchEvent(new Event('input', { bubbles: true }))
+      dateRangeEl.value.dispatchEvent(new Event('change', { bubbles: true }))
+    }
+  } catch {
+    // ignore
+  }
 }
 
 const logs = ref([])
@@ -703,7 +755,14 @@ const fetchLogs = async (page = 1) => {
 
 const applySearch = async () => {
   appliedFilters.value = { ...filters.value }
-  await fetchLogs(1)
+  try {
+    await fetchLogs(1)
+  } finally {
+    // Close filters after search (requested UX)
+    filtersOpen.value = false
+    simDropdownOpen.value = false
+    timeDropdownOpen.value = null
+  }
 }
 
 const refresh = async () => {
@@ -722,6 +781,7 @@ const onPerPageChange = async () => {
 }
 
 const resetAll = async () => {
+  // Reset to today's full-day range
   applyDefaultTodayRange()
   filters.value.call_type = ''
   filters.value.call_status = ''
@@ -735,13 +795,8 @@ const resetAll = async () => {
     filters.value.organization_id = ''
   }
 
-  // Keep pickers in sync with the default values
-  try {
-    const today = new Date()
-    dateRangePicker?.setDate?.([today, today], true)
-  } catch {
-    // ignore
-  }
+  // Keep date picker + input UI in sync with the default values
+  await forceDateRangeToToday()
 
   timeDropdownOpen.value = null
 
@@ -868,7 +923,13 @@ onMounted(async () => {
       allowInput: false,
       rangeSeparator: ' - ',
       maxDate: 'today',
-      defaultDate: [today, today]
+      defaultDate: [today, today],
+      onReady: (_selectedDates, dateStr) => {
+        if (dateStr) filters.value.date_range = dateStr
+      },
+      onChange: (_selectedDates, dateStr) => {
+        filters.value.date_range = dateStr
+      }
     })
   }
 
@@ -888,6 +949,22 @@ onBeforeUnmount(() => {
 </script>
 
 <style scoped>
+
+.text-orange {
+  color: #ff6a00 !important;
+}
+
+/* Reduce gap between title and Filters button (Call Reports only) */
+.page-header .header-content {
+  justify-content: flex-start !important;
+  gap: 10px !important;
+}
+
+.page-header .header-title {
+  flex: 0 0 auto !important;
+  min-width: 0 !important;
+}
+
 /* Responsive Table Wrapper */
 .table-responsive-wrapper {
   overflow-x: auto;
@@ -998,7 +1075,7 @@ onBeforeUnmount(() => {
   letter-spacing: normal;
   border-bottom: 1px solid #e3e6f0;
   border-right: 1px solid #e3e6f0;
-  padding: 14px 16px !important;
+  padding: 10px 12px !important;
   text-align: left;
   vertical-align: middle;
   white-space: nowrap;
@@ -1007,7 +1084,7 @@ onBeforeUnmount(() => {
 .call-reports-table :deep(table.table tbody td) {
   border-top: 1px solid #e3e6f0;
   border-right: 1px solid #e3e6f0;
-  padding: 14px 16px !important;
+  padding: 10px 12px !important;
   vertical-align: middle;
   background: #fff;
 }

@@ -11,12 +11,15 @@ use App\Models\UserSim;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Validator;
 
 class DashboardAnalyticsController extends Controller
 {
+    private const DASHBOARD_CACHE_TTL_SECONDS = 30;
+
     public function options(Request $request)
     {
         $this->normalizeEmptyStringsToNull($request, [
@@ -230,119 +233,96 @@ class DashboardAnalyticsController extends Controller
             ], 422);
         }
 
-        $baseQuery = $this->buildDashboardQuery($request);
+        $authUser = auth()->user();
+        $cacheKey = $this->dashboardCacheKey($authUser->id, 'summary', $request->all());
 
-        $totalCalls = (clone $baseQuery)->count();
-        $answeredCalls = (clone $baseQuery)->where('call_logs.call_status', 'Answered')->count();
+        $payload = Cache::remember($cacheKey, self::DASHBOARD_CACHE_TTL_SECONDS, function () use ($request) {
+            $baseQuery = $this->buildDashboardQuery($request);
 
-        $outboundCalls = (clone $baseQuery)->where('call_logs.call_type', 'outbound')->count();
-        $inboundCalls = (clone $baseQuery)->where('call_logs.call_type', 'inbound')->count();
-        $missedCalls = (clone $baseQuery)->where('call_logs.call_status', 'Missed')->count();
+            // Single aggregate query for summary metrics
+            $row = (clone $baseQuery)
+                ->selectRaw('COUNT(*) as total_calls')
+                ->selectRaw("SUM(CASE WHEN call_logs.call_status = 'Answered' THEN 1 ELSE 0 END) as answered_calls")
+                ->selectRaw("SUM(CASE WHEN call_logs.call_type = 'outbound' THEN 1 ELSE 0 END) as outbound_calls")
+                ->selectRaw("SUM(CASE WHEN call_logs.call_type = 'inbound' THEN 1 ELSE 0 END) as inbound_calls")
+                ->selectRaw("SUM(CASE WHEN call_logs.call_status = 'Missed' THEN 1 ELSE 0 END) as missed_calls")
+                ->selectRaw("SUM(CASE WHEN call_logs.call_type = 'outbound' AND call_logs.call_status = 'Answered' THEN 1 ELSE 0 END) as outbound_answered")
+                ->selectRaw("SUM(CASE WHEN call_logs.call_type = 'outbound' AND call_logs.call_status = 'No Answer' THEN 1 ELSE 0 END) as outbound_no_answer")
+                ->selectRaw("SUM(CASE WHEN call_logs.call_type = 'inbound' AND call_logs.call_status = 'Answered' THEN 1 ELSE 0 END) as inbound_answered")
+                ->selectRaw("SUM(CASE WHEN call_logs.call_type = 'inbound' AND call_logs.call_status = 'Missed' THEN 1 ELSE 0 END) as inbound_missed")
+                ->selectRaw("SUM(CASE WHEN call_logs.call_status = 'Missed' AND call_logs.call_back = 'Y' THEN 1 ELSE 0 END) as missed_returned")
+                ->selectRaw("SUM(CASE WHEN call_logs.call_status = 'Missed' AND (call_logs.call_back IS NULL OR call_logs.call_back <> 'Y') THEN 1 ELSE 0 END) as missed_pending")
+                ->selectRaw("COUNT(DISTINCT NULLIF(TRIM(call_logs.caller_number), '')) as unique_calls")
+                ->selectRaw("AVG(TIME_TO_SEC(NULLIF(call_logs.caller_duration, ''))) as avg_seconds")
+                ->first();
 
-        $uniqueCalls = (clone $baseQuery)
-            ->whereNotNull('call_logs.caller_number')
-            ->where('call_logs.caller_number', '!=', '')
-            ->distinct('call_logs.caller_number')
-            ->count('call_logs.caller_number');
+            $totalCalls = (int) ($row->total_calls ?? 0);
+            $answeredCalls = (int) ($row->answered_calls ?? 0);
+            $outboundCalls = (int) ($row->outbound_calls ?? 0);
+            $inboundCalls = (int) ($row->inbound_calls ?? 0);
+            $missedCalls = (int) ($row->missed_calls ?? 0);
+            $uniqueCalls = (int) ($row->unique_calls ?? 0);
+            $avgSeconds = $row->avg_seconds !== null ? (int) round((float) $row->avg_seconds) : 0;
 
-        $answerRatePct = $totalCalls > 0 ? (int) round(($answeredCalls / $totalCalls) * 100) : 0;
+            $answerRatePct = $totalCalls > 0 ? (int) round(($answeredCalls / $totalCalls) * 100) : 0;
 
-        $avgSeconds = (clone $baseQuery)
-            ->whereNotNull('call_logs.caller_duration')
-            ->selectRaw('AVG(TIME_TO_SEC(call_logs.caller_duration)) as avg_seconds')
-            ->value('avg_seconds');
+            // Peak Call Hours: top 2 two-hour windows
+            $peakBuckets = (clone $baseQuery)
+                ->whereNotNull('call_logs.date_time')
+                ->selectRaw('FLOOR(HOUR(call_logs.date_time) / 2) as bucket')
+                ->selectRaw('COUNT(*) as total')
+                ->groupBy('bucket')
+                ->orderByDesc('total')
+                ->limit(2)
+                ->get();
 
-        $avgSeconds = $avgSeconds !== null ? (int) round((float) $avgSeconds) : 0;
+            $peakMax = $peakBuckets->max('total') ?: 0;
+            $peakHours = $peakBuckets->map(function ($row) use ($peakMax) {
+                $bucket = (int) ($row->bucket ?? 0);
+                $count = (int) ($row->total ?? 0);
+                $startHour = $bucket * 2;
+                $endHour = $startHour + 2;
 
-        $outboundAnswered = (clone $baseQuery)
-            ->where('call_logs.call_type', 'outbound')
-            ->where('call_logs.call_status', 'Answered')
-            ->count();
+                $label = sprintf('%s – %s', $this->formatHourRangeLabel($startHour), $this->formatHourRangeLabel($endHour));
+                $pct = $peakMax > 0 ? (int) round(($count / $peakMax) * 100) : 0;
 
-        $outboundNoAnswer = (clone $baseQuery)
-            ->where('call_logs.call_type', 'outbound')
-            ->where('call_logs.call_status', 'No Answer')
-            ->count();
-
-        $inboundAnswered = (clone $baseQuery)
-            ->where('call_logs.call_type', 'inbound')
-            ->where('call_logs.call_status', 'Answered')
-            ->count();
-
-        $inboundMissed = (clone $baseQuery)
-            ->where('call_logs.call_type', 'inbound')
-            ->where('call_logs.call_status', 'Missed')
-            ->count();
-
-        // Missed Calls Analysis (Returned vs Callback Pending)
-        // Convention: call_back = 'Y' means callback/return completed, otherwise pending.
-        $missedReturned = (clone $baseQuery)
-            ->where('call_logs.call_status', 'Missed')
-            ->where('call_logs.call_back', 'Y')
-            ->count();
-
-        $missedPending = (clone $baseQuery)
-            ->where('call_logs.call_status', 'Missed')
-            ->where(function ($q) {
-                $q->whereNull('call_logs.call_back')
-                    ->orWhere('call_logs.call_back', '!=', 'Y');
-            })
-            ->count();
-
-        // Peak Call Hours: top 2 two-hour windows
-        $peakBuckets = (clone $baseQuery)
-            ->whereNotNull('call_logs.date_time')
-            ->selectRaw('FLOOR(HOUR(call_logs.date_time) / 2) as bucket')
-            ->selectRaw('COUNT(*) as total')
-            ->groupBy('bucket')
-            ->orderByDesc('total')
-            ->limit(2)
-            ->get();
-
-        $peakMax = $peakBuckets->max('total') ?: 0;
-        $peakHours = $peakBuckets->map(function ($row) use ($peakMax) {
-            $bucket = (int) ($row->bucket ?? 0);
-            $count = (int) ($row->total ?? 0);
-            $startHour = $bucket * 2;
-            $endHour = $startHour + 2;
-
-            $label = sprintf('%s – %s', $this->formatHourRangeLabel($startHour), $this->formatHourRangeLabel($endHour));
-            $pct = $peakMax > 0 ? (int) round(($count / $peakMax) * 100) : 0;
+                return [
+                    'label' => $label,
+                    'count' => $count,
+                    'pct' => $pct,
+                ];
+            })->values();
 
             return [
-                'label' => $label,
-                'count' => $count,
-                'pct' => $pct,
+                'total_calls' => $totalCalls,
+                'answer_rate_pct' => $answerRatePct,
+                'avg_duration_seconds' => $avgSeconds,
+                'avg_duration_display' => $this->formatDurationShort($avgSeconds),
+                'outbound_calls' => $outboundCalls,
+                'inbound_calls' => $inboundCalls,
+                'missed_calls' => $missedCalls,
+                'unique_calls' => $uniqueCalls,
+                'missed_analysis' => [
+                    'returned_calls' => (int) ($row->missed_returned ?? 0),
+                    'callback_pending' => (int) ($row->missed_pending ?? 0),
+                ],
+                'peak_hours' => $peakHours,
+                'breakdown' => [
+                    'outbound' => [
+                        'answered' => (int) ($row->outbound_answered ?? 0),
+                        'no_answer' => (int) ($row->outbound_no_answer ?? 0),
+                        'total' => $outboundCalls,
+                    ],
+                    'inbound' => [
+                        'answered' => (int) ($row->inbound_answered ?? 0),
+                        'missed' => (int) ($row->inbound_missed ?? 0),
+                        'total' => $inboundCalls,
+                    ],
+                ],
             ];
-        })->values();
+        });
 
-        return response()->json([
-            'total_calls' => $totalCalls,
-            'answer_rate_pct' => $answerRatePct,
-            'avg_duration_seconds' => $avgSeconds,
-            'avg_duration_display' => $this->formatDurationShort($avgSeconds),
-            'outbound_calls' => $outboundCalls,
-            'inbound_calls' => $inboundCalls,
-            'missed_calls' => $missedCalls,
-            'unique_calls' => $uniqueCalls,
-            'missed_analysis' => [
-                'returned_calls' => $missedReturned,
-                'callback_pending' => $missedPending,
-            ],
-            'peak_hours' => $peakHours,
-            'breakdown' => [
-                'outbound' => [
-                    'answered' => $outboundAnswered,
-                    'no_answer' => $outboundNoAnswer,
-                    'total' => $outboundCalls,
-                ],
-                'inbound' => [
-                    'answered' => $inboundAnswered,
-                    'missed' => $inboundMissed,
-                    'total' => $inboundCalls,
-                ],
-            ],
-        ]);
+        return response()->json($payload);
     }
 
     private function formatHourRangeLabel(int $hour24): string
@@ -418,16 +398,21 @@ class DashboardAnalyticsController extends Controller
             'end_date_time' => $end->toDateTimeString(),
         ]);
 
-        $baseQuery = $this->buildDashboardQuery($request);
+        $authUser = auth()->user();
+        $cacheKey = $this->dashboardCacheKey($authUser->id, 'daily-call-volume', $request->all());
 
-        $rows = (clone $baseQuery)
-            ->selectRaw('DATE(call_logs.date_time) as day')
-            ->selectRaw("SUM(CASE WHEN call_logs.call_type = 'inbound' THEN 1 ELSE 0 END) as inbound_calls")
-            ->selectRaw("SUM(CASE WHEN call_logs.call_type = 'outbound' THEN 1 ELSE 0 END) as outbound_calls")
-            ->selectRaw('COUNT(*) as total_calls')
-            ->groupBy('day')
-            ->orderBy('day')
-            ->get();
+        $rows = Cache::remember($cacheKey, self::DASHBOARD_CACHE_TTL_SECONDS, function () use ($request) {
+            $baseQuery = $this->buildDashboardQuery($request);
+
+            return (clone $baseQuery)
+                ->selectRaw('DATE(call_logs.date_time) as day')
+                ->selectRaw("SUM(CASE WHEN call_logs.call_type = 'inbound' THEN 1 ELSE 0 END) as inbound_calls")
+                ->selectRaw("SUM(CASE WHEN call_logs.call_type = 'outbound' THEN 1 ELSE 0 END) as outbound_calls")
+                ->selectRaw('COUNT(*) as total_calls')
+                ->groupBy('day')
+                ->orderBy('day')
+                ->get();
+        });
 
         $byDay = [];
         foreach ($rows as $row) {
@@ -482,7 +467,10 @@ class DashboardAnalyticsController extends Controller
         $authUser = auth()->user();
         $role = $authUser->role;
 
-        $hasCallerIdColumn = Schema::hasColumn('call_logs', 'caller_id');
+        static $hasCallerIdColumn = null;
+        if ($hasCallerIdColumn === null) {
+            $hasCallerIdColumn = Schema::hasColumn('call_logs', 'caller_id');
+        }
 
         $query = CallLog::query();
 
@@ -492,15 +480,9 @@ class DashboardAnalyticsController extends Controller
                 $query->where('call_logs.organization_id', (int) $request->organization_id);
             }
         } elseif ($role === 'user') {
-            // Only their assigned SIMs
+            // Only their assigned SIMs (use subquery to avoid large PHP arrays)
             if ($hasCallerIdColumn) {
-                $userSimMobiles = $this->getUserSimMobilesForCallerId($authUser->id);
-
-                if (!empty($userSimMobiles)) {
-                    $query->whereIn('call_logs.caller_id', $userSimMobiles);
-                } else {
-                    $query->whereRaw('1 = 0');
-                }
+                $query->whereIn('call_logs.caller_id', $this->userSimMobilesSubquery($authUser->id));
             } else {
                 $query->whereRaw('1 = 0');
             }
@@ -512,22 +494,7 @@ class DashboardAnalyticsController extends Controller
             if ($hasCallerIdColumn) {
                 $accessible = $this->getManagerAccessibleDepartmentIds($authUser);
                 if (!empty($accessible)) {
-                    $userIds = User::whereIn('department_id', $accessible)
-                        ->where('role', 'user')
-                        ->pluck('id')
-                        ->toArray();
-
-                    if (!empty($userIds)) {
-                        $managerSimMobiles = $this->getUserSimMobilesForCallerIdMany($userIds);
-
-                        if (!empty($managerSimMobiles)) {
-                            $query->whereIn('call_logs.caller_id', $managerSimMobiles);
-                        } else {
-                            $query->whereRaw('1 = 0');
-                        }
-                    } else {
-                        $query->whereRaw('1 = 0');
-                    }
+                    $query->whereIn('call_logs.caller_id', $this->managerSimMobilesSubquery($authUser->organization_id, $accessible));
                 } else {
                     $query->whereRaw('1 = 0');
                 }
@@ -561,24 +528,26 @@ class DashboardAnalyticsController extends Controller
         if ($request->filled('department_id')) {
             $departmentId = (int) $request->department_id;
 
-            $departmentSimMobiles = Sim::where('department_id', $departmentId)
-                ->pluck('mobile')
-                ->filter()
-                ->toArray();
+            $departmentName = Department::query()
+                ->where('id', $departmentId)
+                ->value('name');
 
-            if ($hasCallerIdColumn && !empty($departmentSimMobiles)) {
-                $query->where(function (Builder $q) use ($departmentSimMobiles, $departmentId) {
-                    $q->whereIn('call_logs.caller_id', $departmentSimMobiles);
+            if ($hasCallerIdColumn) {
+                $simMobilesSub = Sim::query()
+                    ->where('department_id', $departmentId)
+                    ->whereNotNull('mobile')
+                    ->where('mobile', '!=', '')
+                    ->select('mobile');
 
-                    $department = Department::select(['name'])->where('id', $departmentId)->first();
-                    if ($department?->name) {
-                        $q->orWhere('call_logs.department_name', $department->name);
+                $query->where(function (Builder $q) use ($simMobilesSub, $departmentName) {
+                    $q->whereIn('call_logs.caller_id', $simMobilesSub);
+                    if (!empty($departmentName)) {
+                        $q->orWhere('call_logs.department_name', $departmentName);
                     }
                 });
             } else {
-                $department = Department::select(['name'])->where('id', $departmentId)->first();
-                if ($department?->name) {
-                    $query->where('call_logs.department_name', $department->name);
+                if (!empty($departmentName)) {
+                    $query->where('call_logs.department_name', $departmentName);
                 } else {
                     $query->whereRaw('1 = 0');
                 }
@@ -588,33 +557,27 @@ class DashboardAnalyticsController extends Controller
         // Selected user filter (admin/org/manager)
         if ($role !== 'user' && $request->filled('user_id')) {
             $selectedUserId = (int) $request->user_id;
-            $selectedUser = User::query()
-                ->select(['id', 'organization_id', 'department_id', 'role'])
-                ->where('id', $selectedUserId)
-                ->first();
 
             $allowed = false;
-            if ($selectedUser) {
-                if ($role === 'admin') {
-                    $allowed = true;
-                } elseif ($role === 'manager') {
-                    $accessible = $this->getManagerAccessibleDepartmentIds($authUser);
-                    $allowed = (int) $selectedUser->organization_id === (int) $authUser->organization_id
-                        && $selectedUser->role === 'user'
-                        && in_array((int) $selectedUser->department_id, $accessible, true);
-                } else {
-                    $allowed = (int) $selectedUser->organization_id === (int) $authUser->organization_id;
-                }
+            if ($role === 'admin') {
+                $allowed = User::query()->where('id', $selectedUserId)->exists();
+            } elseif ($role === 'manager') {
+                $accessible = $this->getManagerAccessibleDepartmentIds($authUser);
+                $allowed = !empty($accessible) && User::query()
+                    ->where('id', $selectedUserId)
+                    ->where('organization_id', $authUser->organization_id)
+                    ->where('role', 'user')
+                    ->whereIn('department_id', $accessible)
+                    ->exists();
+            } else {
+                $allowed = User::query()
+                    ->where('id', $selectedUserId)
+                    ->where('organization_id', $authUser->organization_id)
+                    ->exists();
             }
 
             if ($allowed && $hasCallerIdColumn) {
-                $userSimMobiles = $this->getUserSimMobilesForCallerId($selectedUserId);
-
-                if (!empty($userSimMobiles)) {
-                    $query->whereIn('call_logs.caller_id', $userSimMobiles);
-                } else {
-                    $query->whereRaw('1 = 0');
-                }
+                $query->whereIn('call_logs.caller_id', $this->userSimMobilesSubquery($selectedUserId));
             } else {
                 $query->whereRaw('1 = 0');
             }
@@ -637,39 +600,39 @@ class DashboardAnalyticsController extends Controller
         return $query;
     }
 
-    private function getUserSimMobilesForCallerId(int $userId): array
+    private function userSimMobilesSubquery(int $userId): Builder
     {
         return UserSim::query()
             ->leftJoin('sims', 'sims.id', '=', 'user_sims.sim_id')
             ->where('user_sims.user_id', $userId)
-            ->selectRaw('COALESCE(sims.mobile, user_sims.mobile) as mobile')
-            ->pluck('mobile')
-            ->filter()
-            ->map(fn ($v) => trim((string) $v))
-            ->filter(fn ($v) => $v !== '')
-            ->unique()
-            ->values()
-            ->toArray();
+            ->whereRaw("TRIM(COALESCE(sims.mobile, user_sims.mobile)) <> ''")
+            ->selectRaw('DISTINCT TRIM(COALESCE(sims.mobile, user_sims.mobile))');
     }
 
-    private function getUserSimMobilesForCallerIdMany(array $userIds): array
+    private function managerSimMobilesSubquery(int $organizationId, array $departmentIds): Builder
     {
-        $userIds = array_values(array_filter(array_map('intval', $userIds)));
-        if (empty($userIds)) {
-            return [];
+        $departmentIds = array_values(array_filter(array_map('intval', $departmentIds)));
+        if (empty($departmentIds)) {
+            // empty set
+            return UserSim::query()->selectRaw('NULL')->whereRaw('1 = 0');
         }
 
         return UserSim::query()
+            ->join('users', 'users.id', '=', 'user_sims.user_id')
             ->leftJoin('sims', 'sims.id', '=', 'user_sims.sim_id')
-            ->whereIn('user_sims.user_id', $userIds)
-            ->selectRaw('COALESCE(sims.mobile, user_sims.mobile) as mobile')
-            ->pluck('mobile')
-            ->filter()
-            ->map(fn ($v) => trim((string) $v))
-            ->filter(fn ($v) => $v !== '')
-            ->unique()
-            ->values()
-            ->toArray();
+            ->where('users.organization_id', $organizationId)
+            ->where('users.role', 'user')
+            ->whereIn('users.department_id', $departmentIds)
+            ->whereRaw("TRIM(COALESCE(sims.mobile, user_sims.mobile)) <> ''")
+            ->selectRaw('DISTINCT TRIM(COALESCE(sims.mobile, user_sims.mobile))');
+    }
+
+    private function dashboardCacheKey(int $userId, string $endpoint, array $params): string
+    {
+        // Keep key stable and small
+        ksort($params);
+        $hash = sha1(json_encode($params));
+        return "dashboard:${endpoint}:u${userId}:${hash}";
     }
 
     private function formatDurationShort(int $seconds): string

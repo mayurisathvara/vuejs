@@ -51,10 +51,15 @@
           <i class="fas fa-filter text-orange"></i>
         </button>
 
-        <Button variant="outline-info" class="shadow-sm" @click="refreshData">
-          <i class="fas fa-sync-alt me-1"></i>
-          Refresh
-        </Button>
+        <button
+          type="button"
+          class="btn btn-light border shadow-sm btn-sm"
+          @click="refreshData"
+          aria-label="Refresh"
+          title="Refresh"
+        >
+          <i class="fas fa-sync-alt"></i>
+        </button>
       </div>
     </div>
 
@@ -621,7 +626,6 @@ import flatpickr from 'flatpickr'
 import 'flatpickr/dist/flatpickr.min.css'
 import api from '@/services/api'
 import { useAuthStore } from '@/stores/auth'
-import Button from '@/components/Button.vue'
 
 const authStore = useAuthStore()
 

@@ -92,14 +92,14 @@
 }
 
 .table td {
-  padding: 8px 20px !important;
+  padding: 6px 16px !important;
   vertical-align: middle;
   border-top: 1px solid #f8f9fc;
   font-size: 14px;
 }
 
 .table th {
-  padding: 10px 20px !important;
+  padding: 8px 16px !important;
   vertical-align: middle;
   font-weight: 600;
   font-size: 13px;
@@ -140,12 +140,12 @@
 /* Add extra padding to first and last columns */
 .table td:first-child,
 .table th:first-child {
-  padding-left: 24px !important;
+  padding-left: 18px !important;
 }
 
 .table td:last-child,
 .table th:last-child {
-  padding-right: 24px !important;
+  padding-right: 18px !important;
 }
 
 /* Hover effect for table rows */
@@ -155,7 +155,7 @@
 
 /* Reduced row height */
 .table tbody tr {
-  height: 48px;
+  height: 44px;
 }
 
 .action-buttons {
@@ -166,8 +166,8 @@
 }
 
 .action-btn {
-  width: 32px;
-  height: 32px;
+  width: 30px;
+  height: 30px;
   border: 1px solid #e3e6f0;
   border-radius: 6px;
   display: flex;

@@ -61,14 +61,16 @@
     <!-- Departments Table -->
     <div class="card card-round">
       <div class="card-body p-0">
-        <Table
-          :data="departments"
-          :headers="departmentHeaders"
-          :loading="loading"
-          :actions="{ edit: true, delete: true }"
-          @edit="openEditModal"
-          @delete="openDeleteModal"
-        >
+        <div class="table-responsive-wrapper">
+          <div class="simple-table">
+            <Table
+              :data="departments"
+              :headers="departmentHeaders"
+              :loading="loading"
+              :actions="{ edit: true, delete: true }"
+              @edit="openEditModal"
+              @delete="openDeleteModal"
+            >
           <template #cell-name="{ row }">
             <div>
               <div class="fw-bold">{{ row.name }}</div>
@@ -81,7 +83,9 @@
           <template #cell-created_at="{ value }">
             {{ formatDate(value) }}
           </template>
-        </Table>
+            </Table>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -169,6 +173,55 @@
 </template>
 
 <style scoped>
+.table-responsive-wrapper {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Simple table look (match Call Reports) */
+.simple-table :deep(.table-responsive) {
+  border: 1px solid #e3e6f0;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.simple-table :deep(table.table) {
+  width: 100%;
+  min-width: 1200px;
+  border-collapse: collapse;
+  margin: 0;
+  font-size: 14px;
+}
+
+.simple-table :deep(table.table thead th) {
+  background: #f8f9fa;
+  color: #111827;
+  font-weight: 600;
+  text-transform: none !important;
+  letter-spacing: normal !important;
+  border-bottom: 1px solid #e3e6f0;
+  border-right: 1px solid #e3e6f0;
+  padding: 10px 12px !important;
+  vertical-align: middle;
+  white-space: nowrap;
+}
+
+.simple-table :deep(table.table tbody td) {
+  border-top: 1px solid #e3e6f0;
+  border-right: 1px solid #e3e6f0;
+  padding: 10px 12px !important;
+  vertical-align: middle;
+  background: #fff;
+}
+
+.simple-table :deep(table.table thead th:last-child),
+.simple-table :deep(table.table tbody td:last-child) {
+  border-right: none;
+}
+
+.simple-table :deep(table.table tbody tr:hover) {
+  background: transparent;
+}
 .search-box-wrapper {
   position: relative;
   display: flex;
