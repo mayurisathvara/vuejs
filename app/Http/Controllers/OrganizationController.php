@@ -17,7 +17,7 @@ class OrganizationController extends Controller
     public function index(Request $request): JsonResponse
     {
         $query = Organization::select([
-            'id', 'name', 'email', 'mobile', 'description', 
+            'id', 'name', 'email', 'mobile', 'app_login_code', 'description', 
             'status', 'created_at', 'updated_at'
         ])->withCount('sims');
 
@@ -56,6 +56,7 @@ class OrganizationController extends Controller
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:organizations',
+            'app_login_code' => 'nullable|string|max:50|unique:organizations,app_login_code',
             'password' => 'required|string|min:6',
             'mobile' => 'required|string|max:20',
             'description' => 'nullable|string|max:1000',
@@ -69,9 +70,14 @@ class OrganizationController extends Controller
             ], 422);
         }
 
+        $appLoginCode = $request->filled('app_login_code')
+            ? (string) $request->app_login_code
+            : $this->generateUniqueAppLoginCode();
+
         $organization = Organization::create([
             'name' => $request->name,
             'email' => $request->email,
+            'app_login_code' => $appLoginCode,
             'password' => Hash::make($request->password),
             'mobile' => $request->mobile,
             'description' => $request->description,
@@ -97,6 +103,7 @@ class OrganizationController extends Controller
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:organizations,email,' . $organization->id,
+            'app_login_code' => 'nullable|string|max:50|unique:organizations,app_login_code,' . $organization->id,
             'password' => 'nullable|string|min:6',
             'mobile' => 'required|string|max:20',
             'description' => 'nullable|string|max:1000',
@@ -118,6 +125,10 @@ class OrganizationController extends Controller
             'status' => $request->status,
         ];
 
+        if ($request->filled('app_login_code')) {
+            $updateData['app_login_code'] = (string) $request->app_login_code;
+        }
+
         // Only update password if provided
         if ($request->password) {
             $updateData['password'] = Hash::make($request->password);
@@ -126,6 +137,35 @@ class OrganizationController extends Controller
         $organization->update($updateData);
 
         return response()->json($organization);
+    }
+
+    private function generateUniqueAppLoginCode(): string
+    {
+        for ($i = 0; $i < 20; $i++) {
+            $code = $this->generateOrgAppLoginCode();
+            if (!Organization::where('app_login_code', $code)->exists()) {
+                return $code;
+            }
+        }
+
+        // Extremely unlikely fallback: try again until unique.
+        do {
+            $code = $this->generateOrgAppLoginCode();
+        } while (Organization::where('app_login_code', $code)->exists());
+
+        return $code;
+    }
+
+    private function generateOrgAppLoginCode(): string
+    {
+        $chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+        $raw = '';
+
+        for ($i = 0; $i < 8; $i++) {
+            $raw .= $chars[random_int(0, strlen($chars) - 1)];
+        }
+
+        return 'ORG-' . substr($raw, 0, 4) . '-' . substr($raw, 4, 4);
     }
 
     /**

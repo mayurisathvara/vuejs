@@ -82,6 +82,9 @@
           <template #cell-mobile="{ value }">
             {{ value || 'N/A' }}
           </template>
+          <template #cell-app_login_code="{ value }">
+            {{ value || '—' }}
+          </template>
           <template #cell-sims_count="{ value }">
             {{ Number(value || 0).toLocaleString() }}
           </template>
@@ -177,6 +180,31 @@
               :error="errors.email"
               required
             />
+          </div>
+          <div class="col-md-6 mb-3">
+            <div class="form-group">
+              <label class="form-label">App Login Code <span class="text-danger">*</span></label>
+              <div class="input-group app-login-code-group">
+                <input
+                  v-model="organizationForm.app_login_code"
+                  type="text"
+                  class="form-control"
+                  readonly
+                  :class="{ 'is-invalid': errors.app_login_code }"
+                />
+                <button
+                  v-if="isEditing"
+                  type="button"
+                  class="btn btn-light border"
+                  @click="regenerateAppLoginCode"
+                >
+                  Regenerate
+                </button>
+              </div>
+              <div v-if="errors.app_login_code" class="invalid-feedback d-block">
+                {{ getErrorMessage(errors.app_login_code) }}
+              </div>
+            </div>
           </div>
           <div class="col-md-6 mb-3">
             <InputField
@@ -434,6 +462,14 @@
   color: white !important;
 }
 
+.app-login-code-group .form-control {
+  border-right: 0;
+}
+
+.app-login-code-group .btn {
+  white-space: nowrap;
+}
+
 /* Status badge styling */
 .badge {
   font-size: 0.75rem;
@@ -628,6 +664,7 @@ const organizationForm = reactive({
   name: '',
   email: '',
   mobile: '',
+  app_login_code: '',
   password: '',
   description: '',
   status: 'active'
@@ -647,6 +684,7 @@ const getErrorMessage = (error) => {
 const organizationHeaders = [
   { key: 'name', label: 'Organization', class: 'text-start' },
   { key: 'mobile', label: 'Mobile', class: 'text-center' },
+  { key: 'app_login_code', label: 'App Login Code', class: 'text-center' },
   { key: 'sims_count', label: 'SIMs', class: 'text-center' },
   { key: 'status', label: 'Status', class: 'text-center' },
   { key: 'created_at', label: 'Created', class: 'text-center' }
@@ -689,6 +727,7 @@ const handlePageChange = (page) => {
 const openCreateModal = () => {
   isEditing.value = false
   resetForm()
+  organizationForm.app_login_code = generateAppLoginCode()
   showOrganizationModal.value = true
 }
 
@@ -699,6 +738,7 @@ const openEditModal = (organization) => {
   organizationForm.mobile = organization.mobile || ''
   organizationForm.description = organization.description || ''
   organizationForm.status = organization.status
+  organizationForm.app_login_code = organization.app_login_code || ''
   organizationForm.password = ''
   organizationToDelete.value = organization
   showOrganizationModal.value = true
@@ -723,11 +763,31 @@ const resetForm = () => {
   organizationForm.name = ''
   organizationForm.email = ''
   organizationForm.mobile = ''
+  organizationForm.app_login_code = ''
   organizationForm.password = ''
   organizationForm.description = ''
   organizationForm.status = 'active'
   errors.value = {}
   errorMessage.value = ''
+}
+
+const generateAppLoginCode = () => {
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'
+  let raw = ''
+  for (let i = 0; i < 8; i++) {
+    raw += chars.charAt(Math.floor(Math.random() * chars.length))
+  }
+  return `ORG-${raw.slice(0, 4)}-${raw.slice(4, 8)}`
+}
+
+const regenerateAppLoginCode = () => {
+  organizationForm.app_login_code = generateAppLoginCode()
+  // Clear any previous validation error once regenerated
+  if (errors.value?.app_login_code) {
+    const next = { ...(errors.value || {}) }
+    delete next.app_login_code
+    errors.value = next
+  }
 }
 
 const handleSubmit = async () => {
@@ -759,6 +819,10 @@ const handleSubmit = async () => {
     validationErrors.password = 'Password is required'
   } else if (organizationForm.password && organizationForm.password.length < 6) {
     validationErrors.password = 'Password must be at least 6 characters'
+  }
+
+  if (!organizationForm.app_login_code) {
+    validationErrors.app_login_code = 'App login code is required'
   }
 
   // If there are validation errors, show them all and return

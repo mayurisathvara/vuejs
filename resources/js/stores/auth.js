@@ -59,19 +59,25 @@ export const useAuthStore = defineStore('auth', () => {
 
   const logout = async () => {
     loading.value = true
-    try {
-      await api.post('/logout')
-    } catch (error) {
-      console.error('Logout error:', error)
-    } finally {
-      // Clear state regardless of API call success
-      user.value = null
-      token.value = null
-      localStorage.removeItem('token')
-      localStorage.removeItem('user')
-      delete api.defaults.headers.common['Authorization']
-      loading.value = false
-    }
+
+    // Capture current token for best-effort server revoke.
+    const currentToken = token.value
+
+    // Clear state immediately (fast UX).
+    user.value = null
+    token.value = null
+    localStorage.removeItem('token')
+    localStorage.removeItem('user')
+    delete api.defaults.headers.common['Authorization']
+    loading.value = false
+
+    // Best-effort revoke in background; do not block UI.
+    const headers = currentToken ? { Authorization: `Bearer ${currentToken}` } : undefined
+    void api
+      .post('/logout', null, { headers, timeout: 4000 })
+      .catch((error) => {
+        console.error('Logout error:', error)
+      })
   }
 
   const fetchUser = async () => {

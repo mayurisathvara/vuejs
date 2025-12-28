@@ -24,49 +24,14 @@
     <!-- Navbar Header -->
     <nav class="navbar navbar-header navbar-header-transparent navbar-expand-lg border-bottom">
       <div class="container-fluid">
-        <nav class="navbar navbar-header-left navbar-expand-lg navbar-form nav-search p-0 d-none d-lg-flex">
-          <div class="input-group">
-            <div class="input-group-prepend">
-              <button type="submit" class="btn btn-search pe-1">
-                <i class="fa fa-search search-icon"></i>
-              </button>
-            </div>
-            <input
-              type="text"
-              placeholder="Search ..."
-              class="form-control"
-              v-model="searchQuery"
-            />
+        <div class="navbar navbar-header-left navbar-expand-lg p-0 d-none d-lg-flex">
+          <div v-if="isOrganization" class="org-app-code">
+            <span class="org-app-code__label">APP LOGIN CODE</span>
+            <span class="org-app-code__value">{{ organizationAppLoginCode }}</span>
           </div>
-        </nav>
+        </div>
 
         <ul class="navbar-nav topbar-nav ms-md-auto align-items-center">
-          <!-- Search for mobile -->
-          <li class="nav-item topbar-icon dropdown hidden-caret d-flex d-lg-none">
-            <a
-              class="nav-link dropdown-toggle"
-              data-bs-toggle="dropdown"
-              href="#"
-              role="button"
-              aria-expanded="false"
-              aria-haspopup="true"
-            >
-              <i class="fa fa-search"></i>
-            </a>
-            <ul class="dropdown-menu dropdown-search animated fadeIn">
-              <form class="navbar-left navbar-form nav-search">
-                <div class="input-group">
-                  <input
-                    type="text"
-                    placeholder="Search ..."
-                    class="form-control"
-                    v-model="searchQuery"
-                  />
-                </div>
-              </form>
-            </ul>
-          </li>
-
           <!-- Notifications -->
           <li class="nav-item topbar-icon dropdown hidden-caret">
             <a
@@ -136,7 +101,6 @@
                 </div>
               </div>
               <span class="profile-username">
-                <span class="op-7">Hi,</span>
                 <span class="fw-bold">{{ user?.name || 'User' }}</span>
               </span>
             </a>
@@ -210,7 +174,8 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
+import { storeToRefs } from 'pinia'
 import { useAuthStore } from '@/stores/auth'
 import { useRouter } from 'vue-router'
 import Modal from '@/components/Modal.vue'
@@ -218,9 +183,11 @@ import Modal from '@/components/Modal.vue'
 const authStore = useAuthStore()
 const router = useRouter()
 
-const searchQuery = ref('')
-const user = authStore.user
+const { user, userRole } = storeToRefs(authStore)
 const isMobile = ref(false)
+
+const isOrganization = computed(() => ['organization', 'manager'].includes(userRole.value))
+const organizationAppLoginCode = computed(() => user.value?.organization?.app_login_code || '—')
 
 const showLogoutModal = ref(false)
 
@@ -266,7 +233,39 @@ onMounted(() => {
   width: 1px;
   height: 34px;
   background: rgba(0, 0, 0, 0.14);
-  margin: 0 14px;
+  margin: 0 0 0 5px;
+}
+
+.org-app-code {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 10px;
+  border: 1px solid rgba(var(--bs-body-color-rgb), 0.12);
+  border-radius: 12px;
+  background: var(--bs-body-bg);
+  line-height: 1;
+}
+
+.org-app-code__label {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: rgba(var(--bs-body-color-rgb), 0.55);
+  white-space: nowrap;
+}
+
+.org-app-code__value {
+  font-size: 13px;
+  font-weight: 800;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  padding: 6px 10px;
+  border-radius: 10px;
+  border: 1px solid rgba(var(--bs-body-color-rgb), 0.12);
+  background: rgba(var(--bs-body-color-rgb), 0.06);
+  color: var(--bs-body-color);
+  white-space: nowrap;
 }
 
 /* Logout confirmation modal styling (matches existing delete confirmation look) */
