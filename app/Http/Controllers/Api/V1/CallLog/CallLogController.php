@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Api\V1\CallLog;
 use App\Http\Controllers\Controller;
 use App\Http\Traits\ApiResponse;
 use App\Models\CallLog;
-use App\Models\User;
 use Illuminate\Http\Request;
 
 class CallLogController extends Controller
@@ -21,7 +20,6 @@ class CallLogController extends Controller
     {
         $request->validate([
             'unique_id' => 'required|string|unique:call_logs,unique_id',
-            'user_id' => 'required|exists:users,id',
             'date_time' => 'required|date',
             'call_status' => 'required|string',
             'caller_number' => 'required|string',
@@ -34,12 +32,8 @@ class CallLogController extends Controller
             'hangup_by' => 'nullable|string',
         ]);
 
-        // Get user with organization and department
-        $user = User::with(['organization', 'department'])->find($request->user_id);
-
-        if (!$user) {
-            return $this->errorResponse('User not found.', 404);
-        }
+        $sim = $request->user();
+        $sim->load(['organization', 'department']);
 
         // Extract date and time from date_time
         $dateTime = \Carbon\Carbon::parse($request->date_time);
@@ -52,8 +46,8 @@ class CallLogController extends Controller
         // Create call log
         $callLog = CallLog::create([
             'unique_id' => $request->unique_id,
-            'organization_id' => $user->organization_id,
-            'user_id' => $request->user_id,
+            'organization_id' => $sim->organization_id,
+            'caller_id' => $sim->mobile,
             'date' => $dateTime->format('Y-m-d'),
             'time' => $dateTime->format('H:i:s'),
             'date_time' => $request->date_time,
@@ -66,8 +60,8 @@ class CallLogController extends Controller
             'contact_status' => $request->contact_status,
             'contact_name' => $request->name,
             'hangup_by' => $request->hangup_by,
-            'name' => $user->name,
-            'department_name' => $user->department ? $user->department->name : null,
+            'name' => $sim->name,
+            'department_name' => $sim->department ? $sim->department->name : null,
         ]);
 
         return $this->successResponse($callLog, 'Call log saved successfully', 201);
@@ -82,7 +76,8 @@ class CallLogController extends Controller
 			'page'        => 'nullable|integer|min:1'
 		]);
 
-		$user = $request->user();
+        $sim = $request->user();
+        $simMobile = $sim->mobile;
 		$filter = $request->filter_type ?? 'all';
 
 		// Base query — selecting only required fields
@@ -97,7 +92,7 @@ class CallLogController extends Controller
 				'caller_duration',
 				'contact_name'
 			])
-			->where('user_id', $user->id)
+            ->where('caller_id', $simMobile)
 			->whereBetween('date', [$request->start_date, $request->end_date]);
 
 		// Filters

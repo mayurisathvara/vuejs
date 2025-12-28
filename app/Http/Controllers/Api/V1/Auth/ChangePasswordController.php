@@ -19,31 +19,6 @@ class ChangePasswordController extends Controller
      */
     public function changePassword(Request $request)
     {
-        $request->validate([
-            'current_password' => 'required|string',
-            'new_password' => ['required', 'string', 'confirmed', Password::min(8)],
-            'new_password_confirmation' => 'required|string',
-        ]);
-
-        $user = $request->user();
-
-        // Check if current password is correct
-        if (!Hash::check($request->current_password, $user->password)) {
-            return $this->errorResponse('Current password is incorrect.', 401);
-        }
-
-        // Check if new password is same as current password
-        if (Hash::check($request->new_password, $user->password)) {
-            return $this->errorResponse('New password cannot be the same as current password.', 422);
-        }
-
-        // Update password
-        $user->password = Hash::make($request->new_password);
-        $user->save();
-
-        // Optionally revoke all tokens to force re-login
-        $user->tokens()->delete();
-
-        return $this->successResponse(null, 'Password changed successfully. Please login again with your new password.');
+        return $this->errorResponse('Change password is not supported for SIM login.', 422);
     }
 }

@@ -17,17 +17,16 @@ class ProfileController extends Controller
      */
     public function show(Request $request)
     {
-        $user = $request->user();
-        
+        $sim = $request->user();
+
         // Load relationships
-        $user->load(['organization', 'department']);
+        $sim->load(['organization', 'department']);
 
         return $this->successResponse([
-            'name' => $user->name,
-            'email' => $user->email,
-            'mobile' => $user->mobile,
-            'organization_name' => $user->organization ? $user->organization->name : null,
-            'department_name' => $user->department ? $user->department->name : null,
+            'name' => $sim->name,
+            'mobile' => $sim->mobile,
+            'organization_name' => $sim->organization ? $sim->organization->name : null,
+            'department_name' => $sim->department ? $sim->department->name : null,
         ], 'Profile fetched successfully');
     }
 }

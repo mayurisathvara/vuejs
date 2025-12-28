@@ -3,9 +3,9 @@
 namespace App\Http\Controllers\Api\V1\Auth;
 
 use App\Http\Controllers\Controller;
-use App\Models\User;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Hash;
+use App\Models\Organization;
+use App\Models\Sim;
 
 class LoginController extends Controller
 {
@@ -19,26 +19,42 @@ class LoginController extends Controller
     {
         $request->validate([
             'mobile' => 'required|string',
-            'password' => 'required|string',
+            'app_login_code' => 'required|string',
         ]);
 
-        $user = User::where('mobile', $request->mobile)->first();
+        $org = Organization::query()
+            ->where('app_login_code', trim((string) $request->app_login_code))
+            ->where('status', 'active')
+            ->first();
 
-        if (! $user || ! Hash::check($request->password, $user->password)) {
+        if (!$org) {
             return response()->json([
-                'message' => 'Invalid mobile or password.'
+                'message' => 'Invalid organization code.'
             ], 401);
         }
 
-        // Revoke previous tokens if you want single device login
-        $user->tokens()->delete();
+        $sim = Sim::query()
+            ->where('organization_id', $org->id)
+            ->where('mobile', trim((string) $request->mobile))
+            ->first();
 
-        $token = $user->createToken('api-token')->plainTextToken;
+        if (!$sim) {
+            return response()->json([
+                'message' => 'Invalid SIM mobile or organization code.'
+            ], 401);
+        }
+
+        // Revoke previous tokens (single device login style)
+        $sim->tokens()->delete();
+
+        $token = $sim->createToken('sim-api-token')->plainTextToken;
+
+        $sim->load(['organization', 'department']);
 
         return response()->json([
             'access_token' => $token,
             'token_type' => 'Bearer',
-            'user' => $user,
+            'sim' => $sim,
         ]);
     }
 

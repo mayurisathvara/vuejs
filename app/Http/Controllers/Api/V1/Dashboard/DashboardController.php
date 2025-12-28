@@ -23,8 +23,8 @@ class DashboardController extends Controller
             'end_date'   => 'required|date',
         ]);
 
-        $authUser = $request->user();
-        $userId = $authUser->id;
+        $authSim = $request->user();
+        $simMobile = $authSim->mobile;
 
         // Normalize input dates
         $start = Carbon::parse($request->start_date)->toDateString();
@@ -51,13 +51,13 @@ class DashboardController extends Controller
         SQL;
 
         // CURRENT PERIOD AGGREGATES
-        $current = CallLog::where('user_id', $userId)
+        $current = CallLog::where('caller_id', $simMobile)
             ->whereBetween('date', [$start, $end])
             ->selectRaw($selectRaw)
             ->first();
 
         // PREVIOUS PERIOD AGGREGATES
-        $previous = CallLog::where('user_id', $userId)
+        $previous = CallLog::where('caller_id', $simMobile)
             ->whereBetween('date', [$prevStart, $prevEnd])
             ->selectRaw($selectRaw)
             ->first();

@@ -262,7 +262,7 @@
                     : 'bg-white bg-opacity-100 text-danger border-danger'
                 "
               >
-                {{ dashboardSummary.total_calls_change_label || '0%' }}
+                {{ formatChangePct(dashboardSummary.total_calls_change_pct) }}
               </div>
             </div>
             <div class="mt-2">
@@ -289,7 +289,7 @@
                     class="fw-bold small"
                     :class="(dashboardSummary.answer_rate_change_pct ?? 0) >= 0 ? 'text-success' : 'text-danger'"
                   >
-                    {{ dashboardSummary.answer_rate_change_label || '0%' }}
+                    {{ formatChangePct(dashboardSummary.answer_rate_change_pct) }}
                   </span>
                 </div>
                 <h3 class="fw-bold mb-1">{{ dashboardSummary.answer_rate_pct }}%</h3>
@@ -308,7 +308,7 @@
                     class="fw-bold small"
                     :class="(dashboardSummary.avg_duration_change_pct ?? 0) >= 0 ? 'text-success' : 'text-danger'"
                   >
-                    {{ dashboardSummary.avg_duration_change_label || '0%' }}
+                    {{ formatChangePct(dashboardSummary.avg_duration_change_pct) }}
                   </span>
                 </div>
                 <h3 class="fw-bold mb-1">{{ dashboardSummary.avg_duration_display }}</h3>
@@ -339,7 +339,7 @@
                 class="fw-bold"
                 :class="(dashboardSummary.outbound_calls_change_pct ?? 0) >= 0 ? 'text-success' : 'text-danger'"
               >
-                {{ dashboardSummary.outbound_calls_change_label || '0%' }}
+                {{ formatChangePct(dashboardSummary.outbound_calls_change_pct) }}
               </span>
             </div>
           </div>
@@ -362,7 +362,7 @@
                 class="fw-bold"
                 :class="(dashboardSummary.inbound_calls_change_pct ?? 0) >= 0 ? 'text-success' : 'text-danger'"
               >
-                {{ dashboardSummary.inbound_calls_change_label || '0%' }}
+                {{ formatChangePct(dashboardSummary.inbound_calls_change_pct) }}
               </span>
             </div>
           </div>
@@ -385,7 +385,7 @@
                 class="fw-bold"
                 :class="(dashboardSummary.missed_calls_change_pct ?? 0) >= 0 ? 'text-success' : 'text-danger'"
               >
-                {{ dashboardSummary.missed_calls_change_label || '0%' }}
+                {{ formatChangePct(dashboardSummary.missed_calls_change_pct) }}
               </span>
             </div>
           </div>
@@ -408,7 +408,7 @@
                 class="fw-bold"
                 :class="(dashboardSummary.unique_calls_change_pct ?? 0) >= 0 ? 'text-success' : 'text-danger'"
               >
-                {{ dashboardSummary.unique_calls_change_label || '0%' }}
+                {{ formatChangePct(dashboardSummary.unique_calls_change_pct) }}
               </span>
             </div>
           </div>
@@ -668,6 +668,14 @@ const authStore = useAuthStore()
 
 const isAdmin = computed(() => authStore.userRole === 'admin')
 const isUser = computed(() => authStore.userRole === 'user')
+
+const formatChangePct = (pct) => {
+  const n = Number(pct ?? 0)
+  const abs = Math.abs(Math.round(n))
+
+  if (!Number.isFinite(n) || abs === 0) return '0%'
+  return `${n > 0 ? '↑' : '↓'} ${abs}%`
+}
 
 const optionsLoading = ref(false)
 const summaryLoading = ref(false)

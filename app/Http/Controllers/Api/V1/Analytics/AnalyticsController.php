@@ -22,9 +22,10 @@ class AnalyticsController extends Controller
 		]);
 
 		$user = $request->user();
+		$simMobile = $user->mobile;
 
 		// Base query
-		$baseQuery = CallLog::where('user_id', $user->id)
+		$baseQuery = CallLog::where('caller_id', $simMobile)
 			->whereBetween('date', [$request->start_date, $request->end_date]);
 
 		// Incoming = all inbound calls (answered + missed)
@@ -56,6 +57,7 @@ class AnalyticsController extends Controller
 	public function dailyCallVolume(Request $request)
 	{
 		$user = $request->user();
+		$simMobile = $user->mobile;
 
 		// Last 7 days range
 		$endDate = now()->toDateString();
@@ -63,7 +65,7 @@ class AnalyticsController extends Controller
 		
 
 		$records = CallLog::selectRaw('date, COUNT(*) as total')
-		->where('user_id', $user->id)
+		->where('caller_id', $simMobile)
 		->whereBetween('date', [$startDate, $endDate])
 		->groupBy('date')
 		->pluck('total', 'date');  // <-- Key = date, Value = total
