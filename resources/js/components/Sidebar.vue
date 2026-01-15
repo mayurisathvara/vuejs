@@ -71,6 +71,13 @@
               <p>Call Reports</p>
             </router-link>
           </li>
+
+          <li v-if="showOrganizationSettings" class="nav-item" :class="{ active: $route.name === 'OrganizationSettingsApp' }">
+            <router-link to="/settings" class="nav-link" @click="handleMenuClick">
+              <i class="fas fa-cog"></i>
+              <p>Settings</p>
+            </router-link>
+          </li>
           
           <li v-if="showSettings" class="nav-item">
             <a href="#" class="nav-link" @click="handleMenuClick">
@@ -105,6 +112,7 @@ const showOrganizations = computed(() => isAdmin.value)
 const showDepartments = computed(() => isAdmin.value || isOrganization.value)
 const showSims = computed(() => isAdmin.value || isOrganization.value)
 const showSettings = computed(() => isAdmin.value)
+const showOrganizationSettings = computed(() => isOrganization.value)
 const showCallReports = computed(() => isAdmin.value || isOrganization.value || isManager.value || isUser.value)
 
 const checkMobile = () => {

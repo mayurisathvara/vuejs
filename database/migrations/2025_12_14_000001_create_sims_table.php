@@ -17,6 +17,7 @@ return new class extends Migration
             $table->string('name');
             $table->foreignId('organization_id')->constrained('organizations')->onDelete('cascade');
             $table->foreignId('department_id')->nullable()->constrained('departments')->onDelete('set null');
+			$table->enum('status', ['active', 'inactive'])->default('active');
             $table->timestamps();
             $table->softDeletes();
             

@@ -785,6 +785,7 @@ import { ref, reactive, computed, onMounted, onUnmounted, watch, nextTick } from
 import { useRouter } from 'vue-router'
 import { useUsersStore } from '@/stores/users'
 import { useAuthStore } from '@/stores/auth'
+import { encryptId } from '@/utils/encryption'
 import Button from '@/components/Button.vue'
 import Table from '@/components/Table.vue'
 import Modal from '@/components/Modal.vue'
@@ -1157,7 +1158,7 @@ const handleDelete = async () => {
 }
 
 const goToAssignSims = (user) => {
-  router.push({ name: 'assign-sims', params: { userId: user.id } })
+  router.push({ name: 'assign-sims', params: { userId: encryptId(user.id) } })
 }
 
 const formatDate = (date) => {

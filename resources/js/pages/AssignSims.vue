@@ -279,11 +279,12 @@ import { useRoute, useRouter } from 'vue-router'
 import api from '@/services/api'
 import Button from '@/components/Button.vue'
 import { showSuccess, showError } from '@/services/toast'
+import { decryptId } from '@/utils/encryption'
 
 const route = useRoute()
 const router = useRouter()
 
-const userId = ref(route.params.userId)
+const userId = ref(decryptId(route.params.userId))
 const loading = ref(true)
 const loadingSims = ref(false)
 const submitting = ref(false)

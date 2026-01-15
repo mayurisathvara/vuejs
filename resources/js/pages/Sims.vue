@@ -117,6 +117,47 @@
             <span v-if="row.department" class="badge bg-info">{{ row.department.name }}</span>
             <span v-else class="text-muted">N/A</span>
           </template>
+          <template #cell-status="{ value, row }">
+            <div class="status-dropdown">
+              <button 
+                class="status-badge" 
+                :class="`status-${normalizeStatus(value)}`"
+                @click="toggleStatusDropdown(row.id)"
+                type="button"
+              >
+                <span class="status-dot"></span>
+                <span class="status-text">{{ formatStatusLabel(value) }}</span>
+                <i class="fas fa-chevron-down status-icon"></i>
+              </button>
+              <div 
+                v-if="activeDropdown === row.id" 
+                class="status-dropdown-menu"
+                :data-dropdown-id="row.id"
+                @click.stop
+              >
+                <button 
+                  class="status-dropdown-item"
+                  :class="{ 'active': normalizeStatus(value) === 'active' }"
+                  @click="updateSimStatus(row.id, 'active')"
+                  type="button"
+                >
+                  <span class="status-dot status-dot-active"></span>
+                  <span>Active</span>
+                  <i v-if="normalizeStatus(value) === 'active'" class="fas fa-check ms-auto"></i>
+                </button>
+                <button 
+                  class="status-dropdown-item"
+                  :class="{ 'active': normalizeStatus(value) === 'inactive' }"
+                  @click="updateSimStatus(row.id, 'inactive')"
+                  type="button"
+                >
+                  <span class="status-dot status-dot-inactive"></span>
+                  <span>Inactive</span>
+                  <i v-if="normalizeStatus(value) === 'inactive'" class="fas fa-check ms-auto"></i>
+                </button>
+              </div>
+            </div>
+          </template>
           <template #cell-created_at="{ value }">
             {{ formatDate(value) }}
           </template>
@@ -898,10 +939,155 @@
   padding-top: 1rem;
   border-top: 1px solid #e9ecef;
 }
+
+/* Status Dropdown Styles */
+.status-dropdown {
+  position: relative;
+  display: inline-flex;
+  justify-content: center;
+}
+
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  border: none;
+  border-radius: 16px;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+  min-width: 80px;
+  justify-content: center;
+}
+
+.status-badge .status-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.status-badge .status-text {
+  flex: 1;
+  text-align: center;
+}
+
+.status-badge .status-icon {
+  font-size: 8px;
+  opacity: 0.7;
+  transition: transform 0.2s ease;
+}
+
+.status-badge:hover .status-icon {
+  opacity: 1;
+}
+
+.status-badge.status-active {
+  background-color: #d4edda;
+  color: #155724;
+}
+
+.status-badge.status-active .status-dot {
+  background-color: #28a745;
+}
+
+.status-badge.status-active:hover {
+  background-color: #c3e6cb;
+  box-shadow: 0 2px 6px rgba(40, 167, 69, 0.2);
+}
+
+.status-badge.status-inactive {
+  background-color: #f8d7da;
+  color: #721c24;
+}
+
+.status-badge.status-inactive .status-dot {
+  background-color: #dc3545;
+}
+
+.status-badge.status-inactive:hover {
+  background-color: #f5c6cb;
+  box-shadow: 0 2px 6px rgba(220, 53, 69, 0.2);
+}
+
+.status-dropdown-menu {
+  position: fixed;
+  background: white;
+  border: 1px solid #e3e6f0;
+  border-radius: 8px;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+  z-index: 9999;
+  overflow: hidden;
+  min-width: 140px;
+  padding: 4px;
+  animation: slideDown 0.2s ease;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.status-dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 13px;
+  font-weight: 500;
+  border: none;
+  background: transparent;
+  border-radius: 6px;
+  width: 100%;
+  text-align: left;
+  color: #495057;
+}
+
+.status-dropdown-item .status-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.status-dropdown-item .status-dot-active {
+  background-color: #28a745;
+}
+
+.status-dropdown-item .status-dot-inactive {
+  background-color: #dc3545;
+}
+
+.status-dropdown-item:hover {
+  background-color: #f8f9fa;
+  color: #212529;
+}
+
+.status-dropdown-item.active {
+  background-color: #e7f3ff;
+  color: #0066cc;
+  font-weight: 600;
+}
+
+.status-dropdown-item .fa-check {
+  font-size: 12px;
+  color: #0066cc;
+}
 </style>
 
 <script setup>
-import { ref, reactive, computed, onMounted } from 'vue'
+import { ref, reactive, computed, onMounted, onUnmounted, nextTick } from 'vue'
 import { useSimsStore } from '@/stores/sims'
 import { useAuthStore } from '@/stores/auth'
 import Button from '@/components/Button.vue'
@@ -927,6 +1113,9 @@ const organizationFilter = ref('')
 const departmentFilter = ref('')
 const perPage = ref(10)
 const searchTimeout = ref(null)
+
+// Status dropdown state
+const activeDropdown = ref(null)
 
 // Modal states
 const showSimModal = ref(false)
@@ -985,11 +1174,21 @@ const simHeaders = computed(() => {
   
   headers.push(
     { key: 'department_name', label: 'Department', class: 'text-start' },
+    { key: 'status', label: 'Status', class: 'text-start' },
     { key: 'created_at', label: 'Created At', class: 'text-start' }
   )
   
   return headers
 })
+
+const normalizeStatus = (status) => {
+  return status === 'inactive' ? 'inactive' : 'active'
+}
+
+const formatStatusLabel = (status) => {
+  const normalized = normalizeStatus(status)
+  return normalized.charAt(0).toUpperCase() + normalized.slice(1)
+}
 
 const formatDate = (date) => {
   if (!date) return 'N/A'
@@ -998,6 +1197,58 @@ const formatDate = (date) => {
     month: 'short',
     day: 'numeric'
   })
+}
+
+const toggleStatusDropdown = (simId) => {
+  if (activeDropdown.value === simId) {
+    activeDropdown.value = null
+  } else {
+    activeDropdown.value = simId
+    nextTick(() => {
+      adjustDropdownPosition(simId)
+    })
+  }
+}
+
+const adjustDropdownPosition = (simId) => {
+  const dropdown = document.querySelector(`[data-dropdown-id="${simId}"]`)
+  const indicator = dropdown?.closest('.status-dropdown')
+  if (!dropdown || !indicator) return
+
+  const indicatorRect = indicator.getBoundingClientRect()
+  const viewportHeight = window.innerHeight
+  const dropdownHeight = 80
+
+  const left = indicatorRect.left
+  const top = indicatorRect.bottom + 4
+  const bottom = viewportHeight - indicatorRect.top + 4
+
+  dropdown.style.setProperty('--dropdown-left', `${left}px`)
+  dropdown.style.setProperty('--dropdown-top', `${top}px`)
+  dropdown.style.setProperty('--dropdown-bottom', `${bottom}px`)
+
+  if (top + dropdownHeight > viewportHeight) {
+    dropdown.setAttribute('data-position', 'up')
+  } else {
+    dropdown.setAttribute('data-position', 'down')
+  }
+}
+
+const updateSimStatus = async (simId, newStatus) => {
+  try {
+    await api.put(`/sims/${simId}/status`, { status: newStatus })
+    activeDropdown.value = null
+    fetchSims()
+  } catch (error) {
+    console.error('Error updating SIM status:', error)
+    showError('Failed to update SIM status')
+  }
+}
+
+const handleClickOutside = (event) => {
+  if (!event.target.closest('.status-dropdown')) {
+    activeDropdown.value = null
+  }
 }
 
 const fetchSims = async () => {
@@ -1475,5 +1726,11 @@ onMounted(() => {
     // For organization users, fetch departments directly using their organization
     fetchDepartmentsByOrganization()
   }
+
+  document.addEventListener('click', handleClickOutside)
+})
+
+onUnmounted(() => {
+  document.removeEventListener('click', handleClickOutside)
 })
 </script>

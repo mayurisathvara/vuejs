@@ -101,10 +101,11 @@ class AnalyticsController extends Controller
 		]);
 
 		$user = $request->user();
+		$simMobile = $user->mobile;
 
 		// STEP 1: Fetch hourly grouped data directly from MySQL (super fast)
 		$hourly = CallLog::selectRaw('HOUR(time) as hour, COUNT(*) as total')
-			->where('user_id', $user->id)
+			->where('caller_id', $simMobile)
 			->whereBetween('date', [$request->start_date, $request->end_date])
 			->groupBy('hour')
 			->pluck('total', 'hour'); // returns: [hour => count]

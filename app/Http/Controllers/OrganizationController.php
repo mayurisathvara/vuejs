@@ -84,6 +84,16 @@ class OrganizationController extends Controller
             'status' => $request->status,
         ]);
 
+        // Create default organization_settings row
+        \App\Models\OrganizationSetting::create([
+            'organization_id' => $organization->id,
+            'callback_window_hours' => 48,
+            'date_formate' => 'Y-m-d',
+            'enable_manager_role' => false,
+            'enable_working_hours' => false,
+            'working_hours' => null,
+        ]);
+
         return response()->json($organization, 201);
     }
 

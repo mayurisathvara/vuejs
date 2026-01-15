@@ -16,6 +16,7 @@ class Sim extends Authenticatable
         'name',
         'organization_id',
         'department_id',
+        'status',
     ];
 
     protected $casts = [

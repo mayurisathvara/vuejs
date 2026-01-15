@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Sim;
 use App\Models\Organization;
 use App\Models\Department;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
@@ -20,7 +21,7 @@ class SimController extends Controller
         // Select only needed columns for better performance
         $query = Sim::select([
             'id', 'mobile', 'name', 'organization_id', 'department_id', 
-            'created_at', 'updated_at'
+            'status', 'created_at', 'updated_at'
         ]);
 
         // Role-based filtering (applied early for index usage)
@@ -62,6 +63,39 @@ class SimController extends Controller
         ])->paginate($perPage);
 
         return response()->json($sims);
+    }
+
+    /**
+     * Update SIM status
+     */
+    public function updateStatus(Request $request, Sim $sim): JsonResponse
+    {
+        $user = auth()->user();
+
+        // Organization role can only update SIMs in their organization
+        if ($user?->role === 'organization' && (int) $sim->organization_id !== (int) $user->organization_id) {
+            return response()->json([
+                'message' => 'Forbidden',
+            ], 403);
+        }
+
+        $validator = Validator::make($request->all(), [
+            'status' => 'required|in:active,inactive',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'message' => 'Validation failed',
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        $sim->update(['status' => $request->status]);
+
+        return response()->json([
+            'message' => 'SIM status updated successfully',
+            'sim' => $sim->fresh()->load(['organization:id,name', 'department:id,name'])
+        ]);
     }
 
     /**

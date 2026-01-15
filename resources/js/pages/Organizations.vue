@@ -60,6 +60,34 @@
               @edit="openEditModal"
               @delete="openDeleteModal"
             >
+          <template #actions="{ row }">
+            <div class="action-buttons">
+              <button
+                class="action-btn settings-btn"
+                type="button"
+                @click="goToSettings(row.id)"
+                title="Settings"
+              >
+                <i class="fas fa-cog"></i>
+              </button>
+              <button
+                class="action-btn edit-btn"
+                type="button"
+                @click="openEditModal(row)"
+                title="Edit"
+              >
+                <i class="fas fa-edit"></i>
+              </button>
+              <button
+                class="action-btn delete-btn"
+                type="button"
+                @click="openDeleteModal(row)"
+                title="Delete"
+              >
+                <i class="fas fa-trash"></i>
+              </button>
+            </div>
+          </template>
           <template #cell-name="{ row }">
             <div>
               <div class="fw-bold">{{ row.name }}</div>
@@ -631,11 +659,78 @@
   font-size: 12px;
   color: #0066cc;
 }
+
+/* Actions (duplicated here because Table.vue styles are scoped) */
+.action-buttons {
+  display: flex;
+  gap: 6px;
+  justify-content: flex-end;
+  align-items: center;
+}
+
+.action-btn {
+  width: 30px;
+  height: 30px;
+  border: 1px solid #e3e6f0;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 14px;
+  background: #fff;
+  position: relative;
+  padding: 0;
+  margin: 0;
+}
+
+.action-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.action-btn:active {
+  transform: translateY(0);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+}
+
+.settings-btn {
+  color: #6c757d;
+}
+
+.settings-btn:hover {
+  background: #6c757d;
+  border-color: #6c757d;
+  color: #fff;
+}
+
+.edit-btn {
+  color: #4e73df;
+}
+
+.edit-btn:hover {
+  background: #4e73df;
+  border-color: #4e73df;
+  color: #fff;
+}
+
+.delete-btn {
+  color: #e74a3b;
+}
+
+.delete-btn:hover {
+  background: #e74a3b;
+  border-color: #e74a3b;
+  color: #fff;
+}
 </style>
 
 <script setup>
 import { ref, reactive, onMounted, onUnmounted, watch, nextTick } from 'vue'
+import { useRouter } from 'vue-router'
 import { useOrganizationsStore } from '@/stores/organizations'
+import { encryptId } from '@/utils/encryption'
 import Button from '@/components/Button.vue'
 import Table from '@/components/Table.vue'
 import Modal from '@/components/Modal.vue'
@@ -644,6 +739,7 @@ import Pagination from '@/components/Pagination.vue'
 import api from '@/services/api'
 
 const organizationsStore = useOrganizationsStore()
+const router = useRouter()
 
 // Search and filters
 const searchQuery = ref('')
@@ -724,10 +820,14 @@ const handlePageChange = (page) => {
   organizationsStore.fetchOrganizations(page, searchQuery.value)
 }
 
+const goToSettings = (organizationId) => {
+  router.push({ name: 'OrganizationSettings', params: { organizationId: encryptId(organizationId) } })
+}
+
 const openCreateModal = () => {
   isEditing.value = false
   resetForm()
-  organizationForm.app_login_code = generateAppLoginCode()
+  organizationForm.app_login_code = generateAppLoginCode('')
   showOrganizationModal.value = true
 }
 
@@ -771,17 +871,36 @@ const resetForm = () => {
   errorMessage.value = ''
 }
 
-const generateAppLoginCode = () => {
+const generateAppLoginCode = (orgName = '') => {
   const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'
+  
+  // Extract first 3 letters from organization name
+  let prefix = 'ORG'
+  if (orgName) {
+    // Remove special characters and get only letters
+    const cleanName = orgName.replace(/[^a-zA-Z]/g, '').toUpperCase()
+    if (cleanName.length >= 3) {
+      prefix = cleanName.slice(0, 3)
+    } else if (cleanName.length > 0) {
+      // If less than 3 letters, pad with random characters
+      prefix = cleanName
+      while (prefix.length < 3) {
+        prefix += chars.charAt(Math.floor(Math.random() * chars.length))
+      }
+    }
+  }
+  
+  // Generate random 8 characters for uniqueness
   let raw = ''
   for (let i = 0; i < 8; i++) {
     raw += chars.charAt(Math.floor(Math.random() * chars.length))
   }
-  return `ORG-${raw.slice(0, 4)}-${raw.slice(4, 8)}`
+  
+  return `${prefix}-${raw.slice(0, 4)}-${raw.slice(4, 8)}`
 }
 
 const regenerateAppLoginCode = () => {
-  organizationForm.app_login_code = generateAppLoginCode()
+  organizationForm.app_login_code = generateAppLoginCode(organizationForm.name)
   // Clear any previous validation error once regenerated
   if (errors.value?.app_login_code) {
     const next = { ...(errors.value || {}) }
@@ -927,6 +1046,14 @@ const getStatusBadgeClass = (status) => {
 const formatDate = (date) => {
   return new Date(date).toLocaleDateString()
 }
+
+// Watch for organization name changes to auto-update app_login_code during creation
+watch(() => organizationForm.name, (newName) => {
+  // Only auto-generate when creating new organization (not editing)
+  if (!isEditing.value && newName) {
+    organizationForm.app_login_code = generateAppLoginCode(newName)
+  }
+})
 
 // Watch for changes in perPage
 watch(perPage, () => {

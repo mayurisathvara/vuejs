@@ -12,6 +12,8 @@ import Dashboard from '@/pages/Dashboard.vue'
 import Users from '@/pages/Users.vue'
 import AssignSims from '@/pages/AssignSims.vue'
 import Organizations from '@/pages/Organizations.vue'
+import OrganizationSettings from '@/pages/OrganizationSettings.vue'
+import OrganizationDateFormatSettings from '@/pages/OrganizationDateFormatSettings.vue'
 import Departments from '@/pages/Departments.vue'
 import Sims from '@/pages/Sims.vue'
 import Profile from '@/pages/Profile.vue'
@@ -86,6 +88,12 @@ const routes = [
         name: 'Organizations',
         component: Organizations,
         meta: { requiresAuth: true, roles: ['admin'] }
+      },
+      {
+        path: ':organizationId/settings',
+        name: 'OrganizationSettings',
+        component: OrganizationSettings,
+        meta: { requiresAuth: true, roles: ['admin'] }
       }
     ]
   },
@@ -146,6 +154,18 @@ const routes = [
         name: 'CallReports',
         component: CallReports,
         meta: { requiresAuth: true, roles: ['admin', 'organization', 'manager', 'user'] }
+      }
+    ]
+  },
+  {
+    path: '/settings',
+    component: DefaultLayout,
+    children: [
+      {
+        path: '',
+        name: 'OrganizationSettingsApp',
+        component: OrganizationDateFormatSettings,
+        meta: { requiresAuth: true, roles: ['organization'] }
       }
     ]
   },

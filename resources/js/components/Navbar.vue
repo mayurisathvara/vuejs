@@ -132,10 +132,10 @@
                     <i class="fas fa-key me-3 text-muted"></i>
                     <span>Change Password</span>
                   </router-link>
-                  <a class="dropdown-item d-flex align-items-center py-2" href="#">
+                  <router-link v-if="isOrganizationOnly" class="dropdown-item d-flex align-items-center py-2" to="/settings">
                     <i class="fas fa-cog me-3 text-muted"></i>
                     <span>Account Setting</span>
-                  </a>
+                  </router-link>
                   <div class="dropdown-divider"></div>
                   <a class="dropdown-item d-flex align-items-center py-2 text-danger" href="#" @click.prevent="openLogoutModal">
                     <i class="fas fa-sign-out-alt me-3"></i>
@@ -187,6 +187,7 @@ const { user, userRole } = storeToRefs(authStore)
 const isMobile = ref(false)
 
 const isOrganization = computed(() => ['organization', 'manager'].includes(userRole.value))
+const isOrganizationOnly = computed(() => userRole.value === 'organization')
 const organizationAppLoginCode = computed(() => user.value?.organization?.app_login_code || '—')
 
 const showLogoutModal = ref(false)

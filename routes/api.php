@@ -65,6 +65,12 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/dashboard/summary', [DashboardAnalyticsController::class, 'summary']);
         Route::get('/dashboard/daily-call-volume', [DashboardAnalyticsController::class, 'dailyCallVolume']);
     });
+
+    // Organization settings - Admin and Organization
+    Route::middleware(['role:admin,organization'])->group(function () {
+        Route::get('/organizations/{organization}/settings', [\App\Http\Controllers\OrganizationSettingController::class, 'show']);
+        Route::put('/organizations/{organization}/settings', [\App\Http\Controllers\OrganizationSettingController::class, 'update']);
+    });
     
     // Organization management routes - Admin only
     Route::middleware(['role:admin'])->group(function () {
@@ -82,6 +88,7 @@ Route::middleware('auth:sanctum')->group(function () {
     
     // SIM management routes - Admin and Organization only
     Route::middleware(['role:admin,organization'])->group(function () {
+        Route::put('/sims/{sim}/status', [\App\Http\Controllers\SimController::class, 'updateStatus']);
         Route::get('/sims/departments/by-organization', [\App\Http\Controllers\SimController::class, 'getDepartments']);
         Route::post('/sims/bulk-delete', [\App\Http\Controllers\SimController::class, 'bulkDelete']);
         Route::post('/sims/import-csv', [\App\Http\Controllers\SimController::class, 'importCsv']);

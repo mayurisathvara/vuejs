@@ -29,7 +29,7 @@ class AuthController extends Controller
             ], 422);
         }
 
-        $user = User::with('organization')->where('email', $request->email)->first();
+        $user = User::with(['organization', 'department'])->where('email', $request->email)->first();
 
         if (!$user || !Hash::check($request->password, $user->password)) {
             return response()->json([
@@ -124,7 +124,19 @@ class AuthController extends Controller
      */
     public function user(Request $request): JsonResponse
     {
-        return response()->json($request->user()->load('organization'));
+        $user = $request->user()->load(['organization', 'department']);
+        
+        // Get organization date format
+        $dateFormat = 'Y-m-d'; // default
+        if ($user->organization_id && $user->organization) {
+            $orgSetting = \App\Models\OrganizationSetting::where('organization_id', $user->organization_id)->first();
+            if ($orgSetting && $orgSetting->date_formate) {
+                $dateFormat = $orgSetting->date_formate;
+            }
+        }
+        $user->date_format = $dateFormat;
+        
+        return response()->json($user);
     }
 
     /**

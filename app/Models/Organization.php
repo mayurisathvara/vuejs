@@ -55,6 +55,11 @@ class Organization extends Model
         return $this->hasMany(Sim::class, 'organization_id');
     }
 
+    public function settings()
+    {
+        return $this->hasOne(OrganizationSetting::class, 'organization_id');
+    }
+
     /**
      * Create or update corresponding user record
      */
