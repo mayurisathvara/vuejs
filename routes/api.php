@@ -7,6 +7,7 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\OrganizationController;
 use App\Http\Controllers\DepartmentController;
 use App\Http\Controllers\CallReportController;
+use App\Http\Controllers\SummaryReportController;
 use App\Http\Controllers\DashboardAnalyticsController;
 
 /*
@@ -59,6 +60,11 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/call-reports/options', [CallReportController::class, 'options']);
         Route::get('/call-reports', [CallReportController::class, 'index']);
         Route::get('/call-reports/export', [CallReportController::class, 'export']);
+
+        // Summary Report - All authenticated users
+        Route::get('/summary-reports/options', [SummaryReportController::class, 'options']);
+        Route::get('/summary-reports', [SummaryReportController::class, 'index']);
+        Route::get('/summary-reports/export', [SummaryReportController::class, 'export']);
 
         // Dashboard analytics (Vue dashboard)
         Route::get('/dashboard/options', [DashboardAnalyticsController::class, 'options']);

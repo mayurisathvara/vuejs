@@ -72,6 +72,13 @@
             </router-link>
           </li>
 
+          <li v-if="showSummaryReport" class="nav-item" :class="{ active: $route.name === 'SummaryReport' }">
+            <router-link to="/summary-report" class="nav-link" @click="handleMenuClick">
+              <i class="fas fa-chart-line"></i>
+              <p>Summary Report</p>
+            </router-link>
+          </li>
+
           <li v-if="showOrganizationSettings" class="nav-item" :class="{ active: $route.name === 'OrganizationSettingsApp' }">
             <router-link to="/settings" class="nav-link" @click="handleMenuClick">
               <i class="fas fa-cog"></i>
@@ -114,6 +121,7 @@ const showSims = computed(() => isAdmin.value || isOrganization.value)
 const showSettings = computed(() => isAdmin.value)
 const showOrganizationSettings = computed(() => isOrganization.value)
 const showCallReports = computed(() => isAdmin.value || isOrganization.value || isManager.value || isUser.value)
+const showSummaryReport = computed(() => isAdmin.value || isOrganization.value || isManager.value || isUser.value)
 
 const checkMobile = () => {
   isMobile.value = window.innerWidth <= 991.5

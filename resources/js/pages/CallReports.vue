@@ -137,6 +137,18 @@
           <small class="text-muted">End Time (HH:MM)</small>
         </div>
 
+        <div class="col-6 col-md-3">
+          <div class="select-wrapper">
+            <i class="fas fa-exchange-alt filter-icon"></i>
+            <select v-model="filters.call_type" class="form-select select-modern">
+              <option value="">All Call Types</option>
+              <option value="inbound">Inbound</option>
+              <option value="outbound">Outbound</option>
+            </select>
+          </div>
+          <small class="text-muted">Call Type</small>
+        </div>
+
         <div class="col-6 col-md-2">
           <div class="select-wrapper">
             <i class="fas fa-phone-volume filter-icon"></i>
@@ -148,18 +160,6 @@
             </select>
           </div>
           <small class="text-muted">Call Status</small>
-        </div>
-
-        <div class="col-6 col-md-3">
-          <div class="select-wrapper">
-            <i class="fas fa-exchange-alt filter-icon"></i>
-            <select v-model="filters.call_type" class="form-select select-modern">
-              <option value="">All Call Types</option>
-              <option value="inbound">Inbound</option>
-              <option value="outbound">Outbound</option>
-            </select>
-          </div>
-          <small class="text-muted">Call Type</small>
         </div>
 
         <div v-if="isAdmin" class="col-12 col-md-3">
@@ -1188,6 +1188,22 @@ onBeforeUnmount(() => {
   font-size: 14px;
 }
 
+.action-icon-btn i.fa-file-excel {
+  color: #10b981;
+}
+
+.action-icon-btn i.fa-file-alt {
+  color: #3b82f6;
+}
+
+.action-icon-btn:hover:not(:disabled) i.fa-file-excel {
+  color: #059669;
+}
+
+.action-icon-btn:hover:not(:disabled) i.fa-file-alt {
+  color: #2563eb;
+}
+
 /* Multiselect styling */
 .select-modern[multiple] {
   height: auto !important;
@@ -1320,15 +1336,121 @@ onBeforeUnmount(() => {
 
 /* Responsive adjustments */
 @media (max-width: 768px) {
+  .page-header .header-content {
+    flex-direction: column;
+    align-items: flex-start !important;
+    gap: 12px !important;
+  }
+
+  .header-actions {
+    width: 100%;
+  }
+
+  .header-actions button {
+    flex: 1;
+  }
+
   .datatable-header {
     flex-direction: column;
     align-items: flex-start;
+    gap: 16px;
   }
   
   .datatable-entries,
   .datatable-actions {
     width: 100%;
     justify-content: space-between;
+  }
+
+  .filters-card {
+    padding: 16px;
+  }
+
+  .filters-card .row {
+    row-gap: 20px !important;
+  }
+
+  .page-title {
+    font-size: 20px;
+  }
+
+  small.text-muted {
+    font-size: 11px;
+    margin-top: 4px;
+  }
+
+  .call-reports-table :deep(table.table) {
+    font-size: 12px;
+  }
+
+  .call-reports-table :deep(table.table thead th) {
+    font-size: 11px;
+    padding: 8px 10px !important;
+  }
+
+  .call-reports-table :deep(table.table tbody td) {
+    font-size: 12px;
+    padding: 8px 10px !important;
+  }
+
+  .timepicker-menu {
+    max-height: 250px;
+  }
+
+  .d-flex.justify-content-between.align-items-center.mt-4 {
+    flex-direction: column;
+    gap: 16px;
+    align-items: flex-start !important;
+  }
+}
+
+@media (max-width: 576px) {
+  .page-title {
+    font-size: 18px;
+  }
+
+  .filters-card {
+    padding: 12px;
+  }
+
+  .btn-sm {
+    font-size: 12px;
+    padding: 6px 12px;
+  }
+
+  .search-input-modern,
+  .select-modern {
+    font-size: 13px;
+    padding: 9px 35px 9px 38px;
+  }
+
+  .multiselect-trigger {
+    font-size: 13px;
+    padding: 9px 35px 9px 38px;
+  }
+
+  .action-icon-btn {
+    width: 32px;
+    height: 32px;
+  }
+
+  .datatable-entries .form-select {
+    width: 60px;
+    font-size: 12px;
+  }
+
+  .datatable-entries label {
+    font-size: 12px;
+  }
+
+  .timepicker-wrapper {
+    width: 100%;
+  }
+
+  .timepicker-menu {
+    left: 0;
+    right: 0;
+    max-height: 200px;
   }
 }
 </style>

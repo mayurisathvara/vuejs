@@ -19,6 +19,7 @@ import Sims from '@/pages/Sims.vue'
 import Profile from '@/pages/Profile.vue'
 import ChangePassword from '@/pages/ChangePassword.vue'
 import CallReports from '@/pages/CallReports.vue'
+import SummaryReport from '@/pages/SummaryReport.vue'
 
 const routes = [
   {
@@ -153,6 +154,18 @@ const routes = [
         path: '',
         name: 'CallReports',
         component: CallReports,
+        meta: { requiresAuth: true, roles: ['admin', 'organization', 'manager', 'user'] }
+      }
+    ]
+  },
+  {
+    path: '/summary-report',
+    component: DefaultLayout,
+    children: [
+      {
+        path: '',
+        name: 'SummaryReport',
+        component: SummaryReport,
         meta: { requiresAuth: true, roles: ['admin', 'organization', 'manager', 'user'] }
       }
     ]
