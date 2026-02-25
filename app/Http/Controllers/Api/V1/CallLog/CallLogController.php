@@ -5,7 +5,10 @@ namespace App\Http\Controllers\Api\V1\CallLog;
 use App\Http\Controllers\Controller;
 use App\Http\Traits\ApiResponse;
 use App\Models\CallLog;
+use App\Models\OrganizationSetting;
 use Illuminate\Http\Request;
+use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
 
 class CallLogController extends Controller
 {
@@ -64,7 +67,56 @@ class CallLogController extends Controller
             'department_name' => $sim->department ? $sim->department->name : null,
         ]);
 
+        // Process callback logic if current call is answered
+        if ($request->call_status === 'Answered') {
+            $this->processCallbackLogic($callLog, $sim->organization_id);
+        }
+
         return $this->successResponse($callLog, 'Call log saved successfully', 201);
+    }
+
+    /**
+     * Process callback logic to mark previous missed calls.
+     *
+     * @param  \App\Models\CallLog  $currentCall
+     * @param  int  $organizationId
+     * @return void
+     */
+    private function processCallbackLogic(CallLog $currentCall, int $organizationId)
+    {
+        try {
+            // Get callback window hours from organization settings
+            $orgSettings = OrganizationSetting::where('organization_id', $organizationId)
+                ->select('callback_window_hours')
+                ->first();
+            
+            $callbackWindowHours = $orgSettings->callback_window_hours ?? 48;
+
+            // Convert hours to days for date calculation
+            $callbackWindowDays = $callbackWindowHours / 24;
+
+            // Calculate the start date for callback window
+            $callbackStartDate = Carbon::parse($currentCall->date_time)
+                ->subDays($callbackWindowDays);
+
+            // Update all previous missed calls in a single optimized query
+            // Uses composite indexes: (caller_id, caller_number, call_status, callback_id, date_time)
+            CallLog::where('caller_id', $currentCall->caller_id)
+                ->where('caller_number', $currentCall->caller_number)
+                ->where('call_status', 'Missed')
+                ->whereNull('callback_id')
+                ->whereBetween('date_time', [$callbackStartDate, $currentCall->date_time])
+                ->update([
+                    'call_back' => 'Y',
+                    'callback_id' => $currentCall->unique_id,
+                ]);
+        } catch (\Exception $e) {
+            // Log the error but don't fail the call log creation
+            \Log::error('Callback logic failed: ' . $e->getMessage(), [
+                'current_call_id' => $currentCall->id,
+                'error' => $e->getMessage(),
+            ]);
+        }
     }
 	
 	public function list(Request $request)
