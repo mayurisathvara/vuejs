@@ -4,7 +4,7 @@
       <!-- Logo Header -->
       <div class="logo-header" data-background-color="dark">
         <router-link to="/dashboard" class="logo">
-          <div class="navbar-brand fw-bold text-white">Vue Admin</div>
+          <img :src="'/logo/logo.svg'" alt="Callytics" class="app-logo" />
         </router-link>
         <div class="nav-toggle">
           <button class="btn btn-toggle toggle-sidebar" @click="toggleSidebar">
@@ -175,3 +175,13 @@ onUnmounted(() => {
   document.removeEventListener('click', closeSidebarOnOutsideClick)
 })
 </script>
+
+<style scoped>
+.app-logo {
+  height: 42px;
+  width: auto;
+  max-width: 200px;
+  display: block;
+  object-fit: contain;
+}
+</style>

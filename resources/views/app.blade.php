@@ -6,6 +6,9 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     
     <title>{{ config('app.name', 'Laravel') }} - Vue 3 Admin</title>
+    <link rel="icon" type="image/png" href="/logo/favicon.png">
+    <link rel="shortcut icon" href="/logo/favicon.png">
+    <link rel="apple-touch-icon" href="/logo/favicon.png">
     
     <!-- Fonts and icons -->
     <script src="/assets/js/plugin/webfont/webfont.min.js"></script>
