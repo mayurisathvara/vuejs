@@ -316,7 +316,7 @@ onMounted(() => {
 }
 
 .app-logo {
-  height: 42px;
+  height: 34px;
   width: auto;
   max-width: 200px;
   display: block;

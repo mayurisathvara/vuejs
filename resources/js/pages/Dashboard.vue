@@ -416,6 +416,54 @@
       </div>
     </div>
 
+    <!-- Third Row: Daily Call Volume -->
+    <div class="row mb-0">
+      <!-- Daily Call Volume (Line Chart Style) -->
+      <div class="col-md-12">
+        <div class="card card-round shadow-sm border-0">
+          <div class="card-header bg-transparent border-0 pt-4 px-4">
+            <div class="d-flex align-items-start justify-content-between gap-3 flex-wrap">
+              <div>
+                <h5 class="fw-bold mb-0">Daily Call Volume</h5>
+                <p class="text-muted small">{{ callVolumeSubtitle }}</p>
+              </div>
+              <div class="btn-group btn-group-sm flex-shrink-0" role="group" aria-label="Chart type">
+                <button
+                  type="button"
+                  class="btn"
+                  :class="callVolumeView === 'bar' ? 'btn-primary' : 'btn-outline-primary'"
+                  @click="callVolumeView = 'bar'"
+                >
+                  Bar
+                </button>
+                <button
+                  type="button"
+                  class="btn"
+                  :class="callVolumeView === 'line' ? 'btn-primary' : 'btn-outline-primary'"
+                  @click="callVolumeView = 'line'"
+                >
+                  Line
+                </button>
+              </div>
+            </div>
+          </div>
+          <div class="card-body px-4 pb-4">
+            <div class="chart-container position-relative">
+              <div
+                v-if="dailyCallVolumeLoading"
+                class="position-absolute top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center bg-white bg-opacity-75 loading-overlay"
+              >
+                <div class="text-center">
+                  <div class="spinner-border text-primary" role="status" aria-label="Loading"></div>
+                </div>
+              </div>
+              <canvas ref="callVolumeCanvas" class="w-100 h-100" aria-label="Daily Call Volume" role="img"></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- Call Breakdown Section -->
     <div class="row gy-3 mb-0">
       <div class="col-12">
@@ -491,54 +539,6 @@
             <div class="d-flex justify-content-between align-items-center pt-3 mt-3 border-top">
               <span class="text-muted">Total Inbound</span>
               <h5 class="fw-bold mb-0">{{ dashboardSummary.breakdown.inbound.total.toLocaleString() }}</h5>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Third Row: Daily Call Volume -->
-    <div class="row mb-0">
-      <!-- Daily Call Volume (Line Chart Style) -->
-      <div class="col-md-12">
-        <div class="card card-round shadow-sm border-0">
-          <div class="card-header bg-transparent border-0 pt-4 px-4">
-            <div class="d-flex align-items-start justify-content-between gap-3 flex-wrap">
-              <div>
-                <h5 class="fw-bold mb-0">Daily Call Volume</h5>
-                <p class="text-muted small">{{ callVolumeSubtitle }}</p>
-              </div>
-              <div class="btn-group btn-group-sm flex-shrink-0" role="group" aria-label="Chart type">
-                <button
-                  type="button"
-                  class="btn"
-                  :class="callVolumeView === 'line' ? 'btn-primary' : 'btn-outline-primary'"
-                  @click="callVolumeView = 'line'"
-                >
-                  Line
-                </button>
-                <button
-                  type="button"
-                  class="btn"
-                  :class="callVolumeView === 'bar' ? 'btn-primary' : 'btn-outline-primary'"
-                  @click="callVolumeView = 'bar'"
-                >
-                  Bar
-                </button>
-              </div>
-            </div>
-          </div>
-          <div class="card-body px-4 pb-4">
-            <div class="chart-container position-relative">
-              <div
-                v-if="dailyCallVolumeLoading"
-                class="position-absolute top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center bg-white bg-opacity-75 loading-overlay"
-              >
-                <div class="text-center">
-                  <div class="spinner-border text-primary" role="status" aria-label="Loading"></div>
-                </div>
-              </div>
-              <canvas ref="callVolumeCanvas" class="w-100 h-100" aria-label="Daily Call Volume" role="img"></canvas>
             </div>
           </div>
         </div>
@@ -1142,7 +1142,7 @@ const callbackPendingPct = computed(() => {
 
 const callVolumeCanvas = ref(null)
 let callVolumeChart = null
-const callVolumeView = ref('line')
+const callVolumeView = ref('bar')
 
 const dailyCallVolumeLoading = ref(false)
 const dailyCallVolume = reactive({
@@ -1204,8 +1204,8 @@ const initCallVolumeChart = () => {
   if (!ctx) return
 
   const totalStroke = '#0d6efd'
-  const inboundStroke = '#0dcaf0'
-  const outboundStroke = '#ff7e39'
+  const inboundStroke = '#00d4ff'
+  const outboundStroke = '#ff6a00'
   const pointBg = '#ffffff'
 
   const labels = Array.isArray(dailyCallVolume.labels) ? dailyCallVolume.labels : []
@@ -1215,10 +1215,10 @@ const initCallVolumeChart = () => {
 
   const makeFillGradient = (chart, rgb) => {
     const { ctx, chartArea } = chart
-    if (!chartArea) return `rgba(${rgb}, 0.15)`
+    if (!chartArea) return `rgba(${rgb}, 0.25)`
     const gradient = ctx.createLinearGradient(0, chartArea.top, 0, chartArea.bottom)
-    gradient.addColorStop(0, `rgba(${rgb}, 0.35)`)
-    gradient.addColorStop(1, `rgba(${rgb}, 0.00)`)
+    gradient.addColorStop(0, `rgba(${rgb}, 0.45)`)
+    gradient.addColorStop(1, `rgba(${rgb}, 0.05)`)
     return gradient
   }
 
@@ -1229,18 +1229,18 @@ const initCallVolumeChart = () => {
       label: 'Outbound',
       data: outbound,
       borderColor: outboundStroke,
-      backgroundColor: 'rgba(255, 126, 57, 0)',
+      backgroundColor: 'rgba(255, 106, 0, 0.08)',
       fill: false,
       cubicInterpolationMode: 'monotone',
-      tension: 0.45,
-      borderWidth: 3,
-      pointRadius: 0,
-      pointHoverRadius: 6,
-      pointHitRadius: 14,
+      tension: 0.4,
+      borderWidth: 4,
+      pointRadius: 4,
+      pointHoverRadius: 8,
+      pointHitRadius: 20,
       pointBackgroundColor: pointBg,
       pointBorderColor: outboundStroke,
-      pointBorderWidth: 2,
-      pointHoverBorderWidth: 3,
+      pointBorderWidth: 3,
+      pointHoverBorderWidth: 4,
       order: 3
     },
     {
@@ -1250,33 +1250,33 @@ const initCallVolumeChart = () => {
       backgroundColor: (context) => makeFillGradient(context.chart, '13, 110, 253'),
       fill: true,
       cubicInterpolationMode: 'monotone',
-      tension: 0.45,
-      borderWidth: 4,
-      pointRadius: 0,
-      pointHoverRadius: 6,
-      pointHitRadius: 14,
+      tension: 0.4,
+      borderWidth: 5,
+      pointRadius: 4,
+      pointHoverRadius: 8,
+      pointHitRadius: 20,
       pointBackgroundColor: pointBg,
       pointBorderColor: totalStroke,
-      pointBorderWidth: 2,
-      pointHoverBorderWidth: 3,
+      pointBorderWidth: 3,
+      pointHoverBorderWidth: 4,
       order: 1
     },
     {
       label: 'Inbound',
       data: inbound,
       borderColor: inboundStroke,
-      backgroundColor: (context) => makeFillGradient(context.chart, '13, 202, 240'),
+      backgroundColor: (context) => makeFillGradient(context.chart, '0, 212, 255'),
       fill: true,
       cubicInterpolationMode: 'monotone',
-      tension: 0.45,
-      borderWidth: 3,
-      pointRadius: 0,
-      pointHoverRadius: 6,
-      pointHitRadius: 14,
+      tension: 0.4,
+      borderWidth: 4,
+      pointRadius: 4,
+      pointHoverRadius: 8,
+      pointHitRadius: 20,
       pointBackgroundColor: pointBg,
       pointBorderColor: inboundStroke,
-      pointBorderWidth: 2,
-      pointHoverBorderWidth: 3,
+      pointBorderWidth: 3,
+      pointHoverBorderWidth: 4,
       order: 2
     }
   ]
@@ -1285,31 +1285,31 @@ const initCallVolumeChart = () => {
     {
       label: 'Outbound',
       data: outbound,
-      backgroundColor: 'rgba(255, 126, 57, 0.55)',
-      hoverBackgroundColor: 'rgba(255, 126, 57, 0.75)',
-      borderColor: 'rgba(255, 126, 57, 0.95)',
-      borderWidth: 1,
-      borderRadius: 10,
+      backgroundColor: 'rgba(255, 106, 0, 0.85)',
+      hoverBackgroundColor: 'rgba(255, 106, 0, 0.95)',
+      borderColor: 'rgba(255, 106, 0, 1)',
+      borderWidth: 2,
+      borderRadius: 12,
       borderSkipped: false
     },
     {
       label: 'Total',
       data: total,
-      backgroundColor: 'rgba(13, 110, 253, 0.35)',
-      hoverBackgroundColor: 'rgba(13, 110, 253, 0.55)',
-      borderColor: 'rgba(13, 110, 253, 0.90)',
-      borderWidth: 1,
-      borderRadius: 10,
+      backgroundColor: 'rgba(13, 110, 253, 0.75)',
+      hoverBackgroundColor: 'rgba(13, 110, 253, 0.90)',
+      borderColor: 'rgba(13, 110, 253, 1)',
+      borderWidth: 2,
+      borderRadius: 12,
       borderSkipped: false
     },
     {
       label: 'Inbound',
       data: inbound,
-      backgroundColor: 'rgba(13, 202, 240, 0.40)',
-      hoverBackgroundColor: 'rgba(13, 202, 240, 0.62)',
-      borderColor: 'rgba(13, 202, 240, 0.95)',
-      borderWidth: 1,
-      borderRadius: 10,
+      backgroundColor: 'rgba(0, 212, 255, 0.75)',
+      hoverBackgroundColor: 'rgba(0, 212, 255, 0.90)',
+      borderColor: 'rgba(0, 212, 255, 1)',
+      borderWidth: 2,
+      borderRadius: 12,
       borderSkipped: false
     }
   ]
@@ -1326,8 +1326,9 @@ const initCallVolumeChart = () => {
       ctx.beginPath()
       ctx.moveTo(x, chartArea.top)
       ctx.lineTo(x, chartArea.bottom)
-      ctx.lineWidth = 1
-      ctx.strokeStyle = 'rgba(148, 163, 184, 0.65)'
+      ctx.lineWidth = 2
+      ctx.strokeStyle = 'rgba(99, 102, 241, 0.3)'
+      ctx.setLineDash([8, 4])
       ctx.stroke()
       ctx.restore()
     }
@@ -1355,22 +1356,33 @@ const initCallVolumeChart = () => {
           labels: {
             usePointStyle: true,
             pointStyle: 'circle',
-            boxWidth: 8,
-            boxHeight: 8,
-            color: '#64748b',
-            font: { size: 12 }
+            boxWidth: 10,
+            boxHeight: 10,
+            color: '#1f2937',
+            font: { size: 13, weight: '600' },
+            padding: 15
           }
         },
         tooltip: {
           enabled: true,
-          backgroundColor: 'rgba(17, 24, 39, 0.95)',
+          backgroundColor: 'rgba(17, 24, 39, 0.96)',
           titleColor: '#ffffff',
-          bodyColor: '#e5e7eb',
-          padding: 10,
+          bodyColor: '#ffffff',
+          padding: 12,
           displayColors: true,
-          caretPadding: 8,
-          caretSize: 6,
-          cornerRadius: 10,
+          caretPadding: 10,
+          caretSize: 7,
+          cornerRadius: 12,
+          borderWidth: 1,
+          borderColor: 'rgba(255, 255, 255, 0.1)',
+          titleFont: {
+            size: 14,
+            weight: '600'
+          },
+          bodyFont: {
+            size: 13,
+            weight: '500'
+          },
           callbacks: {
             title: (items) => items?.[0]?.label ?? '',
             label: (item) => `${item.dataset.label}: ${item.parsed.y}`
@@ -1380,16 +1392,22 @@ const initCallVolumeChart = () => {
       datasets: isBar
         ? {
             bar: {
-              barPercentage: 0.85,
-              categoryPercentage: 0.62,
-              maxBarThickness: 18
+              barPercentage: 0.92,
+              categoryPercentage: 0.85,
+              maxBarThickness: 55
             }
           }
         : undefined,
       scales: {
         x: {
           grid: { display: false },
-          ticks: { color: '#98a1b3' },
+          ticks: { 
+            color: '#4b5563',
+            font: {
+              size: 12,
+              weight: '500'
+            }
+          },
           border: { display: false },
           stacked: false
         },
@@ -1397,14 +1415,19 @@ const initCallVolumeChart = () => {
           beginAtZero: true,
           suggestedMax: Math.max(0, ...(total || [])) + 10,
           grid: {
-            color: '#eef0f4',
-            borderDash: [4, 4],
-            drawTicks: false
+            color: '#e5e7eb',
+            borderDash: [5, 5],
+            drawTicks: false,
+            lineWidth: 1
           },
           ticks: {
-            color: '#98a1b3',
-            padding: 6,
-            maxTicksLimit: 5
+            color: '#6b7280',
+            padding: 8,
+            maxTicksLimit: 5,
+            font: {
+              size: 12,
+              weight: '500'
+            }
           },
           border: { display: false },
           stacked: false
@@ -1435,12 +1458,12 @@ const initMissedCallsChart = () => {
       datasets: [
         {
           data: dataValues,
-          backgroundColor: ['#2bb930', '#ffad46'],
+          backgroundColor: ['#10b981', '#ff9800'],
           borderColor: '#ffffff',
           borderWidth: 6,
-          borderRadius: 14,
-          spacing: 2,
-          hoverOffset: 6
+          borderRadius: 16,
+          spacing: 3,
+          hoverOffset: 8
         }
       ]
     },
@@ -1452,13 +1475,23 @@ const initMissedCallsChart = () => {
         legend: { display: false },
         tooltip: {
           enabled: true,
-          backgroundColor: 'rgba(17, 24, 39, 0.95)',
+          backgroundColor: 'rgba(17, 24, 39, 0.96)',
           titleColor: '#ffffff',
-          bodyColor: '#e5e7eb',
-          padding: 10,
-          caretPadding: 8,
-          caretSize: 6,
-          cornerRadius: 10,
+          bodyColor: '#ffffff',
+          padding: 12,
+          caretPadding: 10,
+          caretSize: 7,
+          cornerRadius: 12,
+          borderWidth: 1,
+          borderColor: 'rgba(255, 255, 255, 0.1)',
+          titleFont: {
+            size: 14,
+            weight: '600'
+          },
+          bodyFont: {
+            size: 13,
+            weight: '500'
+          },
           callbacks: {
             label: (context) => {
               const label = context.label || ''
@@ -1607,12 +1640,12 @@ onBeforeUnmount(() => {
 
 /* Chart sizing: make it feel balanced on mobile */
 .chart-container {
-  height: 260px;
+  height: 320px;
 }
 
 .missed-donut {
-  width: 180px;
-  height: 180px;
+  width: 200px;
+  height: 200px;
 }
 
 .loading-overlay {
@@ -1621,14 +1654,14 @@ onBeforeUnmount(() => {
 
 @media (max-width: 575.98px) {
   .missed-donut {
-    width: 160px;
-    height: 160px;
+    width: 170px;
+    height: 170px;
   }
 }
 
 @media (max-width: 575.98px) {
   .chart-container {
-    height: 210px;
+    height: 240px;
   }
 }
 
