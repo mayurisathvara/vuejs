@@ -307,12 +307,12 @@ class CallReportController extends Controller
                 fputcsv($out, [
                     'Date',
                     'Time',
+                    'SIM (caller_id)',
                     'Caller Duration',
                     'Call Type',
                     'Call Status',
                     'Department',
                     'User',
-                    'SIM (caller_id)',
                     'Customer Number',
                     'Return Call (Y/N)',
                 ]);
@@ -325,12 +325,12 @@ class CallReportController extends Controller
                         fputcsv($out, [
                             optional($log->date)->format('Y-m-d') ?: optional($log->date_time)->format('Y-m-d'),
                             $log->time ? (string) $log->time : optional($log->date_time)->format('H:i:s'),
+                            $log->caller_id,
                             $log->caller_duration,
                             $log->call_type,
                             $log->call_status,
                             $department,
                             $log->name,
-                            $log->caller_id,
                             $log->caller_number,
                             $log->call_back,
                         ]);
@@ -355,12 +355,12 @@ class CallReportController extends Controller
             foreach ([
                 'Date',
                 'Time',
+                'SIM (caller_id)',
                 'Caller Duration',
                 'Call Type',
                 'Call Status',
                 'Department',
                 'User',
-                'SIM (caller_id)',
                 'Customer Number',
                 'Return Call (Y/N)',
             ] as $h) {
@@ -375,12 +375,12 @@ class CallReportController extends Controller
                     $row = [
                         optional($log->date)->format('Y-m-d') ?: optional($log->date_time)->format('Y-m-d'),
                         $log->time ? (string) $log->time : optional($log->date_time)->format('H:i:s'),
+                        $log->caller_id,
                         $log->caller_duration,
                         $log->call_type,
                         $log->call_status,
                         $department,
                         $log->name,
-                        $log->caller_id,
                         $log->caller_number,
                         $log->call_back,
                     ];

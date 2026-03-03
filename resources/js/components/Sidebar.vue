@@ -68,7 +68,7 @@
           <li v-if="showCallReports" class="nav-item" :class="{ active: $route.name === 'CallReports' }">
             <router-link to="/call-reports" class="nav-link" @click="handleMenuClick">
               <i class="fas fa-chart-bar"></i>
-              <p>Call Reports</p>
+              <p>Call Report</p>
             </router-link>
           </li>
 

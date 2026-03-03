@@ -3,7 +3,7 @@
     <div class="page-header">
       <div class="header-content d-flex align-items-center gap-2 flex-wrap">
         <div class="header-title">
-          <h3 class="page-title">Call Reports</h3>
+          <h3 class="page-title">Call Report</h3>
         </div>
 
         <div class="header-actions d-flex align-items-center gap-2">
@@ -635,12 +635,12 @@ const pagination = ref({
 const headers = [
   { key: 'date', label: 'Date' },
   { key: 'time', label: 'Time' },
+  { key: 'caller_id', label: 'SIM' },
   { key: 'caller_duration', label: 'Caller Duration' },
   { key: 'call_type', label: 'Call Type' },
   { key: 'call_status', label: 'Status' },
   { key: 'department', label: 'Department' },
   { key: 'user', label: 'Name' },
-  { key: 'caller_id', label: 'SIM' },
   { key: 'caller_number', label: 'Customer No.' },
   { key: 'call_back', label: 'Return Call' }
 ]

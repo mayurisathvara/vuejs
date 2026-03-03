@@ -329,19 +329,19 @@ class SummaryReportController extends Controller
                     'Total Duration',
                     'Answered Calls',
                     'Answered Calls Duration',
-                    'Answered Call Avg. Duration',
+                    // 'Answered Call Avg. Duration',
                     'Unique Clients',
                     'Inbound Total Call',
                     'Inbound Total Duration',
                     'Inbound Answered',
                     'Inbound Ans. Calls Duration',
-                    'Inbound Ans. Calls Avg. Duration',
+                    // 'Inbound Ans. Calls Avg. Duration',
                     'Inbound Missed',
                     'Outbound Total Call',
                     'Outbound Total Duration',
                     'Outbound Answered',
                     'Outbound Ans. Calls Duration',
-                    'Outbound Ans. Calls Avg. Duration',
+                    // 'Outbound Ans. Calls Avg. Duration',
                 ]);
 
                 foreach ($summaryData as $index => $row) {
@@ -352,19 +352,19 @@ class SummaryReportController extends Controller
                         $row['total_duration_formatted'],
                         $row['answered_calls'],
                         $row['answered_duration_formatted'],
-                        $row['answered_avg_duration_formatted'],
+                        // $row['answered_avg_duration_formatted'],
                         $row['unique_clients'],
                         $row['inbound_total_calls'],
                         $row['inbound_total_duration_formatted'],
                         $row['inbound_answered'],
                         $row['inbound_answered_duration_formatted'],
-                        $row['inbound_answered_avg_duration_formatted'],
+                        // $row['inbound_answered_avg_duration_formatted'],
                         $row['inbound_missed'],
                         $row['outbound_total_calls'],
                         $row['outbound_total_duration_formatted'],
                         $row['outbound_answered'],
                         $row['outbound_answered_duration_formatted'],
-                        $row['outbound_answered_avg_duration_formatted'],
+                        // $row['outbound_answered_avg_duration_formatted'],
                     ]);
                 }
 
@@ -390,19 +390,19 @@ class SummaryReportController extends Controller
                 'Total Duration',
                 'Answered Calls',
                 'Answered Calls Duration',
-                'Answered Call Avg. Duration',
+                // 'Answered Call Avg. Duration',
                 'Unique Clients',
                 'Inbound Total Call',
                 'Inbound Total Duration',
                 'Inbound Answered',
                 'Inbound Ans. Calls Duration',
-                'Inbound Ans. Calls Avg. Duration',
+                // 'Inbound Ans. Calls Avg. Duration',
                 'Inbound Missed',
                 'Outbound Total Call',
                 'Outbound Total Duration',
                 'Outbound Answered',
                 'Outbound Ans. Calls Duration',
-                'Outbound Ans. Calls Avg. Duration',
+                // 'Outbound Ans. Calls Avg. Duration',
             ] as $h) {
                 echo '<th>' . htmlspecialchars($h, ENT_QUOTES, 'UTF-8') . '</th>';
             }
@@ -416,19 +416,19 @@ class SummaryReportController extends Controller
                 echo '<td>' . htmlspecialchars($row['total_duration_formatted'], ENT_QUOTES, 'UTF-8') . '</td>';
                 echo '<td>' . $row['answered_calls'] . '</td>';
                 echo '<td>' . htmlspecialchars($row['answered_duration_formatted'], ENT_QUOTES, 'UTF-8') . '</td>';
-                echo '<td>' . htmlspecialchars($row['answered_avg_duration_formatted'], ENT_QUOTES, 'UTF-8') . '</td>';
+                // echo '<td>' . htmlspecialchars($row['answered_avg_duration_formatted'], ENT_QUOTES, 'UTF-8') . '</td>';
                 echo '<td>' . $row['unique_clients'] . '</td>';
                 echo '<td>' . $row['inbound_total_calls'] . '</td>';
                 echo '<td>' . htmlspecialchars($row['inbound_total_duration_formatted'], ENT_QUOTES, 'UTF-8') . '</td>';
                 echo '<td>' . $row['inbound_answered'] . '</td>';
                 echo '<td>' . htmlspecialchars($row['inbound_answered_duration_formatted'], ENT_QUOTES, 'UTF-8') . '</td>';
-                echo '<td>' . htmlspecialchars($row['inbound_answered_avg_duration_formatted'], ENT_QUOTES, 'UTF-8') . '</td>';
+                // echo '<td>' . htmlspecialchars($row['inbound_answered_avg_duration_formatted'], ENT_QUOTES, 'UTF-8') . '</td>';
                 echo '<td>' . $row['inbound_missed'] . '</td>';
                 echo '<td>' . $row['outbound_total_calls'] . '</td>';
                 echo '<td>' . htmlspecialchars($row['outbound_total_duration_formatted'], ENT_QUOTES, 'UTF-8') . '</td>';
                 echo '<td>' . $row['outbound_answered'] . '</td>';
                 echo '<td>' . htmlspecialchars($row['outbound_answered_duration_formatted'], ENT_QUOTES, 'UTF-8') . '</td>';
-                echo '<td>' . htmlspecialchars($row['outbound_answered_avg_duration_formatted'], ENT_QUOTES, 'UTF-8') . '</td>';
+                // echo '<td>' . htmlspecialchars($row['outbound_answered_avg_duration_formatted'], ENT_QUOTES, 'UTF-8') . '</td>';
                 echo '</tr>';
             }
 

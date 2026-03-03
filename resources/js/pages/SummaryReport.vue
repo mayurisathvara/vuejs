@@ -231,37 +231,39 @@
               <thead>
                 <tr>
                   <th rowspan="2" class="text-center sticky-col sticky-col-index">#</th>
-                  <th rowspan="2" class="sticky-col sticky-col-phone phone-col">Phone Number</th>
-                  <th colspan="6" class="section-header text-center section-header-uppercase">Summary</th>
-                  <th colspan="6" class="section-header-inbound text-center section-header-uppercase">Inbound</th>
-                  <th colspan="5" class="section-header-outbound text-center section-header-uppercase">Outbound</th>
+                  <th rowspan="2" class="sticky-col sticky-col-mobile mobile-col">Mobile</th>
+                  <th rowspan="2" class="sticky-col sticky-col-name name-col">Name</th>
+                  <th rowspan="2" class="sticky-col sticky-col-dept dept-col">Department</th>
+                  <th colspan="5" class="section-header text-center section-header-uppercase">Summary</th>
+                  <th colspan="5" class="section-header-inbound text-center section-header-uppercase">Inbound</th>
+                  <th colspan="4" class="section-header-outbound text-center section-header-uppercase">Outbound</th>
                 </tr>
                 <tr>
                   <!-- Summary columns -->
                   <th class="text-center col-summary">Total Calls</th>
+                  <th class="text-center col-summary">Total Unique Calls</th>
                   <th class="text-center col-summary">Total Duration</th>
                   <th class="text-center col-summary">Answered Calls</th>
                   <th class="text-center col-summary">Answered Duration</th>
-                  <th class="text-center col-summary">Answered Avg. Duration</th>
-                  <th class="text-center col-summary">Unique Clients</th>
+                  <!-- <th class="text-center col-summary">Answered Avg. Duration</th> -->
                   <!-- Inbound columns -->
                   <th class="text-center col-inbound">Total Calls</th>
                   <th class="text-center col-inbound">Total Duration</th>
                   <th class="text-center col-inbound">Answered Calls</th>
                   <th class="text-center col-inbound">Answered Duration</th>
-                  <th class="text-center col-inbound">Answered Avg. Duration</th>
+                  <!-- <th class="text-center col-inbound">Answered Avg. Duration</th> -->
                   <th class="text-center col-inbound">Missed Calls</th>
                   <!-- Outbound columns -->
                   <th class="text-center col-outbound">Total Calls</th>
                   <th class="text-center col-outbound">Total Duration</th>
                   <th class="text-center col-outbound">Answered Calls</th>
                   <th class="text-center col-outbound">Answered Duration</th>
-                  <th class="text-center col-outbound">Answered Avg. Duration</th>
+                  <!-- <th class="text-center col-outbound">Answered Avg. Duration</th> -->
                 </tr>
               </thead>
               <tbody>
                 <tr v-if="loading && summaryData.length === 0">
-                  <td colspan="19" class="text-center py-4">
+                  <td colspan="18" class="text-center py-4">
                     <div class="spinner-border spinner-border-sm text-primary" role="status">
                       <span class="visually-hidden">Loading...</span>
                     </div>
@@ -269,7 +271,7 @@
                   </td>
                 </tr>
                 <tr v-else-if="summaryData.length === 0">
-                  <td colspan="19" class="text-center py-4 text-muted">
+                  <td colspan="18" class="text-center py-4 text-muted">
                     <i class="fas fa-inbox fa-2x mb-2 d-block" style="opacity: 0.3;"></i>
                     No data available
                   </td>
@@ -277,38 +279,32 @@
                 <template v-else>
                   <tr v-for="(row, index) in summaryData" :key="index">
                     <td class="text-center sticky-col sticky-col-index">{{ (pagination.current_page - 1) * pagination.per_page + index + 1 }}</td>
-                    <td class="sticky-col sticky-col-phone">
-                      <div class="phone-info">
-                        <div class="phone-number">{{ row.phone_number }}</div>
-                        <div v-if="row.name || row.department" class="phone-meta">
-                          <span v-if="row.name" class="user-name">{{ row.name }}</span>
-                          <span v-if="row.department" class="department-name">{{ row.department }}</span>
-                        </div>
-                      </div>
-                    </td>
+                    <td class="sticky-col sticky-col-mobile">{{ parsePhoneInfo(row.phone_number).mobile }}</td>
+                    <td class="sticky-col sticky-col-name">{{ parsePhoneInfo(row.phone_number).name }}</td>
+                    <td class="sticky-col sticky-col-dept">{{ parsePhoneInfo(row.phone_number).department }}</td>
                     <!-- Summary -->
                     <td class="text-center cell-summary">{{ row.total_calls }}</td>
+                    <td class="text-center cell-summary">{{ row.unique_clients }}</td>
                     <td class="text-center cell-summary">{{ row.total_duration_formatted }}</td>
                     <td class="text-center cell-summary">{{ row.answered_calls }}</td>
                     <td class="text-center cell-summary">{{ row.answered_duration_formatted }}</td>
-                    <td class="text-center cell-summary">{{ row.answered_avg_duration_formatted }}</td>
-                    <td class="text-center cell-summary">{{ row.unique_clients }}</td>
+                    <!-- <td class="text-center cell-summary">{{ row.answered_avg_duration_formatted }}</td> -->
                     <!-- Inbound -->
                     <td class="text-center cell-inbound">{{ row.inbound_total_calls }}</td>
                     <td class="text-center cell-inbound">{{ row.inbound_total_duration_formatted }}</td>
                     <td class="text-center cell-inbound">{{ row.inbound_answered }}</td>
                     <td class="text-center cell-inbound">{{ row.inbound_answered_duration_formatted }}</td>
-                    <td class="text-center cell-inbound">{{ row.inbound_answered_avg_duration_formatted }}</td>
+                    <!-- <td class="text-center cell-inbound">{{ row.inbound_answered_avg_duration_formatted }}</td> -->
                     <td class="text-center cell-inbound">{{ row.inbound_missed }}</td>
                     <!-- Outbound -->
                     <td class="text-center cell-outbound">{{ row.outbound_total_calls }}</td>
                     <td class="text-center cell-outbound">{{ row.outbound_total_duration_formatted }}</td>
                     <td class="text-center cell-outbound">{{ row.outbound_answered }}</td>
                     <td class="text-center cell-outbound">{{ row.outbound_answered_duration_formatted }}</td>
-                    <td class="text-center cell-outbound">{{ row.outbound_answered_avg_duration_formatted }}</td>
+                    <!-- <td class="text-center cell-outbound">{{ row.outbound_answered_avg_duration_formatted }}</td> -->
                   </tr>
                   <tr v-if="loading" class="loading-overlay-row">
-                    <td colspan="19">
+                    <td colspan="18">
                       <div class="table-loading-overlay">
                         <div class="spinner-border spinner-border-sm text-primary" role="status"></div>
                         <span class="ms-2">Updating...</span>
@@ -353,6 +349,19 @@ const authStore = useAuthStore()
 
 const isAdmin = computed(() => authStore.userRole === 'admin')
 const isUser = computed(() => authStore.userRole === 'user')
+
+const parsePhoneInfo = (phoneStr) => {
+  if (!phoneStr || typeof phoneStr !== 'string') {
+    return { mobile: '', name: '', department: '' }
+  }
+  
+  const parts = phoneStr.split('-').map(p => p.trim())
+  return {
+    mobile: parts[0] || '',
+    name: parts[1] || '',
+    department: parts[2] || ''
+  }
+}
 
 const loading = ref(false)
 const exporting = ref(false)
@@ -1169,12 +1178,28 @@ small.text-muted {
   box-shadow: 2px 0 4px rgba(0, 0, 0, 0.08);
 }
 
-.summary-report-table .sticky-col-phone {
+.summary-report-table .sticky-col-mobile {
   left: 50px;
 }
 
-.summary-report-table .phone-col {
-  min-width: 280px;
+.summary-report-table .sticky-col-name {
+  left: 200px;
+}
+
+.summary-report-table .sticky-col-dept {
+  left: 350px;
+}
+
+.summary-report-table .mobile-col {
+  min-width: 150px;
+}
+
+.summary-report-table .name-col {
+  min-width: 150px;
+}
+
+.summary-report-table .dept-col {
+  min-width: 150px;
 }
 
 .section-header-uppercase {
@@ -1190,7 +1215,9 @@ small.text-muted {
   background: #f8f9fa;
 }
 
-.summary-report-table tbody tr:hover .sticky-col-phone {
+.summary-report-table tbody tr:hover .sticky-col-mobile,
+.summary-report-table tbody tr:hover .sticky-col-name,
+.summary-report-table tbody tr:hover .sticky-col-dept {
   background: #fff;
 }
 
@@ -1453,16 +1480,10 @@ small.text-muted {
     padding: 5px 6px !important;
   }
 
-  .phone-number {
-    font-size: 13px;
-  }
-
-  .phone-meta {
-    font-size: 11px;
-  }
-
-  .sticky-col-phone {
-    min-width: 200px !important;
+  .sticky-col-mobile,
+  .sticky-col-name,
+  .sticky-col-dept {
+    min-width: 120px !important;
   }
 
   .alert {
@@ -1607,68 +1628,5 @@ small.text-muted {
 .multiselect-option:focus-visible {
   background-color: #e7f3ff;
   box-shadow: inset 0 0 0 2px #4e73df;
-}
-
-/* Phone info styling */
-.phone-info {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  padding: 4px 0;
-}
-
-.phone-number {
-  font-weight: 600;
-  color: #1a202c;
-  font-size: 14px;
-}
-
-.phone-meta {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  font-size: 12px;
-  max-width: 100%;
-  overflow: hidden;
-}
-
-.user-name {
-  color: #4a5568;
-  font-weight: 500;
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  max-width: 150px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.user-name::before {
-  content: '\f007';
-  font-family: 'Font Awesome 5 Free';
-  font-weight: 900;
-  font-size: 11px;
-  opacity: 0.7;
-}
-
-.department-name {
-  color: #718096;
-  font-weight: 400;
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  max-width: 150px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.department-name::before {
-  content: '\f1ad';
-  font-family: 'Font Awesome 5 Free';
-  font-weight: 900;
-  font-size: 11px;
-  opacity: 0.7;
 }
 </style>

@@ -55,7 +55,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/users', [UserController::class, 'index']);
     });
 
-    // Call Reports - All authenticated users
+    // Call Report - All authenticated users
     Route::middleware(['role:admin,organization,manager,user'])->group(function () {
         Route::get('/call-reports/options', [CallReportController::class, 'options']);
         Route::get('/call-reports', [CallReportController::class, 'index']);
