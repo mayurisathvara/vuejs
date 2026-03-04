@@ -4,10 +4,10 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
-use App\Models\Department;
+use App\Models\Team;
 use App\Models\Organization;
 
-class DepartmentSeeder extends Seeder
+class TeamSeeder extends Seeder
 {
     /**
      * Run the database seeds.
@@ -22,8 +22,8 @@ class DepartmentSeeder extends Seeder
             return;
         }
 
-        // Sample departments for each organization
-        $departmentNames = [
+        // Sample teams for each organization
+        $teamNames = [
             'Human Resources',
             'Information Technology',
             'Finance',
@@ -37,17 +37,17 @@ class DepartmentSeeder extends Seeder
         ];
 
         foreach ($organizations as $organization) {
-            // Create 3-5 random departments for each organization
-            $randomDepartments = collect($departmentNames)->random(rand(3, 5));
+            // Create 3-5 random teams for each organization
+            $randomTeams = collect($teamNames)->random(rand(3, 5));
             
-            foreach ($randomDepartments as $departmentName) {
-                Department::create([
-                    'name' => $departmentName,
+            foreach ($randomTeams as $teamName) {
+                Team::create([
+                    'name' => $teamName,
                     'organization_id' => $organization->id,
                 ]);
             }
         }
 
-        $this->command->info('Departments seeded successfully!');
+        $this->command->info('Teams seeded successfully!');
     }
 }

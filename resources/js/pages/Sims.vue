@@ -20,10 +20,11 @@
             <i class="fas fa-trash-alt me-2"></i>
             <span class="btn-text">Delete Selected ({{ selectedSims.length }})</span>
           </button>
-          <button type="button" class="btn btn-sm sim-pill-btn sim-pill-success me-2" @click="handleExportCsv">
+          <button type="button" class="btn btn-success btn-sm me-2" @click="handleExportCsv">
+            <i class="fas fa-file-export me-2"></i>
             <span class="btn-text">Export</span>
           </button>
-          <button type="button" class="btn btn-sm sim-pill-btn sim-pill-info me-2" @click="openImportModal">
+          <button type="button" class="btn btn-info btn-sm me-2" @click="openImportModal">
             <i class="fas fa-file-import me-2"></i>
             <span class="btn-text">Import</span>
           </button>
@@ -64,9 +65,9 @@
         <div class="filter-item">
           <div class="select-wrapper">
             <i class="fas fa-sitemap filter-icon"></i>
-            <select v-model="departmentFilter" class="form-select select-modern" @change="handleDepartmentFilter">
-              <option value="">All Departments</option>
-              <option v-for="dept in departments" :key="dept.id" :value="dept.id">
+            <select v-model="teamFilter" class="form-select select-modern" @change="handleTeamFilter">
+              <option value="">All Teams</option>
+              <option v-for="dept in teams" :key="dept.id" :value="dept.id">
                 {{ dept.name }}
               </option>
             </select>
@@ -113,8 +114,8 @@
           <template #cell-organization_name="{ row }">
             {{ row.organization ? row.organization.name : 'N/A' }}
           </template>
-          <template #cell-department_name="{ row }">
-            <span v-if="row.department" class="badge bg-info">{{ row.department.name }}</span>
+          <template #cell-team_name="{ row }">
+            <span v-if="row.team" class="badge bg-info">{{ row.team.name }}</span>
             <span v-else class="text-muted">N/A</span>
           </template>
           <template #cell-status="{ value, row }">
@@ -230,17 +231,17 @@
           <div class="col-md-6 mb-3">
             <div class="form-group">
               <label class="form-label">
-                Department
+                Team
                 <span class="text-danger">*</span>
               </label>
-              <select v-model="simForm.department_id" class="form-select" :class="{ 'is-invalid': errors.department_id }" :disabled="!simForm.organization_id" required>
-                <option value="">Select Department</option>
-                <option v-for="dept in availableDepartments" :key="dept.id" :value="dept.id">
+              <select v-model="simForm.team_id" class="form-select" :class="{ 'is-invalid': errors.team_id }" :disabled="!simForm.organization_id" required>
+                <option value="">Select Team</option>
+                <option v-for="dept in availableTeams" :key="dept.id" :value="dept.id">
                   {{ dept.name }}
                 </option>
               </select>
-              <div v-if="errors.department_id" class="invalid-feedback d-block">
-                {{ getErrorMessage(errors.department_id) }}
+              <div v-if="errors.team_id" class="invalid-feedback d-block">
+                {{ getErrorMessage(errors.team_id) }}
               </div>
             </div>
           </div>
@@ -347,8 +348,8 @@
               <div class="csv-column-info">
                 <i class="fas fa-sitemap me-2"></i>
                 <div>
-                  <strong class="d-block">department</strong>
-                  <small class="text-muted">Department name</small>
+                  <strong class="d-block">team</strong>
+                  <small class="text-muted">Team name</small>
                 </div>
               </div>
             </div>
@@ -1110,7 +1111,7 @@ const isManager = computed(() => userRole.value === 'manager')
 // Search and filters
 const searchQuery = ref('')
 const organizationFilter = ref('')
-const departmentFilter = ref('')
+const teamFilter = ref('')
 const perPage = ref(10)
 const searchTimeout = ref(null)
 
@@ -1142,13 +1143,13 @@ const simForm = reactive({
   mobile: '',
   name: '',
   organization_id: '',
-  department_id: ''
+  team_id: ''
 })
 
-// Organizations and departments data
+// Organizations and teams data
 const organizations = ref([])
-const departments = ref([])
-const availableDepartments = ref([])
+const teams = ref([])
+const availableTeams = ref([])
 
 const errors = ref({})
 const errorMessage = ref('')
@@ -1173,7 +1174,7 @@ const simHeaders = computed(() => {
   }
   
   headers.push(
-    { key: 'department_name', label: 'Department', class: 'text-start' },
+    { key: 'team_name', label: 'Team', class: 'text-start' },
     { key: 'status', label: 'Status', class: 'text-start' },
     { key: 'created_at', label: 'Created At', class: 'text-start' }
   )
@@ -1256,7 +1257,7 @@ const fetchSims = async () => {
     simsStore.pagination.current_page,
     searchQuery.value,
     organizationFilter.value,
-    departmentFilter.value,
+    teamFilter.value,
     perPage.value
   )
 }
@@ -1264,7 +1265,7 @@ const fetchSims = async () => {
 const refreshSims = () => {
   searchQuery.value = ''
   organizationFilter.value = ''
-  departmentFilter.value = ''
+  teamFilter.value = ''
   fetchSims()
 }
 
@@ -1279,18 +1280,18 @@ const handleSearch = () => {
 }
 
 const handleOrganizationFilter = async () => {
-  departmentFilter.value = ''
+  teamFilter.value = ''
   
   if (organizationFilter.value) {
-    await fetchDepartmentsByOrganization(organizationFilter.value)
+    await fetchTeamsByOrganization(organizationFilter.value)
   } else {
-    departments.value = []
+    teams.value = []
   }
   
   fetchSims()
 }
 
-const handleDepartmentFilter = () => {
+const handleTeamFilter = () => {
   fetchSims()
 }
 
@@ -1299,16 +1300,16 @@ const handlePerPageChange = () => {
 }
 
 const handlePageChange = (page) => {
-  simsStore.fetchSims(page, searchQuery.value, organizationFilter.value, departmentFilter.value, perPage.value)
+  simsStore.fetchSims(page, searchQuery.value, organizationFilter.value, teamFilter.value, perPage.value)
 }
 
-const fetchDepartmentsByOrganization = async (organizationId) => {
+const fetchTeamsByOrganization = async (organizationId) => {
   try {
-    const response = await api.get(`/sims/departments/by-organization?organization_id=${organizationId}`)
-    departments.value = response.data
+    const response = await api.get(`/sims/teams/by-organization?organization_id=${organizationId}`)
+    teams.value = response.data
   } catch (error) {
-    console.error('Error fetching departments:', error)
-    departments.value = []
+    console.error('Error fetching teams:', error)
+    teams.value = []
   }
 }
 
@@ -1316,7 +1317,7 @@ const openCreateModal = async () => {
   isEditing.value = false
   resetForm()
   
-  // For non-admin users, fetch departments after organization is auto-set
+  // For non-admin users, fetch teams after organization is auto-set
   if ((isOrganization.value || isManager.value) && organizations.value.length > 0) {
     simForm.organization_id = organizations.value[0].id
     await handleOrganizationChange()
@@ -1330,17 +1331,17 @@ const openEditModal = async (sim) => {
   simForm.mobile = sim.mobile
   simForm.name = sim.name
   simForm.organization_id = sim.organization_id
-  simForm.department_id = sim.department_id || ''
+  simForm.team_id = sim.team_id || ''
   simToDelete.value = sim
   
-  // Fetch departments for the sim's organization
+  // Fetch teams for the sim's organization
   if (simForm.organization_id) {
     try {
-      const response = await api.get(`/sims/departments/by-organization?organization_id=${simForm.organization_id}`)
-      availableDepartments.value = response.data
+      const response = await api.get(`/sims/teams/by-organization?organization_id=${simForm.organization_id}`)
+      availableTeams.value = response.data
     } catch (error) {
-      console.error('Error fetching departments:', error)
-      availableDepartments.value = []
+      console.error('Error fetching teams:', error)
+      availableTeams.value = []
     }
   }
   
@@ -1488,7 +1489,7 @@ const handleExportCsv = async () => {
     const params = {
       search: searchQuery.value || '',
       organization_id: organizationFilter.value || '',
-      department_id: departmentFilter.value || '',
+      team_id: teamFilter.value || '',
       per_page: 999999 // Get all records matching filters, not just current page
     }
 
@@ -1506,27 +1507,27 @@ const handleExportCsv = async () => {
     
     // CSV headers based on role
     if (isAdmin.value) {
-      csvContent = 'Mobile Number,Name,Organization,Department,Created At\n'
+      csvContent = 'Mobile Number,Name,Organization,Team,Created At\n'
       
       simsData.forEach(sim => {
         const mobile = sim.mobile || ''
         const name = (sim.name || '').replace(/"/g, '""') // Escape quotes
         const organization = (sim.organization_name || '').replace(/"/g, '""')
-        const department = (sim.department_name || '').replace(/"/g, '""')
+        const team = (sim.team_name || '').replace(/"/g, '""')
         const createdAt = sim.created_at ? new Date(sim.created_at).toLocaleDateString('en-US') : ''
         
-        csvContent += `"${mobile}","${name}","${organization}","${department}","${createdAt}"\n`
+        csvContent += `"${mobile}","${name}","${organization}","${team}","${createdAt}"\n`
       })
     } else {
-      csvContent = 'Mobile Number,Name,Department,Created At\n'
+      csvContent = 'Mobile Number,Name,Team,Created At\n'
       
       simsData.forEach(sim => {
         const mobile = sim.mobile || ''
         const name = (sim.name || '').replace(/"/g, '""') // Escape quotes
-        const department = (sim.department_name || '').replace(/"/g, '""')
+        const team = (sim.team_name || '').replace(/"/g, '""')
         const createdAt = sim.created_at ? new Date(sim.created_at).toLocaleDateString('en-US') : ''
         
-        csvContent += `"${mobile}","${name}","${department}","${createdAt}"\n`
+        csvContent += `"${mobile}","${name}","${team}","${createdAt}"\n`
       })
     }
 
@@ -1555,11 +1556,11 @@ const downloadSampleCsv = () => {
   let csvContent = ''
   
   if (isAdmin.value) {
-    csvContent = 'organization,department,mobile,name\n'
+    csvContent = 'organization,team,mobile,name\n'
     csvContent += 'Dosti Enterprise,Sales,9876543210,Sales SIM 1\n'
     csvContent += 'Dosti Enterprise,Marketing,9876543211,Marketing SIM 1\n'
   } else {
-    csvContent = 'department,mobile,name\n'
+    csvContent = 'team,mobile,name\n'
     csvContent += 'Sales,9876543210,Sales SIM 1\n'
     csvContent += 'Marketing,9876543211,Marketing SIM 1\n'
   }
@@ -1611,23 +1612,23 @@ const resetForm = () => {
   simForm.mobile = ''
   simForm.name = ''
   simForm.organization_id = ''
-  simForm.department_id = ''
-  availableDepartments.value = []
+  simForm.team_id = ''
+  availableTeams.value = []
   errors.value = {}
   errorMessage.value = ''
 }
 
 const handleOrganizationChange = async () => {
-  simForm.department_id = ''
-  availableDepartments.value = []
+  simForm.team_id = ''
+  availableTeams.value = []
   
   if (simForm.organization_id) {
     try {
-      const response = await api.get(`/sims/departments/by-organization?organization_id=${simForm.organization_id}`)
-      availableDepartments.value = response.data
+      const response = await api.get(`/sims/teams/by-organization?organization_id=${simForm.organization_id}`)
+      availableTeams.value = response.data
     } catch (error) {
-      console.error('Error fetching departments:', error)
-      availableDepartments.value = []
+      console.error('Error fetching teams:', error)
+      availableTeams.value = []
     }
   }
 }
@@ -1723,8 +1724,8 @@ onMounted(() => {
   if (isAdmin.value) {
     fetchOrganizations()
   } else if (isOrganization.value) {
-    // For organization users, fetch departments directly using their organization
-    fetchDepartmentsByOrganization()
+    // For organization users, fetch teams directly using their organization
+    fetchTeamsByOrganization()
   }
 
   document.addEventListener('click', handleClickOutside)

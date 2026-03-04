@@ -12,13 +12,13 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('users', function (Blueprint $table) {
-            $table->unsignedBigInteger('department_id')->nullable()->after('organization_id');
+            $table->unsignedBigInteger('team_id')->nullable()->after('organization_id');
             
             // Foreign key constraint
-            $table->foreign('department_id')->references('id')->on('departments')->onDelete('set null');
+            $table->foreign('team_id')->references('id')->on('teams')->onDelete('set null');
             
             // Index for better performance
-            $table->index('department_id', 'users_department_index');
+            $table->index('team_id', 'users_team_index');
         });
     }
 
@@ -28,9 +28,9 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('users', function (Blueprint $table) {
-            $table->dropForeign(['department_id']);
-            $table->dropIndex('users_department_index');
-            $table->dropColumn('department_id');
+            $table->dropForeign(['team_id']);
+            $table->dropIndex('users_team_index');
+            $table->dropColumn('team_id');
         });
     }
 };

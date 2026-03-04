@@ -3,7 +3,7 @@
     <div class="page-header">
       <div class="header-content d-flex align-items-center gap-2 flex-wrap">
         <div class="header-title">
-          <h3 class="page-title">Call Reports</h3>
+          <h3 class="page-title">Call Report</h3>
         </div>
 
         <div class="header-actions d-flex align-items-center gap-2">
@@ -178,21 +178,21 @@
         <div v-if="!isUser" class="col-12 col-md-3">
           <div class="select-wrapper">
             <i class="fas fa-sitemap filter-icon"></i>
-            <select v-model="filters.department_id" class="form-select select-modern" :disabled="optionsLoading || (isAdmin && !filters.organization_id)" @change="onDepartmentChange">
-              <option value="">All Departments</option>
+            <select v-model="filters.team_id" class="form-select select-modern" :disabled="optionsLoading || (isAdmin && !filters.organization_id)" @change="onTeamChange">
+              <option value="">All Teams</option>
               <option v-if="optionsLoading" value="" disabled>Loading...</option>
-              <option v-for="dept in options.departments" :key="dept.id" :value="dept.id">
+              <option v-for="dept in options.teams" :key="dept.id" :value="dept.id">
                 {{ dept.name }}
               </option>
             </select>
           </div>
-          <small class="text-muted">Department</small>
+          <small class="text-muted">Team</small>
         </div>
 
         <div v-if="!isUser" class="col-12 col-md-3">
           <div class="select-wrapper">
             <i class="fas fa-user filter-icon"></i>
-            <select v-model="filters.user_id" class="form-select select-modern" :disabled="optionsLoading || (!filters.department_id && options.users.length === 0)" @change="onUserChange">
+            <select v-model="filters.user_id" class="form-select select-modern" :disabled="optionsLoading || (!filters.team_id && options.users.length === 0)" @change="onUserChange">
               <option value="">All Users</option>
               <option v-if="optionsLoading" value="" disabled>Loading...</option>
               <option v-for="u in options.users" :key="u.id" :value="u.id">
@@ -337,8 +337,8 @@
             <!-- Fallback -->
             <span v-else class="text-muted">{{ row.call_status || 'N/A' }}</span>
           </template>
-          <template #cell-department="{ row }">
-            {{ row.department_name || row.user?.department?.name || 'N/A' }}
+          <template #cell-team="{ row }">
+            {{ row.team_name || row.user?.team?.name || 'N/A' }}
           </template>
           <template #cell-user="{ row }">
             {{ row.name || row.user?.name || 'N/A' }}
@@ -401,7 +401,7 @@ let logsAbort = null
 
 const options = ref({
   organizations: [],
-  departments: [],
+  teams: [],
   users: [],
   sims: []
 })
@@ -413,7 +413,7 @@ const filters = ref({
   call_type: '',
   call_status: '',
   organization_id: '',
-  department_id: '',
+  team_id: '',
   user_id: '',
   sim_mobile: [],
   caller_number: '',
@@ -638,7 +638,7 @@ const headers = [
   { key: 'caller_duration', label: 'Caller Duration' },
   { key: 'call_type', label: 'Call Type' },
   { key: 'call_status', label: 'Status' },
-  { key: 'department', label: 'Department' },
+  { key: 'team', label: 'Team' },
   { key: 'user', label: 'Name' },
   { key: 'caller_id', label: 'SIM' },
   { key: 'caller_number', label: 'Customer No.' },
@@ -686,7 +686,7 @@ const normalizeFilterParams = (src) => ({
   call_type: src.call_type || undefined,
   call_status: src.call_status || undefined,
   organization_id: src.organization_id || undefined,
-  department_id: src.department_id || undefined,
+  team_id: src.team_id || undefined,
   user_id: src.user_id || undefined,
   sim_mobile: src.sim_mobile || undefined,
   caller_number: src.caller_number || undefined,
@@ -715,7 +715,7 @@ const fetchOptions = async () => {
 
   const params = {
     organization_id: filters.value.organization_id || undefined,
-    department_id: filters.value.department_id || undefined,
+    team_id: filters.value.team_id || undefined,
     user_id: filters.value.user_id || undefined
   }
 
@@ -785,7 +785,7 @@ const resetAll = async () => {
   applyDefaultTodayRange()
   filters.value.call_type = ''
   filters.value.call_status = ''
-  filters.value.department_id = ''
+  filters.value.team_id = ''
   filters.value.user_id = ''
   filters.value.sim_mobile = []
   filters.value.caller_number = ''
@@ -806,19 +806,19 @@ const resetAll = async () => {
 }
 
 const onOrganizationChange = async () => {
-  filters.value.department_id = ''
+  filters.value.team_id = ''
   filters.value.user_id = ''
   filters.value.sim_mobile = []
 
   // Clear dependent option lists immediately to avoid showing stale items
-  options.value.departments = []
+  options.value.teams = []
   options.value.users = []
   options.value.sims = []
 
   await fetchOptions()
 }
 
-const onDepartmentChange = async () => {
+const onTeamChange = async () => {
   filters.value.user_id = ''
   filters.value.sim_mobile = []
 
@@ -954,7 +954,7 @@ onBeforeUnmount(() => {
   color: #ff6a00 !important;
 }
 
-/* Reduce gap between title and Filters button (Call Reports only) */
+/* Reduce gap between title and Filters button (Call Report only) */
 .page-header .header-content {
   justify-content: flex-start !important;
   gap: 10px !important;
@@ -1052,7 +1052,7 @@ onBeforeUnmount(() => {
   font-weight: 700;
 }
 
-/* Simple table look (Call Reports only) */
+/* Simple table look (Call Report only) */
 .call-reports-table :deep(.table-responsive) {
   border: 1px solid #e3e6f0;
   border-radius: 10px;

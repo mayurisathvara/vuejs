@@ -29,7 +29,7 @@ class AuthController extends Controller
             ], 422);
         }
 
-        $user = User::with(['organization', 'department'])->where('email', $request->email)->first();
+        $user = User::with(['organization', 'team'])->where('email', $request->email)->first();
 
         if (!$user || !Hash::check($request->password, $user->password)) {
             return response()->json([
@@ -124,7 +124,7 @@ class AuthController extends Controller
      */
     public function user(Request $request): JsonResponse
     {
-        $user = $request->user()->load(['organization', 'department']);
+        $user = $request->user()->load(['organization', 'team']);
         
         // Get organization date format
         $dateFormat = 'Y-m-d'; // default

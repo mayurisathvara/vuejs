@@ -5,7 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
-class Department extends Model
+class Team extends Model
 {
     use HasFactory;
 
@@ -15,7 +15,7 @@ class Department extends Model
     ];
 
     /**
-     * Get the organization that the department belongs to.
+     * Get the organization that the team belongs to.
      */
     public function organization()
     {
@@ -23,10 +23,10 @@ class Department extends Model
     }
 
     /**
-     * Get the users that belong to this department.
+     * Get the users that belong to this team.
      */
     public function users()
     {
-        return $this->hasMany(User::class, 'department_id');
+        return $this->hasMany(User::class, 'team_id');
     }
 }

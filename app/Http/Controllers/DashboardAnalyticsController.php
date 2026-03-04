@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\CallLog;
-use App\Models\Department;
+use App\Models\Team;
 use App\Models\Organization;
 use App\Models\Sim;
 use App\Models\User;
@@ -24,13 +24,13 @@ class DashboardAnalyticsController extends Controller
     {
         $this->normalizeEmptyStringsToNull($request, [
             'organization_id',
-            'department_id',
+            'team_id',
             'user_id',
         ]);
 
         $validator = Validator::make($request->all(), [
             'organization_id' => ['nullable', 'integer'],
-            'department_id' => ['nullable', 'integer'],
+            'team_id' => ['nullable', 'integer'],
             'user_id' => ['nullable', 'integer'],
         ]);
 
@@ -59,39 +59,39 @@ class DashboardAnalyticsController extends Controller
                 ->get();
         }
 
-        $departments = collect();
+        $teams = collect();
         if ($effectiveOrganizationId) {
-            $departmentsQuery = Department::where('organization_id', $effectiveOrganizationId)
+            $teamsQuery = Team::where('organization_id', $effectiveOrganizationId)
                 ->select(['id', 'name'])
                 ->orderBy('name');
 
             if ($role === 'manager') {
-                $accessible = $this->getManagerAccessibleDepartmentIds($authUser);
+                $accessible = $this->getManagerAccessibleTeamIds($authUser);
                 if (!empty($accessible)) {
-                    $departmentsQuery->whereIn('id', $accessible);
+                    $teamsQuery->whereIn('id', $accessible);
                 } else {
-                    $departmentsQuery->whereRaw('1 = 0');
+                    $teamsQuery->whereRaw('1 = 0');
                 }
             }
 
-            $departments = $departmentsQuery->get();
+            $teams = $teamsQuery->get();
         }
 
         $users = collect();
         if ($effectiveOrganizationId) {
             $usersQuery = User::whereIn('role', ['user', 'manager'])
-                ->select(['id', 'name', 'department_id', 'organization_id', 'role'])
+                ->select(['id', 'name', 'team_id', 'organization_id', 'role'])
                 ->orderBy('name')
                 ->where('organization_id', $effectiveOrganizationId);
 
-            if ($request->filled('department_id')) {
-                $usersQuery->where('department_id', (int) $request->department_id);
+            if ($request->filled('team_id')) {
+                $usersQuery->where('team_id', (int) $request->team_id);
             }
 
             if ($role === 'manager') {
-                $accessible = $this->getManagerAccessibleDepartmentIds($authUser);
+                $accessible = $this->getManagerAccessibleTeamIds($authUser);
                 if (!empty($accessible)) {
-                    $usersQuery->whereIn('department_id', $accessible);
+                    $usersQuery->whereIn('team_id', $accessible);
                 } else {
                     $usersQuery->whereRaw('1 = 0');
                 }
@@ -103,7 +103,7 @@ class DashboardAnalyticsController extends Controller
 
         // SIMs options:
         // - User role: only their SIMs
-        // - Admin/Org/Manager: org SIMs, optionally narrowed by department or selected user
+        // - Admin/Org/Manager: org SIMs, optionally narrowed by team or selected user
         if ($role === 'user') {
             $sims = UserSim::query()
                 ->leftJoin('sims', 'sims.id', '=', 'user_sims.sim_id')
@@ -112,7 +112,7 @@ class DashboardAnalyticsController extends Controller
                 ->addSelect([
                     'sims.id as id',
                     'sims.name as name',
-                    'sims.department_id as department_id',
+                    'sims.team_id as team_id',
                 ])
                 ->orderBy('mobile')
                 ->get()
@@ -122,14 +122,14 @@ class DashboardAnalyticsController extends Controller
                     'id' => $row->id,
                     'mobile' => $row->mobile,
                     'name' => $row->name,
-                    'department_id' => $row->department_id,
+                    'team_id' => $row->team_id,
                 ]);
         } elseif ($effectiveOrganizationId) {
             $selectedUserId = $request->filled('user_id') ? (int) $request->user_id : null;
 
             if ($selectedUserId) {
                 $selectedUser = User::query()
-                    ->select(['id', 'organization_id', 'department_id', 'role'])
+                    ->select(['id', 'organization_id', 'team_id', 'role'])
                     ->where('id', $selectedUserId)
                     ->first();
 
@@ -138,8 +138,8 @@ class DashboardAnalyticsController extends Controller
                     if ($role === 'admin') {
                         $allowed = true;
                     } elseif ($role === 'manager') {
-                        $accessible = $this->getManagerAccessibleDepartmentIds($authUser);
-                        $allowed = $selectedUser->role === 'user' && in_array((int) $selectedUser->department_id, $accessible, true);
+                        $accessible = $this->getManagerAccessibleTeamIds($authUser);
+                        $allowed = $selectedUser->role === 'user' && in_array((int) $selectedUser->team_id, $accessible, true);
                     } else {
                         // organization role
                         $allowed = true;
@@ -154,7 +154,7 @@ class DashboardAnalyticsController extends Controller
                         ->addSelect([
                             'sims.id as id',
                             'sims.name as name',
-                            'sims.department_id as department_id',
+                            'sims.team_id as team_id',
                         ])
                         ->orderBy('mobile')
                         ->get()
@@ -164,17 +164,17 @@ class DashboardAnalyticsController extends Controller
                             'id' => $row->id,
                             'mobile' => $row->mobile,
                             'name' => $row->name,
-                            'department_id' => $row->department_id,
+                            'team_id' => $row->team_id,
                         ]);
                 } else {
                     $sims = collect();
                 }
             } else {
                 $simsQuery = Sim::where('organization_id', $effectiveOrganizationId)
-                    ->select(['id', 'mobile', 'name', 'organization_id', 'department_id']);
+                    ->select(['id', 'mobile', 'name', 'organization_id', 'team_id']);
 
-                if ($request->filled('department_id')) {
-                    $simsQuery->where('department_id', (int) $request->department_id);
+                if ($request->filled('team_id')) {
+                    $simsQuery->where('team_id', (int) $request->team_id);
                 }
 
                 $sims = $simsQuery
@@ -184,7 +184,7 @@ class DashboardAnalyticsController extends Controller
                         'id' => $sim->id,
                         'mobile' => $sim->mobile,
                         'name' => $sim->name,
-                        'department_id' => $sim->department_id,
+                        'team_id' => $sim->team_id,
                     ]);
             }
         } else {
@@ -193,7 +193,7 @@ class DashboardAnalyticsController extends Controller
 
         return response()->json([
             'organizations' => $organizations,
-            'departments' => $departments,
+            'teams' => $teams,
             'users' => $users,
             'sims' => $sims,
             'effective_organization_id' => $effectiveOrganizationId,
@@ -208,7 +208,7 @@ class DashboardAnalyticsController extends Controller
             'call_type',
             'call_status',
             'organization_id',
-            'department_id',
+            'team_id',
             'user_id',
             'caller_number',
         ]);
@@ -219,7 +219,7 @@ class DashboardAnalyticsController extends Controller
             'call_type' => ['nullable', 'in:inbound,outbound'],
             'call_status' => ['nullable', 'in:Answered,No Answer,Missed'],
             'organization_id' => ['nullable', 'integer'],
-            'department_id' => ['nullable', 'integer'],
+            'team_id' => ['nullable', 'integer'],
             'user_id' => ['nullable', 'integer'],
             'sim_mobile' => ['nullable', 'array'],
             'sim_mobile.*' => ['string', 'max:25'],
@@ -428,7 +428,7 @@ class DashboardAnalyticsController extends Controller
             'start_date_time',
             'end_date_time',
             'organization_id',
-            'department_id',
+            'team_id',
             'user_id',
             'caller_number',
         ]);
@@ -437,7 +437,7 @@ class DashboardAnalyticsController extends Controller
             'start_date_time' => ['nullable', 'date'],
             'end_date_time' => ['nullable', 'date'],
             'organization_id' => ['nullable', 'integer'],
-            'department_id' => ['nullable', 'integer'],
+            'team_id' => ['nullable', 'integer'],
             'user_id' => ['nullable', 'integer'],
             'sim_mobile' => ['nullable', 'array'],
             'sim_mobile.*' => ['string', 'max:25'],
@@ -573,7 +573,7 @@ class DashboardAnalyticsController extends Controller
 
         if ($role === 'manager') {
             if ($hasCallerIdColumn) {
-                $accessible = $this->getManagerAccessibleDepartmentIds($authUser);
+                $accessible = $this->getManagerAccessibleTeamIds($authUser);
                 if (!empty($accessible)) {
                     $query->whereIn('call_logs.caller_id', $this->managerSimMobilesSubquery($authUser->organization_id, $accessible));
                 } else {
@@ -605,30 +605,30 @@ class DashboardAnalyticsController extends Controller
             $query->where('call_logs.call_status', $request->call_status);
         }
 
-        // Department filter
-        if ($request->filled('department_id')) {
-            $departmentId = (int) $request->department_id;
+        // Team filter
+        if ($request->filled('team_id')) {
+            $teamId = (int) $request->team_id;
 
-            $departmentName = Department::query()
-                ->where('id', $departmentId)
+            $teamName = Team::query()
+                ->where('id', $teamId)
                 ->value('name');
 
             if ($hasCallerIdColumn) {
                 $simMobilesSub = Sim::query()
-                    ->where('department_id', $departmentId)
+                    ->where('team_id', $teamId)
                     ->whereNotNull('mobile')
                     ->where('mobile', '!=', '')
                     ->select('mobile');
 
-                $query->where(function (Builder $q) use ($simMobilesSub, $departmentName) {
+                $query->where(function (Builder $q) use ($simMobilesSub, $teamName) {
                     $q->whereIn('call_logs.caller_id', $simMobilesSub);
-                    if (!empty($departmentName)) {
-                        $q->orWhere('call_logs.department_name', $departmentName);
+                    if (!empty($teamName)) {
+                        $q->orWhere('call_logs.team_name', $teamName);
                     }
                 });
             } else {
-                if (!empty($departmentName)) {
-                    $query->where('call_logs.department_name', $departmentName);
+                if (!empty($teamName)) {
+                    $query->where('call_logs.team_name', $teamName);
                 } else {
                     $query->whereRaw('1 = 0');
                 }
@@ -643,12 +643,12 @@ class DashboardAnalyticsController extends Controller
             if ($role === 'admin') {
                 $allowed = User::query()->where('id', $selectedUserId)->exists();
             } elseif ($role === 'manager') {
-                $accessible = $this->getManagerAccessibleDepartmentIds($authUser);
+                $accessible = $this->getManagerAccessibleTeamIds($authUser);
                 $allowed = !empty($accessible) && User::query()
                     ->where('id', $selectedUserId)
                     ->where('organization_id', $authUser->organization_id)
                     ->where('role', 'user')
-                    ->whereIn('department_id', $accessible)
+                    ->whereIn('team_id', $accessible)
                     ->exists();
             } else {
                 $allowed = User::query()
@@ -690,10 +690,10 @@ class DashboardAnalyticsController extends Controller
             ->selectRaw('DISTINCT TRIM(COALESCE(sims.mobile, user_sims.mobile))');
     }
 
-    private function managerSimMobilesSubquery(int $organizationId, array $departmentIds): Builder
+    private function managerSimMobilesSubquery(int $organizationId, array $teamIds): Builder
     {
-        $departmentIds = array_values(array_filter(array_map('intval', $departmentIds)));
-        if (empty($departmentIds)) {
+        $teamIds = array_values(array_filter(array_map('intval', $teamIds)));
+        if (empty($teamIds)) {
             // empty set
             return UserSim::query()->selectRaw('NULL')->whereRaw('1 = 0');
         }
@@ -703,7 +703,7 @@ class DashboardAnalyticsController extends Controller
             ->leftJoin('sims', 'sims.id', '=', 'user_sims.sim_id')
             ->where('users.organization_id', $organizationId)
             ->where('users.role', 'user')
-            ->whereIn('users.department_id', $departmentIds)
+            ->whereIn('users.team_id', $teamIds)
             ->whereRaw("TRIM(COALESCE(sims.mobile, user_sims.mobile)) <> ''")
             ->selectRaw('DISTINCT TRIM(COALESCE(sims.mobile, user_sims.mobile))');
     }
@@ -779,25 +779,25 @@ class DashboardAnalyticsController extends Controller
         return '0%';
     }
 
-    private function getManagerAccessibleDepartmentIds($authUser): array
+    private function getManagerAccessibleTeamIds($authUser): array
     {
-        $accessibleDepartments = [];
+        $accessibleTeams = [];
 
-        if ($authUser->department_id) {
-            $accessibleDepartments[] = $authUser->department_id;
+        if ($authUser->team_id) {
+            $accessibleTeams[] = $authUser->team_id;
         }
 
-        if ($authUser->allowed_department_ids) {
-            $allowedDepartments = is_string($authUser->allowed_department_ids)
-                ? json_decode($authUser->allowed_department_ids, true)
-                : $authUser->allowed_department_ids;
+        if ($authUser->allowed_team_ids) {
+            $allowedTeams = is_string($authUser->allowed_team_ids)
+                ? json_decode($authUser->allowed_team_ids, true)
+                : $authUser->allowed_team_ids;
 
-            if (!empty($allowedDepartments) && is_array($allowedDepartments)) {
-                $accessibleDepartments = array_merge($accessibleDepartments, $allowedDepartments);
+            if (!empty($allowedTeams) && is_array($allowedTeams)) {
+                $accessibleTeams = array_merge($accessibleTeams, $allowedTeams);
             }
         }
 
-        return array_values(array_unique(array_filter($accessibleDepartments)));
+        return array_values(array_unique(array_filter($accessibleTeams)));
     }
 
     private function normalizeEmptyStringsToNull(Request $request, array $keys): void

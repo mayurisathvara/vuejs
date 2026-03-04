@@ -48,9 +48,9 @@
         <div class="filter-item">
           <div class="select-wrapper">
             <i class="fas fa-sitemap filter-icon"></i>
-            <select v-model="departmentFilter" class="form-select select-modern" @change="handleDepartmentFilter">
-              <option value="">All Departments</option>
-              <option v-for="dept in departments" :key="dept.id" :value="dept.id">
+            <select v-model="teamFilter" class="form-select select-modern" @change="handleTeamFilter">
+              <option value="">All Teams</option>
+              <option v-for="dept in teams" :key="dept.id" :value="dept.id">
                 {{ dept.name }}
               </option>
             </select>
@@ -129,8 +129,8 @@
           <template #cell-organization_name="{ row }">
             {{ row.organization ? row.organization.name : 'N/A' }}
           </template>
-          <template #cell-department_name="{ row }">
-            <span v-if="row.department" class="badge bg-info">{{ row.department.name }}</span>
+          <template #cell-team_name="{ row }">
+            <span v-if="row.team" class="badge bg-info">{{ row.team.name }}</span>
             <span v-else class="text-muted">N/A</span>
           </template>
           <template #cell-status="{ value, row }">
@@ -256,17 +256,17 @@
           <div class="col-md-6 mb-3">
             <div class="form-group">
               <label class="form-label">
-                Department
+                Team
                 <span class="text-danger">*</span>
               </label>
-              <select v-model="userForm.department_id" class="form-select" :class="{ 'is-invalid': errors.department_id }" :disabled="!userForm.organization_id" required>
-                <option value="">Select Department</option>
-                <option v-for="dept in availableDepartments" :key="dept.id" :value="dept.id">
+              <select v-model="userForm.team_id" class="form-select" :class="{ 'is-invalid': errors.team_id }" :disabled="!userForm.organization_id" required>
+                <option value="">Select Team</option>
+                <option v-for="dept in availableTeams" :key="dept.id" :value="dept.id">
                   {{ dept.name }}
                 </option>
               </select>
-              <div v-if="errors.department_id" class="invalid-feedback d-block">
-                {{ getErrorMessage(errors.department_id) }}
+              <div v-if="errors.team_id" class="invalid-feedback d-block">
+                {{ getErrorMessage(errors.team_id) }}
               </div>
             </div>
           </div>
@@ -806,7 +806,7 @@ const isManager = computed(() => userRole.value === 'manager')
 // Search and filters
 const searchQuery = ref('')
 const organizationFilter = ref('')
-const departmentFilter = ref('')
+const teamFilter = ref('')
 const perPage = ref(10)
 const searchTimeout = ref(null)
 
@@ -824,14 +824,14 @@ const userForm = reactive({
   password: '',
   role: 'user',
   organization_id: '',
-  department_id: '',
+  team_id: '',
   status: 'active'
 })
 
 // Organizations data
 const organizations = ref([])
-const departments = ref([])
-const availableDepartments = ref([])
+const teams = ref([])
+const availableTeams = ref([])
 
 // Helper function to get error message
 const getErrorMessage = (error) => {
@@ -860,7 +860,7 @@ const userHeaders = computed(() => {
   }
   
   headers.push(
-    { key: 'department_name', label: 'Department', class: 'text-center' },
+    { key: 'team_name', label: 'Team', class: 'text-center' },
     { key: 'status', label: 'Status', class: 'text-center' }
   )
   
@@ -870,7 +870,7 @@ const userHeaders = computed(() => {
 // Methods
 const fetchUsers = async () => {
   try {
-    await usersStore.fetchUsers(1, searchQuery.value, organizationFilter.value, departmentFilter.value)
+    await usersStore.fetchUsers(1, searchQuery.value, organizationFilter.value, teamFilter.value)
   } catch (error) {
     console.error('Error fetching users:', error)
   }
@@ -902,46 +902,46 @@ const handleSearch = () => {
 }
 
 const handleOrganizationFilter = async () => {
-  // Reset department filter when organization changes
-  departmentFilter.value = ''
-  // Fetch departments for the selected organization
+  // Reset team filter when organization changes
+  teamFilter.value = ''
+  // Fetch teams for the selected organization
   if (organizationFilter.value) {
-    await fetchDepartmentsByOrganization(organizationFilter.value)
+    await fetchTeamsByOrganization(organizationFilter.value)
   } else {
-    departments.value = []
+    teams.value = []
   }
   fetchUsers()
 }
 
-const handleDepartmentFilter = () => {
+const handleTeamFilter = () => {
   fetchUsers()
 }
 
-const fetchDepartmentsByOrganization = async (organizationId) => {
+const fetchTeamsByOrganization = async (organizationId) => {
   try {
-    const response = await api.get(`/users/departments?organization_id=${organizationId}`)
-    departments.value = response.data
+    const response = await api.get(`/users/teams?organization_id=${organizationId}`)
+    teams.value = response.data
   } catch (error) {
-    console.error('Error fetching departments:', error)
-    departments.value = []
+    console.error('Error fetching teams:', error)
+    teams.value = []
   }
 }
 
 const handleOrganizationChange = async () => {
-  // Reset department selection when organization changes
-  userForm.department_id = ''
+  // Reset team selection when organization changes
+  userForm.team_id = ''
   
-  // Fetch departments for the selected organization
+  // Fetch teams for the selected organization
   if (userForm.organization_id) {
     try {
-      const response = await api.get(`/users/departments?organization_id=${userForm.organization_id}`)
-      availableDepartments.value = response.data
+      const response = await api.get(`/users/teams?organization_id=${userForm.organization_id}`)
+      availableTeams.value = response.data
     } catch (error) {
-      console.error('Error fetching departments:', error)
-      availableDepartments.value = []
+      console.error('Error fetching teams:', error)
+      availableTeams.value = []
     }
   } else {
-    availableDepartments.value = []
+    availableTeams.value = []
   }
 }
 
@@ -951,14 +951,14 @@ const handlePerPageChange = () => {
 }
 
 const handlePageChange = (page) => {
-  usersStore.fetchUsers(page, searchQuery.value, organizationFilter.value, departmentFilter.value)
+  usersStore.fetchUsers(page, searchQuery.value, organizationFilter.value, teamFilter.value)
 }
 
 const openCreateModal = async () => {
   isEditing.value = false
   resetForm()
   
-  // For non-admin users, fetch departments after organization is auto-set
+  // For non-admin users, fetch teams after organization is auto-set
   if ((isOrganization.value || isManager.value) && organizations.value.length > 0) {
     userForm.organization_id = organizations.value[0].id
     await handleOrganizationChange()
@@ -974,19 +974,19 @@ const openEditModal = async (user) => {
   userForm.mobile = user.mobile || ''
   userForm.role = user.role || 'user'
   userForm.organization_id = user.organization_id || ''
-  userForm.department_id = user.department_id || ''
+  userForm.team_id = user.team_id || ''
   userForm.status = user.status || 'active'
   userForm.password = ''
   userToDelete.value = user
   
-  // Fetch departments for the user's organization
+  // Fetch teams for the user's organization
   if (userForm.organization_id) {
     try {
-      const response = await api.get(`/users/departments?organization_id=${userForm.organization_id}`)
-      availableDepartments.value = response.data
+      const response = await api.get(`/users/teams?organization_id=${userForm.organization_id}`)
+      availableTeams.value = response.data
     } catch (error) {
-      console.error('Error fetching departments:', error)
-      availableDepartments.value = []
+      console.error('Error fetching teams:', error)
+      availableTeams.value = []
     }
   }
   
@@ -1015,9 +1015,9 @@ const resetForm = () => {
   userForm.password = ''
   userForm.role = 'user'
   userForm.organization_id = ''
-  userForm.department_id = ''
+  userForm.team_id = ''
   userForm.status = 'active'
-  availableDepartments.value = []
+  availableTeams.value = []
   errors.value = {}
   errorMessage.value = ''
 }
@@ -1051,8 +1051,8 @@ const handleSubmit = async () => {
     validationErrors.organization_id = 'Organization is required'
   }
   
-  if (!userForm.department_id) {
-    validationErrors.department_id = 'Department is required'
+  if (!userForm.team_id) {
+    validationErrors.team_id = 'Team is required'
   }
   
   if (!userForm.role) {
@@ -1188,12 +1188,12 @@ onMounted(async () => {
   // Start fetching users immediately (non-blocking)
   fetchUsers()
   
-  // Fetch organizations and then departments for non-admin users
+  // Fetch organizations and then teams for non-admin users
   fetchOrganizations().then(() => {
-    // For non-admin users, fetch departments for their organization
+    // For non-admin users, fetch teams for their organization
     if ((isOrganization.value || isManager.value) && organizations.value.length > 0) {
       userForm.organization_id = organizations.value[0].id
-      fetchDepartmentsByOrganization(organizations.value[0].id)
+      fetchTeamsByOrganization(organizations.value[0].id)
     }
   })
   

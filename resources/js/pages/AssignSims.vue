@@ -44,8 +44,8 @@
                 <div>{{ userData.organization?.name || 'N/A' }}</div>
               </div>
               <div class="col-md-6 mb-2">
-                <label class="text-muted small">Primary Department</label>
-                <div>{{ userData.department?.name || 'N/A' }}</div>
+                <label class="text-muted small">Primary Team</label>
+                <div>{{ userData.team?.name || 'N/A' }}</div>
               </div>
             </div>
           </div>
@@ -56,54 +56,54 @@
           <div class="card-body">
             <h5 class="card-title mb-4">SIM Assignment</h5>
             <form @submit.prevent="handleSubmit">
-              <!-- Allowed Departments -->
+              <!-- Allowed Teams -->
               <div class="mb-4">
                 <label class="form-label">
-                  Allowed Departments
+                  Allowed Teams
                   <span class="text-danger">*</span>
                 </label>
                 <div class="multiselect-header">
                   <button
                     type="button"
                     class="btn btn-sm btn-outline-primary"
-                    @click="selectAllDepartments"
+                    @click="selectAllTeams"
                   >
                     <i class="fas fa-check-double me-1"></i>
                     Select All
                   </button>
                   <button
-                    v-if="form.allowed_department_ids.length > 0"
+                    v-if="form.allowed_team_ids.length > 0"
                     type="button"
                     class="btn btn-sm btn-outline-secondary"
-                    @click="clearAllDepartments"
+                    @click="clearAllTeams"
                   >
                     <i class="fas fa-times me-1"></i>
                     Clear All
                   </button>
                   <span class="text-muted ms-auto">
-                    {{ form.allowed_department_ids.length }} of {{ departments.length }} selected
+                    {{ form.allowed_team_ids.length }} of {{ teams.length }} selected
                   </span>
                 </div>
-                <div class="department-checkboxes">
-                  <div v-for="dept in departments" :key="dept.id" class="form-check mb-2">
+                <div class="team-checkboxes">
+                  <div v-for="team in teams" :key="team.id" class="form-check mb-2">
                     <input
-                      :id="`dept-${dept.id}`"
-                      v-model="form.allowed_department_ids"
+                      :id="`team-${team.id}`"
+                      v-model="form.allowed_team_ids"
                       class="form-check-input"
                       type="checkbox"
-                      :value="dept.id"
-                      :disabled="dept.id === userData?.department_id"
-                      @change="handleDepartmentChange"
+                      :value="team.id"
+                      :disabled="team.id === userData?.team_id"
+                      @change="handleTeamChange"
                     />
-                    <label class="form-check-label" :for="`dept-${dept.id}`">
+                    <label class="form-check-label" :for="`team-${team.id}`">
                       <i class="fas fa-sitemap me-2 text-primary"></i>
-                      {{ dept.name }}
-                      <span v-if="dept.id === userData?.department_id" class="badge bg-info ms-2">Primary</span>
+                      {{ team.name }}
+                      <span v-if="team.id === userData?.team_id" class="badge bg-info ms-2">Primary</span>
                     </label>
                   </div>
                 </div>
-                <div v-if="errors.allowed_department_ids" class="text-danger small mt-1">
-                  {{ getErrorMessage(errors.allowed_department_ids) }}
+                <div v-if="errors.allowed_team_ids" class="text-danger small mt-1">
+                  {{ getErrorMessage(errors.allowed_team_ids) }}
                 </div>
               </div>
 
@@ -122,16 +122,16 @@
                   <span class="ms-2">Loading SIMs...</span>
                 </div>
 
-                <!-- No departments selected -->
-                <div v-else-if="form.allowed_department_ids.length === 0" class="alert alert-info">
+                <!-- No teams selected -->
+                <div v-else-if="form.allowed_team_ids.length === 0" class="alert alert-info">
                   <i class="fas fa-info-circle me-2"></i>
-                  Please select at least one department to view available SIMs
+                  Please select at least one team to view available SIMs
                 </div>
 
                 <!-- No SIMs available -->
                 <div v-else-if="availableSims.length === 0" class="alert alert-warning">
                   <i class="fas fa-exclamation-triangle me-2"></i>
-                  No SIMs available in the selected departments
+                  No SIMs available in the selected teams
                 </div>
 
                 <!-- SIMs List -->
@@ -175,7 +175,7 @@
                             <span v-if="sim.name" class="sim-name">{{ sim.name }}</span>
                           </div>
                         </div>
-                        <span class="badge bg-info">{{ getDepartmentName(sim.department_id) }}</span>
+                        <span class="badge bg-info">{{ getTeamName(sim.team_id) }}</span>
                       </label>
                     </div>
                   </div>
@@ -229,12 +229,12 @@
             
             <div class="summary-item mb-3">
               <div class="d-flex justify-content-between align-items-center mb-2">
-                <span class="text-muted">Selected Departments</span>
-                <span class="badge bg-primary">{{ form.allowed_department_ids.length }}</span>
+                <span class="text-muted">Selected Teams</span>
+                <span class="badge bg-primary">{{ form.allowed_team_ids.length }}</span>
               </div>
-              <div v-if="form.allowed_department_ids.length > 0" class="small">
-                <div v-for="deptId in form.allowed_department_ids" :key="deptId" class="badge bg-light text-dark me-1 mb-1">
-                  {{ getDepartmentName(deptId) }}
+              <div v-if="form.allowed_team_ids.length > 0" class="small">
+                <div v-for="teamId in form.allowed_team_ids" :key="teamId" class="badge bg-light text-dark me-1 mb-1">
+                  {{ getTeamName(teamId) }}
                 </div>
               </div>
             </div>
@@ -289,14 +289,14 @@ const loading = ref(true)
 const loadingSims = ref(false)
 const submitting = ref(false)
 const userData = ref(null)
-const departments = ref([])
+const teams = ref([])
 const availableSims = ref([])
 const errors = ref({})
 const errorMessage = ref('')
 const successMessage = ref('')
 
 const form = ref({
-  allowed_department_ids: [],
+  allowed_team_ids: [],
   sim_ids: [],
 })
 
@@ -306,7 +306,7 @@ const canAssignSims = computed(() => {
 
 const canSubmit = computed(() => {
   if (submitting.value) return false
-  if (form.value.allowed_department_ids.length === 0) return false
+  if (form.value.allowed_team_ids.length === 0) return false
   if (!canAssignSims.value) return true
   return form.value.sim_ids.length > 0
 })
@@ -317,38 +317,38 @@ const loadUserData = async () => {
     const response = await api.get(`/users/${userId.value}/assign-sims`)
     userData.value = response.data.user
     
-    // Parse allowed_department_ids from JSON string if needed
-    let allowedDeptIds = []
-    if (userData.value.allowed_department_ids) {
-      if (typeof userData.value.allowed_department_ids === 'string') {
+    // Parse allowed_team_ids from JSON string if needed
+    let allowedTeamIds = []
+    if (userData.value.allowed_team_ids) {
+      if (typeof userData.value.allowed_team_ids === 'string') {
         try {
-          allowedDeptIds = JSON.parse(userData.value.allowed_department_ids)
+          allowedTeamIds = JSON.parse(userData.value.allowed_team_ids)
         } catch (e) {
-          console.error('Error parsing allowed_department_ids:', e)
+          console.error('Error parsing allowed_team_ids:', e)
         }
-      } else if (Array.isArray(userData.value.allowed_department_ids)) {
-        allowedDeptIds = userData.value.allowed_department_ids
+      } else if (Array.isArray(userData.value.allowed_team_ids)) {
+        allowedTeamIds = userData.value.allowed_team_ids
       }
     }
     
-    // Ensure user's own department is always included
-    if (userData.value.department_id && !allowedDeptIds.includes(userData.value.department_id)) {
-      allowedDeptIds.push(userData.value.department_id)
+    // Ensure user's own team is always included
+    if (userData.value.team_id && !allowedTeamIds.includes(userData.value.team_id)) {
+      allowedTeamIds.push(userData.value.team_id)
     }
     
-    form.value.allowed_department_ids = allowedDeptIds
+    form.value.allowed_team_ids = allowedTeamIds
     form.value.sim_ids = canAssignSims.value ? (response.data.assigned_sim_ids || []) : []
 
-    // Sort departments: selected ones first
-    departments.value = response.data.departments.sort((a, b) => {
-      const aSelected = allowedDeptIds.includes(a.id)
-      const bSelected = allowedDeptIds.includes(b.id)
+    // Sort teams: selected ones first
+    teams.value = response.data.teams.sort((a, b) => {
+      const aSelected = allowedTeamIds.includes(a.id)
+      const bSelected = allowedTeamIds.includes(b.id)
       if (aSelected && !bSelected) return -1
       if (!aSelected && bSelected) return 1
       return a.name.localeCompare(b.name)
     })
 
-    if (canAssignSims.value && form.value.allowed_department_ids.length > 0) {
+    if (canAssignSims.value && form.value.allowed_team_ids.length > 0) {
       await loadAvailableSims()
     } else {
       availableSims.value = []
@@ -363,16 +363,16 @@ const loadUserData = async () => {
 }
 
 const loadAvailableSims = async () => {
-  if (form.value.allowed_department_ids.length === 0) {
+  if (form.value.allowed_team_ids.length === 0) {
     availableSims.value = []
     return
   }
 
   try {
     loadingSims.value = true
-    const response = await api.post('/users/sims/by-departments', {
+    const response = await api.post('/users/sims/by-teams', {
       user_id: userId.value,
-      department_ids: form.value.allowed_department_ids,
+      team_ids: form.value.allowed_team_ids,
     })
     
     // Sort SIMs: selected ones first
@@ -391,11 +391,11 @@ const loadAvailableSims = async () => {
   }
 }
 
-const handleDepartmentChange = async () => {
+const handleTeamChange = async () => {
   if (canAssignSims.value) {
     form.value.sim_ids = form.value.sim_ids.filter(simId => {
       const sim = availableSims.value.find(s => s.id === simId)
-      return sim && form.value.allowed_department_ids.includes(sim.department_id)
+      return sim && form.value.allowed_team_ids.includes(sim.team_id)
     })
 
     await loadAvailableSims()
@@ -404,8 +404,8 @@ const handleDepartmentChange = async () => {
     availableSims.value = []
   }
   
-  if (errors.value.allowed_department_ids) {
-    delete errors.value.allowed_department_ids
+  if (errors.value.allowed_team_ids) {
+    delete errors.value.allowed_team_ids
   }
 }
 
@@ -414,8 +414,8 @@ const handleSubmit = async () => {
   errorMessage.value = ''
   successMessage.value = ''
 
-  if (form.value.allowed_department_ids.length === 0) {
-    errors.value.allowed_department_ids = ['At least one department must be selected']
+  if (form.value.allowed_team_ids.length === 0) {
+    errors.value.allowed_team_ids = ['At least one team must be selected']
     return
   }
 
@@ -427,7 +427,7 @@ const handleSubmit = async () => {
   try {
     submitting.value = true
     const payload = {
-      allowed_department_ids: form.value.allowed_department_ids,
+      allowed_team_ids: form.value.allowed_team_ids,
     }
     if (canAssignSims.value) {
       payload.sim_ids = form.value.sim_ids
@@ -455,9 +455,9 @@ const handleSubmit = async () => {
   }
 }
 
-const getDepartmentName = (deptId) => {
-  const dept = departments.value.find(d => d.id === deptId)
-  return dept?.name || 'Unknown'
+const getTeamName = (teamId) => {
+  const team = teams.value.find(d => d.id === teamId)
+  return team?.name || 'Unknown'
 }
 
 const getSimMobile = (simId) => {
@@ -470,20 +470,20 @@ const getSimName = (simId) => {
   return sim?.name || 'N/A'
 }
 
-const selectAllDepartments = () => {
-  form.value.allowed_department_ids = departments.value.map(dept => dept.id)
-  handleDepartmentChange()
+const selectAllTeams = () => {
+  form.value.allowed_team_ids = teams.value.map(team => team.id)
+  handleTeamChange()
 }
 
-const clearAllDepartments = () => {
-  // Keep user's own department always selected
-  if (userData.value?.department_id) {
-    form.value.allowed_department_ids = [userData.value.department_id]
+const clearAllTeams = () => {
+  // Keep user's own team always selected
+  if (userData.value?.team_id) {
+    form.value.allowed_team_ids = [userData.value.team_id]
   } else {
-    form.value.allowed_department_ids = []
+    form.value.allowed_team_ids = []
   }
   form.value.sim_ids = []
-  handleDepartmentChange()
+  handleTeamChange()
 }
 
 const selectAllSims = () => {
@@ -563,7 +563,7 @@ onMounted(() => {
   font-weight: 500;
 }
 
-.department-checkboxes {
+.team-checkboxes {
   max-height: 280px;
   overflow-y: auto;
   padding: 15px;
@@ -741,24 +741,24 @@ onMounted(() => {
   border-radius: 8px;
 }
 
-.department-checkboxes::-webkit-scrollbar,
+.team-checkboxes::-webkit-scrollbar,
 .sims-selection-box::-webkit-scrollbar {
   width: 8px;
 }
 
-.department-checkboxes::-webkit-scrollbar-track,
+.team-checkboxes::-webkit-scrollbar-track,
 .sims-selection-box::-webkit-scrollbar-track {
   background: #f1f1f1;
   border-radius: 10px;
 }
 
-.department-checkboxes::-webkit-scrollbar-thumb,
+.team-checkboxes::-webkit-scrollbar-thumb,
 .sims-selection-box::-webkit-scrollbar-thumb {
   background: #888;
   border-radius: 10px;
 }
 
-.department-checkboxes::-webkit-scrollbar-thumb:hover,
+.team-checkboxes::-webkit-scrollbar-thumb:hover,
 .sims-selection-box::-webkit-scrollbar-thumb:hover {
   background: #555;
 }

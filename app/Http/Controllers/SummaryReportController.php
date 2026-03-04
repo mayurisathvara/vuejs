@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\CallLog;
-use App\Models\Department;
+use App\Models\Team;
 use App\Models\Organization;
 use App\Models\Sim;
 use App\Models\User;
@@ -25,7 +25,7 @@ class SummaryReportController extends Controller
             'call_type',
             'call_status',
             'organization_id',
-            'department_id',
+            'team_id',
             'user_id',
             'per_page',
             'page',
@@ -37,7 +37,7 @@ class SummaryReportController extends Controller
             'call_type' => ['nullable', 'in:inbound,outbound'],
             'call_status' => ['nullable', 'in:Answered,No Answer,Missed'],
             'organization_id' => ['nullable', 'integer'],
-            'department_id' => ['nullable', 'integer'],
+            'team_id' => ['nullable', 'integer'],
             'user_id' => ['nullable', 'integer'],
             'sim_mobile' => ['nullable', 'array'],
             'sim_mobile.*' => ['string', 'max:25'],
@@ -92,13 +92,13 @@ class SummaryReportController extends Controller
     {
         $this->normalizeEmptyStringsToNull($request, [
             'organization_id',
-            'department_id',
+            'team_id',
             'user_id',
         ]);
 
         $validator = Validator::make($request->all(), [
             'organization_id' => ['nullable', 'integer'],
-            'department_id' => ['nullable', 'integer'],
+            'team_id' => ['nullable', 'integer'],
             'user_id' => ['nullable', 'integer'],
         ]);
 
@@ -127,39 +127,39 @@ class SummaryReportController extends Controller
                 ->get();
         }
 
-        $departments = collect();
+        $teams = collect();
         if ($effectiveOrganizationId) {
-            $departmentsQuery = Department::where('organization_id', $effectiveOrganizationId)
+            $teamsQuery = Team::where('organization_id', $effectiveOrganizationId)
                 ->select(['id', 'name'])
                 ->orderBy('name');
 
             if ($role === 'manager') {
-                $accessible = $this->getManagerAccessibleDepartmentIds($authUser);
+                $accessible = $this->getManagerAccessibleTeamIds($authUser);
                 if (!empty($accessible)) {
-                    $departmentsQuery->whereIn('id', $accessible);
+                    $teamsQuery->whereIn('id', $accessible);
                 } else {
-                    $departmentsQuery->whereRaw('1 = 0');
+                    $teamsQuery->whereRaw('1 = 0');
                 }
             }
 
-            $departments = $departmentsQuery->get();
+            $teams = $teamsQuery->get();
         }
 
         $users = collect();
         if ($effectiveOrganizationId) {
             $usersQuery = User::whereIn('role', ['user', 'manager'])
-                ->select(['id', 'name', 'department_id', 'organization_id', 'role'])
+                ->select(['id', 'name', 'team_id', 'organization_id', 'role'])
                 ->orderBy('name')
                 ->where('organization_id', $effectiveOrganizationId);
 
-            if ($request->filled('department_id')) {
-                $usersQuery->where('department_id', (int) $request->department_id);
+            if ($request->filled('team_id')) {
+                $usersQuery->where('team_id', (int) $request->team_id);
             }
 
             if ($role === 'manager') {
-                $accessible = $this->getManagerAccessibleDepartmentIds($authUser);
+                $accessible = $this->getManagerAccessibleTeamIds($authUser);
                 if (!empty($accessible)) {
-                    $usersQuery->whereIn('department_id', $accessible);
+                    $usersQuery->whereIn('team_id', $accessible);
                 } else {
                     $usersQuery->whereRaw('1 = 0');
                 }
@@ -177,7 +177,7 @@ class SummaryReportController extends Controller
                 ->addSelect([
                     'sims.id as id',
                     'sims.name as name',
-                    'sims.department_id as department_id',
+                    'sims.team_id as team_id',
                 ])
                 ->orderBy('mobile')
                 ->get()
@@ -187,14 +187,14 @@ class SummaryReportController extends Controller
                     'id' => $row->id,
                     'mobile' => $row->mobile,
                     'name' => $row->name,
-                    'department_id' => $row->department_id,
+                    'team_id' => $row->team_id,
                 ]);
         } elseif ($effectiveOrganizationId) {
             $selectedUserId = $request->filled('user_id') ? (int) $request->user_id : null;
 
             if ($selectedUserId) {
                 $selectedUser = User::query()
-                    ->select(['id', 'organization_id', 'department_id', 'role'])
+                    ->select(['id', 'organization_id', 'team_id', 'role'])
                     ->where('id', $selectedUserId)
                     ->first();
 
@@ -203,8 +203,8 @@ class SummaryReportController extends Controller
                     if ($role === 'admin') {
                         $allowed = true;
                     } elseif ($role === 'manager') {
-                        $accessible = $this->getManagerAccessibleDepartmentIds($authUser);
-                        $allowed = $selectedUser->role === 'user' && in_array((int) $selectedUser->department_id, $accessible, true);
+                        $accessible = $this->getManagerAccessibleTeamIds($authUser);
+                        $allowed = $selectedUser->role === 'user' && in_array((int) $selectedUser->team_id, $accessible, true);
                     } else {
                         $allowed = true;
                     }
@@ -218,7 +218,7 @@ class SummaryReportController extends Controller
                         ->addSelect([
                             'sims.id as id',
                             'sims.name as name',
-                            'sims.department_id as department_id',
+                            'sims.team_id as team_id',
                         ])
                         ->orderBy('mobile')
                         ->get()
@@ -228,17 +228,17 @@ class SummaryReportController extends Controller
                             'id' => $row->id,
                             'mobile' => $row->mobile,
                             'name' => $row->name,
-                            'department_id' => $row->department_id,
+                            'team_id' => $row->team_id,
                         ]);
                 } else {
                     $sims = collect();
                 }
             } else {
                 $simsQuery = Sim::where('organization_id', $effectiveOrganizationId)
-                    ->select(['id', 'mobile', 'name', 'organization_id', 'department_id']);
+                    ->select(['id', 'mobile', 'name', 'organization_id', 'team_id']);
 
-                if ($request->filled('department_id')) {
-                    $simsQuery->where('department_id', (int) $request->department_id);
+                if ($request->filled('team_id')) {
+                    $simsQuery->where('team_id', (int) $request->team_id);
                 }
 
                 $sims = $simsQuery
@@ -248,7 +248,7 @@ class SummaryReportController extends Controller
                         'id' => $sim->id,
                         'mobile' => $sim->mobile,
                         'name' => $sim->name,
-                        'department_id' => $sim->department_id,
+                        'team_id' => $sim->team_id,
                     ]);
             }
         } else {
@@ -257,7 +257,7 @@ class SummaryReportController extends Controller
 
         return response()->json([
             'organizations' => $organizations,
-            'departments' => $departments,
+            'teams' => $teams,
             'users' => $users,
             'sims' => $sims,
             'effective_organization_id' => $effectiveOrganizationId,
@@ -273,7 +273,7 @@ class SummaryReportController extends Controller
             'call_type',
             'call_status',
             'organization_id',
-            'department_id',
+            'team_id',
             'user_id',
         ]);
 
@@ -284,7 +284,7 @@ class SummaryReportController extends Controller
             'call_type' => ['nullable', 'in:inbound,outbound'],
             'call_status' => ['nullable', 'in:Answered,No Answer,Missed'],
             'organization_id' => ['nullable', 'integer'],
-            'department_id' => ['nullable', 'integer'],
+            'team_id' => ['nullable', 'integer'],
             'user_id' => ['nullable', 'integer'],
             'sim_mobile' => ['nullable', 'array'],
             'sim_mobile.*' => ['string', 'max:25'],
@@ -325,12 +325,14 @@ class SummaryReportController extends Controller
                 fputcsv($out, [
                     '#',
                     'Phone Number',
+                    'Name',
+                    'Team',
                     'Total Calls',
+                    'Total Unique Calls',
                     'Total Duration',
                     'Answered Calls',
                     'Answered Calls Duration',
                     'Answered Call Avg. Duration',
-                    'Unique Clients',
                     'Inbound Total Call',
                     'Inbound Total Duration',
                     'Inbound Answered',
@@ -348,12 +350,14 @@ class SummaryReportController extends Controller
                     fputcsv($out, [
                         $index + 1,
                         $row['phone_number'],
+                        $row['name'] ?? '-',
+                        $row['department'] ?? '-',
                         $row['total_calls'],
+                        $row['unique_clients'],
                         $row['total_duration_formatted'],
                         $row['answered_calls'],
                         $row['answered_duration_formatted'],
                         $row['answered_avg_duration_formatted'],
-                        $row['unique_clients'],
                         $row['inbound_total_calls'],
                         $row['inbound_total_duration_formatted'],
                         $row['inbound_answered'],
@@ -386,12 +390,14 @@ class SummaryReportController extends Controller
             foreach ([
                 '#',
                 'Phone Number',
+                'Name',
+                'Team',
                 'Total Calls',
+                'Total Unique Calls',
                 'Total Duration',
                 'Answered Calls',
                 'Answered Calls Duration',
                 'Answered Call Avg. Duration',
-                'Unique Clients',
                 'Inbound Total Call',
                 'Inbound Total Duration',
                 'Inbound Answered',
@@ -412,12 +418,14 @@ class SummaryReportController extends Controller
                 echo '<tr>';
                 echo '<td>' . ($index + 1) . '</td>';
                 echo '<td>' . htmlspecialchars($row['phone_number'], ENT_QUOTES, 'UTF-8') . '</td>';
+                echo '<td>' . htmlspecialchars($row['name'] ?? '-', ENT_QUOTES, 'UTF-8') . '</td>';
+                echo '<td>' . htmlspecialchars($row['department'] ?? '-', ENT_QUOTES, 'UTF-8') . '</td>';
                 echo '<td>' . $row['total_calls'] . '</td>';
+                echo '<td>' . $row['unique_clients'] . '</td>';
                 echo '<td>' . htmlspecialchars($row['total_duration_formatted'], ENT_QUOTES, 'UTF-8') . '</td>';
                 echo '<td>' . $row['answered_calls'] . '</td>';
                 echo '<td>' . htmlspecialchars($row['answered_duration_formatted'], ENT_QUOTES, 'UTF-8') . '</td>';
                 echo '<td>' . htmlspecialchars($row['answered_avg_duration_formatted'], ENT_QUOTES, 'UTF-8') . '</td>';
-                echo '<td>' . $row['unique_clients'] . '</td>';
                 echo '<td>' . $row['inbound_total_calls'] . '</td>';
                 echo '<td>' . htmlspecialchars($row['inbound_total_duration_formatted'], ENT_QUOTES, 'UTF-8') . '</td>';
                 echo '<td>' . $row['inbound_answered'] . '</td>';
@@ -473,7 +481,9 @@ class SummaryReportController extends Controller
             foreach ($summaryBySim as $callerId => $data) {
                 $userInfo = $this->getUserInfoForSim($callerId);
                 $summaryData[] = [
-                    'phone_number' => $callerId . ($userInfo ? ' - ' . $userInfo : ''),
+                    'phone_number' => $callerId,
+                    'name' => $userInfo['name'] ?? null,
+                    'department' => $userInfo['department'] ?? null,
                     'total_calls' => 0,
                     'total_duration_formatted' => '0h 0m 0s',
                     'answered_calls' => 0,
@@ -591,7 +601,9 @@ class SummaryReportController extends Controller
             $userInfo = $this->getUserInfoForSim($callerId);
 
             $summaryData[] = [
-                'phone_number' => $callerId . ($userInfo ? ' - ' . $userInfo : ''),
+                'phone_number' => $callerId,
+                'name' => $userInfo['name'] ?? null,
+                'department' => $userInfo['department'] ?? null,
                 'total_calls' => $data['total_calls'],
                 'total_duration_formatted' => $this->formatDuration($data['total_duration_seconds']),
                 'answered_calls' => $data['answered_calls'],
@@ -621,19 +633,18 @@ class SummaryReportController extends Controller
         return $summaryData;
     }
 
-    private function getUserInfoForSim(string $mobile): ?string
+    private function getUserInfoForSim(string $mobile): array
     {
         $sim = Sim::query()
-            ->leftJoin('departments', 'departments.id', '=', 'sims.department_id')
+            ->leftJoin('teams', 'teams.id', '=', 'sims.team_id')
             ->where('sims.mobile', $mobile)
-            ->select(['sims.name', 'departments.name as department_name'])
+            ->select(['sims.name', 'teams.name as team_name'])
             ->first();
 
-        if ($sim && $sim->name) {
-            return $sim->name . ($sim->department_name ? ' - ' . $sim->department_name : '');
-        }
-
-        return null;
+        return [
+            'name' => $sim->name ?? null,
+            'department' => $sim->team_name ?? null,
+        ];
     }
 
     private function formatDuration(int $seconds): string
@@ -665,9 +676,9 @@ class SummaryReportController extends Controller
                 
                 if ($request->filled('user_id')) {
                     $simMobiles = $this->getUserSimMobilesForCallerId((int) $request->user_id);
-                } elseif ($request->filled('department_id')) {
+                } elseif ($request->filled('team_id')) {
                     $simMobiles = Sim::where('organization_id', $orgId)
-                        ->where('department_id', (int) $request->department_id)
+                        ->where('team_id', (int) $request->team_id)
                         ->pluck('mobile')
                         ->filter()
                         ->unique()
@@ -687,29 +698,29 @@ class SummaryReportController extends Controller
                     ->toArray();
             }
         } elseif ($role === 'manager') {
-            $accessible = $this->getManagerAccessibleDepartmentIds($authUser);
+            $accessible = $this->getManagerAccessibleTeamIds($authUser);
             
             if (!empty($accessible)) {
                 if ($request->filled('user_id')) {
                     $selectedUserId = (int) $request->user_id;
                     $selectedUser = User::find($selectedUserId);
                     
-                    if ($selectedUser && $selectedUser->role === 'user' && in_array((int) $selectedUser->department_id, $accessible, true)) {
+                    if ($selectedUser && $selectedUser->role === 'user' && in_array((int) $selectedUser->team_id, $accessible, true)) {
                         $simMobiles = $this->getUserSimMobilesForCallerId($selectedUserId);
                     }
-                } elseif ($request->filled('department_id')) {
-                    // Filter by specific department
-                    $deptId = (int) $request->department_id;
-                    if (in_array($deptId, $accessible, true)) {
-                        $simMobiles = Sim::where('department_id', $deptId)
+                } elseif ($request->filled('team_id')) {
+                    // Filter by specific team
+                    $teamId = (int) $request->team_id;
+                    if (in_array($teamId, $accessible, true)) {
+                        $simMobiles = Sim::where('team_id', $teamId)
                             ->pluck('mobile')
                             ->filter()
                             ->unique()
                             ->toArray();
                     }
                 } else {
-                    // Get all SIMs from accessible departments
-                    $simMobiles = Sim::whereIn('department_id', $accessible)
+                    // Get all SIMs from accessible teams
+                    $simMobiles = Sim::whereIn('team_id', $accessible)
                         ->pluck('mobile')
                         ->filter()
                         ->unique()
@@ -727,9 +738,9 @@ class SummaryReportController extends Controller
                 if ($selectedUser && (int) $selectedUser->organization_id === (int) $orgId) {
                     $simMobiles = $this->getUserSimMobilesForCallerId($selectedUserId);
                 }
-            } elseif ($request->filled('department_id')) {
+            } elseif ($request->filled('team_id')) {
                 $simMobiles = Sim::where('organization_id', $orgId)
-                    ->where('department_id', (int) $request->department_id)
+                    ->where('team_id', (int) $request->team_id)
                     ->pluck('mobile')
                     ->filter()
                     ->unique()
@@ -787,25 +798,25 @@ class SummaryReportController extends Controller
             ->toArray();
     }
 
-    private function getManagerAccessibleDepartmentIds($authUser): array
+    private function getManagerAccessibleTeamIds($authUser): array
     {
-        $accessibleDepartments = [];
+        $accessibleTeams = [];
 
-        if ($authUser->department_id) {
-            $accessibleDepartments[] = $authUser->department_id;
+        if ($authUser->team_id) {
+            $accessibleTeams[] = $authUser->team_id;
         }
 
-        if ($authUser->allowed_department_ids) {
-            $allowedDepartments = is_string($authUser->allowed_department_ids)
-                ? json_decode($authUser->allowed_department_ids, true)
-                : $authUser->allowed_department_ids;
+        if ($authUser->allowed_team_ids) {
+            $allowedTeams = is_string($authUser->allowed_team_ids)
+                ? json_decode($authUser->allowed_team_ids, true)
+                : $authUser->allowed_team_ids;
 
-            if (!empty($allowedDepartments) && is_array($allowedDepartments)) {
-                $accessibleDepartments = array_merge($accessibleDepartments, $allowedDepartments);
+            if (!empty($allowedTeams) && is_array($allowedTeams)) {
+                $accessibleTeams = array_merge($accessibleTeams, $allowedTeams);
             }
         }
 
-        return array_values(array_unique(array_filter($accessibleDepartments)));
+        return array_values(array_unique(array_filter($accessibleTeams)));
     }
 
     private function normalizeEmptyStringsToNull(Request $request, array $keys): void

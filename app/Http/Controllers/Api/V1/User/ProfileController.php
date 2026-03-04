@@ -20,13 +20,13 @@ class ProfileController extends Controller
         $sim = $request->user();
 
         // Load relationships
-        $sim->load(['organization', 'department']);
+        $sim->load(['organization', 'team']);
 
         return $this->successResponse([
             'name' => $sim->name,
             'mobile' => $sim->mobile,
             'organization_name' => $sim->organization ? $sim->organization->name : null,
-            'department_name' => $sim->department ? $sim->department->name : null,
+            'team_name' => $sim->team ? $sim->team->name : null,
         ], 'Profile fetched successfully');
     }
 }

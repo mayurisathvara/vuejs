@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Sim;
 use App\Models\Organization;
-use App\Models\Department;
+use App\Models\Team;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
@@ -20,7 +20,7 @@ class SimController extends Controller
         
         // Select only needed columns for better performance
         $query = Sim::select([
-            'id', 'mobile', 'name', 'organization_id', 'department_id', 
+            'id', 'mobile', 'name', 'organization_id', 'team_id', 
             'status', 'created_at', 'updated_at'
         ]);
 
@@ -47,9 +47,9 @@ class SimController extends Controller
             $query->where('organization_id', $request->organization_id);
         }
 
-        // Filter by department
-        if ($request->has('department_id') && $request->department_id) {
-            $query->where('department_id', $request->department_id);
+        // Filter by team
+        if ($request->has('team_id') && $request->team_id) {
+            $query->where('team_id', $request->team_id);
         }
 
         // Order by indexed column for better performance
@@ -59,7 +59,7 @@ class SimController extends Controller
         $perPage = min($request->get('per_page', 10), 100); // Cap at 100 items
         $sims = $query->with([
             'organization:id,name',
-            'department:id,name'
+            'team:id,name'
         ])->paginate($perPage);
 
         return response()->json($sims);
@@ -94,7 +94,7 @@ class SimController extends Controller
 
         return response()->json([
             'message' => 'SIM status updated successfully',
-            'sim' => $sim->fresh()->load(['organization:id,name', 'department:id,name'])
+            'sim' => $sim->fresh()->load(['organization:id,name', 'team:id,name'])
         ]);
     }
 
@@ -113,7 +113,7 @@ class SimController extends Controller
         $rules = [
             'mobile' => 'required|string|max:20|unique:sims,mobile',
             'name' => 'required|string|max:255',
-            'department_id' => 'required|exists:departments,id',
+            'team_id' => 'required|exists:teams,id',
         ];
         
         // Only require organization_id if user is admin
@@ -134,9 +134,9 @@ class SimController extends Controller
             'mobile' => $request->mobile,
             'name' => $request->name,
             'organization_id' => $organizationId,
-            'department_id' => $request->department_id,
+            'team_id' => $request->team_id,
         ]);
-        $sim->load(['organization', 'department']);
+        $sim->load(['organization', 'team']);
 
         return response()->json([
             'message' => 'SIM created successfully',
@@ -149,7 +149,7 @@ class SimController extends Controller
      */
     public function show(Sim $sim)
     {
-        $sim->load(['organization', 'department']);
+        $sim->load(['organization', 'team']);
         return response()->json($sim);
     }
 
@@ -168,7 +168,7 @@ class SimController extends Controller
         $rules = [
             'mobile' => 'required|string|max:20|unique:sims,mobile,' . $sim->id,
             'name' => 'required|string|max:255',
-            'department_id' => 'required|exists:departments,id',
+            'team_id' => 'required|exists:teams,id',
         ];
         
         // Only require organization_id if user is admin
@@ -189,9 +189,9 @@ class SimController extends Controller
             'mobile' => $request->mobile,
             'name' => $request->name,
             'organization_id' => $organizationId,
-            'department_id' => $request->department_id,
+            'team_id' => $request->team_id,
         ]);
-        $sim->load(['organization', 'department']);
+        $sim->load(['organization', 'team']);
 
         return response()->json([
             'message' => 'SIM updated successfully',
@@ -236,9 +236,9 @@ class SimController extends Controller
     }
 
     /**
-     * Get departments by organization.
+     * Get teams by organization.
      */
-    public function getDepartments(Request $request)
+    public function getTeams(Request $request)
     {
         $user = auth()->user();
         
@@ -251,12 +251,12 @@ class SimController extends Controller
             return response()->json([]);
         }
 
-        $departments = Department::where('organization_id', $organizationId)
+        $teams = Team::where('organization_id', $organizationId)
             ->select('id', 'name')
             ->orderBy('name')
             ->get();
         
-        return response()->json($departments);
+        return response()->json($teams);
     }
 
     /**
@@ -287,9 +287,9 @@ class SimController extends Controller
             
             // Validate headers based on role
             if ($user->role === 'admin') {
-                $requiredHeaders = ['organization', 'department', 'mobile', 'name'];
+                $requiredHeaders = ['organization', 'team', 'mobile', 'name'];
             } else {
-                $requiredHeaders = ['department', 'mobile', 'name'];
+                $requiredHeaders = ['team', 'mobile', 'name'];
             }
             
             foreach ($requiredHeaders as $required) {
@@ -329,13 +329,13 @@ class SimController extends Controller
                     $organizationId = $user->organization_id;
                 }
                 
-                // Find department by name and organization
-                $department = Department::where('name', trim($rowData['department']))
+                // Find team by name and organization
+                $team = Team::where('name', trim($rowData['team']))
                     ->where('organization_id', $organizationId)
                     ->first();
                     
-                if (!$department) {
-                    $errors[] = "Row {$row}: Department '{$rowData['department']}' not found";
+                if (!$team) {
+                    $errors[] = "Row {$row}: Team '{$rowData['team']}' not found";
                     continue;
                 }
                 
@@ -365,7 +365,7 @@ class SimController extends Controller
                         'mobile' => $mobile,
                         'name' => $name,
                         'organization_id' => $organizationId,
-                        'department_id' => $department->id,
+                        'team_id' => $team->id,
                     ]);
                     $imported++;
                 } catch (\Exception $e) {

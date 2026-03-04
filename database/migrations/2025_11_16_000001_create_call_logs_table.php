@@ -47,7 +47,7 @@ return new class extends Migration
             $table->string('contact_name')->nullable();
             $table->string('hangup_by')->nullable();
             $table->string('name')->nullable();
-            $table->string('department_name')->nullable();
+            $table->string('team_name')->nullable();
 
             $table->timestamps();
             $table->softDeletes();

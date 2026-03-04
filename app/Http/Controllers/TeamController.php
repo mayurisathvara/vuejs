@@ -3,32 +3,32 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
-use App\Models\Department;
+use App\Models\Team;
 use App\Models\Organization;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Validator;
 
-class DepartmentController extends Controller
+class TeamController extends Controller
 {
     /**
-     * Display a listing of departments
+     * Display a listing of teams
      */
     public function index(Request $request): JsonResponse
     {
         $user = auth()->user();
         
-        $query = Department::select([
+        $query = Team::select([
             'id', 'name', 'organization_id', 'created_at', 'updated_at'
         ]);
 
         // Role-based filtering
         if ($user->role === 'organization') {
-            // Organization role: show only departments from their organization
+            // Organization role: show only teams from their organization
             $query->where('organization_id', $user->organization_id);
         }
         // Admin and Organization roles: filtering applied above
-        // Manager role: no access to departments module
+        // Manager role: no access to teams module
 
         // Search functionality
         if ($request->has('search') && $request->search) {
@@ -50,10 +50,10 @@ class DepartmentController extends Controller
 
         // Pagination with limit
         $perPage = min($request->get('per_page', 10), 50); // Cap at 50 items
-        $departments = $query->with(['organization:id,name'])
+        $teams = $query->with(['organization:id,name'])
                             ->paginate($perPage);
 
-        return response()->json($departments);
+        return response()->json($teams);
     }
 
     /**
@@ -78,7 +78,7 @@ class DepartmentController extends Controller
     }
 
     /**
-     * Store a newly created department
+     * Store a newly created team
      */
     public function store(Request $request): JsonResponse
     {
@@ -107,30 +107,30 @@ class DepartmentController extends Controller
             ], 422);
         }
 
-        $department = Department::create([
+        $team = Team::create([
             'name' => $request->name,
             'organization_id' => $organizationId,
         ]);
 
         // Load organization relationship for response
-        $department->load('organization:id,name');
+        $team->load('organization:id,name');
 
-        return response()->json($department, 201);
+        return response()->json($team, 201);
     }
 
     /**
-     * Display the specified department
+     * Display the specified team
      */
-    public function show(Department $department): JsonResponse
+    public function show(Team $team): JsonResponse
     {
-        $department->load('organization:id,name');
-        return response()->json($department);
+        $team->load('organization:id,name');
+        return response()->json($team);
     }
 
     /**
-     * Update the specified department
+     * Update the specified team
      */
-    public function update(Request $request, Department $department): JsonResponse
+    public function update(Request $request, Team $team): JsonResponse
     {
         $user = auth()->user();
         
@@ -157,26 +157,26 @@ class DepartmentController extends Controller
             ], 422);
         }
 
-        $department->update([
+        $team->update([
             'name' => $request->name,
             'organization_id' => $organizationId,
         ]);
 
         // Load organization relationship for response
-        $department->load('organization:id,name');
+        $team->load('organization:id,name');
 
-        return response()->json($department);
+        return response()->json($team);
     }
 
     /**
-     * Remove the specified department
+     * Remove the specified team
      */
-    public function destroy(Department $department): JsonResponse
+    public function destroy(Team $team): JsonResponse
     {
-        $department->delete();
+        $team->delete();
 
         return response()->json([
-            'message' => 'Department deleted successfully'
+            'message' => 'Team deleted successfully'
         ]);
     }
 }

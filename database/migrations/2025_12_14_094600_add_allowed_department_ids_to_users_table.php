@@ -8,16 +8,16 @@ return new class extends Migration {
     public function up(): void
     {
         Schema::table('users', function (Blueprint $table) {
-            $table->json('allowed_department_ids')
+            $table->json('allowed_team_ids')
                   ->nullable()
-                  ->after('department_id'); // adjust column if needed
+                  ->after('team_id'); // adjust column if needed
         });
     }
 
     public function down(): void
     {
         Schema::table('users', function (Blueprint $table) {
-            $table->dropColumn('allowed_department_ids');
+            $table->dropColumn('allowed_team_ids');
         });
     }
 };

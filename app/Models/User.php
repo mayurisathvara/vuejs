@@ -25,7 +25,7 @@ class User extends Authenticatable
         'password',
         'role',
         'organization_id',
-        'department_id',
+        'team_id',
         'profile',
         'profile_image',
         'description',
@@ -33,7 +33,7 @@ class User extends Authenticatable
 		'sim_verified_at',
         'sim_verified_mobile',
         'sim_subscription_id',
-		'allowed_department_ids'
+		'allowed_team_ids'
     ];
 
     /**
@@ -69,11 +69,11 @@ class User extends Authenticatable
     }
 
     /**
-     * Get the department that the user belongs to.
+     * Get the team that the user belongs to.
      */
-    public function department()
+    public function team()
     {
-        return $this->belongsTo(Department::class, 'department_id');
+        return $this->belongsTo(Team::class, 'team_id');
     }
 
     /**

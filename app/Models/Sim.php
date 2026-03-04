@@ -15,7 +15,7 @@ class Sim extends Authenticatable
         'mobile',
         'name',
         'organization_id',
-        'department_id',
+        'team_id',
         'status',
     ];
 
@@ -34,11 +34,11 @@ class Sim extends Authenticatable
     }
 
     /**
-     * Get the department that owns the SIM.
+     * Get the team that owns the SIM.
      */
-    public function department()
+    public function team()
     {
-        return $this->belongsTo(Department::class);
+        return $this->belongsTo(Team::class);
     }
 
     /**

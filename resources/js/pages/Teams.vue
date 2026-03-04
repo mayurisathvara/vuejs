@@ -4,10 +4,10 @@
     <div class="page-header">
       <div class="header-content">
         <div class="header-title">
-          <h3 class="page-title">Departments Management</h3>
+          <h3 class="page-title">Teams Management</h3>
         </div>
         <div class="header-actions">
-          <button type="button" class="btn btn-light border btn-sm me-2" @click="refreshDepartments">
+          <button type="button" class="btn btn-light border btn-sm me-2" @click="refreshTeams">
             <i class="fas fa-sync-alt me-2"></i>
             <span class="btn-text">Refresh</span>
           </button>
@@ -29,7 +29,7 @@
               v-model="searchQuery"
               type="text"
               class="form-control search-input-modern"
-              placeholder="Search departments by name..."
+              placeholder="Search teams by name..."
               @input="handleSearch"
             />
           </div>
@@ -58,14 +58,14 @@
       </div>
     </div>
 
-    <!-- Departments Table -->
+    <!-- Teams Table -->
     <div class="card card-round">
       <div class="card-body p-0">
         <div class="table-responsive-wrapper">
           <div class="simple-table">
             <Table
-              :data="departments"
-              :headers="departmentHeaders"
+              :data="teams"
+              :headers="teamHeaders"
               :loading="loading"
               :actions="{ edit: true, delete: true }"
               @edit="openEditModal"
@@ -103,21 +103,21 @@
       />
     </div>
 
-    <!-- Create/Edit Department Modal -->
+    <!-- Create/Edit Team Modal -->
     <Modal
-      :show="showDepartmentModal"
-      :title="isEditing ? 'Edit Department' : 'Create Department'"
+      :show="showTeamModal"
+      :title="isEditing ? 'Edit Team' : 'Create Team'"
       size="lg"
-      @close="closeDepartmentModal"
+      @close="closeTeamModal"
     >
       <form @submit.prevent="handleSubmit">
         <div class="row">
           <div class="col-md-6 mb-3">
             <InputField
-              v-model="departmentForm.name"
+              v-model="teamForm.name"
               type="text"
-              label="Department Name"
-              placeholder="Enter department name"
+              label="Team Name"
+              placeholder="Enter team name"
               :error="errors.name"
               required
             />
@@ -125,7 +125,7 @@
           <div v-if="isAdmin" class="col-md-6 mb-3">
             <div class="form-group">
               <label class="form-label">Organization</label>
-              <select v-model="departmentForm.organization_id" class="form-select" :class="{ 'is-invalid': errors.organization_id }">
+              <select v-model="teamForm.organization_id" class="form-select" :class="{ 'is-invalid': errors.organization_id }">
                 <option value="">Select Organization</option>
                 <option v-for="org in organizations" :key="org.id" :value="org.id">
                   {{ org.name }}
@@ -144,13 +144,13 @@
       </form>
 
       <template #footer>
-        <Button variant="secondary" @click="closeDepartmentModal">Cancel</Button>
+        <Button variant="secondary" @click="closeTeamModal">Cancel</Button>
         <Button
           variant="primary"
           :loading="loading"
           @click="handleSubmit"
         >
-          {{ isEditing ? 'Update Department' : 'Create Department' }}
+          {{ isEditing ? 'Update Team' : 'Create Team' }}
         </Button>
       </template>
     </Modal>
@@ -158,14 +158,14 @@
     <!-- Delete Confirmation Modal -->
     <Modal
       :show="showDeleteModal"
-      title="Delete Department"
+      title="Delete Team"
       @close="closeDeleteModal"
       @confirm="handleDelete"
     >
-      <p>Are you sure you want to delete this department?</p>
-      <div v-if="departmentToDelete" class="alert alert-warning">
-        <strong>{{ departmentToDelete.name }}</strong><br>
-        <small>{{ departmentToDelete.organization?.name || 'N/A' }}</small>
+      <p>Are you sure you want to delete this team?</p>
+      <div v-if="teamToDelete" class="alert alert-warning">
+        <strong>{{ teamToDelete.name }}</strong><br>
+        <small>{{ teamToDelete.organization?.name || 'N/A' }}</small>
       </div>
       <p class="text-danger">This action cannot be undone.</p>
     </Modal>
@@ -326,7 +326,7 @@ const isOrganization = computed(() => userRole.value === 'organization')
 const isManager = computed(() => userRole.value === 'manager')
 
 // Data
-const departments = ref([])
+const teams = ref([])
 const organizations = ref([])
 const loading = ref(false)
 const searchQuery = ref('')
@@ -335,13 +335,13 @@ const perPage = ref(10)
 const searchTimeout = ref(null)
 
 // Modal states
-const showDepartmentModal = ref(false)
+const showTeamModal = ref(false)
 const showDeleteModal = ref(false)
 const isEditing = ref(false)
-const departmentToDelete = ref(null)
+const teamToDelete = ref(null)
 
 // Form data
-const departmentForm = reactive({
+const teamForm = reactive({
   name: '',
   organization_id: ''
 })
@@ -365,9 +365,9 @@ const getErrorMessage = (error) => {
   return error
 }
 
-const departmentHeaders = computed(() => {
+const teamHeaders = computed(() => {
   const headers = [
-    { key: 'name', label: 'Department', class: 'text-start' },
+    { key: 'name', label: 'Team', class: 'text-start' },
   ]
   
   // Show organization column only for admin
@@ -381,7 +381,7 @@ const departmentHeaders = computed(() => {
 })
 
 // Methods
-const fetchDepartments = async (page = 1) => {
+const fetchTeams = async (page = 1) => {
   try {
     loading.value = true
     const params = new URLSearchParams({
@@ -397,15 +397,15 @@ const fetchDepartments = async (page = 1) => {
       params.append('organization_id', selectedOrganization.value)
     }
 
-    const response = await api.get(`/departments?${params}`)
-    departments.value = response.data.data
+    const response = await api.get(`/teams?${params}`)
+    teams.value = response.data.data
     pagination.current_page = response.data.current_page
     pagination.last_page = response.data.last_page
     pagination.per_page = response.data.per_page
     pagination.total = response.data.total
   } catch (error) {
-    console.error('Error fetching departments:', error)
-    showError('Failed to load departments. Please try again.')
+    console.error('Error fetching teams:', error)
+    showError('Failed to load teams. Please try again.')
   } finally {
     loading.value = false
   }
@@ -413,12 +413,12 @@ const fetchDepartments = async (page = 1) => {
 
 const fetchOrganizations = async () => {
   try {
-    const response = await api.get('/departments/organizations')
+    const response = await api.get('/teams/organizations')
     organizations.value = response.data
     
     // Auto-set organization for organization and manager roles
     if ((isOrganization.value || isManager.value) && organizations.value.length > 0) {
-      departmentForm.organization_id = organizations.value[0].id
+      teamForm.organization_id = organizations.value[0].id
     }
   } catch (error) {
     console.error('Error fetching organizations:', error)
@@ -426,8 +426,8 @@ const fetchOrganizations = async () => {
   }
 }
 
-const refreshDepartments = () => {
-  fetchDepartments()
+const refreshTeams = () => {
+  fetchTeams()
 }
 
 const handleSearch = () => {
@@ -438,21 +438,21 @@ const handleSearch = () => {
   
   // Set new timeout for debounced search
   searchTimeout.value = setTimeout(() => {
-    fetchDepartments()
+    fetchTeams()
   }, 500) // 500ms delay
 }
 
 const handleOrganizationFilter = () => {
-  fetchDepartments()
+  fetchTeams()
 }
 
 const handlePerPageChange = () => {
   pagination.per_page = perPage.value
-  fetchDepartments()
+  fetchTeams()
 }
 
 const handlePageChange = (page) => {
-  fetchDepartments(page)
+  fetchTeams(page)
 }
 
 const openCreateModal = () => {
@@ -461,38 +461,38 @@ const openCreateModal = () => {
   
   // For non-admin users, auto-set organization
   if ((isOrganization.value || isManager.value) && organizations.value.length > 0) {
-    departmentForm.organization_id = organizations.value[0].id
+    teamForm.organization_id = organizations.value[0].id
   }
   
-  showDepartmentModal.value = true
+  showTeamModal.value = true
 }
 
-const openEditModal = (department) => {
+const openEditModal = (team) => {
   isEditing.value = true
-  departmentForm.name = department.name
-  departmentForm.organization_id = department.organization_id
-  departmentToDelete.value = department
-  showDepartmentModal.value = true
+  teamForm.name = team.name
+  teamForm.organization_id = team.organization_id
+  teamToDelete.value = team
+  showTeamModal.value = true
 }
 
-const openDeleteModal = (department) => {
-  departmentToDelete.value = department
+const openDeleteModal = (team) => {
+  teamToDelete.value = team
   showDeleteModal.value = true
 }
 
-const closeDepartmentModal = () => {
-  showDepartmentModal.value = false
+const closeTeamModal = () => {
+  showTeamModal.value = false
   resetForm()
 }
 
 const closeDeleteModal = () => {
   showDeleteModal.value = false
-  departmentToDelete.value = null
+  teamToDelete.value = null
 }
 
 const resetForm = () => {
-  departmentForm.name = ''
-  departmentForm.organization_id = ''
+  teamForm.name = ''
+  teamForm.organization_id = ''
   errors.value = {}
   errorMessage.value = ''
 }
@@ -504,14 +504,14 @@ const handleSubmit = async () => {
   // Collect all validation errors
   const validationErrors = {}
   
-  if (!departmentForm.name) {
-    validationErrors.name = 'Department name is required'
-  } else if (departmentForm.name.length < 2) {
-    validationErrors.name = 'Department name must be at least 2 characters'
+  if (!teamForm.name) {
+    validationErrors.name = 'Team name is required'
+  } else if (teamForm.name.length < 2) {
+    validationErrors.name = 'Team name must be at least 2 characters'
   }
   
   // Only validate organization for admin
-  if (isAdmin.value && !departmentForm.organization_id) {
+  if (isAdmin.value && !teamForm.organization_id) {
     validationErrors.organization_id = 'Organization is required'
   }
 
@@ -524,21 +524,21 @@ const handleSubmit = async () => {
   try {
     loading.value = true
     if (isEditing.value) {
-      await api.put(`/departments/${departmentToDelete.value.id}`, departmentForm)
-      showSuccess('Department updated successfully!')
+      await api.put(`/teams/${teamToDelete.value.id}`, teamForm)
+      showSuccess('Team updated successfully!')
     } else {
-      await api.post('/departments', departmentForm)
-      showSuccess('Department created successfully!')
+      await api.post('/teams', teamForm)
+      showSuccess('Team created successfully!')
     }
-    closeDepartmentModal()
-    fetchDepartments()
+    closeTeamModal()
+    fetchTeams()
   } catch (error) {
-    console.error('Error saving department:', error)
+    console.error('Error saving team:', error)
     if (error.response?.data?.errors) {
       errors.value = error.response.data.errors
     } else {
-      errorMessage.value = 'Error saving department. Please try again.'
-      showError('Failed to save department. Please try again.')
+      errorMessage.value = 'Error saving team. Please try again.'
+      showError('Failed to save team. Please try again.')
     }
   } finally {
     loading.value = false
@@ -548,13 +548,13 @@ const handleSubmit = async () => {
 const handleDelete = async () => {
   try {
     loading.value = true
-    await api.delete(`/departments/${departmentToDelete.value.id}`)
-    showSuccess('Department deleted successfully!')
+    await api.delete(`/teams/${teamToDelete.value.id}`)
+    showSuccess('Team deleted successfully!')
     closeDeleteModal()
-    fetchDepartments()
+    fetchTeams()
   } catch (error) {
-    console.error('Error deleting department:', error)
-    showError('Failed to delete department. Please try again.')
+    console.error('Error deleting team:', error)
+    showError('Failed to delete team. Please try again.')
   } finally {
     loading.value = false
   }
@@ -566,11 +566,11 @@ const formatDate = (date) => {
 
 // Watch for changes in perPage
 watch(perPage, () => {
-  fetchDepartments()
+  fetchTeams()
 })
 
 onMounted(() => {
-  fetchDepartments()
+  fetchTeams()
   fetchOrganizations()
 })
 

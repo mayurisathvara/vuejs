@@ -39,7 +39,7 @@ class CallLog extends Model
         'contact_name',
         'hangup_by',
         'name',
-        'department_name',
+        'team_name',
         'call_back',
         'callback_id',
     ];

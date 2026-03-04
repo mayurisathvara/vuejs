@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('departments', function (Blueprint $table) {
+        Schema::create('teams', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->string('name', 255);
             $table->unsignedBigInteger('organization_id');
@@ -21,8 +21,8 @@ return new class extends Migration
             $table->foreign('organization_id')->references('id')->on('organizations')->onDelete('cascade');
             
             // Indexes for better performance
-            $table->index('organization_id', 'departments_organization_index');
-            $table->index('name', 'departments_name_index');
+            $table->index('organization_id', 'teams_organization_index');
+            $table->index('name', 'teams_name_index');
         });
     }
 
@@ -31,6 +31,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('departments');
+        Schema::dropIfExists('teams');
     }
 };

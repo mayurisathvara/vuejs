@@ -147,16 +147,16 @@
               </div>
 
               <div v-if="!isUser" class="col-12 col-md-6">
-                <label class="form-label small text-muted">Department</label>
+                <label class="form-label small text-muted">Team</label>
                 <select
                   class="form-select"
-                  v-model="filters.department_id"
-                  @change="onDepartmentChange"
+                  v-model="filters.team_id"
+                  @change="onTeamChange"
                   :disabled="optionsLoading || (isAdmin && !filters.organization_id)"
                 >
-                  <option value="">All Departments</option>
+                  <option value="">All Teams</option>
                   <option v-if="optionsLoading" value="" disabled>Loading...</option>
-                  <option v-for="dept in dashboardOptions.departments" :key="dept.id" :value="String(dept.id)">
+                  <option v-for="dept in dashboardOptions.teams" :key="dept.id" :value="String(dept.id)">
                     {{ dept.name }}
                   </option>
                 </select>
@@ -168,7 +168,7 @@
                   class="form-select"
                   v-model="filters.user_id"
                   @change="onUserChange"
-                  :disabled="optionsLoading || (!filters.department_id && dashboardOptions.users.length === 0)"
+                  :disabled="optionsLoading || (!filters.team_id && dashboardOptions.users.length === 0)"
                 >
                   <option value="">All Users</option>
                   <option v-if="optionsLoading" value="" disabled>Loading...</option>
@@ -682,7 +682,7 @@ const summaryLoading = ref(false)
 
 const dashboardOptions = reactive({
   organizations: [],
-  departments: [],
+  teams: [],
   users: [],
   sims: []
 })
@@ -718,7 +718,7 @@ const dashboardSummary = reactive({
 
 const filters = reactive({
   organization_id: '',
-  department_id: '',
+  team_id: '',
   user_id: '',
   sim_mobile: [],
   caller_number: ''
@@ -870,7 +870,7 @@ const buildDashboardParams = (forOptions = false) => {
   const params = {}
 
   if (isAdmin.value && filters.organization_id) params.organization_id = filters.organization_id
-  if (!isUser.value && filters.department_id) params.department_id = filters.department_id
+  if (!isUser.value && filters.team_id) params.team_id = filters.team_id
   if (!isUser.value && filters.user_id) params.user_id = filters.user_id
 
   if (!forOptions) {
@@ -992,7 +992,7 @@ const fetchDashboardOptions = async () => {
   try {
     const resp = await api.get('/dashboard/options', { params: buildDashboardParams(true) })
     dashboardOptions.organizations = resp.data.organizations || []
-    dashboardOptions.departments = resp.data.departments || []
+    dashboardOptions.teams = resp.data.teams || []
     dashboardOptions.users = resp.data.users || []
     dashboardOptions.sims = resp.data.sims || []
   } finally {
@@ -1087,16 +1087,16 @@ const fetchDailyCallVolume = async () => {
 
 const onOrganizationChange = async () => {
   closeSimDropdown()
-  filters.department_id = ''
+  filters.team_id = ''
   filters.user_id = ''
   filters.sim_mobile = []
-  dashboardOptions.departments = []
+  dashboardOptions.teams = []
   dashboardOptions.users = []
   dashboardOptions.sims = []
   await fetchDashboardOptions()
 }
 
-const onDepartmentChange = async () => {
+const onTeamChange = async () => {
   closeSimDropdown()
   filters.user_id = ''
   filters.sim_mobile = []
@@ -1180,7 +1180,7 @@ const resetFilters = async () => {
   closeSimDropdown()
   if (isAdmin.value) filters.organization_id = ''
   if (!isUser.value) {
-    filters.department_id = ''
+    filters.team_id = ''
     filters.user_id = ''
   }
   filters.sim_mobile = []

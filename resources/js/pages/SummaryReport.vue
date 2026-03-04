@@ -232,36 +232,35 @@
                 <tr>
                   <th rowspan="2" class="text-center sticky-col sticky-col-index">#</th>
                   <th rowspan="2" class="sticky-col sticky-col-phone phone-col">Phone Number</th>
-                  <th colspan="6" class="section-header text-center section-header-uppercase">Summary</th>
-                  <th colspan="6" class="section-header-inbound text-center section-header-uppercase">Inbound</th>
-                  <th colspan="5" class="section-header-outbound text-center section-header-uppercase">Outbound</th>
+                  <th rowspan="2" class="sticky-col sticky-col-name name-col">Name</th>
+                  <th rowspan="2" class="sticky-col sticky-col-team team-col">Team</th>
+                  <th colspan="5" class="section-header text-center section-header-uppercase">Summary</th>
+                  <th colspan="5" class="section-header-inbound text-center section-header-uppercase">Inbound</th>
+                  <th colspan="4" class="section-header-outbound text-center section-header-uppercase">Outbound</th>
                 </tr>
                 <tr>
                   <!-- Summary columns -->
                   <th class="text-center col-summary">Total Calls</th>
+                  <th class="text-center col-summary">Total Unique Calls</th>
                   <th class="text-center col-summary">Total Duration</th>
                   <th class="text-center col-summary">Answered Calls</th>
                   <th class="text-center col-summary">Answered Duration</th>
-                  <th class="text-center col-summary">Answered Avg. Duration</th>
-                  <th class="text-center col-summary">Unique Clients</th>
                   <!-- Inbound columns -->
                   <th class="text-center col-inbound">Total Calls</th>
                   <th class="text-center col-inbound">Total Duration</th>
                   <th class="text-center col-inbound">Answered Calls</th>
                   <th class="text-center col-inbound">Answered Duration</th>
-                  <th class="text-center col-inbound">Answered Avg. Duration</th>
                   <th class="text-center col-inbound">Missed Calls</th>
                   <!-- Outbound columns -->
                   <th class="text-center col-outbound">Total Calls</th>
                   <th class="text-center col-outbound">Total Duration</th>
                   <th class="text-center col-outbound">Answered Calls</th>
                   <th class="text-center col-outbound">Answered Duration</th>
-                  <th class="text-center col-outbound">Answered Avg. Duration</th>
                 </tr>
               </thead>
               <tbody>
                 <tr v-if="loading && summaryData.length === 0">
-                  <td colspan="19" class="text-center py-4">
+                  <td colspan="18" class="text-center py-4">
                     <div class="spinner-border spinner-border-sm text-primary" role="status">
                       <span class="visually-hidden">Loading...</span>
                     </div>
@@ -269,7 +268,7 @@
                   </td>
                 </tr>
                 <tr v-else-if="summaryData.length === 0">
-                  <td colspan="19" class="text-center py-4 text-muted">
+                  <td colspan="18" class="text-center py-4 text-muted">
                     <i class="fas fa-inbox fa-2x mb-2 d-block" style="opacity: 0.3;"></i>
                     No data available
                   </td>
@@ -278,37 +277,34 @@
                   <tr v-for="(row, index) in summaryData" :key="index">
                     <td class="text-center sticky-col sticky-col-index">{{ (pagination.current_page - 1) * pagination.per_page + index + 1 }}</td>
                     <td class="sticky-col sticky-col-phone">
-                      <div class="phone-info">
-                        <div class="phone-number">{{ row.phone_number }}</div>
-                        <div v-if="row.name || row.department" class="phone-meta">
-                          <span v-if="row.name" class="user-name">{{ row.name }}</span>
-                          <span v-if="row.department" class="department-name">{{ row.department }}</span>
-                        </div>
-                      </div>
+                      <div class="phone-number">{{ row.phone_number }}</div>
+                    </td>
+                    <td class="sticky-col sticky-col-name">
+                      <div class="user-name">{{ row.name || '-' }}</div>
+                    </td>
+                    <td class="sticky-col sticky-col-team">
+                      <div class="team-name">{{ row.department || '-' }}</div>
                     </td>
                     <!-- Summary -->
                     <td class="text-center cell-summary">{{ row.total_calls }}</td>
+                    <td class="text-center cell-summary">{{ row.unique_clients }}</td>
                     <td class="text-center cell-summary">{{ row.total_duration_formatted }}</td>
                     <td class="text-center cell-summary">{{ row.answered_calls }}</td>
                     <td class="text-center cell-summary">{{ row.answered_duration_formatted }}</td>
-                    <td class="text-center cell-summary">{{ row.answered_avg_duration_formatted }}</td>
-                    <td class="text-center cell-summary">{{ row.unique_clients }}</td>
                     <!-- Inbound -->
                     <td class="text-center cell-inbound">{{ row.inbound_total_calls }}</td>
                     <td class="text-center cell-inbound">{{ row.inbound_total_duration_formatted }}</td>
                     <td class="text-center cell-inbound">{{ row.inbound_answered }}</td>
                     <td class="text-center cell-inbound">{{ row.inbound_answered_duration_formatted }}</td>
-                    <td class="text-center cell-inbound">{{ row.inbound_answered_avg_duration_formatted }}</td>
                     <td class="text-center cell-inbound">{{ row.inbound_missed }}</td>
                     <!-- Outbound -->
                     <td class="text-center cell-outbound">{{ row.outbound_total_calls }}</td>
                     <td class="text-center cell-outbound">{{ row.outbound_total_duration_formatted }}</td>
                     <td class="text-center cell-outbound">{{ row.outbound_answered }}</td>
                     <td class="text-center cell-outbound">{{ row.outbound_answered_duration_formatted }}</td>
-                    <td class="text-center cell-outbound">{{ row.outbound_answered_avg_duration_formatted }}</td>
                   </tr>
                   <tr v-if="loading" class="loading-overlay-row">
-                    <td colspan="19">
+                    <td colspan="18">
                       <div class="table-loading-overlay">
                         <div class="spinner-border spinner-border-sm text-primary" role="status"></div>
                         <span class="ms-2">Updating...</span>
@@ -1171,10 +1167,29 @@ small.text-muted {
 
 .summary-report-table .sticky-col-phone {
   left: 50px;
+  min-width: 140px;
+}
+
+.summary-report-table .sticky-col-name {
+  left: 190px;
+  min-width: 150px;
+}
+
+.summary-report-table .sticky-col-team {
+  left: 340px;
+  min-width: 150px;
 }
 
 .summary-report-table .phone-col {
-  min-width: 280px;
+  min-width: 140px;
+}
+
+.summary-report-table .name-col {
+  min-width: 150px;
+}
+
+.summary-report-table .team-col {
+  min-width: 150px;
 }
 
 .section-header-uppercase {
@@ -1191,6 +1206,14 @@ small.text-muted {
 }
 
 .summary-report-table tbody tr:hover .sticky-col-phone {
+  background: #fff;
+}
+
+.summary-report-table tbody tr:hover .sticky-col-name {
+  background: #fff;
+}
+
+.summary-report-table tbody tr:hover .sticky-col-team {
   background: #fff;
 }
 
@@ -1457,12 +1480,30 @@ small.text-muted {
     font-size: 13px;
   }
 
+  .user-name {
+    font-size: 12px;
+  }
+
+  .team-name {
+    font-size: 12px;
+  }
+
   .phone-meta {
     font-size: 11px;
   }
 
   .sticky-col-phone {
-    min-width: 200px !important;
+    min-width: 120px !important;
+  }
+
+  .sticky-col-name {
+    min-width: 130px !important;
+    left: 170px !important;
+  }
+
+  .sticky-col-team {
+    min-width: 130px !important;
+    left: 300px !important;
   }
 
   .alert {
@@ -1633,23 +1674,15 @@ small.text-muted {
 }
 
 .user-name {
-  color: #4a5568;
+  color: #1a202c;
   font-weight: 500;
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  max-width: 150px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  font-size: 13px;
 }
 
-.user-name::before {
-  content: '\f007';
-  font-family: 'Font Awesome 5 Free';
-  font-weight: 900;
-  font-size: 11px;
-  opacity: 0.7;
+.team-name {
+  color: #4a5568;
+  font-weight: 400;
+  font-size: 13px;
 }
 
 .department-name {

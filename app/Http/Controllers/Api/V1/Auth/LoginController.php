@@ -49,7 +49,7 @@ class LoginController extends Controller
 
         $token = $sim->createToken('sim-api-token')->plainTextToken;
 
-        $sim->load(['organization', 'department']);
+        $sim->load(['organization', 'team']);
 
         return response()->json([
             'access_token' => $token,

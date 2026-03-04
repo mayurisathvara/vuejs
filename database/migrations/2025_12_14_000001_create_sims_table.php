@@ -16,14 +16,14 @@ return new class extends Migration
             $table->string('mobile')->unique();
             $table->string('name');
             $table->foreignId('organization_id')->constrained('organizations')->onDelete('cascade');
-            $table->foreignId('department_id')->nullable()->constrained('departments')->onDelete('set null');
+            $table->foreignId('team_id')->nullable()->constrained('teams')->onDelete('set null');
 			$table->enum('status', ['active', 'inactive'])->default('active');
             $table->timestamps();
             $table->softDeletes();
             
             $table->index('mobile');
             $table->index('organization_id');
-            $table->index('department_id');
+            $table->index('team_id');
         });
     }
 

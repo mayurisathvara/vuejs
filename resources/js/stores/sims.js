@@ -14,7 +14,7 @@ export const useSimsStore = defineStore('sims', {
   }),
 
   actions: {
-    async fetchSims(page = 1, search = '', organizationId = '', departmentId = '', perPage = 10) {
+    async fetchSims(page = 1, search = '', organizationId = '', teamId = '', perPage = 10) {
       this.loading = true
       try {
         const params = {
@@ -22,7 +22,7 @@ export const useSimsStore = defineStore('sims', {
           per_page: perPage,
           ...(search && { search }),
           ...(organizationId && { organization_id: organizationId }),
-          ...(departmentId && { department_id: departmentId })
+          ...(teamId && { team_id: teamId })
         }
 
         const response = await api.get('/sims', { params })

@@ -51,10 +51,10 @@
             </router-link>
           </li>
           
-          <li v-if="showDepartments" class="nav-item" :class="{ active: $route.name === 'Departments' }">
-            <router-link to="/departments" class="nav-link" @click="handleMenuClick">
+          <li v-if="showTeams" class="nav-item" :class="{ active: $route.name === 'Teams' }">
+            <router-link to="/teams" class="nav-link" @click="handleMenuClick">
               <i class="fas fa-sitemap"></i>
-              <p>Departments</p>
+              <p>Teams</p>
             </router-link>
           </li>
           
@@ -68,7 +68,7 @@
           <li v-if="showCallReports" class="nav-item" :class="{ active: $route.name === 'CallReports' }">
             <router-link to="/call-reports" class="nav-link" @click="handleMenuClick">
               <i class="fas fa-chart-bar"></i>
-              <p>Call Reports</p>
+              <p>Call Report</p>
             </router-link>
           </li>
 
@@ -116,7 +116,7 @@ const isUser = computed(() => userRole.value === 'user')
 // Show menu items based on role
 const showUsers = computed(() => isAdmin.value || isOrganization.value || isManager.value)
 const showOrganizations = computed(() => isAdmin.value)
-const showDepartments = computed(() => isAdmin.value || isOrganization.value)
+const showTeams = computed(() => isAdmin.value || isOrganization.value)
 const showSims = computed(() => isAdmin.value || isOrganization.value)
 const showSettings = computed(() => isAdmin.value)
 const showOrganizationSettings = computed(() => isOrganization.value)

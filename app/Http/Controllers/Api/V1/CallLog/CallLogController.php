@@ -36,7 +36,7 @@ class CallLogController extends Controller
         ]);
 
         $sim = $request->user();
-        $sim->load(['organization', 'department']);
+        $sim->load(['organization', 'team']);
 
         // Extract date and time from date_time
         $dateTime = \Carbon\Carbon::parse($request->date_time);
@@ -64,7 +64,7 @@ class CallLogController extends Controller
             'contact_name' => $request->name,
             'hangup_by' => $request->hangup_by,
             'name' => $sim->name,
-            'department_name' => $sim->department ? $sim->department->name : null,
+            'team_name' => $sim->team ? $sim->team->name : null,
         ]);
 
         // Process callback logic if current call is answered

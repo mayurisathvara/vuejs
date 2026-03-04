@@ -14,7 +14,7 @@ import AssignSims from '@/pages/AssignSims.vue'
 import Organizations from '@/pages/Organizations.vue'
 import OrganizationSettings from '@/pages/OrganizationSettings.vue'
 import OrganizationDateFormatSettings from '@/pages/OrganizationDateFormatSettings.vue'
-import Departments from '@/pages/Departments.vue'
+import Teams from '@/pages/Teams.vue'
 import Sims from '@/pages/Sims.vue'
 import Profile from '@/pages/Profile.vue'
 import ChangePassword from '@/pages/ChangePassword.vue'
@@ -99,13 +99,13 @@ const routes = [
     ]
   },
   {
-    path: '/departments',
+    path: '/teams',
     component: DefaultLayout,
     children: [
       {
         path: '',
-        name: 'Departments',
-        component: Departments,
+        name: 'Teams',
+        component: Teams,
         meta: { requiresAuth: true, roles: ['admin', 'organization'] }
       }
     ]

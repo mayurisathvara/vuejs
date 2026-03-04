@@ -5,7 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\OrganizationController;
-use App\Http\Controllers\DepartmentController;
+use App\Http\Controllers\TeamController;
 use App\Http\Controllers\CallReportController;
 use App\Http\Controllers\SummaryReportController;
 use App\Http\Controllers\DashboardAnalyticsController;
@@ -41,12 +41,12 @@ Route::middleware('auth:sanctum')->group(function () {
     // User management routes - Admin, Organization, Manager only
     Route::middleware(['role:admin,organization,manager'])->group(function () {
         Route::get('/users/organizations', [UserController::class, 'getOrganizations']);
-        Route::get('/users/departments', [UserController::class, 'getDepartmentsByOrganization']);
+        Route::get('/users/teams', [UserController::class, 'getTeamsByOrganization']);
         Route::put('/users/{user}/status', [UserController::class, 'updateStatus']);
         
         // Assign SIMs routes
         Route::get('/users/{user}/assign-sims', [UserController::class, 'getAssignSimsData']);
-        Route::post('/users/sims/by-departments', [UserController::class, 'getSimsByDepartments']);
+        Route::post('/users/sims/by-teams', [UserController::class, 'getSimsByTeams']);
         Route::get('/users/{user}/assigned-sims', [UserController::class, 'getAssignedSims']);
         Route::post('/users/{user}/assign-sims', [UserController::class, 'assignSims']);
         Route::get('/users/{user}/available-sims', [UserController::class, 'getAvailableSims']);
@@ -85,17 +85,17 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/organizations', [OrganizationController::class, 'index']);
     });
     
-    // Department management routes - Admin and Organization only
+    // Team management routes - Admin and Organization only
     Route::middleware(['role:admin,organization'])->group(function () {
-        Route::get('/departments/organizations', [DepartmentController::class, 'getOrganizations']);
-        Route::apiResource('departments', DepartmentController::class);
-        Route::get('/departments', [DepartmentController::class, 'index']);
+        Route::get('/teams/organizations', [TeamController::class, 'getOrganizations']);
+        Route::apiResource('teams', TeamController::class);
+        Route::get('/teams', [TeamController::class, 'index']);
     });
     
     // SIM management routes - Admin and Organization only
     Route::middleware(['role:admin,organization'])->group(function () {
         Route::put('/sims/{sim}/status', [\App\Http\Controllers\SimController::class, 'updateStatus']);
-        Route::get('/sims/departments/by-organization', [\App\Http\Controllers\SimController::class, 'getDepartments']);
+        Route::get('/sims/teams/by-organization', [\App\Http\Controllers\SimController::class, 'getTeams']);
         Route::post('/sims/bulk-delete', [\App\Http\Controllers\SimController::class, 'bulkDelete']);
         Route::post('/sims/import-csv', [\App\Http\Controllers\SimController::class, 'importCsv']);
         Route::apiResource('sims', \App\Http\Controllers\SimController::class);

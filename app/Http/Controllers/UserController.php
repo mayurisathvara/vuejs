@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Models\Organization;
-use App\Models\Department;
+use App\Models\Team;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Hash;
@@ -21,7 +21,7 @@ class UserController extends Controller
         $user = auth()->user();
         
         $query = User::select([
-            'id', 'name', 'email', 'mobile', 'organization_id', 'department_id',
+            'id', 'name', 'email', 'mobile', 'organization_id', 'team_id',
             'status', 'role', 'created_at', 'updated_at'
         ])->whereIn('role', ['user', 'manager']);
 
@@ -30,30 +30,30 @@ class UserController extends Controller
             // Organization role: show only users from their organization
             $query->where('organization_id', $user->organization_id);
         } elseif ($user->role === 'manager') {
-            // Manager role: show only user role users from accessible departments
+            // Manager role: show only user role users from accessible teams
             $query->where('organization_id', $user->organization_id);
             $query->where('role', 'user'); // Only show user role users
             
-            $accessibleDepartments = [];
+            $accessibleTeams = [];
             
-            // Include manager's own department
-            if ($user->department_id) {
-                $accessibleDepartments[] = $user->department_id;
+            // Include manager's own team
+            if ($user->team_id) {
+                $accessibleTeams[] = $user->team_id;
             }
             
-            // Include allowed departments
-            if ($user->allowed_department_ids) {
-                $allowedDepartments = is_string($user->allowed_department_ids) 
-                    ? json_decode($user->allowed_department_ids, true) 
-                    : $user->allowed_department_ids;
+            // Include allowed teams
+            if ($user->allowed_team_ids) {
+                $allowedTeams = is_string($user->allowed_team_ids) 
+                    ? json_decode($user->allowed_team_ids, true) 
+                    : $user->allowed_team_ids;
                     
-                if (!empty($allowedDepartments)) {
-                    $accessibleDepartments = array_merge($accessibleDepartments, $allowedDepartments);
+                if (!empty($allowedTeams)) {
+                    $accessibleTeams = array_merge($accessibleTeams, $allowedTeams);
                 }
             }
             
-            if (!empty($accessibleDepartments)) {
-                $query->whereIn('department_id', array_unique($accessibleDepartments));
+            if (!empty($accessibleTeams)) {
+                $query->whereIn('team_id', array_unique($accessibleTeams));
             }
         }
         // Admin role: no filtering
@@ -75,9 +75,9 @@ class UserController extends Controller
             $query->where('organization_id', $request->organization_id);
         }
 
-        // Department filter
-        if ($request->has('department_id') && $request->department_id) {
-            $query->where('department_id', $request->department_id);
+        // Team filter
+        if ($request->has('team_id') && $request->team_id) {
+            $query->where('team_id', $request->team_id);
         }
 
         // Role filter
@@ -95,7 +95,7 @@ class UserController extends Controller
 
         // Pagination with optimized relationship loading
         $perPage = min($request->get('per_page', 10), 50); // Cap at 50 items
-        $users = $query->with(['organization:id,name', 'department:id,name'])
+        $users = $query->with(['organization:id,name', 'team:id,name'])
                       ->paginate($perPage);
 
         return response()->json($users);
@@ -123,9 +123,9 @@ class UserController extends Controller
     }
 
     /**
-     * Get departments for a specific organization
+     * Get teams for a specific organization
      */
-    public function getDepartmentsByOrganization(Request $request): JsonResponse
+    public function getTeamsByOrganization(Request $request): JsonResponse
     {
         $authUser = auth()->user();
         
@@ -148,38 +148,38 @@ class UserController extends Controller
             }
         }
 
-        $query = Department::where('organization_id', $organizationId)
+        $query = Team::where('organization_id', $organizationId)
             ->select('id', 'name')
             ->orderBy('name');
         
-        // For manager role, filter by accessible departments
+        // For manager role, filter by accessible teams
         if ($authUser->role === 'manager') {
-            $accessibleDepartments = [];
+            $accessibleTeams = [];
             
-            // Include manager's own department
-            if ($authUser->department_id) {
-                $accessibleDepartments[] = $authUser->department_id;
+            // Include manager's own team
+            if ($authUser->team_id) {
+                $accessibleTeams[] = $authUser->team_id;
             }
             
-            // Include allowed departments
-            if ($authUser->allowed_department_ids) {
-                $allowedDepartments = is_string($authUser->allowed_department_ids) 
-                    ? json_decode($authUser->allowed_department_ids, true) 
-                    : $authUser->allowed_department_ids;
+            // Include allowed teams
+            if ($authUser->allowed_team_ids) {
+                $allowedTeams = is_string($authUser->allowed_team_ids) 
+                    ? json_decode($authUser->allowed_team_ids, true) 
+                    : $authUser->allowed_team_ids;
                     
-                if (!empty($allowedDepartments)) {
-                    $accessibleDepartments = array_merge($accessibleDepartments, $allowedDepartments);
+                if (!empty($allowedTeams)) {
+                    $accessibleTeams = array_merge($accessibleTeams, $allowedTeams);
                 }
             }
             
-            if (!empty($accessibleDepartments)) {
-                $query->whereIn('id', array_unique($accessibleDepartments));
+            if (!empty($accessibleTeams)) {
+                $query->whereIn('id', array_unique($accessibleTeams));
             }
         }
         
-        $departments = $query->get();
+        $teams = $query->get();
 
-        return response()->json($departments);
+        return response()->json($teams);
     }
 
     /**
@@ -199,7 +199,7 @@ class UserController extends Controller
             'email' => 'required|string|email|max:255|unique:users',
             'mobile' => 'required|string|max:20',
             'password' => 'required|string|min:6',
-            'department_id' => 'required|exists:departments,id',
+            'team_id' => 'required|exists:teams,id',
             'status' => 'required|in:active,inactive',
         ];
         
@@ -232,12 +232,12 @@ class UserController extends Controller
             'password' => Hash::make($request->password),
             'role' => $userRole,
             'organization_id' => $organizationId,
-            'department_id' => $request->department_id,
+            'team_id' => $request->team_id,
             'status' => $request->status ?? 'active',
         ]);
 
         // Load relationships for response
-        $user->load(['organization:id,name', 'department:id,name']);
+        $user->load(['organization:id,name', 'team:id,name']);
 
         return response()->json($user, 201);
     }
@@ -247,7 +247,7 @@ class UserController extends Controller
      */
     public function show(User $user): JsonResponse
     {
-        $user->load(['organization:id,name', 'department:id,name']);
+        $user->load(['organization:id,name', 'team:id,name']);
         return response()->json($user);
     }
 
@@ -269,7 +269,7 @@ class UserController extends Controller
             'mobile' => 'required|string|max:20',
             'password' => 'nullable|string|min:6',
             'role' => 'required|in:user,manager',
-            'department_id' => 'required|exists:departments,id',
+            'team_id' => 'required|exists:teams,id',
             'status' => 'required|in:active,inactive',
         ];
         
@@ -293,7 +293,7 @@ class UserController extends Controller
             'mobile' => $request->mobile,
             'role' => $request->role ?? 'user',
             'organization_id' => $organizationId,
-            'department_id' => $request->department_id,
+            'team_id' => $request->team_id,
             'status' => $request->status,
         ];
 
@@ -305,7 +305,7 @@ class UserController extends Controller
         $user->update($updateData);
         
         // Load relationships for response
-        $user->load(['organization:id,name', 'department:id,name']);
+        $user->load(['organization:id,name', 'team:id,name']);
 
         return response()->json($user);
     }
@@ -354,39 +354,39 @@ class UserController extends Controller
         $authUser = auth()->user();
         
         // Load user with relationships
-        $user->load(['organization', 'department']);
+        $user->load(['organization', 'team']);
 
-        // Get departments based on auth user role
-        $query = Department::where('organization_id', $user->organization_id)
+        // Get teams based on auth user role
+        $query = Team::where('organization_id', $user->organization_id)
             ->select('id', 'name', 'organization_id')
             ->orderBy('name');
         
-        // For manager role, filter by accessible departments
+        // For manager role, filter by accessible teams
         if ($authUser->role === 'manager') {
-            $accessibleDepartments = [];
+            $accessibleTeams = [];
             
-            // Include manager's own department
-            if ($authUser->department_id) {
-                $accessibleDepartments[] = $authUser->department_id;
+            // Include manager's own team
+            if ($authUser->team_id) {
+                $accessibleTeams[] = $authUser->team_id;
             }
             
-            // Include allowed departments
-            if ($authUser->allowed_department_ids) {
-                $allowedDepartments = is_string($authUser->allowed_department_ids) 
-                    ? json_decode($authUser->allowed_department_ids, true) 
-                    : $authUser->allowed_department_ids;
+            // Include allowed teams
+            if ($authUser->allowed_team_ids) {
+                $allowedTeams = is_string($authUser->allowed_team_ids) 
+                    ? json_decode($authUser->allowed_team_ids, true) 
+                    : $authUser->allowed_team_ids;
                     
-                if (!empty($allowedDepartments)) {
-                    $accessibleDepartments = array_merge($accessibleDepartments, $allowedDepartments);
+                if (!empty($allowedTeams)) {
+                    $accessibleTeams = array_merge($accessibleTeams, $allowedTeams);
                 }
             }
             
-            if (!empty($accessibleDepartments)) {
-                $query->whereIn('id', array_unique($accessibleDepartments));
+            if (!empty($accessibleTeams)) {
+                $query->whereIn('id', array_unique($accessibleTeams));
             }
         }
         
-        $departments = $query->get();
+        $teams = $query->get();
 
         // Get currently assigned SIM IDs
         $assignedSimIds = \App\Models\UserSim::where('user_id', $user->id)
@@ -395,20 +395,20 @@ class UserController extends Controller
 
         return response()->json([
             'user' => $user,
-            'departments' => $departments,
+            'teams' => $teams,
             'assigned_sim_ids' => $assignedSimIds,
         ]);
     }
 
     /**
-     * Get SIMs filtered by departments
+     * Get SIMs filtered by teams
      */
-    public function getSimsByDepartments(Request $request): JsonResponse
+    public function getSimsByTeams(Request $request): JsonResponse
     {
         $validator = Validator::make($request->all(), [
             'user_id' => 'required|exists:users,id',
-            'department_ids' => 'required|array',
-            'department_ids.*' => 'exists:departments,id',
+            'team_ids' => 'required|array',
+            'team_ids.*' => 'exists:teams,id',
         ]);
 
         if ($validator->fails()) {
@@ -420,11 +420,11 @@ class UserController extends Controller
 
         $user = User::findOrFail($request->user_id);
         
-        // Get SIMs from selected departments and same organization
-        $sims = \App\Models\Sim::whereIn('department_id', $request->department_ids)
+        // Get SIMs from selected teams and same organization
+        $sims = \App\Models\Sim::whereIn('team_id', $request->team_ids)
             ->where('organization_id', $user->organization_id)
-            ->select('id', 'mobile', 'name', 'department_id', 'organization_id')
-            ->with('department:id,name')
+            ->select('id', 'mobile', 'name', 'team_id', 'organization_id')
+            ->with('team:id,name')
             ->orderBy('mobile')
             ->get();
 
@@ -439,20 +439,20 @@ class UserController extends Controller
         $assignedSims = \App\Models\Sim::whereHas('userSims', function ($query) use ($user) {
             $query->where('user_id', $user->id);
         })
-        ->select('id', 'mobile', 'name', 'department_id')
-        ->with('department:id,name')
+        ->select('id', 'mobile', 'name', 'team_id')
+        ->with('team:id,name')
         ->get();
 
         return response()->json($assignedSims);
     }
 
     /**
-     * Get available SIMs for a user based on selected departments
+     * Get available SIMs for a user based on selected teams
      */
     public function getAvailableSims(Request $request, User $user): JsonResponse
     {
         $validator = Validator::make($request->all(), [
-            'department_ids' => 'required|string',
+            'team_ids' => 'required|string',
         ]);
 
         if ($validator->fails()) {
@@ -462,13 +462,13 @@ class UserController extends Controller
             ], 422);
         }
 
-        $departmentIds = explode(',', $request->department_ids);
+        $teamIds = explode(',', $request->team_ids);
 
-        // Get SIMs from selected departments and same organization
-        $sims = \App\Models\Sim::whereIn('department_id', $departmentIds)
+        // Get SIMs from selected teams and same organization
+        $sims = \App\Models\Sim::whereIn('team_id', $teamIds)
             ->where('organization_id', $user->organization_id)
-            ->select('id', 'mobile', 'name', 'department_id', 'organization_id')
-            ->with('department:id,name')
+            ->select('id', 'mobile', 'name', 'team_id', 'organization_id')
+            ->with('team:id,name')
             ->orderBy('mobile')
             ->get();
 
@@ -483,8 +483,8 @@ class UserController extends Controller
         $isManagerTarget = $user->role === 'manager';
 
         $rules = [
-            'allowed_department_ids' => 'required|array|min:1',
-            'allowed_department_ids.*' => 'exists:departments,id',
+            'allowed_team_ids' => 'required|array|min:1',
+            'allowed_team_ids.*' => 'exists:teams,id',
         ];
 
         if ($isManagerTarget) {
@@ -508,17 +508,17 @@ class UserController extends Controller
         $selectedSims = collect();
 
         if (!$isManagerTarget) {
-            // Validate that all selected SIMs belong to the selected departments
+            // Validate that all selected SIMs belong to the selected teams
             $selectedSims = \App\Models\Sim::whereIn('id', $request->sim_ids)
                 ->where('organization_id', $user->organization_id)
                 ->get();
 
             foreach ($selectedSims as $sim) {
-                if (!in_array($sim->department_id, $request->allowed_department_ids)) {
+                if (!in_array($sim->team_id, $request->allowed_team_ids)) {
                     return response()->json([
-                        'message' => 'SIM must belong to one of the selected departments',
+                        'message' => 'SIM must belong to one of the selected teams',
                         'errors' => [
-                            'sim_ids' => ['SIM ' . $sim->mobile . ' does not belong to the selected departments']
+                            'sim_ids' => ['SIM ' . $sim->mobile . ' does not belong to the selected teams']
                         ]
                     ], 422);
                 }
@@ -529,9 +529,9 @@ class UserController extends Controller
         \DB::beginTransaction();
         
         try {
-            // Update user's allowed departments
+            // Update user's allowed teams
             $user->update([
-                'allowed_department_ids' => json_encode($request->allowed_department_ids)
+                'allowed_team_ids' => json_encode($request->allowed_team_ids)
             ]);
 
             // Delete existing SIM assignments
@@ -556,7 +556,7 @@ class UserController extends Controller
             \DB::commit();
 
             return response()->json([
-                'message' => $isManagerTarget ? 'Departments updated successfully' : 'SIMs assigned successfully',
+                'message' => $isManagerTarget ? 'Teams updated successfully' : 'SIMs assigned successfully',
                 'assigned_count' => count($userSimsData)
             ]);
         } catch (\Exception $e) {

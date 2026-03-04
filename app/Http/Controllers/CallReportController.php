@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\CallLog;
-use App\Models\Department;
+use App\Models\Team;
 use App\Models\Organization;
 use App\Models\Sim;
 use App\Models\User;
@@ -25,7 +25,7 @@ class CallReportController extends Controller
             'call_type',
             'call_status',
             'organization_id',
-            'department_id',
+            'team_id',
             'user_id',
             'caller_number',
             'call_back',
@@ -39,7 +39,7 @@ class CallReportController extends Controller
             'call_type' => ['nullable', 'in:inbound,outbound'],
             'call_status' => ['nullable', 'in:Answered,No Answer,Missed'],
             'organization_id' => ['nullable', 'integer'],
-            'department_id' => ['nullable', 'integer'],
+            'team_id' => ['nullable', 'integer'],
             'user_id' => ['nullable', 'integer'],
             'sim_mobile' => ['nullable', 'array'],
             'sim_mobile.*' => ['string', 'max:25'],
@@ -69,13 +69,13 @@ class CallReportController extends Controller
     {
         $this->normalizeEmptyStringsToNull($request, [
             'organization_id',
-            'department_id',
+            'team_id',
             'user_id',
         ]);
 
         $validator = Validator::make($request->all(), [
             'organization_id' => ['nullable', 'integer'],
-            'department_id' => ['nullable', 'integer'],
+            'team_id' => ['nullable', 'integer'],
             'user_id' => ['nullable', 'integer'],
         ]);
 
@@ -104,43 +104,43 @@ class CallReportController extends Controller
                 ->get();
         }
 
-        $departments = collect();
+        $teams = collect();
         if ($effectiveOrganizationId) {
-            $departmentsQuery = Department::where('organization_id', $effectiveOrganizationId)
+            $teamsQuery = Team::where('organization_id', $effectiveOrganizationId)
                 ->select(['id', 'name'])
                 ->orderBy('name');
 
             if ($role === 'manager') {
-                $accessible = $this->getManagerAccessibleDepartmentIds($authUser);
+                $accessible = $this->getManagerAccessibleTeamIds($authUser);
                 if (!empty($accessible)) {
-                    $departmentsQuery->whereIn('id', $accessible);
+                    $teamsQuery->whereIn('id', $accessible);
                 } else {
-                    $departmentsQuery->whereRaw('1 = 0');
+                    $teamsQuery->whereRaw('1 = 0');
                 }
             }
 
-            $departments = $departmentsQuery->get();
+            $teams = $teamsQuery->get();
         }
 
         // Users dropdown:
         // - When Organization is selected: load all users (roles user, manager) in that org.
-        // - When Department is selected: narrow to that department.
-        // - For manager role: only users in accessible departments (and only role=user).
+        // - When Team is selected: narrow to that team.
+        // - For manager role: only users in accessible teams (and only role=user).
         $users = collect();
         if ($effectiveOrganizationId) {
             $usersQuery = User::whereIn('role', ['user', 'manager'])
-                ->select(['id', 'name', 'department_id', 'organization_id', 'role'])
+                ->select(['id', 'name', 'team_id', 'organization_id', 'role'])
                 ->orderBy('name')
                 ->where('organization_id', $effectiveOrganizationId);
 
-            if ($request->filled('department_id')) {
-                $usersQuery->where('department_id', (int) $request->department_id);
+            if ($request->filled('team_id')) {
+                $usersQuery->where('team_id', (int) $request->team_id);
             }
 
             if ($role === 'manager') {
-                $accessible = $this->getManagerAccessibleDepartmentIds($authUser);
+                $accessible = $this->getManagerAccessibleTeamIds($authUser);
                 if (!empty($accessible)) {
-                    $usersQuery->whereIn('department_id', $accessible);
+                    $usersQuery->whereIn('team_id', $accessible);
                 } else {
                     $usersQuery->whereRaw('1 = 0');
                 }
@@ -150,7 +150,7 @@ class CallReportController extends Controller
             $users = $usersQuery->get();
         }
 
-        // For user role: return only their assigned SIMs (no org/dept filter needed)
+        // For user role: return only their assigned SIMs (no org/team filter needed)
         if ($role === 'user') {
             $sims = UserSim::query()
                 ->leftJoin('sims', 'sims.id', '=', 'user_sims.sim_id')
@@ -159,7 +159,7 @@ class CallReportController extends Controller
                 ->addSelect([
                     'sims.id as id',
                     'sims.name as name',
-                    'sims.department_id as department_id',
+                    'sims.team_id as team_id',
                 ])
                 ->orderBy('mobile')
                 ->get()
@@ -169,18 +169,18 @@ class CallReportController extends Controller
                     'id' => $row->id,
                     'mobile' => $row->mobile,
                     'name' => $row->name,
-                    'department_id' => $row->department_id,
+                    'team_id' => $row->team_id,
                 ]);
         } elseif ($effectiveOrganizationId) {
             // For admin/organization/manager roles:
             // - If a user is selected, return only SIMs assigned to that user.
-            // - Otherwise, return SIMs for the effective organization (optionally narrowed by department).
+            // - Otherwise, return SIMs for the effective organization (optionally narrowed by team).
 
             $selectedUserId = $request->filled('user_id') ? (int) $request->user_id : null;
 
             if ($selectedUserId) {
                 $selectedUser = User::query()
-                    ->select(['id', 'organization_id', 'department_id', 'role'])
+                    ->select(['id', 'organization_id', 'team_id', 'role'])
                     ->where('id', $selectedUserId)
                     ->first();
 
@@ -189,8 +189,8 @@ class CallReportController extends Controller
                     if ($role === 'admin') {
                         $allowed = true;
                     } elseif ($role === 'manager') {
-                        $accessible = $this->getManagerAccessibleDepartmentIds($authUser);
-                        $allowed = $selectedUser->role === 'user' && in_array((int) $selectedUser->department_id, $accessible, true);
+                        $accessible = $this->getManagerAccessibleTeamIds($authUser);
+                        $allowed = $selectedUser->role === 'user' && in_array((int) $selectedUser->team_id, $accessible, true);
                     } else {
                         // organization role
                         $allowed = true;
@@ -205,7 +205,7 @@ class CallReportController extends Controller
                         ->addSelect([
                             'sims.id as id',
                             'sims.name as name',
-                            'sims.department_id as department_id',
+                            'sims.team_id as team_id',
                         ])
                         ->orderBy('mobile')
                         ->get()
@@ -215,17 +215,17 @@ class CallReportController extends Controller
                             'id' => $row->id,
                             'mobile' => $row->mobile,
                             'name' => $row->name,
-                            'department_id' => $row->department_id,
+                            'team_id' => $row->team_id,
                         ]);
                 } else {
                     $sims = collect();
                 }
             } else {
                 $simsQuery = Sim::where('organization_id', $effectiveOrganizationId)
-                    ->select(['id', 'mobile', 'name', 'organization_id', 'department_id']);
+                    ->select(['id', 'mobile', 'name', 'organization_id', 'team_id']);
 
-                if ($request->filled('department_id')) {
-                    $simsQuery->where('department_id', (int) $request->department_id);
+                if ($request->filled('team_id')) {
+                    $simsQuery->where('team_id', (int) $request->team_id);
                 }
 
                 $sims = $simsQuery
@@ -235,7 +235,7 @@ class CallReportController extends Controller
                         'id' => $sim->id,
                         'mobile' => $sim->mobile,
                         'name' => $sim->name,
-                        'department_id' => $sim->department_id,
+                        'team_id' => $sim->team_id,
                     ]);
             }
         } else {
@@ -244,7 +244,7 @@ class CallReportController extends Controller
 
         return response()->json([
             'organizations' => $organizations,
-            'departments' => $departments,
+            'teams' => $teams,
             'users' => $users,
             'sims' => $sims,
             'effective_organization_id' => $effectiveOrganizationId,
@@ -260,7 +260,7 @@ class CallReportController extends Controller
             'call_type',
             'call_status',
             'organization_id',
-            'department_id',
+            'team_id',
             'user_id',
             'caller_number',
             'call_back',
@@ -273,7 +273,7 @@ class CallReportController extends Controller
             'call_type' => ['nullable', 'in:inbound,outbound'],
             'call_status' => ['nullable', 'in:Answered,No Answer,Missed'],
             'organization_id' => ['nullable', 'integer'],
-            'department_id' => ['nullable', 'integer'],
+            'team_id' => ['nullable', 'integer'],
             'user_id' => ['nullable', 'integer'],
             'sim_mobile' => ['nullable', 'array'],
             'sim_mobile.*' => ['string', 'max:25'],
@@ -310,7 +310,7 @@ class CallReportController extends Controller
                     'Caller Duration',
                     'Call Type',
                     'Call Status',
-                    'Department',
+                    'Team',
                     'User',
                     'SIM (caller_id)',
                     'Customer Number',
@@ -320,7 +320,7 @@ class CallReportController extends Controller
                 $query->orderByDesc('date_time')
                     ->lazy(1000)
                     ->each(function (CallLog $log) use ($out) {
-                        $department = $log->department_name;
+                        $team = $log->team_name;
 
                         fputcsv($out, [
                             optional($log->date)->format('Y-m-d') ?: optional($log->date_time)->format('Y-m-d'),
@@ -328,7 +328,7 @@ class CallReportController extends Controller
                             $log->caller_duration,
                             $log->call_type,
                             $log->call_status,
-                            $department,
+                            $team,
                             $log->name,
                             $log->caller_id,
                             $log->caller_number,
@@ -358,7 +358,7 @@ class CallReportController extends Controller
                 'Caller Duration',
                 'Call Type',
                 'Call Status',
-                'Department',
+                'Team',
                 'User',
                 'SIM (caller_id)',
                 'Customer Number',
@@ -371,14 +371,14 @@ class CallReportController extends Controller
             $query->orderByDesc('date_time')
                 ->lazy(1000)
                 ->each(function (CallLog $log) {
-                    $department = $log->department_name;
+                    $team = $log->team_name;
                     $row = [
                         optional($log->date)->format('Y-m-d') ?: optional($log->date_time)->format('Y-m-d'),
                         $log->time ? (string) $log->time : optional($log->date_time)->format('H:i:s'),
                         $log->caller_duration,
                         $log->call_type,
                         $log->call_status,
-                        $department,
+                        $team,
                         $log->name,
                         $log->caller_id,
                         $log->caller_number,
@@ -414,7 +414,7 @@ class CallReportController extends Controller
             'call_logs.call_status',
             'call_logs.caller_number',
             'call_logs.caller_duration',
-            'call_logs.department_name',
+            'call_logs.team_name',
             'call_logs.call_back',
             'call_logs.created_at',
         ];
@@ -447,13 +447,13 @@ class CallReportController extends Controller
         }
 
         if ($role === 'manager') {
-            // For manager role: get SIMs from users in accessible departments via user_sims
+            // For manager role: get SIMs from users in accessible teams via user_sims
             if (!$hasCallerIdColumn) {
                 $query->whereRaw('1 = 0');
             } else {
-                $accessible = $this->getManagerAccessibleDepartmentIds($authUser);
+                $accessible = $this->getManagerAccessibleTeamIds($authUser);
                 if (!empty($accessible)) {
-                    $userIds = User::whereIn('department_id', $accessible)
+                    $userIds = User::whereIn('team_id', $accessible)
                         ->where('role', 'user')
                         ->pluck('id')
                         ->toArray();
@@ -480,7 +480,7 @@ class CallReportController extends Controller
         if ($role !== 'user' && $request->filled('user_id')) {
             $selectedUserId = (int) $request->user_id;
             $selectedUser = User::query()
-                ->select(['id', 'organization_id', 'department_id', 'role'])
+                ->select(['id', 'organization_id', 'team_id', 'role'])
                 ->where('id', $selectedUserId)
                 ->first();
 
@@ -489,10 +489,10 @@ class CallReportController extends Controller
                 if ($role === 'admin') {
                     $allowed = true;
                 } elseif ($role === 'manager') {
-                    $accessible = $this->getManagerAccessibleDepartmentIds($authUser);
+                    $accessible = $this->getManagerAccessibleTeamIds($authUser);
                     $allowed = (int) $selectedUser->organization_id === (int) $authUser->organization_id
                         && $selectedUser->role === 'user'
-                        && in_array((int) $selectedUser->department_id, $accessible, true);
+                        && in_array((int) $selectedUser->team_id, $accessible, true);
                 } else {
                     // organization role
                     $allowed = (int) $selectedUser->organization_id === (int) $authUser->organization_id;
@@ -534,31 +534,31 @@ class CallReportController extends Controller
             $query->where('call_logs.call_status', $request->call_status);
         }
 
-        if ($request->filled('department_id')) {
-            $departmentId = (int) $request->department_id;
+        if ($request->filled('team_id')) {
+            $teamId = (int) $request->team_id;
             
-            // Get SIMs from the selected department
-            $departmentSimMobiles = Sim::where('department_id', $departmentId)
+            // Get SIMs from the selected team
+            $teamSimMobiles = Sim::where('team_id', $teamId)
                 ->pluck('mobile')
                 ->filter()
                 ->toArray();
 
-            if ($hasCallerIdColumn && !empty($departmentSimMobiles)) {
-                $query->where(function (Builder $q) use ($departmentSimMobiles, $departmentId) {
-                    // Filter by caller_id (SIMs from the department)
-                    $q->whereIn('call_logs.caller_id', $departmentSimMobiles);
+            if ($hasCallerIdColumn && !empty($teamSimMobiles)) {
+                $query->where(function (Builder $q) use ($teamSimMobiles, $teamId) {
+                    // Filter by caller_id (SIMs from the team)
+                    $q->whereIn('call_logs.caller_id', $teamSimMobiles);
                     
-                    // Also check department_name for backward compatibility
-                    $department = Department::select(['name'])->where('id', $departmentId)->first();
-                    if ($department?->name) {
-                        $q->orWhere('call_logs.department_name', $department->name);
+                    // Also check team_name for backward compatibility
+                    $team = Team::select(['name'])->where('id', $teamId)->first();
+                    if ($team?->name) {
+                        $q->orWhere('call_logs.team_name', $team->name);
                     }
                 });
             } else {
-                // If no SIMs in department, only check department_name
-                $department = Department::select(['name'])->where('id', $departmentId)->first();
-                if ($department?->name) {
-                    $query->where('call_logs.department_name', $department->name);
+                // If no SIMs in team, only check team_name
+                $team = Team::select(['name'])->where('id', $teamId)->first();
+                if ($team?->name) {
+                    $query->where('call_logs.team_name', $team->name);
                 } else {
                     $query->whereRaw('1 = 0');
                 }
@@ -625,25 +625,25 @@ class CallReportController extends Controller
             ->toArray();
     }
 
-    private function getManagerAccessibleDepartmentIds($authUser): array
+    private function getManagerAccessibleTeamIds($authUser): array
     {
-        $accessibleDepartments = [];
+        $accessibleTeams = [];
 
-        if ($authUser->department_id) {
-            $accessibleDepartments[] = $authUser->department_id;
+        if ($authUser->team_id) {
+            $accessibleTeams[] = $authUser->team_id;
         }
 
-        if ($authUser->allowed_department_ids) {
-            $allowedDepartments = is_string($authUser->allowed_department_ids)
-                ? json_decode($authUser->allowed_department_ids, true)
-                : $authUser->allowed_department_ids;
+        if ($authUser->allowed_team_ids) {
+            $allowedTeams = is_string($authUser->allowed_team_ids)
+                ? json_decode($authUser->allowed_team_ids, true)
+                : $authUser->allowed_team_ids;
 
-            if (!empty($allowedDepartments) && is_array($allowedDepartments)) {
-                $accessibleDepartments = array_merge($accessibleDepartments, $allowedDepartments);
+            if (!empty($allowedTeams) && is_array($allowedTeams)) {
+                $accessibleTeams = array_merge($accessibleTeams, $allowedTeams);
             }
         }
 
-        return array_values(array_unique(array_filter($accessibleDepartments)));
+        return array_values(array_unique(array_filter($accessibleTeams)));
     }
 
     private function normalizeEmptyStringsToNull(Request $request, array $keys): void

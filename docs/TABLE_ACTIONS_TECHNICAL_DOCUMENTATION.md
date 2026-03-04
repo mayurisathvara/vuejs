@@ -50,7 +50,7 @@ resources/js/
 ├── pages/
 │   ├── Users.vue                 # Example: Custom actions implementation
 │   ├── Organizations.vue         # Example: Default actions usage
-│   ├── Departments.vue           # Example: Default actions usage
+│   ├── Teams.vue                 # Example: Default actions usage
 │   └── Sims.vue                  # Example: Default actions usage
 └── docs/
     └── TABLE_ACTIONS_TECHNICAL_DOCUMENTATION.md

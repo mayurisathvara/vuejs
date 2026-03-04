@@ -40,11 +40,11 @@ class Organization extends Model
     }
 
     /**
-     * Get the departments that belong to this organization.
+     * Get the teams that belong to this organization.
      */
-    public function departments()
+    public function teams()
     {
-        return $this->hasMany(Department::class, 'organization_id');
+        return $this->hasMany(Team::class, 'organization_id');
     }
 
     /**
