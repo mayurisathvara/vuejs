@@ -1,0 +1,60 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Orange Brand Theme CSS Variables */
+:root {
+  --color-orange-primary: #ff6b00;
+  --color-orange-secondary: #ff8c33;
+  --color-orange-light: #ffb366;
+  --color-orange-lighter: #ffd699;
+  --color-orange-dark: #cc5500;
+  --color-orange-darker: #994000;
+}
+
+/* Orange Theme Custom Utilities */
+@layer utilities {
+  .bg-gradient-orange {
+    background: linear-gradient(135deg, var(--color-orange-primary) 0%, var(--color-orange-secondary) 100%);
+  }
+  
+  .bg-gradient-orange-intense {
+    background: linear-gradient(310deg, var(--color-orange-dark) 0%, var(--color-orange-primary) 100%);
+  }
+  
+  .text-primary {
+    color: var(--color-orange-primary);
+  }
+  
+  .text-orange-primary {
+    color: var(--color-orange-primary);
+  }
+  
+  .text-orange-secondary {
+    color: var(--color-orange-secondary);
+  }
+  
+  .border-primary {
+    border-color: var(--color-orange-primary);
+  }
+  
+  .hover\:bg-primary:hover {
+    background-color: var(--color-orange-primary);
+  }
+  
+  .focus\:ring-primary:focus {
+    --tw-ring-color: var(--color-orange-primary);
+  }
+  
+  .bg-orange-gradient-br {
+    background-image: linear-gradient(to bottom right, var(--color-orange-primary), var(--color-orange-secondary));
+  }
+  
+  .from-orange-primary {
+    --tw-gradient-from: var(--color-orange-primary);
+  }
+  
+  .to-orange-secondary {
+    --tw-gradient-to: var(--color-orange-secondary);
+  }
+}
