@@ -2,7 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 
-// Serve Vue.js SPA for all routes
+// SPA - Catch all routes and return the main view
 Route::get('/{any}', function () {
-    return view('app');
+    return view('welcome');
 })->where('any', '.*');

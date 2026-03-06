@@ -1,229 +1,148 @@
-import { createRouter, createWebHistory } from 'vue-router'
-import { useAuthStore } from '@/stores/auth'
+import { createRouter, createWebHistory } from 'vue-router';
 
-// Layouts
-import AuthLayout from '@/layouts/AuthLayout.vue'
-import DefaultLayout from '@/layouts/DefaultLayout.vue'
-
-// Pages
-import Login from '@/pages/Login.vue'
-import Register from '@/pages/Register.vue'
-import Dashboard from '@/pages/Dashboard.vue'
-import Users from '@/pages/Users.vue'
-import AssignSims from '@/pages/AssignSims.vue'
-import Organizations from '@/pages/Organizations.vue'
-import OrganizationSettings from '@/pages/OrganizationSettings.vue'
-import OrganizationDateFormatSettings from '@/pages/OrganizationDateFormatSettings.vue'
-import Departments from '@/pages/Departments.vue'
-import Sims from '@/pages/Sims.vue'
-import Profile from '@/pages/Profile.vue'
-import ChangePassword from '@/pages/ChangePassword.vue'
-import CallReports from '@/pages/CallReports.vue'
-import SummaryReport from '@/pages/SummaryReport.vue'
+// Import pages
+import Features from '../pages/Features.vue';
+import About from '../pages/About.vue';
+import Services from '../pages/Services.vue';
+import Help from '../pages/Help.vue';
+import Pricing from '../pages/Pricing.vue';
+import Contact from '../pages/Contact.vue';
+import Privacy from '../pages/Privacy.vue';
+import Terms from '../pages/Terms.vue';
+import NotFound from '../pages/NotFound.vue';
 
 const routes = [
   {
     path: '/',
-    redirect: '/dashboard'
+    name: 'Features',
+    component: Features,
+    meta: { 
+      title: 'Callytics - Track, Analyze & Optimize Every Business Call',
+      description: 'Track every business call with Callytics. Real-time analytics, call recording, and powerful insights to optimize your marketing ROI.'
+    }
   },
   {
-    path: '/login',
-    component: AuthLayout,
-    children: [
-      {
-        path: '',
-        name: 'Login',
-        component: Login,
-        meta: { requiresGuest: true }
-      }
-    ]
+    path: '/about',
+    name: 'About',
+    component: About,
+    meta: { 
+      title: 'About Callytics – Call Tracking & Analytics Company',
+      description: 'Learn about Callytics, our mission to help businesses track, analyze, and optimize phone calls using powerful call tracking and analytics software.'
+    }
   },
   {
-    path: '/register',
-    component: AuthLayout,
-    children: [
-      {
-        path: '',
-        name: 'Register',
-        component: Register,
-        meta: { requiresGuest: true }
-      }
-    ]
+    path: '/services',
+    name: 'Services',
+    component: Services,
+    meta: { 
+      title: 'Call Tracking Services | Callytics Analytics Platform',
+      description: 'Discover Callytics call tracking and analytics services including call recording, attribution tracking, and advanced reporting tools.'
+    }
   },
   {
-    path: '/dashboard',
-    component: DefaultLayout,
-    children: [
-      {
-        path: '',
-        name: 'Dashboard',
-        component: Dashboard,
-        meta: { requiresAuth: true }
-      }
-    ]
+    path: '/help',
+    name: 'Help',
+    component: Help,
+    meta: { 
+      title: 'Callytics Support – Help Center & Customer Assistance',
+      description: 'Get expert support for Callytics call tracking software. Access FAQs, live chat, email support, and integration assistance.'
+    }
   },
   {
-    path: '/users',
-    component: DefaultLayout,
-    children: [
-      {
-        path: '',
-        name: 'Users',
-        component: Users,
-        meta: { requiresAuth: true, roles: ['admin', 'organization', 'manager'] }
-      },
-      {
-        path: ':userId/assign-sims',
-        name: 'assign-sims',
-        component: AssignSims,
-        meta: { requiresAuth: true, roles: ['admin', 'organization', 'manager'] }
-      }
-    ]
+    path: '/pricing',
+    name: 'Pricing',
+    component: Pricing,
+    meta: { 
+      title: 'Callytics Pricing – Call Tracking Plans & Costs',
+      description: 'View Callytics call tracking pricing plans. Flexible monthly and annual options with a 14-day free trial. No credit card required.'
+    }
   },
   {
-    path: '/organizations',
-    component: DefaultLayout,
-    children: [
-      {
-        path: '',
-        name: 'Organizations',
-        component: Organizations,
-        meta: { requiresAuth: true, roles: ['admin'] }
-      },
-      {
-        path: ':organizationId/settings',
-        name: 'OrganizationSettings',
-        component: OrganizationSettings,
-        meta: { requiresAuth: true, roles: ['admin'] }
-      }
-    ]
+    path: '/contact',
+    name: 'Contact',
+    component: Contact,
+    meta: { 
+      title: 'Contact Callytics – Call Tracking Support & Sales',
+      description: 'Contact Callytics for call tracking software support, sales inquiries, or partnership opportunities. Our team is ready to help.'
+    }
   },
   {
-    path: '/departments',
-    component: DefaultLayout,
-    children: [
-      {
-        path: '',
-        name: 'Departments',
-        component: Departments,
-        meta: { requiresAuth: true, roles: ['admin', 'organization'] }
-      }
-    ]
+    path: '/privacy',
+    name: 'Privacy',
+    component: Privacy,
+    meta: { 
+      title: 'Privacy Policy | Callytics Data Protection',
+      description: 'Read our privacy policy to learn how Callytics protects your data and ensures GDPR compliance.'
+    }
   },
   {
-    path: '/sims',
-    component: DefaultLayout,
-    children: [
-      {
-        path: '',
-        name: 'Sims',
-        component: Sims,
-        meta: { requiresAuth: true, roles: ['admin', 'organization'] }
-      }
-    ]
-  },
-  {
-    path: '/profile',
-    component: DefaultLayout,
-    children: [
-      {
-        path: '',
-        name: 'Profile',
-        component: Profile,
-        meta: { requiresAuth: true }
-      }
-    ]
-  },
-  {
-    path: '/change-password',
-    component: DefaultLayout,
-    children: [
-      {
-        path: '',
-        name: 'ChangePassword',
-        component: ChangePassword,
-        meta: { requiresAuth: true }
-      }
-    ]
-  },
-  {
-    path: '/call-reports',
-    component: DefaultLayout,
-    children: [
-      {
-        path: '',
-        name: 'CallReports',
-        component: CallReports,
-        meta: { requiresAuth: true, roles: ['admin', 'organization', 'manager', 'user'] }
-      }
-    ]
-  },
-  {
-    path: '/summary-report',
-    component: DefaultLayout,
-    children: [
-      {
-        path: '',
-        name: 'SummaryReport',
-        component: SummaryReport,
-        meta: { requiresAuth: true, roles: ['admin', 'organization', 'manager', 'user'] }
-      }
-    ]
-  },
-  {
-    path: '/settings',
-    component: DefaultLayout,
-    children: [
-      {
-        path: '',
-        name: 'OrganizationSettingsApp',
-        component: OrganizationDateFormatSettings,
-        meta: { requiresAuth: true, roles: ['organization'] }
-      }
-    ]
+    path: '/terms',
+    name: 'Terms',
+    component: Terms,
+    meta: { 
+      title: 'Terms of Service | Callytics Legal Terms',
+      description: 'Review the terms and conditions for using Callytics call tracking and analytics services.'
+    }
   },
   {
     path: '/:pathMatch(.*)*',
-    redirect: '/dashboard'
+    name: 'NotFound',
+    component: NotFound,
+    meta: { 
+      title: '404 - Page Not Found | Callytics',
+      description: 'The page you are looking for could not be found.'
+    }
   }
-]
+];
 
 const router = createRouter({
   history: createWebHistory(),
-  routes
-})
-
-// Navigation guards
-router.beforeEach(async (to, from, next) => {
-  const authStore = useAuthStore()
-  
-  // Initialize auth if not already done
-  if (!authStore.user && authStore.token) {
-    try {
-      await authStore.fetchUser()
-    } catch (error) {
-      // Token is invalid, will be cleared by the store
+  routes,
+  scrollBehavior(to, from, savedPosition) {
+    if (savedPosition) {
+      return savedPosition;
+    } else if (to.hash) {
+      return {
+        el: to.hash,
+        behavior: 'smooth',
+      };
+    } else {
+      return { top: 0, behavior: 'smooth' };
     }
   }
+});
 
-  const requiresAuth = to.matched.some(record => record.meta.requiresAuth)
-  const requiresGuest = to.matched.some(record => record.meta.requiresGuest)
+// Update document title and meta tags for SEO
+router.beforeEach((to, from, next) => {
+  // Update title
+  document.title = to.meta.title || 'Callytics - Call Tracking & Analytics';
   
-  // Check role-based access
-  const requiredRoles = to.meta.roles
-  const userRole = authStore.userRole
-
-  if (requiresAuth && !authStore.isAuthenticated) {
-    next('/login')
-  } else if (requiresGuest && authStore.isAuthenticated) {
-    next('/dashboard')
-  } else if (requiredRoles && !requiredRoles.includes(userRole)) {
-    // User doesn't have required role, redirect to dashboard
-    alert('You do not have permission to access this page.')
-    next('/dashboard')
-  } else {
-    next()
+  // Update or create meta description
+  let metaDescription = document.querySelector('meta[name="description"]');
+  if (to.meta.description) {
+    if (metaDescription) {
+      metaDescription.setAttribute('content', to.meta.description);
+    } else {
+      metaDescription = document.createElement('meta');
+      metaDescription.setAttribute('name', 'description');
+      metaDescription.setAttribute('content', to.meta.description);
+      document.head.appendChild(metaDescription);
+    }
   }
-})
+  
+  // Update canonical URL
+  let canonical = document.querySelector('link[rel="canonical"]');
+  const currentUrl = window.location.origin + to.path;
+  if (canonical) {
+    canonical.setAttribute('href', currentUrl);
+  } else {
+    canonical = document.createElement('link');
+    canonical.setAttribute('rel', 'canonical');
+    canonical.setAttribute('href', currentUrl);
+    document.head.appendChild(canonical);
+  }
+  
+  next();
+});
 
-export default router
+export default router;

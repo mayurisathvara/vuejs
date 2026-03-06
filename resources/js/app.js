@@ -1,17 +1,13 @@
-import { createApp } from 'vue'
-import { createPinia } from 'pinia'
-import router from './router'
-import App from './App.vue'
-import './bootstrap'
+import './bootstrap';
+import '../css/app.css';
 
-// Create Vue app
-const app = createApp(App)
+import { createApp } from 'vue';
+import App from './App.vue';
+import router from './router';
 
-// Use Pinia for state management
-app.use(createPinia())
+const app = createApp(App);
 
-// Use Vue Router
-app.use(router)
+app.use(router);
 
-// Mount the app
-app.mount('#app')
+app.mount('#app');
+
