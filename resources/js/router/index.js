@@ -21,6 +21,8 @@ import ChangePassword from '@/pages/ChangePassword.vue'
 import CallReports from '@/pages/CallReports.vue'
 import SummaryReport from '@/pages/SummaryReport.vue'
 
+const APP_NAME = 'Callytics'
+
 const routes = [
   {
     path: '/',
@@ -34,7 +36,7 @@ const routes = [
         path: '',
         name: 'Login',
         component: Login,
-        meta: { requiresGuest: true }
+        meta: { requiresGuest: true, title: 'Login' }
       }
     ]
   },
@@ -46,7 +48,7 @@ const routes = [
         path: '',
         name: 'Register',
         component: Register,
-        meta: { requiresGuest: true }
+        meta: { requiresGuest: true, title: 'Register' }
       }
     ]
   },
@@ -58,7 +60,7 @@ const routes = [
         path: '',
         name: 'Dashboard',
         component: Dashboard,
-        meta: { requiresAuth: true }
+        meta: { requiresAuth: true, title: 'Dashboard' }
       }
     ]
   },
@@ -70,13 +72,13 @@ const routes = [
         path: '',
         name: 'Users',
         component: Users,
-        meta: { requiresAuth: true, roles: ['admin', 'organization', 'manager'] }
+        meta: { requiresAuth: true, roles: ['admin', 'organization', 'manager'], title: 'User Management' }
       },
       {
         path: ':userId/assign-sims',
         name: 'assign-sims',
         component: AssignSims,
-        meta: { requiresAuth: true, roles: ['admin', 'organization', 'manager'] }
+        meta: { requiresAuth: true, roles: ['admin', 'organization', 'manager'], title: 'Assign SIMs' }
       }
     ]
   },
@@ -88,13 +90,13 @@ const routes = [
         path: '',
         name: 'Organizations',
         component: Organizations,
-        meta: { requiresAuth: true, roles: ['admin'] }
+        meta: { requiresAuth: true, roles: ['admin'], title: 'Organizations' }
       },
       {
         path: ':organizationId/settings',
         name: 'OrganizationSettings',
         component: OrganizationSettings,
-        meta: { requiresAuth: true, roles: ['admin'] }
+        meta: { requiresAuth: true, roles: ['admin'], title: 'Organization Settings' }
       }
     ]
   },
@@ -106,7 +108,7 @@ const routes = [
         path: '',
         name: 'Teams',
         component: Teams,
-        meta: { requiresAuth: true, roles: ['admin', 'organization'] }
+        meta: { requiresAuth: true, roles: ['admin', 'organization'], title: 'Team Management' }
       }
     ]
   },
@@ -118,7 +120,7 @@ const routes = [
         path: '',
         name: 'Sims',
         component: Sims,
-        meta: { requiresAuth: true, roles: ['admin', 'organization'] }
+        meta: { requiresAuth: true, roles: ['admin', 'organization'], title: 'SIM Management' }
       }
     ]
   },
@@ -130,7 +132,7 @@ const routes = [
         path: '',
         name: 'Profile',
         component: Profile,
-        meta: { requiresAuth: true }
+        meta: { requiresAuth: true, title: 'My Profile' }
       }
     ]
   },
@@ -142,7 +144,7 @@ const routes = [
         path: '',
         name: 'ChangePassword',
         component: ChangePassword,
-        meta: { requiresAuth: true }
+        meta: { requiresAuth: true, title: 'Change Password' }
       }
     ]
   },
@@ -154,7 +156,7 @@ const routes = [
         path: '',
         name: 'CallReports',
         component: CallReports,
-        meta: { requiresAuth: true, roles: ['admin', 'organization', 'manager', 'user'] }
+        meta: { requiresAuth: true, roles: ['admin', 'organization', 'manager', 'user'], title: 'Call Reports' }
       }
     ]
   },
@@ -166,7 +168,7 @@ const routes = [
         path: '',
         name: 'SummaryReport',
         component: SummaryReport,
-        meta: { requiresAuth: true, roles: ['admin', 'organization', 'manager', 'user'] }
+        meta: { requiresAuth: true, roles: ['admin', 'organization', 'manager', 'user'], title: 'Summary Report' }
       }
     ]
   },
@@ -178,7 +180,7 @@ const routes = [
         path: '',
         name: 'OrganizationSettingsApp',
         component: OrganizationDateFormatSettings,
-        meta: { requiresAuth: true, roles: ['organization'] }
+        meta: { requiresAuth: true, roles: ['organization'], title: 'Settings' }
       }
     ]
   },
@@ -224,6 +226,12 @@ router.beforeEach(async (to, from, next) => {
   } else {
     next()
   }
+})
+
+// Update document title on each navigation
+router.afterEach((to) => {
+  const pageTitle = to.meta.title
+  document.title = pageTitle ? `${pageTitle} | ${APP_NAME}` : APP_NAME
 })
 
 export default router
