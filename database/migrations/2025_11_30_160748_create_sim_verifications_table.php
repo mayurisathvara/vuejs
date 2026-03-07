@@ -18,6 +18,7 @@ return new class extends Migration
 			$table->string('token_hash');
 			$table->string('status')->default('pending'); // pending, verified
 			$table->string('sender_number')->nullable();
+			$table->integer('subscription_id')->nullable();
 			$table->timestamp('expires_at');
 			$table->timestamps();
 		});

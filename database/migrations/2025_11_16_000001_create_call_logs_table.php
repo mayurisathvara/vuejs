@@ -58,11 +58,6 @@ return new class extends Migration
                   ->on('organizations')
                   ->onDelete('set null');
 
-            // Composite index for reports
-            $table->index(['organization_id', 'date_time']);
-            
-            // Composite index for callback query optimization
-            $table->index(['caller_id', 'caller_number', 'call_status', 'callback_id', 'date_time'], 'idx_callback_lookup');
         });
     }
 

@@ -13,9 +13,10 @@ return new class extends Migration
     {
         Schema::table('users', function (Blueprint $table) {
             $table->string('role')->default('user')->after('email');
-            $table->string('organization_id')->nullable()->after('role');
-            $table->text('profile')->nullable()->after('organization_id');
-            $table->string('profile_image')->nullable()->after('profile');
+            $table->integer('organization_id')->nullable()->after('role');
+            $table->text('profile')->nullable();
+            $table->string('profile_image')->nullable();
+			$table->integer('sim_subscription_id')->nullable();
         });
     }
 
@@ -25,7 +26,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('users', function (Blueprint $table) {
-            $table->dropColumn(['role', 'organization_id', 'profile', 'profile_image']);
+            $table->dropColumn(['role', 'organization_id', 'profile', 'profile_image','sim_subscription_id']);
         });
     }
 };

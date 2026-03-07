@@ -19,7 +19,7 @@ return new class extends Migration {
                   ->constrained('sims')
                   ->cascadeOnDelete();
 				  
-		    $table->string('mobile', 15);
+		    $table->string('mobile', 15)->nullable();
 
             $table->timestamps();
 

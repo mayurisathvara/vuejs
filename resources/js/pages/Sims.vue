@@ -1512,8 +1512,8 @@ const handleExportCsv = async () => {
       simsData.forEach(sim => {
         const mobile = sim.mobile || ''
         const name = (sim.name || '').replace(/"/g, '""') // Escape quotes
-        const organization = (sim.organization_name || '').replace(/"/g, '""')
-        const team = (sim.team_name || '').replace(/"/g, '""')
+        const organization = (sim.organization?.name || '').replace(/"/g, '""')
+        const team = (sim.team?.name || '').replace(/"/g, '""')
         const createdAt = sim.created_at ? new Date(sim.created_at).toLocaleDateString('en-US') : ''
         
         csvContent += `"${mobile}","${name}","${organization}","${team}","${createdAt}"\n`
@@ -1524,7 +1524,7 @@ const handleExportCsv = async () => {
       simsData.forEach(sim => {
         const mobile = sim.mobile || ''
         const name = (sim.name || '').replace(/"/g, '""') // Escape quotes
-        const team = (sim.team_name || '').replace(/"/g, '""')
+        const team = (sim.team?.name || '').replace(/"/g, '""')
         const createdAt = sim.created_at ? new Date(sim.created_at).toLocaleDateString('en-US') : ''
         
         csvContent += `"${mobile}","${name}","${team}","${createdAt}"\n`
