@@ -34,11 +34,12 @@ class OrganizationSettingController extends Controller
         $settings = OrganizationSetting::firstOrCreate(
             ['organization_id' => $organization->id],
             [
-                'callback_window_hours' => 48,
-                'date_formate' => 'Y-m-d',
-                'enable_manager_role' => false,
-                'enable_working_hours' => false,
-                'working_hours' => null,
+                'callback_window_hours'   => 48,
+                'date_formate'            => 'Y-m-d',
+                'enable_manager_role'     => false,
+                'enable_working_hours'    => false,
+                'working_hours'           => null,
+                'exclude_numbers_enabled' => 1,
             ]
         );
 
@@ -62,11 +63,12 @@ class OrganizationSettingController extends Controller
         }
 
         $validator = Validator::make($request->all(), [
-            'callback_window_hours' => 'required|integer|in:' . implode(',', self::CALLBACK_WINDOW_OPTIONS),
-            'date_formate' => 'required|string|in:' . implode(',', self::DATE_FORMAT_OPTIONS),
-            'enable_manager_role' => 'required|boolean',
-            'enable_working_hours' => 'required|boolean',
-            'working_hours' => 'nullable|integer|min:1|max:20',
+            'callback_window_hours'   => 'required|integer|in:' . implode(',', self::CALLBACK_WINDOW_OPTIONS),
+            'date_formate'            => 'required|string|in:' . implode(',', self::DATE_FORMAT_OPTIONS),
+            'enable_manager_role'     => 'required|boolean',
+            'enable_working_hours'    => 'required|boolean',
+            'working_hours'           => 'nullable|integer|min:1|max:20',
+            'exclude_numbers_enabled' => 'required|integer|in:0,1',
         ]);
 
         if ($validator->fails()) {
@@ -79,11 +81,12 @@ class OrganizationSettingController extends Controller
         $settings = OrganizationSetting::firstOrCreate(['organization_id' => $organization->id]);
 
         $settings->update([
-            'callback_window_hours' => (int) $request->callback_window_hours,
-            'date_formate' => $request->date_formate,
-            'enable_manager_role' => (bool) $request->enable_manager_role,
-            'enable_working_hours' => (bool) $request->enable_working_hours,
-            'working_hours' => $request->working_hours !== null ? (int) $request->working_hours : null,
+            'callback_window_hours'   => (int) $request->callback_window_hours,
+            'date_formate'            => $request->date_formate,
+            'enable_manager_role'     => (bool) $request->enable_manager_role,
+            'enable_working_hours'    => (bool) $request->enable_working_hours,
+            'working_hours'           => $request->working_hours !== null ? (int) $request->working_hours : null,
+            'exclude_numbers_enabled' => (int) $request->exclude_numbers_enabled,
         ]);
 
         return response()->json([

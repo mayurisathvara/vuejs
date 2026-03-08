@@ -95,6 +95,23 @@
                 {{ getErrorMessage(errors.working_hours) }}
               </div>
             </div>
+
+            <div class="col-md-6 mb-3">
+              <label class="form-label d-block">Excluded Numbers <span class="text-danger">*</span></label>
+              <div class="form-check form-switch">
+                <input
+                  class="form-check-input switcher-lg"
+                  type="checkbox"
+                  role="switch"
+                  id="exclude_numbers_enabled"
+                  v-model="excludeNumbersEnabled"
+                />
+                <label class="form-check-label" for="exclude_numbers_enabled">{{ excludeNumbersEnabled ? 'Enabled' : 'Disabled' }}</label>
+              </div>
+              <div v-if="errors.exclude_numbers_enabled" class="text-danger mt-1" style="font-size: 0.875rem;">
+                {{ getErrorMessage(errors.exclude_numbers_enabled) }}
+              </div>
+            </div>
           </div>
 
           <div class="d-flex justify-content-end gap-2">
@@ -134,7 +151,14 @@ const form = reactive({
   date_formate: 'Y-m-d',
   enable_manager_role: false,
   enable_working_hours: false,
-  working_hours: ''
+  working_hours: '',
+  exclude_numbers_enabled: 1,
+})
+
+// Two-way bridge: checkbox ↔ 1/0 integer
+const excludeNumbersEnabled = computed({
+  get: () => form.exclude_numbers_enabled === 1,
+  set: (val) => { form.exclude_numbers_enabled = val ? 1 : 0 },
 })
 
 const getErrorMessage = (error) => {
@@ -166,8 +190,8 @@ const fetchSettings = async () => {
   form.date_formate = settings.date_formate ?? 'Y-m-d'
   form.enable_manager_role = Boolean(settings.enable_manager_role ?? false)
   form.enable_working_hours = Boolean(settings.enable_working_hours ?? false)
-
   form.working_hours = coerceWorkingHours(settings.working_hours)
+  form.exclude_numbers_enabled = settings.exclude_numbers_enabled !== undefined ? Number(settings.exclude_numbers_enabled) : 1
 }
 
 const handleRefresh = async () => {
@@ -191,11 +215,12 @@ const handleSave = async () => {
 
   try {
     await api.put(`/organizations/${organizationId.value}/settings`, {
-      callback_window_hours: form.callback_window_hours,
-      date_formate: form.date_formate,
-      enable_manager_role: form.enable_manager_role,
-      enable_working_hours: form.enable_working_hours,
-      working_hours: form.working_hours
+      callback_window_hours:   form.callback_window_hours,
+      date_formate:            form.date_formate,
+      enable_manager_role:     form.enable_manager_role,
+      enable_working_hours:    form.enable_working_hours,
+      working_hours:           form.working_hours,
+      exclude_numbers_enabled: form.exclude_numbers_enabled,
     })
 
     showSuccess('Settings saved successfully')

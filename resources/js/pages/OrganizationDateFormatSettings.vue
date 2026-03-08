@@ -58,6 +58,43 @@
             </div>
           </div>
 
+          <!-- Excluded Numbers Setting -->
+          <hr class="my-4" />
+          <div class="row g-4 align-items-start">
+            <div class="col-lg-5">
+              <div class="setting-field">
+                <label class="form-label d-block">Excluded Numbers</label>
+                <div class="form-check form-switch mt-2">
+                  <input
+                    id="excludeNumbersSwitch"
+                    v-model="excludeNumbersEnabled"
+                    class="form-check-input"
+                    type="checkbox"
+                    role="switch"
+                    style="width: 3em; height: 1.5em; cursor: pointer;"
+                  />
+                  <label class="form-check-label ms-2" for="excludeNumbersSwitch" style="line-height: 1.8;">
+                    <span v-if="excludeNumbersEnabled" class="badge bg-success">Enabled</span>
+                    <span v-else class="badge bg-secondary">Disabled</span>
+                  </label>
+                </div>
+              </div>
+            </div>
+            <div class="col-lg-7">
+              <div class="help-card">
+                <div class="help-card__text">
+                  <p class="mb-2">
+                    When <strong>enabled</strong>, call logs will be filtered against the Excluded Numbers list.
+                    Calls from excluded numbers will be hidden or flagged in reports.
+                  </p>
+                  <p class="mb-0">
+                    When <strong>disabled</strong>, all calls are shown regardless of the exclusion list.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+
           <div class="d-flex justify-content-end gap-2 mt-4">
             <button type="submit" class="btn btn-primary" :disabled="loading || !organizationId">
               <span v-if="loading" class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
@@ -79,6 +116,12 @@ import { showSuccess } from '@/services/toast'
 const authStore = useAuthStore()
 
 const organizationId = computed(() => authStore.user?.organization?.id || authStore.user?.organization_id || null)
+
+// Two-way bridge: checkbox works with boolean, form stores 1/0
+const excludeNumbersEnabled = computed({
+  get: () => form.exclude_numbers_enabled === 1,
+  set: (val) => { form.exclude_numbers_enabled = val ? 1 : 0 },
+})
 const organizationName = computed(() => authStore.user?.organization?.name || '')
 
 const loading = ref(false)
@@ -88,7 +131,8 @@ const errors = ref({})
 const dateFormatOptions = ref(['Y-m-d', 'd-m-Y', 'm-d-Y', 'd/m/Y', 'm/d/Y', 'Y/m/d'])
 
 const form = reactive({
-  date_formate: 'Y-m-d'
+  date_formate: 'Y-m-d',
+  exclude_numbers_enabled: 1,
 })
 
 const settingsSnapshot = ref(null)
@@ -114,6 +158,7 @@ const fetchSettings = async () => {
   if (Array.isArray(options.date_formate)) dateFormatOptions.value = options.date_formate
 
   form.date_formate = settings.date_formate ?? 'Y-m-d'
+  form.exclude_numbers_enabled = settings.exclude_numbers_enabled ?? 1
 }
 
 const handleSave = async () => {
@@ -127,11 +172,12 @@ const handleSave = async () => {
     const s = settingsSnapshot.value || {}
 
     await api.put(`/organizations/${organizationId.value}/settings`, {
-      callback_window_hours: Number(s.callback_window_hours ?? 48),
-      date_formate: form.date_formate,
-      enable_manager_role: Boolean(s.enable_manager_role ?? false),
-      enable_working_hours: Boolean(s.enable_working_hours ?? false),
-      working_hours: s.working_hours === '' ? null : s.working_hours
+      callback_window_hours:   Number(s.callback_window_hours ?? 48),
+      date_formate:            form.date_formate,
+      enable_manager_role:     Boolean(s.enable_manager_role ?? false),
+      enable_working_hours:    Boolean(s.enable_working_hours ?? false),
+      working_hours:           s.working_hours === '' ? null : s.working_hours,
+      exclude_numbers_enabled: form.exclude_numbers_enabled,
     })
 
     showSuccess('Settings saved successfully')
