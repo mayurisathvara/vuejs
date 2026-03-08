@@ -92,6 +92,13 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/teams', [TeamController::class, 'index']);
     });
     
+    // Excluded Numbers - Admin, Organization, Manager
+    Route::middleware(['role:admin,organization,manager'])->group(function () {
+        Route::get('/excluded-numbers/organizations', [\App\Http\Controllers\ExcludedNumberController::class, 'getOrganizations']);
+        Route::post('/excluded-numbers/import-csv', [\App\Http\Controllers\ExcludedNumberController::class, 'importCsv']);
+        Route::apiResource('excluded-numbers', \App\Http\Controllers\ExcludedNumberController::class);
+    });
+
     // SIM management routes - Admin and Organization only
     Route::middleware(['role:admin,organization'])->group(function () {
         Route::put('/sims/{sim}/status', [\App\Http\Controllers\SimController::class, 'updateStatus']);

@@ -79,6 +79,13 @@
             </router-link>
           </li>
 
+          <li v-if="showExcludedNumbers" class="nav-item" :class="{ active: $route.name === 'ExcludedNumbers' }">
+            <router-link to="/excluded-numbers" class="nav-link" @click="handleMenuClick">
+              <i class="fas fa-ban"></i>
+              <p>Excluded Numbers</p>
+            </router-link>
+          </li>
+
           <li v-if="showOrganizationSettings" class="nav-item" :class="{ active: $route.name === 'OrganizationSettingsApp' }">
             <router-link to="/settings" class="nav-link" @click="handleMenuClick">
               <i class="fas fa-cog"></i>
@@ -122,6 +129,7 @@ const showSettings = computed(() => isAdmin.value)
 const showOrganizationSettings = computed(() => isOrganization.value)
 const showCallReports = computed(() => isAdmin.value || isOrganization.value || isManager.value || isUser.value)
 const showSummaryReport = computed(() => isAdmin.value || isOrganization.value || isManager.value || isUser.value)
+const showExcludedNumbers = computed(() => isAdmin.value || isOrganization.value || isManager.value)
 
 const checkMobile = () => {
   isMobile.value = window.innerWidth <= 991.5

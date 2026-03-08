@@ -16,6 +16,7 @@ import OrganizationSettings from '@/pages/OrganizationSettings.vue'
 import OrganizationDateFormatSettings from '@/pages/OrganizationDateFormatSettings.vue'
 import Teams from '@/pages/Teams.vue'
 import Sims from '@/pages/Sims.vue'
+import ExcludedNumbers from '@/pages/ExcludedNumbers.vue'
 import Profile from '@/pages/Profile.vue'
 import ChangePassword from '@/pages/ChangePassword.vue'
 import CallReports from '@/pages/CallReports.vue'
@@ -181,6 +182,18 @@ const routes = [
         name: 'OrganizationSettingsApp',
         component: OrganizationDateFormatSettings,
         meta: { requiresAuth: true, roles: ['organization'], title: 'Settings' }
+      }
+    ]
+  },
+  {
+    path: '/excluded-numbers',
+    component: DefaultLayout,
+    children: [
+      {
+        path: '',
+        name: 'ExcludedNumbers',
+        component: ExcludedNumbers,
+        meta: { requiresAuth: true, roles: ['admin', 'organization', 'manager'], title: 'Excluded Numbers' }
       }
     ]
   },
