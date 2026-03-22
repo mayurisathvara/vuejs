@@ -69,41 +69,71 @@ class AuthController extends Controller
     }
 
     /**
-     * Register user
+     * Register a new organization (role = organization).
+     * Creating an Organization automatically:
+     *  - creates the linked User with role=organization  (via Organization::boot)
+     *  - assigns the 14-day Free Trial plan             (via Organization::boot)
+     *  - creates the OrganizationSetting row
      */
     public function register(Request $request): JsonResponse
     {
         $validator = Validator::make($request->all(), [
-            'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users',
-            'password' => 'required|string|min:6|confirmed',
-            'role' => 'required|string|in:admin,manager,user',
-            'organization_id' => 'nullable|string|max:255',
-            'profile' => 'nullable|string|max:500',
+            'name'                  => 'required|string|max:255',
+            'email'                 => 'required|string|email|max:255|unique:organizations,email|unique:users,email',
+            'mobile'                => 'required|string|max:20',
+            'industry'              => 'required|string|max:100',
+            'password'              => 'required|string|min:6|confirmed',
+            'password_confirmation' => 'required|string',
         ]);
 
         if ($validator->fails()) {
             return response()->json([
                 'message' => 'Validation failed',
-                'errors' => $validator->errors()
+                'errors'  => $validator->errors(),
             ], 422);
         }
 
-        $user = User::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'password' => Hash::make($request->password),
-            'role' => $request->role,
-            'organization_id' => $request->organization_id,
-            'profile' => $request->profile,
+        // Generate a unique numeric app login code
+        do {
+            $code = str_pad((string) random_int(100000, 999999), 6, '0', STR_PAD_LEFT);
+        } while (\App\Models\Organization::where('app_login_code', $code)->exists());
+
+        // Creating the Organization triggers boot():
+        //   → syncUser()  → creates User with role=organization
+        //   → assignTrialPlan() → creates 14-day free trial subscription
+        $organization = \App\Models\Organization::create([
+            'name'           => $request->name,
+            'email'          => $request->email,
+            'mobile'         => $request->mobile,
+            'industry'       => $request->industry,
+            'password'       => Hash::make($request->password),
+            'app_login_code' => $code,
+            'status'         => 'active',
         ]);
+
+        // Create default organization settings
+        \App\Models\OrganizationSetting::firstOrCreate(
+            ['organization_id' => $organization->id],
+            [
+                'callback_window_hours' => 48,
+                'date_formate'          => 'Y-m-d',
+                'enable_manager_role'   => false,
+                'enable_working_hours'  => false,
+                'working_hours'         => null,
+            ]
+        );
+
+        // Retrieve the auto-created user
+        $user = User::where('organization_id', $organization->id)
+            ->where('role', 'organization')
+            ->first();
 
         $token = $user->createToken('auth-token')->plainTextToken;
 
         return response()->json([
-            'user' => $user,
-            'token' => $token,
-            'message' => 'Registration successful'
+            'user'    => $user->load('organization'),
+            'token'   => $token,
+            'message' => 'Registration successful. Your 14-day free trial has started.',
         ], 201);
     }
 

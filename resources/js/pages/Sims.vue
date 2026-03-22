@@ -312,6 +312,82 @@
       </div>
     </Modal>
 
+    <!-- SIM Limit Reached Modal -->
+    <Modal
+      :show="showLimitModal"
+      title="SIM Limit Reached"
+      size="md"
+      :showFooter="false"
+      @close="closeLimitModal"
+    >
+      <div class="limit-modal-body">
+        <!-- Info banner -->
+        <div class="limit-info-banner">
+          <div class="limit-info-icon">
+            <i class="fas fa-lock"></i>
+          </div>
+          <div class="limit-info-text">
+            <p class="limit-info-title">You've reached your active SIM limit.</p>
+            <p class="limit-info-sub">
+              To activate
+              <strong v-if="limitModalTargetSim">{{ limitModalTargetSim.name || limitModalTargetSim.mobile }}</strong>
+              <strong v-else>this SIM</strong>,
+              select one currently active SIM below to deactivate first.
+            </p>
+          </div>
+        </div>
+
+        <!-- How it works steps -->
+        <ol class="limit-steps">
+          <li>Select a SIM from the list below to deactivate.</li>
+          <li>Click <strong>Confirm Swap</strong> — the selected SIM is deactivated and your chosen SIM is activated instantly.</li>
+          <li>To increase your limit, contact the administrator to upgrade your plan.</li>
+        </ol>
+
+        <!-- Active SIMs list -->
+        <p class="limit-list-label">Currently active SIMs (select one to deactivate):</p>
+        <div class="limit-sims-list">
+          <label
+            v-for="sim in limitModalActiveSims"
+            :key="sim.id"
+            class="limit-sim-row"
+            :class="{ selected: selectedSimToDeactivate === sim.id }"
+          >
+            <input
+              type="radio"
+              :value="sim.id"
+              v-model="selectedSimToDeactivate"
+              class="limit-sim-radio"
+            />
+            <span class="limit-sim-dot"></span>
+            <div class="limit-sim-info">
+              <span class="limit-sim-mobile">{{ sim.mobile }}</span>
+              <span class="limit-sim-name">{{ sim.name }}</span>
+            </div>
+            <i v-if="selectedSimToDeactivate === sim.id" class="fas fa-check-circle limit-check-icon"></i>
+          </label>
+          <p v-if="limitModalActiveSims.length === 0" class="text-muted text-center py-2">
+            No active SIMs found.
+          </p>
+        </div>
+
+        <!-- Footer actions -->
+        <div class="limit-modal-footer">
+          <button class="btn btn-secondary" @click="closeLimitModal" :disabled="swapLoading">
+            Cancel
+          </button>
+          <button
+            class="btn btn-primary"
+            @click="handleSimSwap"
+            :disabled="!selectedSimToDeactivate || swapLoading"
+          >
+            <span v-if="swapLoading"><i class="fas fa-spinner fa-spin me-2"></i>Swapping…</span>
+            <span v-else><i class="fas fa-exchange-alt me-2"></i>Confirm Swap</span>
+          </button>
+        </div>
+      </div>
+    </Modal>
+
     <!-- Import CSV Modal -->
     <Modal
       :show="showImportModal"
@@ -1085,6 +1161,163 @@
   font-size: 12px;
   color: #0066cc;
 }
+
+/* ============================================================
+   SIM Limit Reached Modal
+   ============================================================ */
+.limit-modal-body {
+  padding: 0.25rem 0;
+}
+
+.limit-info-banner {
+  display: flex;
+  gap: 1rem;
+  background: #fff8e6;
+  border: 1px solid #ffd166;
+  border-radius: 12px;
+  padding: 1rem 1.1rem;
+  margin-bottom: 1.1rem;
+  align-items: flex-start;
+}
+
+.limit-info-icon {
+  width: 40px;
+  height: 40px;
+  background: #ffd166;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  color: #7a4f00;
+  font-size: 1.1rem;
+}
+
+.limit-info-text {
+  flex: 1;
+}
+
+.limit-info-title {
+  font-weight: 700;
+  color: #7a4f00;
+  margin: 0 0 0.25rem;
+  font-size: 0.97rem;
+}
+
+.limit-info-sub {
+  color: #7a4f00;
+  margin: 0;
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.limit-steps {
+  margin: 0 0 1rem 0;
+  padding-left: 1.3rem;
+  font-size: 0.88rem;
+  color: #495057;
+  line-height: 1.7;
+}
+
+.limit-list-label {
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: #495057;
+  margin-bottom: 0.5rem;
+}
+
+.limit-sims-list {
+  border: 1px solid #e3e6f0;
+  border-radius: 10px;
+  overflow: hidden;
+  max-height: 240px;
+  overflow-y: auto;
+  margin-bottom: 1.2rem;
+}
+
+.limit-sims-list::-webkit-scrollbar {
+  width: 5px;
+}
+.limit-sims-list::-webkit-scrollbar-thumb {
+  background: #ced4da;
+  border-radius: 10px;
+}
+
+.limit-sim-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.7rem 1rem;
+  cursor: pointer;
+  border-bottom: 1px solid #f0f2f5;
+  transition: background 0.15s;
+  user-select: none;
+}
+
+.limit-sim-row:last-child {
+  border-bottom: none;
+}
+
+.limit-sim-row:hover {
+  background: #f8f9fa;
+}
+
+.limit-sim-row.selected {
+  background: #e8f4ff;
+  border-left: 3px solid #0d6efd;
+}
+
+.limit-sim-radio {
+  display: none;
+}
+
+.limit-sim-dot {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 2px solid #ced4da;
+  flex-shrink: 0;
+  transition: all 0.15s;
+  background: #fff;
+}
+
+.limit-sim-row.selected .limit-sim-dot {
+  border-color: #0d6efd;
+  background: #0d6efd;
+  box-shadow: inset 0 0 0 3px #fff;
+}
+
+.limit-sim-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.limit-sim-mobile {
+  font-weight: 600;
+  font-size: 0.91rem;
+  color: #212529;
+}
+
+.limit-sim-name {
+  font-size: 0.82rem;
+  color: #6c757d;
+}
+
+.limit-check-icon {
+  color: #0d6efd;
+  font-size: 1rem;
+  flex-shrink: 0;
+}
+
+.limit-modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.65rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid #e9ecef;
+}
 </style>
 
 <script setup>
@@ -1183,10 +1416,12 @@ const simHeaders = computed(() => {
 })
 
 const normalizeStatus = (status) => {
-  return status === 'inactive' ? 'inactive' : 'active'
+  if (status === 'inactive' || status === 'inactive_plan_limit') return 'inactive'
+  return 'active'
 }
 
 const formatStatusLabel = (status) => {
+  if (status === 'inactive_plan_limit') return 'Inactive (Limit)'
   const normalized = normalizeStatus(status)
   return normalized.charAt(0).toUpperCase() + normalized.slice(1)
 }
@@ -1235,14 +1470,68 @@ const adjustDropdownPosition = (simId) => {
   }
 }
 
+// SIM limit modal state
+const showLimitModal = ref(false)
+const limitModalActiveSims = ref([])  // active SIMs returned by the server
+const limitModalTargetId  = ref(null) // the SIM the user is trying to activate
+const limitModalTargetSim = ref(null) // full sim object of target
+const selectedSimToDeactivate = ref(null)
+const swapLoading = ref(false)
+
 const updateSimStatus = async (simId, newStatus) => {
+  activeDropdown.value = null
+
+  // If activating, find the sim object so we can show its name in the modal if needed
+  const targetSim = simsStore.sims.find(s => s.id === simId)
+
   try {
     await api.put(`/sims/${simId}/status`, { status: newStatus })
-    activeDropdown.value = null
     fetchSims()
   } catch (error) {
-    console.error('Error updating SIM status:', error)
-    showError('Failed to update SIM status')
+    const data = error.response?.data
+
+    if (error.response?.status === 422 && data?.code === 'SIM_LIMIT_REACHED') {
+      // Open the swap popup instead of a toast
+      limitModalTargetId.value  = simId
+      limitModalTargetSim.value = targetSim || null
+      limitModalActiveSims.value = data.active_sims || []
+      selectedSimToDeactivate.value = null
+      showLimitModal.value = true
+    } else if (error.response?.status === 403 && data?.code === 'SUBSCRIPTION_EXPIRED') {
+      showError(data.message || 'Your subscription has expired. Please contact administrator.')
+    } else {
+      showError(data?.message || 'Failed to update SIM status')
+    }
+  }
+}
+
+const closeLimitModal = () => {
+  showLimitModal.value = false
+  limitModalTargetId.value  = null
+  limitModalTargetSim.value = null
+  limitModalActiveSims.value = []
+  selectedSimToDeactivate.value = null
+}
+
+const handleSimSwap = async () => {
+  if (!selectedSimToDeactivate.value) {
+    showError('Please select a SIM to deactivate.')
+    return
+  }
+
+  swapLoading.value = true
+  try {
+    await api.post('/sims/swap', {
+      activate_sim_id:   limitModalTargetId.value,
+      deactivate_sim_id: selectedSimToDeactivate.value,
+    })
+    showSuccess('SIM swap completed successfully.')
+    closeLimitModal()
+    fetchSims()
+  } catch (error) {
+    showError(error.response?.data?.message || 'Swap failed. Please try again.')
+  } finally {
+    swapLoading.value = false
   }
 }
 

@@ -2,11 +2,12 @@
   <div class="auth-wrapper">
     <div class="container">
       <div class="row justify-content-center">
-        <div class="col-md-7 col-lg-5 col-xl-4">
+        <div :class="isRegister ? 'col-md-8 col-lg-6 col-xl-5' : 'col-md-7 col-lg-5 col-xl-4'">
           <div class="card card-round">
             <div class="card-body">
               <div class="text-center mb-4 auth-heading">
                 <img :src="'/logo/login_icon.png'" alt="Callytics" class="auth-logo mb-3" />
+                <h4 class="fw-bold mb-1">{{ title }}</h4>
                 <p class="text-muted">{{ subtitle }}</p>
               </div>
               
@@ -40,14 +41,16 @@ import { useRoute } from 'vue-router'
 
 const route = useRoute()
 
+const isRegister = computed(() => route.name === 'Register')
+
 const title = computed(() => {
   return route.name === 'Login' ? 'Welcome Back' : 'Create Account'
 })
 
 const subtitle = computed(() => {
-  return route.name === 'Login' 
-    ? 'Sign in to continue to your dashboard' 
-    : 'Sign up for a new account to get started'
+  return route.name === 'Login'
+    ? 'Sign in to continue to your dashboard'
+    : 'Register your organization and start your free trial'
 })
 </script>
 

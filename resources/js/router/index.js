@@ -2,7 +2,8 @@ import { createRouter, createWebHistory } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 
 // Layouts
-import AuthLayout from '@/layouts/AuthLayout.vue'
+import LoginLayout from '@/layouts/LoginLayout.vue'
+import RegisterLayout from '@/layouts/RegisterLayout.vue'
 import DefaultLayout from '@/layouts/DefaultLayout.vue'
 
 // Pages
@@ -21,6 +22,7 @@ import Profile from '@/pages/Profile.vue'
 import ChangePassword from '@/pages/ChangePassword.vue'
 import CallReports from '@/pages/CallReports.vue'
 import SummaryReport from '@/pages/SummaryReport.vue'
+import DeveloperApi from '@/pages/DeveloperApi.vue'
 
 const APP_NAME = 'Callytics'
 
@@ -31,25 +33,43 @@ const routes = [
   },
   {
     path: '/login',
-    component: AuthLayout,
+    component: LoginLayout,
     children: [
       {
         path: '',
         name: 'Login',
         component: Login,
-        meta: { requiresGuest: true, title: 'Login' }
+        meta: {
+          requiresGuest: true,
+          title: 'Sign In',
+          seo: {
+            description: 'Sign in to your Callytics account to access your call analytics dashboard, SIM management, and team reports.',
+            ogTitle: 'Sign In to Callytics',
+            ogDescription: 'Access your call analytics dashboard, manage SIMs, and monitor team performance with Callytics.',
+            robots: 'noindex, nofollow',
+          },
+        },
       }
     ]
   },
   {
     path: '/register',
-    component: AuthLayout,
+    component: RegisterLayout,
     children: [
       {
         path: '',
         name: 'Register',
         component: Register,
-        meta: { requiresGuest: true, title: 'Register' }
+        meta: {
+          requiresGuest: true,
+          title: 'Start Your Free Trial',
+          seo: {
+            description: 'Sign up for Callytics and start your 14-day free trial. Track call logs, manage SIMs, monitor team performance, and grow your business — no credit card required.',
+            ogTitle:     'Create Your Free Callytics Account',
+            ogDescription: 'Join thousands of teams using Callytics to track calls, manage SIMs, and generate powerful call analytics reports. Free 14-day trial.',
+            robots:    'index, follow',
+          },
+        },
       }
     ]
   },
@@ -198,6 +218,18 @@ const routes = [
     ]
   },
   {
+    path: '/developer-api',
+    component: DefaultLayout,
+    children: [
+      {
+        path: '',
+        name: 'DeveloperApi',
+        component: DeveloperApi,
+        meta: { requiresAuth: true, roles: ['admin', 'organization'], title: 'Developer API' }
+      }
+    ]
+  },
+  {
     path: '/:pathMatch(.*)*',
     redirect: '/dashboard'
   }
@@ -241,10 +273,54 @@ router.beforeEach(async (to, from, next) => {
   }
 })
 
-// Update document title on each navigation
+// Update document title and meta tags on each navigation
 router.afterEach((to) => {
-  const pageTitle = to.meta.title
+  const APP_URL    = window.location.origin
+  const pageTitle  = to.meta.title
+  const seo        = to.meta.seo || {}
+
+  // Title
   document.title = pageTitle ? `${pageTitle} | ${APP_NAME}` : APP_NAME
+
+  // Helper – find or create a <meta> tag
+  const setMeta = (selector, attr, value) => {
+    let el = document.querySelector(selector)
+    if (!el) {
+      el = document.createElement('meta')
+      const [attrName, attrVal] = selector.replace('meta[', '').replace(']', '').split('=')
+      el.setAttribute(attrName.trim(), attrVal.replace(/"/g, '').trim())
+      document.head.appendChild(el)
+    }
+    el.setAttribute(attr, value)
+  }
+
+  // Description
+  const description = seo.description || 'Callytics is a powerful call analytics and management platform. Track call logs, manage SIMs, monitor team performance, and generate insightful reports.'
+  setMeta('meta[name="description"]', 'content', description)
+
+  // Robots
+  const robots = seo.robots || 'index, follow'
+  setMeta('meta[name="robots"]', 'content', robots)
+
+  // Open Graph
+  const ogTitle = seo.ogTitle || (pageTitle ? `${pageTitle} | ${APP_NAME}` : APP_NAME)
+  const ogDesc  = seo.ogDescription || description
+  setMeta('meta[property="og:title"]',       'content', ogTitle)
+  setMeta('meta[property="og:description"]', 'content', ogDesc)
+  setMeta('meta[property="og:url"]',         'content', APP_URL + to.fullPath)
+
+  // Twitter
+  setMeta('meta[name="twitter:title"]',       'content', ogTitle)
+  setMeta('meta[name="twitter:description"]', 'content', ogDesc)
+
+  // Canonical
+  let canonical = document.querySelector('link[rel="canonical"]')
+  if (!canonical) {
+    canonical = document.createElement('link')
+    canonical.setAttribute('rel', 'canonical')
+    document.head.appendChild(canonical)
+  }
+  canonical.setAttribute('href', APP_URL + to.fullPath)
 })
 
 export default router

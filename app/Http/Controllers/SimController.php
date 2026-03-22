@@ -5,8 +5,10 @@ namespace App\Http\Controllers;
 use App\Models\Sim;
 use App\Models\Organization;
 use App\Models\Team;
+use App\Services\SubscriptionService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 
 class SimController extends Controller
@@ -86,15 +88,36 @@ class SimController extends Controller
         if ($validator->fails()) {
             return response()->json([
                 'message' => 'Validation failed',
-                'errors' => $validator->errors()
+                'errors'  => $validator->errors(),
             ], 422);
+        }
+
+        // When activating a SIM, verify subscription is active and limit allows it.
+        if ($request->status === 'active' && $sim->status !== 'active') {
+            $organizationId = (int) $sim->organization_id;
+
+            if (! SubscriptionService::isSubscriptionActive($organizationId)) {
+                return response()->json([
+                    'message' => 'Your subscription has expired. Please contact administrator to renew.',
+                    'code'    => 'SUBSCRIPTION_EXPIRED',
+                ], 403);
+            }
+
+            if (! SubscriptionService::canAddOrActivateSim($organizationId)) {
+                return response()->json([
+                    'message'       => 'SIM limit reached. Select an active SIM to deactivate first.',
+                    'code'          => 'SIM_LIMIT_REACHED',
+                    'limit_reached' => true,
+                    'active_sims'   => SubscriptionService::getActiveSims($organizationId),
+                ], 422);
+            }
         }
 
         $sim->update(['status' => $request->status]);
 
         return response()->json([
             'message' => 'SIM status updated successfully',
-            'sim' => $sim->fresh()->load(['organization:id,name', 'team:id,name'])
+            'sim'     => $sim->fresh()->load(['organization:id,name', 'team:id,name']),
         ]);
     }
 
@@ -130,17 +153,32 @@ class SimController extends Controller
             ], 422);
         }
 
+        // Enforce subscription + SIM limit before creating a new SIM.
+        if (! SubscriptionService::isSubscriptionActive((int) $organizationId)) {
+            return response()->json([
+                'message' => 'Your subscription has expired. Please contact administrator to renew.',
+                'code'    => 'SUBSCRIPTION_EXPIRED',
+            ], 403);
+        }
+
+        if (! SubscriptionService::canAddOrActivateSim((int) $organizationId)) {
+            return response()->json([
+                'message' => 'SIM limit reached. Please upgrade your plan.',
+                'code'    => 'SIM_LIMIT_REACHED',
+            ], 422);
+        }
+
         $sim = Sim::create([
-            'mobile' => $request->mobile,
-            'name' => $request->name,
+            'mobile'          => $request->mobile,
+            'name'            => $request->name,
             'organization_id' => $organizationId,
-            'team_id' => $request->team_id,
+            'team_id'         => $request->team_id,
         ]);
         $sim->load(['organization', 'team']);
 
         return response()->json([
             'message' => 'SIM created successfully',
-            'sim' => $sim
+            'sim'     => $sim,
         ], 201);
     }
 
@@ -359,6 +397,17 @@ class SimController extends Controller
                     continue;
                 }
                 
+                // Check subscription + SIM limit before creating each SIM.
+                if (! SubscriptionService::isSubscriptionActive((int) $organizationId)) {
+                    $errors[] = "Row {$row}: Subscription expired for this organization.";
+                    continue;
+                }
+
+                if (! SubscriptionService::canAddOrActivateSim((int) $organizationId)) {
+                    $errors[] = "Row {$row}: SIM limit reached for this organization. Skipping remaining SIMs.";
+                    break; // No point continuing — the limit is full
+                }
+
                 // Create SIM
                 try {
                     Sim::create([
@@ -385,5 +434,80 @@ class SimController extends Controller
                 'message' => 'Error processing CSV file: ' . $e->getMessage()
             ], 500);
         }
+    }
+
+    // -------------------------------------------------------------------------
+    // SIM swap — atomically deactivate one SIM and activate another
+    // -------------------------------------------------------------------------
+
+    /**
+     * POST /sims/swap
+     *
+     * Body:
+     *   activate_sim_id   int  – SIM to activate   (must belong to the org, currently inactive)
+     *   deactivate_sim_id int  – SIM to deactivate (must currently be active, same org)
+     *
+     * Used when the SIM limit is full and the user wants to swap which SIM is
+     * active without upgrading their plan.
+     */
+    public function swap(Request $request): JsonResponse
+    {
+        $user = auth()->user();
+
+        $validator = Validator::make($request->all(), [
+            'activate_sim_id'   => 'required|integer|exists:sims,id',
+            'deactivate_sim_id' => 'required|integer|exists:sims,id|different:activate_sim_id',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'message' => 'Validation failed',
+                'errors'  => $validator->errors(),
+            ], 422);
+        }
+
+        $toActivate   = Sim::findOrFail($request->activate_sim_id);
+        $toDeactivate = Sim::findOrFail($request->deactivate_sim_id);
+
+        // Determine the organization scope the user is allowed to work with.
+        $organizationId = $user->role === 'admin'
+            ? (int) $toActivate->organization_id
+            : (int) $user->organization_id;
+
+        // Both SIMs must belong to the same organization.
+        if ((int) $toActivate->organization_id !== $organizationId ||
+            (int) $toDeactivate->organization_id !== $organizationId) {
+            return response()->json(['message' => 'Forbidden.'], 403);
+        }
+
+        if ($toDeactivate->status !== 'active') {
+            return response()->json([
+                'message' => 'The SIM selected for deactivation is not currently active.',
+            ], 422);
+        }
+
+        if ($toActivate->status === 'active') {
+            return response()->json([
+                'message' => 'The SIM you want to activate is already active.',
+            ], 422);
+        }
+
+        if (! SubscriptionService::isSubscriptionActive($organizationId)) {
+            return response()->json([
+                'message' => 'Your subscription has expired. Please contact administrator to renew.',
+                'code'    => 'SUBSCRIPTION_EXPIRED',
+            ], 403);
+        }
+
+        DB::transaction(function () use ($toActivate, $toDeactivate) {
+            $toDeactivate->update(['status' => 'inactive']);
+            $toActivate->update(['status' => 'active']);
+        });
+
+        return response()->json([
+            'message'     => 'SIM swap completed successfully.',
+            'activated'   => $toActivate->fresh()->load(['organization:id,name', 'team:id,name']),
+            'deactivated' => $toDeactivate->fresh()->load(['organization:id,name', 'team:id,name']),
+        ]);
     }
 }

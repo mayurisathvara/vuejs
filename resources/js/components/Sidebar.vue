@@ -86,6 +86,13 @@
             </router-link>
           </li>
 
+          <li v-if="showDeveloperApi" class="nav-item" :class="{ active: $route.name === 'DeveloperApi' }">
+            <router-link to="/developer-api" class="nav-link" @click="handleMenuClick">
+              <i class="fas fa-code"></i>
+              <p>Developer API</p>
+            </router-link>
+          </li>
+
           <li v-if="showOrganizationSettings" class="nav-item" :class="{ active: $route.name === 'OrganizationSettingsApp' }">
             <router-link to="/settings" class="nav-link" @click="handleMenuClick">
               <i class="fas fa-cog"></i>
@@ -130,6 +137,7 @@ const showOrganizationSettings = computed(() => isOrganization.value)
 const showCallReports = computed(() => isAdmin.value || isOrganization.value || isManager.value || isUser.value)
 const showSummaryReport = computed(() => isAdmin.value || isOrganization.value || isManager.value || isUser.value)
 const showExcludedNumbers = computed(() => isAdmin.value || isOrganization.value || isManager.value)
+const showDeveloperApi = computed(() => isAdmin.value || isOrganization.value)
 
 const checkMobile = () => {
   isMobile.value = window.innerWidth <= 991.5

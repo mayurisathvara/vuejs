@@ -102,11 +102,42 @@ Route::middleware('auth:sanctum')->group(function () {
     // SIM management routes - Admin and Organization only
     Route::middleware(['role:admin,organization'])->group(function () {
         Route::put('/sims/{sim}/status', [\App\Http\Controllers\SimController::class, 'updateStatus']);
+        Route::post('/sims/swap', [\App\Http\Controllers\SimController::class, 'swap']);
         Route::get('/sims/teams/by-organization', [\App\Http\Controllers\SimController::class, 'getTeams']);
         Route::post('/sims/bulk-delete', [\App\Http\Controllers\SimController::class, 'bulkDelete']);
         Route::post('/sims/import-csv', [\App\Http\Controllers\SimController::class, 'importCsv']);
         Route::apiResource('sims', \App\Http\Controllers\SimController::class);
         Route::get('/sims', [\App\Http\Controllers\SimController::class, 'index']);
+    });
+
+    // Subscription stats — authenticated org/manager/user can view their own plan
+    Route::middleware(['role:admin,organization,manager,user'])->group(function () {
+        Route::get('/subscription/stats', [\App\Http\Controllers\SubscriptionController::class, 'stats']);
+    });
+
+    // Admin subscription management
+    Route::middleware(['role:admin'])->group(function () {
+        Route::get('/admin/plans', [\App\Http\Controllers\SubscriptionController::class, 'plans']);
+        Route::get('/admin/subscriptions', [\App\Http\Controllers\SubscriptionController::class, 'index']);
+        Route::get('/admin/organizations/{organization}/subscription', [\App\Http\Controllers\SubscriptionController::class, 'show']);
+        Route::put('/admin/organizations/{organization}/subscription', [\App\Http\Controllers\SubscriptionController::class, 'assign']);
+        Route::patch('/admin/organizations/{organization}/subscription/sim-limit', [\App\Http\Controllers\SubscriptionController::class, 'adjustSimLimit']);
+    });
+});
+
+// =========================================
+// Third-Party Organization API - Version 1
+// =========================================
+
+Route::prefix('v1/org')->group(function () {
+
+    // Public: organization login (only role=organization allowed)
+    Route::post('/auth/login', [\App\Http\Controllers\Api\V1\Organization\AuthController::class, 'login']);
+
+    // Protected: require a valid Bearer token issued by the login above
+    Route::middleware('auth:sanctum')->group(function () {
+        // Call logs — filtered to the authenticated organization automatically
+        Route::get('/call-logs', [\App\Http\Controllers\Api\V1\Organization\CallLogController::class, 'index']);
     });
 });
 
