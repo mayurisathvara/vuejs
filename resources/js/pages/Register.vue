@@ -10,60 +10,60 @@
       <span>{{ errorMessage }}</span>
     </div>
 
-    <!-- Organization Name -->
-    <div class="mb-3">
-      <InputField
-        v-model="form.name"
-        type="text"
-        label="Organization Name"
-        placeholder="e.g. Acme Corp"
-        :error="errors.name"
-        required
-      />
-    </div>
+    <!-- 2-column fields grid -->
+    <div class="fields-grid">
 
-    <!-- Email -->
-    <div class="mb-3">
-      <InputField
-        v-model="form.email"
-        type="email"
-        label="Email Address"
-        placeholder="admin@yourcompany.com"
-        :error="errors.email"
-        required
-      />
-    </div>
-
-    <!-- Mobile -->
-    <div class="mb-3">
-      <InputField
-        v-model="form.mobile"
-        type="tel"
-        label="Mobile Number"
-        placeholder="+91 98765 43210"
-        :error="errors.mobile"
-        required
-      />
-    </div>
-
-    <!-- Industry -->
-    <div class="mb-3">
-      <label class="form-label" for="industry">Select Industry <span class="text-danger">*</span></label>
-      <div class="select-wrap" :class="{ 'has-error': errors.industry }">
-        <select
-          v-model="form.industry"
-          id="industry"
-          class="form-select industry-select"
-        >
-          <option value="" disabled>Choose your industry</option>
-          <option v-for="opt in industries" :key="opt" :value="opt">{{ opt }}</option>
-        </select>
-        <i class="fas fa-chevron-down select-arrow"></i>
+      <!-- Row 1: Organization Name | Email Address -->
+      <div class="field-cell">
+        <InputField
+          v-model="form.name"
+          type="text"
+          label="Organization Name"
+          placeholder="e.g. Acme Corp"
+          :error="errors.name"
+          required
+        />
       </div>
-      <div v-if="errors.industry" class="field-error">{{ errors.industry }}</div>
-    </div>
-    <div class="row">
-      <div class="col-sm-6 mb-3">
+      <div class="field-cell">
+        <InputField
+          v-model="form.email"
+          type="email"
+          label="Email Address"
+          placeholder="admin@yourcompany.com"
+          :error="errors.email"
+          required
+        />
+      </div>
+
+      <!-- Row 2: Mobile Number | Select Industry -->
+      <div class="field-cell">
+        <InputField
+          v-model="form.mobile"
+          type="tel"
+          label="Mobile Number"
+          placeholder="+91 98765 43210"
+          :error="errors.mobile"
+          required
+        />
+      </div>
+      <div class="field-cell">
+        <label class="form-label" for="industry">Select Industry <span class="text-danger">*</span></label>
+        <div class="select-wrap" :class="{ 'has-error': errors.industry }">
+          <select
+            v-model="form.industry"
+            id="industry"
+            class="form-select industry-select"
+          >
+            <option value="" disabled>Choose your industry</option>
+            <option v-for="opt in industries" :key="opt" :value="opt">{{ opt }}</option>
+          </select>
+          <i class="fas fa-chevron-down select-arrow"></i>
+        </div>
+        <div v-if="errors.industry" class="field-error">{{ errors.industry }}</div>
+      </div>
+
+      <!-- Row 3: Password | Confirm Password -->
+      <div class="field-cell">
         <InputField
           v-model="form.password"
           type="password"
@@ -74,7 +74,7 @@
           required
         />
       </div>
-      <div class="col-sm-6 mb-3">
+      <div class="field-cell">
         <InputField
           v-model="form.password_confirmation"
           type="password"
@@ -85,18 +85,11 @@
           required
         />
       </div>
-    </div>
 
-    <!-- Trial info badge -->
-    <div class="trial-badge mb-4">
-      <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" fill="currentColor" viewBox="0 0 16 16" class="me-1">
-        <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z"/>
-      </svg>
-      <strong>14-day Free Trial</strong> — No credit card required. SIM limit: 10.
     </div>
 
     <!-- Terms -->
-    <div class="mb-4">
+    <div class="terms-row">
       <div class="form-check">
         <input
           v-model="form.terms"
@@ -113,7 +106,7 @@
     </div>
 
     <!-- Submit -->
-    <div class="d-grid">
+    <div class="submit-row">
       <Button
         type="submit"
         variant="primary"
@@ -122,6 +115,14 @@
         label="Create Account"
         block
       />
+    </div>
+
+    <!-- Trial info (below button) -->
+    <div class="trial-info">
+      <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" fill="currentColor" viewBox="0 0 16 16">
+        <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z"/>
+      </svg>
+      <span><strong>14-day free trial</strong> &middot; No credit card required &middot; SIM limit: 10</span>
     </div>
 
   </form>
@@ -238,20 +239,63 @@ const industries = [
 </script>
 
 <style scoped>
-/* Industry select */
+/* ── 2-column grid layout ──────────────────────────────────────── */
+.fields-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px 16px;
+  margin-bottom: 20px;
+}
+
+.field-cell {
+  min-width: 0;
+}
+
+/* Terms row */
+.terms-row {
+  margin-bottom: 20px;
+}
+
+/* Submit row */
+.submit-row {
+  margin-bottom: 12px;
+}
+
+/* Trial info (below button) */
+.trial-info {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-size: 0.82rem;
+  color: #9ca3af;
+  text-align: center;
+}
+
+.trial-info svg {
+  color: #d1d5db;
+  flex-shrink: 0;
+}
+
+.trial-info strong {
+  color: #6b7280;
+  font-weight: 600;
+}
+
+/* ── Industry select ───────────────────────────────────────────── */
 .select-wrap {
   position: relative;
 }
 
 .industry-select {
   width: 100%;
-  height: 50px;
+  height: 48px;
   padding: 0 2.5rem 0 0.85rem;
   appearance: none;
   -webkit-appearance: none;
   background: #fff;
   border: 1.5px solid #e5e7eb;
-  border-radius: 10px;
+  border-radius: 8px;
   color: #111827;
   font-size: 0.97rem;
   cursor: pointer;
@@ -284,24 +328,8 @@ const industries = [
 
 .field-error {
   color: #dc3545;
-  font-size: 0.85rem;
-  margin-top: 0.3rem;
-}
-.trial-badge {
-  display: flex;
-  align-items: center;
-  background: #fff8ee;
-  border: 1px solid #ffe0a6;
-  border-radius: 10px;
-  padding: 0.6rem 0.9rem;
-  font-size: 0.92rem;
-  color: #b06a00;
-  gap: 4px;
-}
-
-.trial-badge svg {
-  color: #ff9b2f;
-  flex-shrink: 0;
+  font-size: 0.82rem;
+  margin-top: 0.28rem;
 }
 
 .terms-link {
@@ -313,6 +341,14 @@ const industries = [
 .terms-link:hover {
   color: #ff7f00;
   text-decoration: underline;
+}
+
+/* ── Responsive: single column on mobile ───────────────────────── */
+@media (max-width: 640px) {
+  .fields-grid {
+    grid-template-columns: 1fr;
+    gap: 16px 0;
+  }
 }
 </style>
 

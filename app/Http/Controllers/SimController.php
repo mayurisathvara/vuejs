@@ -115,6 +115,11 @@ class SimController extends Controller
 
         $sim->update(['status' => $request->status]);
 
+        // Revoke only this SIM's tokens so the mobile app is immediately logged out
+        if ($request->status === 'inactive') {
+            $sim->tokens()->delete();
+        }
+
         return response()->json([
             'message' => 'SIM status updated successfully',
             'sim'     => $sim->fresh()->load(['organization:id,name', 'team:id,name']),

@@ -44,6 +44,12 @@ class LoginController extends Controller
             ], 401);
         }
 
+        if ($sim->status !== 'active') {
+            return response()->json([
+                'message' => 'Your SIM is inactive. Please contact your administrator.'
+            ], 403);
+        }
+
         // Revoke previous tokens (single device login style)
         $sim->tokens()->delete();
 

@@ -30,8 +30,8 @@
 
         <!-- Headline -->
         <div class="left-headline">
-          <h1>Welcome back.<br><span class="headline-accent">Your calls await.</span></h1>
-          <p class="left-sub">Everything you need to manage calls, teams, and SIMs — right where you left off.</p>
+          <h1>Track every call.<br><span class="headline-accent">Close more deals.</span></h1>
+          <p class="left-sub">Turn every call into actionable insights. Monitor, analyze, and optimize your team's call performance in real time.</p>
         </div>
 
         <!-- Highlights -->
@@ -50,7 +50,7 @@
         <!-- Testimonial -->
         <div class="testimonial-card">
           <p class="testimonial-text">
-            "Callytics transformed how we track and manage our field team's calls. Instant visibility, zero hassle."
+            "Callytics helped us increase our call conversion rate by 35% with real-time tracking and insights."
           </p>
           <div class="testimonial-author">
             <div class="author-avatar">R</div>
@@ -58,6 +58,10 @@
               <span class="author-name">Rahul Mehta</span>
               <span class="author-role">Operations Head, TechGroup</span>
             </div>
+          </div>
+          <div class="testimonial-highlight">
+            <i class="fas fa-fire-alt"></i>
+            10,000+ calls tracked daily by growing teams
           </div>
         </div>
 
@@ -90,17 +94,17 @@ const highlights = [
   {
     icon: 'fas fa-tachometer-alt',
     title: 'Live Dashboard',
-    desc: 'View real-time call activity across all your teams and SIMs.',
+    desc: 'Monitor every call with real-time analytics and insights.',
   },
   {
     icon: 'fas fa-mobile-alt',
     title: 'SIM Management',
-    desc: 'Activate, swap, and monitor all your SIMs from one place.',
+    desc: 'Control and manage all your SIMs from one centralized dashboard.',
   },
   {
     icon: 'fas fa-chart-bar',
     title: 'Detailed Reports',
-    desc: 'Export call summaries and analytics in just a few clicks.',
+    desc: 'Get powerful reports to improve team performance and conversions.',
   },
 ]
 </script>
@@ -388,6 +392,23 @@ const highlights = [
   color: rgba(255,255,255,0.45);
 }
 
+.testimonial-highlight {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin-top: 1rem;
+  padding-top: 0.85rem;
+  border-top: 1px solid rgba(255,255,255,0.1);
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: rgba(255,255,255,0.65);
+}
+
+.testimonial-highlight i {
+  color: #fb923c;
+  font-size: 0.85rem;
+}
+
 /* ── RIGHT PANEL ───────────────────────────────────────────────── */
 .login-right {
   flex: 1;
@@ -401,7 +422,7 @@ const highlights = [
 
 .login-form-wrap {
   width: 100%;
-  max-width: 420px;
+  max-width: 560px;
 }
 
 /* Form header */
@@ -410,10 +431,10 @@ const highlights = [
 }
 
 .form-title {
-  font-size: 1.85rem;
+  font-size: 1.9rem;
   font-weight: 800;
-  color: #111827;
-  letter-spacing: -0.025em;
+  color: #0f172a;
+  letter-spacing: -0.03em;
   margin: 0 0 0.4rem;
 }
 
@@ -435,28 +456,31 @@ const highlights = [
   text-decoration: underline;
 }
 
-/* Mirror the same form field overrides as RegisterLayout */
+/* ── Form field overrides ──────────────────────────────────────── */
 :deep(.form-label) {
   color: #374151;
   font-weight: 600;
-  margin-bottom: 0.4rem;
-  font-size: 0.92rem;
+  margin-bottom: 0.35rem;
+  font-size: 0.83rem;
+  letter-spacing: 0.01em;
 }
 
 :deep(.form-control) {
   background: #fff;
   border: 1.5px solid #e5e7eb;
-  border-radius: 10px;
-  height: 50px;
+  border-radius: 8px;
+  height: 48px;
   color: #111827;
   font-size: 0.97rem;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.06);
   transition: border-color 0.18s, box-shadow 0.18s;
 }
 
 :deep(.form-control:focus) {
   border-color: #f97316;
-  box-shadow: 0 0 0 3px rgba(249,115,22,0.15);
+  box-shadow: 0 0 0 3.5px rgba(249,115,22,0.16), 0 1px 3px rgba(0,0,0,0.06);
   background: #fff;
+  outline: none;
 }
 
 :deep(.form-control::placeholder) {
@@ -466,29 +490,30 @@ const highlights = [
 :deep(.btn.btn-primary) {
   border: none !important;
   border-radius: 10px !important;
-  height: 50px;
-  background: linear-gradient(90deg, #ea580c 0%, #f97316 50%, #fb923c 100%) !important;
-  box-shadow: 0 6px 18px rgba(249,115,22,0.32) !important;
+  height: 52px;
+  width: 100%;
+  background: linear-gradient(90deg, #ea580c 0%, #f97316 55%, #fb923c 100%) !important;
+  box-shadow: 0 4px 14px rgba(249,115,22,0.30) !important;
   font-weight: 700 !important;
   font-size: 1rem !important;
   color: #fff !important;
-  letter-spacing: 0.01em !important;
-  transition: all 0.2s !important;
+  letter-spacing: 0.015em !important;
+  transition: all 0.2s ease !important;
 }
 
 :deep(.btn.btn-primary:hover) {
-  background: linear-gradient(90deg, #c2410c 0%, #ea580c 50%, #f97316 100%) !important;
-  box-shadow: 0 8px 22px rgba(234,88,12,0.38) !important;
+  background: linear-gradient(90deg, #c2410c 0%, #ea580c 55%, #f97316 100%) !important;
+  box-shadow: 0 7px 20px rgba(234,88,12,0.38) !important;
   transform: translateY(-1px);
 }
 
 :deep(.btn.btn-primary:active) {
   transform: translateY(0) !important;
-  box-shadow: 0 4px 12px rgba(249,115,22,0.28) !important;
+  box-shadow: 0 3px 10px rgba(249,115,22,0.26) !important;
 }
 
 :deep(.btn-lg) {
-  min-height: 50px;
+  min-height: 52px;
   padding: 0.7rem 1rem;
 }
 
@@ -499,17 +524,7 @@ const highlights = [
 
 :deep(.form-check-label) {
   color: #6b7280;
-  font-size: 0.9rem;
-}
-
-/* Forgot password link override */
-:deep(.forgot-link) {
-  color: #f97316;
-  font-size: 0.9rem;
-}
-
-:deep(.forgot-link:hover) {
-  color: #ea580c;
+  font-size: 0.875rem;
 }
 
 /* ── Responsive ────────────────────────────────────────────────── */
@@ -528,7 +543,7 @@ const highlights = [
     border-radius: 20px;
     padding: 2rem 1.8rem;
     box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-    max-width: 400px;
+    max-width: 520px;
   }
 }
 

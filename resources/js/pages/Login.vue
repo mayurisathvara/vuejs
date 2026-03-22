@@ -1,17 +1,29 @@
 <template>
-  <form class="login-form" @submit.prevent="handleLogin">
-    <div class="mb-3">
+  <form class="login-form" @submit.prevent="handleLogin" novalidate>
+
+    <!-- Server error alert -->
+    <div v-if="errorMessage" class="lf-error-alert" role="alert">
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+        <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
+        <path d="M7.002 11a1 1 0 1 1 2 0 1 1 0 0 1-2 0zM7.1 4.995a.905.905 0 1 1 1.8 0l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 4.995z"/>
+      </svg>
+      <span>{{ errorMessage }}</span>
+    </div>
+
+    <!-- Email field -->
+    <div class="lf-field">
       <InputField
         v-model="form.email"
         type="email"
         label="Email Address"
-        placeholder="Enter your email"
+        placeholder="you@company.com"
         :error="errors.email"
         required
       />
     </div>
 
-    <div class="mb-3">
+    <!-- Password field -->
+    <div class="lf-field">
       <InputField
         v-model="form.password"
         type="password"
@@ -23,22 +35,22 @@
       />
     </div>
 
-    <div class="mb-4 d-flex justify-content-between align-items-center login-meta">
-      <div class="form-check mb-0">
+    <!-- Options row: remember me + forgot password -->
+    <div class="lf-options">
+      <label class="lf-remember">
         <input
           v-model="form.remember"
           type="checkbox"
-          class="form-check-input"
+          class="lf-checkbox"
           id="remember"
         />
-        <label class="form-check-label" for="remember">
-          Remember me
-        </label>
-      </div>
-      <a href="#" class="forgot-link" @click.prevent>Forgot password?</a>
+        <span>Remember me</span>
+      </label>
+      <a href="#" class="lf-forgot" @click.prevent>Forgot password?</a>
     </div>
 
-    <div class="d-grid">
+    <!-- Sign In button -->
+    <div class="lf-submit">
       <Button
         type="submit"
         variant="primary"
@@ -49,11 +61,6 @@
       />
     </div>
 
-    <div class="login-divider"></div>
-
-    <div v-if="errorMessage" class="alert alert-danger mt-3" role="alert">
-      {{ errorMessage }}
-    </div>
   </form>
 </template>
 
@@ -106,23 +113,71 @@ const handleLogin = async () => {
 </script>
 
 <style scoped>
-.login-meta .form-check-label,
-.forgot-link {
-  font-size: 1.05rem;
-  color: #7b8391;
+/* ── Field spacing ─────────────────────────────────────────────── */
+.lf-field {
+  margin-bottom: 20px;
 }
 
-.forgot-link {
+/* ── Error alert ───────────────────────────────────────────────── */
+.lf-error-alert {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #fff1f0;
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+  padding: 0.65rem 0.9rem;
+  color: #dc2626;
+  font-size: 0.88rem;
+  margin-bottom: 20px;
+}
+
+/* ── Options row ───────────────────────────────────────────────── */
+.lf-options {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+}
+
+.lf-remember {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  font-size: 0.875rem;
+  color: #6b7280;
+  user-select: none;
+  line-height: 1;
+}
+
+.lf-checkbox {
+  width: 15px;
+  height: 15px;
+  min-width: 15px;
+  accent-color: #f97316;
+  cursor: pointer;
+  margin: 0;
+  vertical-align: middle;
+  position: relative;
+  top: -1px;
+}
+
+.lf-forgot {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #f97316;
   text-decoration: none;
-  font-weight: 500;
+  transition: color 0.15s;
 }
 
-.forgot-link:hover {
-  color: #ff8f1f;
+.lf-forgot:hover {
+  color: #ea580c;
+  text-decoration: underline;
 }
 
-.login-divider {
-  margin-top: 1.55rem;
-  border-top: 1px solid #e8e9ee;
+/* ── Submit row ────────────────────────────────────────────────── */
+.lf-submit {
+  margin-bottom: 0;
 }
 </style>

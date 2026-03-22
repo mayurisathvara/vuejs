@@ -30,7 +30,11 @@
         <!-- Headline -->
         <div class="left-headline">
           <h1>Track every call.<br><span class="headline-accent">Grow faster.</span></h1>
-          <p class="left-sub">The all-in-one call intelligence platform for growing teams.</p>
+          <p class="left-sub">Turn every call into actionable insights. Monitor, analyze, and optimize your team's call performance in real time.</p>
+          <div class="trust-line">
+            <i class="fas fa-shield-alt"></i>
+            Trusted by growing teams to track 10,000+ calls daily
+          </div>
         </div>
 
         <!-- Feature list -->
@@ -63,7 +67,7 @@
         <!-- Header -->
         <div class="form-header">
           <h2 class="form-title">Create your account</h2>
-          <p class="form-sub">Start your <strong>14-day free trial</strong> — no credit card required.</p>
+          <p class="form-sub">No credit card required &bull; Setup in 2 minutes &bull; SIM limit: 10</p>
         </div>
 
         <!-- The register form (router-view) -->
@@ -152,22 +156,22 @@ const features = [
   {
     icon: 'fas fa-chart-line',
     title: 'Real-time Call Analytics',
-    desc: 'Track inbound & outbound calls with live dashboards.',
+    desc: 'Monitor every inbound and outbound call with live insights.',
   },
   {
     icon: 'fas fa-users',
     title: 'Team Management',
-    desc: 'Organise SIMs across teams and departments effortlessly.',
+    desc: 'Manage teams and SIMs effortlessly from one centralized dashboard.',
   },
   {
-    icon: 'fas fa-shield-alt',
+    icon: 'fas fa-sliders-h',
     title: 'Smart SIM Control',
-    desc: 'Set limits, swap SIMs, and manage access — all in one place.',
+    desc: 'Control SIM usage, limits, and access in one place.',
   },
   {
-    icon: 'fas fa-file-export',
+    icon: 'fas fa-chart-bar',
     title: 'Powerful Reports',
-    desc: 'Export call logs and summary reports in seconds.',
+    desc: 'Generate detailed reports to improve performance and conversions.',
   },
 ]
 
@@ -358,7 +362,25 @@ const stats = [
   color: rgba(255,255,255,0.62);
   font-size: 1.05rem;
   line-height: 1.6;
-  margin: 0;
+  margin: 0 0 1rem;
+}
+
+.trust-line {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: rgba(255,255,255,0.5);
+  background: rgba(255,255,255,0.07);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 20px;
+  padding: 0.3rem 0.85rem;
+}
+
+.trust-line i {
+  color: #34d399;
+  font-size: 0.75rem;
 }
 
 /* Feature list */
@@ -468,7 +490,7 @@ const stats = [
 
 .reg-form-wrap {
   width: 100%;
-  max-width: 460px;
+  max-width: 680px;
 }
 
 /* Form header */
@@ -499,15 +521,17 @@ const stats = [
 :deep(.form-label) {
   color: #374151;
   font-weight: 600;
-  margin-bottom: 0.4rem;
-  font-size: 0.92rem;
+  margin-bottom: 0.35rem;
+  font-size: 0.83rem;
+  letter-spacing: 0.01em;
+  text-transform: none;
 }
 
 :deep(.form-control) {
   background: #fff;
   border: 1.5px solid #e5e7eb;
-  border-radius: 10px;
-  height: 50px;
+  border-radius: 8px;
+  height: 48px;
   color: #111827;
   font-size: 0.97rem;
   transition: border-color 0.18s, box-shadow 0.18s;
@@ -527,8 +551,9 @@ const stats = [
   border: none !important;
   border-radius: 10px !important;
   height: 50px;
+  width: 100%;
   background: linear-gradient(90deg, #ea580c 0%, #f97316 50%, #fb923c 100%) !important;
-  box-shadow: 0 6px 18px rgba(249,115,22,0.32) !important;
+  box-shadow: 0 4px 14px rgba(249,115,22,0.30) !important;
   font-weight: 700 !important;
   font-size: 1rem !important;
   color: #fff !important;
@@ -598,7 +623,7 @@ const stats = [
     border-radius: 20px;
     padding: 2rem 1.8rem;
     box-shadow: 0 20px 60px rgba(0,0,0,0.25);
-    max-width: 420px;
+    max-width: 640px;
   }
 }
 
