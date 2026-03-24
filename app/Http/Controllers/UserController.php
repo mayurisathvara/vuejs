@@ -197,7 +197,7 @@ class UserController extends Controller
         $rules = [
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
-            'mobile' => 'required|string|max:20',
+            'mobile' => ['required', 'digits:10'],
             'password' => 'required|string|min:6',
             'team_id' => 'required|exists:teams,id',
             'status' => 'required|in:active,inactive',
@@ -266,7 +266,7 @@ class UserController extends Controller
         $rules = [
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users,email,' . $user->id,
-            'mobile' => 'required|string|max:20',
+            'mobile' => ['required', 'digits:10'],
             'password' => 'nullable|string|min:6',
             'role' => 'required|in:user,manager',
             'team_id' => 'required|exists:teams,id',

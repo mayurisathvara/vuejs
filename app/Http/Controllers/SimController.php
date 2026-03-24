@@ -139,7 +139,7 @@ class SimController extends Controller
             : $request->organization_id;
         
         $rules = [
-            'mobile' => 'required|string|max:20|unique:sims,mobile',
+            'mobile' => ['required', 'digits:10', 'unique:sims,mobile'],
             'name' => 'required|string|max:255',
             'team_id' => 'required|exists:teams,id',
         ];
@@ -209,7 +209,7 @@ class SimController extends Controller
             : $request->organization_id;
         
         $rules = [
-            'mobile' => 'required|string|max:20|unique:sims,mobile,' . $sim->id,
+            'mobile' => ['required', 'digits:10', 'unique:sims,mobile,' . $sim->id],
             'name' => 'required|string|max:255',
             'team_id' => 'required|exists:teams,id',
         ];
@@ -386,6 +386,11 @@ class SimController extends Controller
                 $mobile = trim($rowData['mobile']);
                 if (empty($mobile)) {
                     $errors[] = "Row {$row}: Mobile number is required";
+                    continue;
+                }
+
+                if (!preg_match('/^\d{10}$/', $mobile)) {
+                    $errors[] = "Row {$row}: Mobile number '{$mobile}' must be exactly 10 digits";
                     continue;
                 }
                 

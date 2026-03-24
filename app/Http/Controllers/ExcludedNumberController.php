@@ -128,7 +128,7 @@ class ExcludedNumberController extends Controller
             : $request->organization_id;
 
         $rules = [
-            'phone_number' => 'required|string|max:20',
+            'phone_number' => ['required', 'digits:10'],
             'label'        => 'nullable|string|max:255',
         ];
 
@@ -245,6 +245,11 @@ class ExcludedNumberController extends Controller
 
                 if (empty($phoneNumber)) {
                     $errors[] = "Row {$row}: phone_number is required";
+                    continue;
+                }
+
+                if (!preg_match('/^\d{10}$/', $phoneNumber)) {
+                    $errors[] = "Row {$row}: phone_number must be exactly 10 digits";
                     continue;
                 }
 

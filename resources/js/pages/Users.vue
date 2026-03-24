@@ -231,8 +231,9 @@
               v-model="userForm.mobile"
               type="tel"
               label="Mobile Number"
-              placeholder="Enter mobile number"
+              placeholder="Enter 10-digit mobile number"
               :error="errors.mobile"
+              maxlength="10"
               required
             />
           </div>
@@ -1043,8 +1044,8 @@ const handleSubmit = async () => {
   
   if (!userForm.mobile) {
     validationErrors.mobile = 'Mobile number is required'
-  } else if (userForm.mobile.length < 10) {
-    validationErrors.mobile = 'Mobile number must be at least 10 digits'
+  } else if (!/^\d{10}$/.test(userForm.mobile)) {
+    validationErrors.mobile = 'Mobile number must be exactly 10 digits'
   }
   
   if (!userForm.organization_id) {

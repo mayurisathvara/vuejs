@@ -58,7 +58,7 @@ class OrganizationController extends Controller
             'email' => 'required|string|email|max:255|unique:organizations',
             'app_login_code' => 'nullable|string|max:50|unique:organizations,app_login_code',
             'password' => 'required|string|min:6',
-            'mobile' => 'required|string|max:20',
+            'mobile' => ['required', 'digits:10'],
             'description' => 'nullable|string|max:1000',
             'status' => 'required|in:active,inactive',
         ]);
@@ -115,7 +115,7 @@ class OrganizationController extends Controller
             'email' => 'required|string|email|max:255|unique:organizations,email,' . $organization->id,
             'app_login_code' => 'nullable|string|max:50|unique:organizations,app_login_code,' . $organization->id,
             'password' => 'nullable|string|min:6',
-            'mobile' => 'required|string|max:20',
+            'mobile' => ['required', 'digits:10'],
             'description' => 'nullable|string|max:1000',
             'status' => 'required|in:active,inactive',
         ]);

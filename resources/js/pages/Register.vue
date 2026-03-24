@@ -41,8 +41,9 @@
           v-model="form.mobile"
           type="tel"
           label="Mobile Number"
-          placeholder="+91 98765 43210"
+          placeholder="Enter 10-digit mobile number"
           :error="errors.mobile"
+          maxlength="10"
           required
         />
       </div>
@@ -166,6 +167,10 @@ const handleRegister = async () => {
   }
   if (!form.mobile.trim()) {
     errors.value.mobile = 'Mobile number is required'
+    return
+  }
+  if (!/^\d{10}$/.test(form.mobile.trim())) {
+    errors.value.mobile = 'Mobile number must be exactly 10 digits'
     return
   }
   if (!form.industry) {

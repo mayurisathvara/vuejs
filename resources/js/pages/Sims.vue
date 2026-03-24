@@ -194,10 +194,11 @@
           <div class="col-md-6 mb-3">
             <InputField
               v-model="simForm.mobile"
-              type="text"
+              type="tel"
               label="Mobile Number"
-              placeholder="Enter mobile number"
+              placeholder="Enter 10-digit mobile number"
               :error="errors.mobile"
+              maxlength="10"
               required
             />
           </div>
@@ -1925,6 +1926,17 @@ const handleOrganizationChange = async () => {
 const handleSubmit = async () => {
   errors.value = {}
   errorMessage.value = ''
+
+  // Client-side validation
+  const mobile = (simForm.mobile || '').trim()
+  if (!mobile) {
+    errors.value = { mobile: ['Mobile number is required.'] }
+    return
+  }
+  if (!/^\d{10}$/.test(mobile)) {
+    errors.value = { mobile: ['Mobile number must be exactly 10 digits.'] }
+    return
+  }
 
   try {
     if (isEditing.value) {

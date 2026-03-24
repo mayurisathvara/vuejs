@@ -13,6 +13,7 @@
         :required="required"
         :disabled="disabled"
         :autocomplete="autocomplete"
+        :maxlength="maxlength || undefined"
         :class="inputClasses"
         @input="$emit('update:modelValue', $event.target.value)"
         @blur="$emit('blur', $event)"
@@ -85,6 +86,10 @@ const props = defineProps({
   showToggle: {
     type: Boolean,
     default: false
+  },
+  maxlength: {
+    type: [String, Number],
+    default: null
   }
 })
 

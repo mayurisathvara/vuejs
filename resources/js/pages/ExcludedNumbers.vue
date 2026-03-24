@@ -120,10 +120,11 @@
           <div class="col-md-6 mb-3">
             <InputField
               v-model="form.phone_number"
-              type="text"
+              type="tel"
               label="Phone Number"
-              placeholder="e.g. +923001234567"
+              placeholder="Enter 10-digit phone number"
               :error="errors.phone_number"
+              maxlength="10"
               required
             />
           </div>
@@ -555,6 +556,8 @@ const handleSubmit = async () => {
   const validationErrors = {}
   if (!form.phone_number) {
     validationErrors.phone_number = 'Phone number is required'
+  } else if (!/^\d{10}$/.test(form.phone_number)) {
+    validationErrors.phone_number = 'Phone number must be exactly 10 digits'
   }
   if (isAdmin.value && !form.organization_id) {
     validationErrors.organization_id = 'Organization is required'
