@@ -177,12 +177,24 @@ class AnalyticsController extends Controller
 		]);
 
 		$user = $request->user();
+		$simMobile = $user->mobile;
 
-		
+		$query = CallLog::query()
+			->where('caller_id', $simMobile)
+			->whereBetween('date', [$request->start_date, $request->end_date]);
+
+		ExclusionService::applyToQuery($query, (int) $user->organization_id);
+
+		$row = $query
+			->selectRaw("SUM(CASE WHEN LOWER(call_type) = 'inbound' AND LOWER(call_status) = 'missed' THEN 1 ELSE 0 END) as total_missed")
+			->selectRaw("SUM(CASE WHEN LOWER(call_type) = 'inbound' AND LOWER(call_status) = 'missed' AND call_back = 'Y' THEN 1 ELSE 0 END) as returned_calls")
+			->selectRaw("SUM(CASE WHEN LOWER(call_type) = 'inbound' AND LOWER(call_status) = 'missed' AND call_back = 'N' THEN 1 ELSE 0 END) as callback_pending")
+			->first();
+
 		return $this->successResponse([
-			'total_missed' => 30,
-			'returned_calls'    => 19,
-			'callback_pending'    => 11,
+			'total_missed' => (int) ($row->total_missed ?? 0),
+			'returned_calls' => (int) ($row->returned_calls ?? 0),
+			'callback_pending' => (int) ($row->callback_pending ?? 0),
 		], 'Total Missed Calls fetched successfully');
 	}
 

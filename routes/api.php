@@ -135,7 +135,7 @@ Route::prefix('v1/org')->group(function () {
     Route::post('/auth/login', [\App\Http\Controllers\Api\V1\Organization\AuthController::class, 'login']);
 
     // Protected: require a valid Bearer token issued by the login above
-    Route::middleware('auth:sanctum')->group(function () {
+    Route::middleware(['auth:sanctum', 'role:organization'])->group(function () {
         // Call logs — filtered to the authenticated organization automatically
         Route::get('/call-logs', [\App\Http\Controllers\Api\V1\Organization\CallLogController::class, 'index']);
     });
@@ -151,7 +151,7 @@ Route::prefix('v1/app')->group(function () {
     Route::post('/login', [\App\Http\Controllers\Api\V1\Auth\LoginController::class, 'login']);
     
     // Protected routes
-    Route::middleware('auth:sanctum')->group(function () {
+    Route::middleware(['auth:sanctum', 'sim.auth'])->group(function () {
         // Auth routes
         Route::post('/logout', [\App\Http\Controllers\Api\V1\Auth\LoginController::class, 'logout']);
         Route::post('/change-password', [\App\Http\Controllers\Api\V1\Auth\ChangePasswordController::class, 'changePassword']);

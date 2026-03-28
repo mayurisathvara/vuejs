@@ -124,7 +124,7 @@ class Organization extends Model
 
         // Only sync user if critical fields changed
         static::updated(function ($organization) {
-            if ($organization->isDirty(['name', 'email', 'password', 'mobile', 'status'])) {
+            if ($organization->wasChanged(['name', 'email', 'password', 'mobile', 'status'])) {
                 $organization->syncUser();
             }
         });

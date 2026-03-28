@@ -221,6 +221,12 @@ class UserController extends Controller
                 'errors' => $validator->errors()
             ], 422);
         }
+
+        if (!$this->isTeamAccessibleToActor($authUser, (int) $request->team_id, (int) $organizationId)) {
+            return response()->json([
+                'message' => 'Forbidden. Team is outside your allowed scope.'
+            ], 403);
+        }
         
         // Manager can only create user role, force role to 'user'
         $userRole = ($authUser->role === 'manager') ? 'user' : ($request->role ?? 'user');
@@ -247,6 +253,11 @@ class UserController extends Controller
      */
     public function show(User $user): JsonResponse
     {
+        $authUser = auth()->user();
+        if (!$this->canManageTargetUser($authUser, $user)) {
+            return response()->json(['message' => 'Forbidden'], 403);
+        }
+
         $user->load(['organization:id,name', 'team:id,name']);
         return response()->json($user);
     }
@@ -287,6 +298,25 @@ class UserController extends Controller
             ], 422);
         }
 
+        if (!$this->canManageTargetUser($authUser, $user)) {
+            return response()->json(['message' => 'Forbidden'], 403);
+        }
+
+        if (!$this->isTeamAccessibleToActor($authUser, (int) $request->team_id, (int) $organizationId)) {
+            return response()->json([
+                'message' => 'Forbidden. Team is outside your allowed scope.'
+            ], 403);
+        }
+
+        if ($authUser->role === 'manager' && $request->role !== 'user') {
+            return response()->json([
+                'message' => 'Validation failed',
+                'errors' => [
+                    'role' => ['Manager can only update users with role user.']
+                ]
+            ], 422);
+        }
+
         $updateData = [
             'name' => $request->name,
             'email' => $request->email,
@@ -315,6 +345,11 @@ class UserController extends Controller
      */
     public function updateStatus(Request $request, User $user): JsonResponse
     {
+        $authUser = auth()->user();
+        if (!$this->canManageTargetUser($authUser, $user)) {
+            return response()->json(['message' => 'Forbidden'], 403);
+        }
+
         $validator = Validator::make($request->all(), [
             'status' => 'required|in:active,inactive',
         ]);
@@ -339,6 +374,11 @@ class UserController extends Controller
      */
     public function destroy(User $user): JsonResponse
     {
+        $authUser = auth()->user();
+        if (!$this->canManageTargetUser($authUser, $user)) {
+            return response()->json(['message' => 'Forbidden'], 403);
+        }
+
         $user->delete();
 
         return response()->json([
@@ -352,6 +392,9 @@ class UserController extends Controller
     public function getAssignSimsData(User $user): JsonResponse
     {
         $authUser = auth()->user();
+        if (!$this->canManageTargetUser($authUser, $user)) {
+            return response()->json(['message' => 'Forbidden'], 403);
+        }
         
         // Load user with relationships
         $user->load(['organization', 'team']);
@@ -419,6 +462,16 @@ class UserController extends Controller
         }
 
         $user = User::findOrFail($request->user_id);
+        $authUser = auth()->user();
+        if (!$this->canManageTargetUser($authUser, $user)) {
+            return response()->json(['message' => 'Forbidden'], 403);
+        }
+
+        foreach ($request->team_ids as $teamId) {
+            if (!$this->isTeamAccessibleToActor($authUser, (int) $teamId, (int) $user->organization_id)) {
+                return response()->json(['message' => 'Forbidden'], 403);
+            }
+        }
         
         // Get SIMs from selected teams and same organization
         $sims = \App\Models\Sim::whereIn('team_id', $request->team_ids)
@@ -436,6 +489,11 @@ class UserController extends Controller
      */
     public function getAssignedSims(User $user): JsonResponse
     {
+        $authUser = auth()->user();
+        if (!$this->canManageTargetUser($authUser, $user)) {
+            return response()->json(['message' => 'Forbidden'], 403);
+        }
+
         $assignedSims = \App\Models\Sim::whereHas('userSims', function ($query) use ($user) {
             $query->where('user_id', $user->id);
         })
@@ -451,6 +509,11 @@ class UserController extends Controller
      */
     public function getAvailableSims(Request $request, User $user): JsonResponse
     {
+        $authUser = auth()->user();
+        if (!$this->canManageTargetUser($authUser, $user)) {
+            return response()->json(['message' => 'Forbidden'], 403);
+        }
+
         $validator = Validator::make($request->all(), [
             'team_ids' => 'required|string',
         ]);
@@ -463,6 +526,13 @@ class UserController extends Controller
         }
 
         $teamIds = explode(',', $request->team_ids);
+        $teamIds = array_values(array_filter(array_map('intval', $teamIds)));
+
+        foreach ($teamIds as $teamId) {
+            if (!$this->isTeamAccessibleToActor($authUser, $teamId, (int) $user->organization_id)) {
+                return response()->json(['message' => 'Forbidden'], 403);
+            }
+        }
 
         // Get SIMs from selected teams and same organization
         $sims = \App\Models\Sim::whereIn('team_id', $teamIds)
@@ -480,6 +550,11 @@ class UserController extends Controller
      */
     public function assignSims(Request $request, User $user): JsonResponse
     {
+        $authUser = auth()->user();
+        if (!$this->canManageTargetUser($authUser, $user)) {
+            return response()->json(['message' => 'Forbidden'], 403);
+        }
+
         $isManagerTarget = $user->role === 'manager';
 
         $rules = [
@@ -503,6 +578,12 @@ class UserController extends Controller
                 'message' => 'Validation failed',
                 'errors' => $validator->errors()
             ], 422);
+        }
+
+        foreach ($request->allowed_team_ids as $teamId) {
+            if (!$this->isTeamAccessibleToActor($authUser, (int) $teamId, (int) $user->organization_id)) {
+                return response()->json(['message' => 'Forbidden'], 403);
+            }
         }
 
         $selectedSims = collect();
@@ -567,5 +648,82 @@ class UserController extends Controller
                 'error' => $e->getMessage()
             ], 500);
         }
+    }
+
+    private function canManageTargetUser(User $actor, User $target): bool
+    {
+        if ($actor->role === 'admin') {
+            return true;
+        }
+
+        if ((int) $target->organization_id !== (int) $actor->organization_id) {
+            return false;
+        }
+
+        if ($actor->role === 'organization') {
+            return in_array($target->role, ['user', 'manager'], true);
+        }
+
+        if ($actor->role === 'manager') {
+            if ($target->role !== 'user') {
+                return false;
+            }
+
+            $accessibleTeams = $this->getManagerAccessibleTeamIds($actor);
+            return in_array((int) $target->team_id, $accessibleTeams, true);
+        }
+
+        return false;
+    }
+
+    private function getManagerAccessibleTeamIds(User $manager): array
+    {
+        $accessibleTeams = [];
+
+        if ($manager->team_id) {
+            $accessibleTeams[] = (int) $manager->team_id;
+        }
+
+        if ($manager->allowed_team_ids) {
+            $allowedTeams = is_string($manager->allowed_team_ids)
+                ? json_decode($manager->allowed_team_ids, true)
+                : $manager->allowed_team_ids;
+
+            if (is_array($allowedTeams)) {
+                $accessibleTeams = array_merge($accessibleTeams, array_map('intval', $allowedTeams));
+            }
+        }
+
+        return array_values(array_unique(array_filter($accessibleTeams)));
+    }
+
+    private function isTeamAccessibleToActor(User $actor, int $teamId, int $organizationId): bool
+    {
+        $teamExistsInOrg = Team::query()
+            ->where('id', $teamId)
+            ->where('organization_id', $organizationId)
+            ->exists();
+
+        if (!$teamExistsInOrg) {
+            return false;
+        }
+
+        if ($actor->role === 'admin') {
+            return true;
+        }
+
+        if ((int) $actor->organization_id !== $organizationId) {
+            return false;
+        }
+
+        if ($actor->role === 'organization') {
+            return true;
+        }
+
+        if ($actor->role === 'manager') {
+            return in_array($teamId, $this->getManagerAccessibleTeamIds($actor), true);
+        }
+
+        return false;
     }
 }

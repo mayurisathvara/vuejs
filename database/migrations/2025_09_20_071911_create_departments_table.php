@@ -19,10 +19,6 @@ return new class extends Migration
             
             // Foreign key constraint
             $table->foreign('organization_id')->references('id')->on('organizations')->onDelete('cascade');
-            
-            // Indexes for better performance
-            $table->index('organization_id', 'teams_organization_index');
-            $table->index('name', 'teams_name_index');
         });
     }
 

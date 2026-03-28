@@ -21,6 +21,12 @@ class CheckRole
         }
 
         $user = auth()->user();
+        $userRole = $user->role ?? null;
+        if (!is_string($userRole) || $userRole === '') {
+            return response()->json([
+                'message' => 'Unauthorized. You do not have permission to access this resource.'
+            ], 403);
+        }
         
         // Handle comma-separated roles from middleware parameter
         $allowedRoles = [];
@@ -32,7 +38,7 @@ class CheckRole
         // Trim whitespace from roles
         $allowedRoles = array_map('trim', $allowedRoles);
         
-        if (!in_array($user->role, $allowedRoles)) {
+        if (!in_array($userRole, $allowedRoles, true)) {
             return response()->json([
                 'message' => 'Unauthorized. You do not have permission to access this resource.'
             ], 403);

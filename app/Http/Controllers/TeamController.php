@@ -123,6 +123,11 @@ class TeamController extends Controller
      */
     public function show(Team $team): JsonResponse
     {
+        $user = auth()->user();
+        if (!$this->canAccessTeam($user, $team)) {
+            return response()->json(['message' => 'Forbidden'], 403);
+        }
+
         $team->load('organization:id,name');
         return response()->json($team);
     }
@@ -133,6 +138,9 @@ class TeamController extends Controller
     public function update(Request $request, Team $team): JsonResponse
     {
         $user = auth()->user();
+        if (!$this->canAccessTeam($user, $team)) {
+            return response()->json(['message' => 'Forbidden'], 403);
+        }
         
         // For organization and manager roles, use their organization_id
         $organizationId = ($user->role === 'organization' || $user->role === 'manager') 
@@ -173,10 +181,24 @@ class TeamController extends Controller
      */
     public function destroy(Team $team): JsonResponse
     {
+        $user = auth()->user();
+        if (!$this->canAccessTeam($user, $team)) {
+            return response()->json(['message' => 'Forbidden'], 403);
+        }
+
         $team->delete();
 
         return response()->json([
             'message' => 'Team deleted successfully'
         ]);
+    }
+
+    private function canAccessTeam($actor, Team $team): bool
+    {
+        if ($actor->role === 'admin') {
+            return true;
+        }
+
+        return (int) $team->organization_id === (int) $actor->organization_id;
     }
 }

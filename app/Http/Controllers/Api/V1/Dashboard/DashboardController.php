@@ -42,7 +42,7 @@ class DashboardController extends Controller
         $selectRaw = <<<SQL
             COUNT(*) AS total_calls,
             SUM(CASE WHEN call_status = 'Answered' THEN 1 ELSE 0 END) AS answered_calls,
-            SUM(CASE WHEN call_status = 'Missed' THEN 1 ELSE 0 END) AS missed_calls,
+            SUM(CASE WHEN LOWER(call_type) = 'inbound' AND LOWER(call_status) = 'missed' THEN 1 ELSE 0 END) AS missed_calls,
             SUM(CASE WHEN call_status = 'No Answer' THEN 1 ELSE 0 END) AS no_answer_calls,
             SUM(CASE WHEN call_type = 'inbound' THEN 1 ELSE 0 END) AS inbound_total,
             SUM(CASE WHEN call_type = 'inbound' AND call_status = 'Answered' THEN 1 ELSE 0 END) AS inbound_answered,

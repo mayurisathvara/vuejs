@@ -19,8 +19,6 @@ return new class extends Migration
             $table->enum('status', ['active', 'expired', 'cancelled'])->default('active');
             $table->text('notes')->nullable();                 // admin notes
             $table->timestamps();
-
-            $table->index(['organization_id', 'status']);
         });
     }
 

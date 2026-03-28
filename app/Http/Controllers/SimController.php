@@ -158,6 +158,15 @@ class SimController extends Controller
             ], 422);
         }
 
+        if (!$this->isTeamInOrganization((int) $request->team_id, (int) $organizationId)) {
+            return response()->json([
+                'message' => 'Validation failed',
+                'errors' => [
+                    'team_id' => ['The selected team does not belong to the selected organization.']
+                ]
+            ], 422);
+        }
+
         // Enforce subscription + SIM limit before creating a new SIM.
         if (! SubscriptionService::isSubscriptionActive((int) $organizationId)) {
             return response()->json([
@@ -192,6 +201,11 @@ class SimController extends Controller
      */
     public function show(Sim $sim)
     {
+        $user = auth()->user();
+        if (!$this->canAccessSim($user, $sim)) {
+            return response()->json(['message' => 'Forbidden'], 403);
+        }
+
         $sim->load(['organization', 'team']);
         return response()->json($sim);
     }
@@ -202,6 +216,9 @@ class SimController extends Controller
     public function update(Request $request, Sim $sim)
     {
         $user = auth()->user();
+        if (!$this->canAccessSim($user, $sim)) {
+            return response()->json(['message' => 'Forbidden'], 403);
+        }
         
         // For organization role, use their organization_id
         $organizationId = ($user->role === 'organization') 
@@ -228,6 +245,15 @@ class SimController extends Controller
             ], 422);
         }
 
+        if (!$this->isTeamInOrganization((int) $request->team_id, (int) $organizationId)) {
+            return response()->json([
+                'message' => 'Validation failed',
+                'errors' => [
+                    'team_id' => ['The selected team does not belong to the selected organization.']
+                ]
+            ], 422);
+        }
+
         $sim->update([
             'mobile' => $request->mobile,
             'name' => $request->name,
@@ -247,6 +273,11 @@ class SimController extends Controller
      */
     public function destroy(Sim $sim)
     {
+        $user = auth()->user();
+        if (!$this->canAccessSim($user, $sim)) {
+            return response()->json(['message' => 'Forbidden'], 403);
+        }
+
         $sim->delete();
 
         return response()->json([
@@ -259,6 +290,8 @@ class SimController extends Controller
      */
     public function bulkDelete(Request $request)
     {
+        $user = auth()->user();
+
         $validator = Validator::make($request->all(), [
             'ids' => 'required|array',
             'ids.*' => 'exists:sims,id',
@@ -269,6 +302,17 @@ class SimController extends Controller
                 'message' => 'Validation failed',
                 'errors' => $validator->errors()
             ], 422);
+        }
+
+        if ($user->role !== 'admin') {
+            $totalRequested = count($request->ids);
+            $authorizedCount = Sim::whereIn('id', $request->ids)
+                ->where('organization_id', $user->organization_id)
+                ->count();
+
+            if ($authorizedCount !== $totalRequested) {
+                return response()->json(['message' => 'Forbidden'], 403);
+            }
         }
 
         Sim::whereIn('id', $request->ids)->delete();
@@ -519,5 +563,22 @@ class SimController extends Controller
             'activated'   => $toActivate->fresh()->load(['organization:id,name', 'team:id,name']),
             'deactivated' => $toDeactivate->fresh()->load(['organization:id,name', 'team:id,name']),
         ]);
+    }
+
+    private function canAccessSim($actor, Sim $sim): bool
+    {
+        if ($actor->role === 'admin') {
+            return true;
+        }
+
+        return (int) $sim->organization_id === (int) $actor->organization_id;
+    }
+
+    private function isTeamInOrganization(int $teamId, int $organizationId): bool
+    {
+        return Team::query()
+            ->where('id', $teamId)
+            ->where('organization_id', $organizationId)
+            ->exists();
     }
 }

@@ -179,8 +179,6 @@ class AuthController extends Controller
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users,email,' . $user->id,
-            'role' => 'required|string|in:admin,manager,user',
-            'organization_id' => 'nullable|string|max:255',
             'profile' => 'nullable|string|max:500',
         ]);
 
@@ -194,8 +192,6 @@ class AuthController extends Controller
         $user->update([
             'name' => $request->name,
             'email' => $request->email,
-            'role' => $request->role,
-            'organization_id' => $request->organization_id,
             'profile' => $request->profile,
         ]);
 

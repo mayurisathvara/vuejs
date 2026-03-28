@@ -79,7 +79,7 @@ class ExcludedNumberController extends Controller
             : $request->organization_id;
 
         $rules = [
-            'phone_number' => 'required|string|max:20',
+            'phone_number' => ['required', 'digits:10'],
             'label'        => 'nullable|string|max:255',
         ];
 

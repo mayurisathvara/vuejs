@@ -17,8 +17,7 @@ return new class extends Migration
             // Foreign key constraint
             $table->foreign('team_id')->references('id')->on('teams')->onDelete('set null');
             
-            // Index for better performance
-            $table->index('team_id', 'users_team_index');
+       
         });
     }
 
@@ -29,7 +28,6 @@ return new class extends Migration
     {
         Schema::table('users', function (Blueprint $table) {
             $table->dropForeign(['team_id']);
-            $table->dropIndex('users_team_index');
             $table->dropColumn('team_id');
         });
     }

@@ -21,17 +21,17 @@ return new class extends Migration
             $table->unsignedBigInteger('organization_id')->nullable();
 
             // Caller info
-            $table->string('caller_id', 15)->nullable()->index();
-            $table->string('caller_number')->nullable()->index();
+            $table->string('caller_id', 15)->nullable();
+            $table->string('caller_number')->nullable();
 
             // Date & time
-            $table->date('date')->nullable()->index();
+            $table->date('date')->nullable();
             $table->time('time')->nullable();
-            $table->timestamp('date_time')->nullable()->index();
+            $table->timestamp('date_time')->nullable();
 
             // Call details
             $table->string('call_type')->nullable();
-            $table->string('call_status')->nullable()->index();
+            $table->string('call_status')->nullable();
 
             // Durations
             $table->time('caller_duration')->nullable();
@@ -39,7 +39,7 @@ return new class extends Migration
             $table->time('ring_duration')->nullable();
 
             // Callback info
-            $table->enum('call_back', ['Y', 'N'])->default('N')->index();
+            $table->enum('call_back', ['Y', 'N'])->default('N');
             $table->string('callback_id', 255)->nullable();
 
             // Meta info
