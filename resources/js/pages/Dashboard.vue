@@ -420,35 +420,64 @@
     <div class="row mb-0">
       <!-- Daily Call Volume (Line Chart Style) -->
       <div class="col-md-12">
-        <div class="card card-round shadow-sm border-0">
+        <div class="card card-round shadow-sm border-0 daily-chart-card">
           <div class="card-header bg-transparent border-0 pt-4 px-4">
-            <div class="d-flex align-items-start justify-content-between gap-3 flex-wrap">
+            <div class="d-flex align-items-start justify-content-between gap-3 flex-wrap chart-header-wrap">
               <div>
                 <h5 class="fw-bold mb-0">Daily Call Volume</h5>
-                <p class="text-muted small">{{ callVolumeSubtitle }}</p>
+                <p class="text-muted small mb-1">{{ callVolumeSubtitle }}</p>
+                <p class="chart-insight mb-0 small">{{ callVolumeInsight }}</p>
               </div>
-              <div class="btn-group btn-group-sm flex-shrink-0" role="group" aria-label="Chart type">
-                <button
-                  type="button"
-                  class="btn"
-                  :class="callVolumeView === 'bar' ? 'btn-primary' : 'btn-outline-primary'"
-                  @click="callVolumeView = 'bar'"
-                >
-                  Bar
-                </button>
-                <button
-                  type="button"
-                  class="btn"
-                  :class="callVolumeView === 'line' ? 'btn-primary' : 'btn-outline-primary'"
-                  @click="callVolumeView = 'line'"
-                >
-                  Line
-                </button>
+              <div class="d-flex align-items-center gap-2 flex-wrap chart-controls">
+                <div class="btn-group btn-group-sm flex-shrink-0 view-toggle" role="group" aria-label="Dataset filter">
+                  <button
+                    type="button"
+                    class="btn"
+                    :class="callVolumeDatasetFilter === 'all' ? 'btn-primary' : 'btn-outline-primary'"
+                    @click="callVolumeDatasetFilter = 'all'"
+                  >
+                    All
+                  </button>
+                  <button
+                    type="button"
+                    class="btn"
+                    :class="callVolumeDatasetFilter === 'inbound' ? 'btn-primary' : 'btn-outline-primary'"
+                    @click="callVolumeDatasetFilter = 'inbound'"
+                  >
+                    Inbound
+                  </button>
+                  <button
+                    type="button"
+                    class="btn"
+                    :class="callVolumeDatasetFilter === 'outbound' ? 'btn-primary' : 'btn-outline-primary'"
+                    @click="callVolumeDatasetFilter = 'outbound'"
+                  >
+                    Outbound
+                  </button>
+                </div>
+                <div class="btn-group btn-group-sm flex-shrink-0 view-toggle" role="group" aria-label="Chart type">
+                  <button
+                    type="button"
+                    class="btn"
+                    :class="callVolumeView === 'bar' ? 'btn-primary' : 'btn-outline-primary'"
+                    @click="callVolumeView = 'bar'"
+                  >
+                    Bar
+                  </button>
+                  <button
+                    type="button"
+                    class="btn"
+                    :class="callVolumeView === 'line' ? 'btn-primary' : 'btn-outline-primary'"
+                    @click="callVolumeView = 'line'"
+                  >
+                    Line
+                  </button>
+                </div>
               </div>
             </div>
           </div>
           <div class="card-body px-4 pb-4">
-            <div class="chart-container position-relative">
+            <div class="chart-container position-relative daily-chart-surface">
               <div
                 v-if="dailyCallVolumeLoading"
                 class="position-absolute top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center bg-white bg-opacity-75 loading-overlay"
@@ -568,12 +597,12 @@
               >
                 <div class="d-flex align-items-center mb-2">
                   <div
-                    class="icon-box rounded-3 p-2 me-3"
-                    :class="index === 0 ? 'bg-warning-light' : 'bg-danger-light'"
+                    class="icon-box peak-hour-icon-wrap rounded-3 p-2 me-3"
+                    :class="index === 0 ? 'peak-hour-icon-wrap--primary' : 'peak-hour-icon-wrap--secondary'"
                   >
                     <i
-                      class="fas"
-                      :class="index === 0 ? 'fa-sun text-warning' : 'fa-cloud-sun text-danger'"
+                      class="fas peak-hour-icon"
+                      :class="index === 0 ? 'fa-sun peak-hour-icon--primary' : 'fa-clock peak-hour-icon--secondary'"
                     ></i>
                   </div>
                   <div>
@@ -592,14 +621,14 @@
 
       <!-- Missed Calls Analysis -->
       <div class="col-12 col-lg-6">
-        <div class="card card-round shadow-sm border-0">
+        <div class="card card-round shadow-sm border-0 missed-analysis-card">
           <div class="card-header bg-transparent border-0 pt-4 px-4">
             <h5 class="fw-bold mb-0">Missed Calls Analysis</h5>
             <p class="text-muted small">Total missed calls breakdown</p>
           </div>
           <div class="card-body p-4">
-            <div class="row align-items-center">
-              <div class="col-md-4 text-center mb-4 mb-md-0">
+            <div class="row align-items-center missed-analysis-layout">
+              <div class="col-md-5 text-center mb-4 mb-md-0">
                 <div class="missed-donut position-relative d-inline-block">
                   <div
                     v-if="summaryLoading"
@@ -615,37 +644,54 @@
                     aria-label="Missed calls breakdown"
                     role="img"
                   ></canvas>
-                  <div class="position-absolute top-50 start-50 translate-middle text-center">
+                  <div class="position-absolute top-50 start-50 translate-middle text-center missed-center">
                     <h2 class="fw-bold mb-0">{{ missedTotal }}</h2>
                     <p class="text-muted small mb-0">Total Missed</p>
                   </div>
                 </div>
               </div>
-              <div class="col-md-8">
-                <div class="card bg-success-light border-0 mb-3 card-round">
-                  <div class="card-body d-flex justify-content-between align-items-center p-3">
-                    <div class="d-flex align-items-center">
-                      <div class="dot bg-success me-3"></div>
-                      <div>
-                        <h6 class="fw-bold mb-0">Returned Calls</h6>
-                        <p class="text-muted small mb-0">{{ returnedCallsPct }}% of total</p>
+              <div class="col-md-7">
+                <div class="card bg-success-light border-0 mb-3 card-round missed-stat-item">
+                  <div class="card-body p-3">
+                    <div class="d-flex justify-content-between align-items-center missed-stat-head">
+                      <div class="d-flex align-items-center">
+                        <div class="dot bg-success me-3"></div>
+                        <div>
+                          <h6 class="fw-bold mb-0">Returned Calls</h6>
+                          <p class="text-muted small mb-0">{{ returnedCallsPct }}% of total</p>
+                        </div>
                       </div>
+                      <h4 class="fw-bold text-success mb-0">{{ missedCalls.returned }}</h4>
                     </div>
-                    <h4 class="fw-bold text-success mb-0">{{ missedCalls.returned }}</h4>
+                    <div class="progress rounded-pill missed-progress mt-3">
+                      <div class="progress-bar bg-success" :style="{ width: `${returnedCallsPct}%` }"></div>
+                    </div>
                   </div>
                 </div>
-                <div class="card bg-warning-light border-0 card-round">
-                  <div class="card-body d-flex justify-content-between align-items-center p-3">
-                    <div class="d-flex align-items-center">
-                      <div class="dot bg-warning me-3"></div>
-                      <div>
-                        <h6 class="fw-bold mb-0">Callback Pending</h6>
-                        <p class="text-muted small mb-0">{{ callbackPendingPct }}% of total</p>
+                <div class="card bg-pending-light border-0 card-round missed-stat-item missed-stat-item-pending">
+                  <div class="card-body p-3">
+                    <div class="d-flex justify-content-between align-items-center missed-stat-head">
+                      <div class="d-flex align-items-center">
+                        <div class="dot bg-pending me-3"></div>
+                        <div>
+                          <h6 class="fw-bold mb-0">Callback Pending</h6>
+                          <p class="text-muted small mb-0">{{ callbackPendingPct }}% of total</p>
+                        </div>
                       </div>
+                      <h4 class="fw-bold text-pending mb-0">{{ missedCalls.pending }}</h4>
                     </div>
-                    <h4 class="fw-bold text-warning mb-0">{{ missedCalls.pending }}</h4>
+                    <div class="progress rounded-pill missed-progress mt-3">
+                      <div class="progress-bar bg-pending" :style="{ width: `${callbackPendingPct}%` }"></div>
+                    </div>
                   </div>
                 </div>
+                <div class="missed-summary-strip mt-3" :class="{ 'is-alert': callbackPendingPct >= 70 }">
+                  <span class="missed-summary-label">Insight</span>
+                  <span class="missed-summary-value">{{ missedInsightText }}</span>
+                </div>
+                <button type="button" class="btn btn-outline-primary btn-sm mt-3 missed-cta-btn" @click="viewMissedCalls">
+                  View Missed Calls
+                </button>
               </div>
             </div>
           </div>
@@ -658,6 +704,7 @@
 
 <script setup>
 import { ref, reactive, computed, onMounted, onBeforeUnmount, nextTick, watch } from 'vue'
+import { useRouter } from 'vue-router'
 import Chart from 'chart.js/auto'
 import flatpickr from 'flatpickr'
 import 'flatpickr/dist/flatpickr.min.css'
@@ -665,6 +712,7 @@ import api from '@/services/api'
 import { useAuthStore } from '@/stores/auth'
 
 const authStore = useAuthStore()
+const router = useRouter()
 
 const isAdmin = computed(() => authStore.userRole === 'admin')
 const isUser = computed(() => authStore.userRole === 'user')
@@ -808,6 +856,104 @@ const formatYmdUtc = (dateObj) => {
   const month = String(dateObj.getUTCMonth() + 1).padStart(2, '0')
   const day = String(dateObj.getUTCDate()).padStart(2, '0')
   return `${year}-${month}-${day}`
+}
+
+const formatChartDateLabel = (value) => {
+  if (!value) return ''
+  const d = new Date(value)
+  if (Number.isNaN(d.getTime())) return String(value)
+  return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })
+}
+
+const getDayOverDayChange = (arr, index) => {
+  if (!Array.isArray(arr) || index <= 0) return null
+  const current = Number(arr[index] || 0)
+  const previous = Number(arr[index - 1] || 0)
+  if (!Number.isFinite(current) || !Number.isFinite(previous)) return null
+
+  if (previous === 0 && current > 0) {
+    return { type: 'new', value: null, previous, current }
+  }
+
+  if (previous === 0 && current === 0) {
+    return { type: 'zero', value: 0, previous, current }
+  }
+
+  const value = Math.round(((current - previous) / previous) * 100)
+  return { type: 'percent', value, previous, current }
+}
+
+const formatTrendLabel = (change) => {
+  if (!change) return 'n/a'
+  if (change.type === 'new') return 'New'
+  if (change.type === 'zero') return '0%'
+  if (!Number.isFinite(change.value)) return 'n/a'
+  if (change.value > 0) return `\u2191 +${Math.abs(change.value)}%`
+  if (change.value < 0) return `\u2193 -${Math.abs(change.value)}%`
+  return '0%'
+}
+
+const formatChangeWithPercent = (change) => {
+  if (!change) return 'n/a'
+  if (change.type === 'new') return `+${Math.abs(Number(change.current || 0))} calls (New)`
+  if (change.type === 'zero') return '0 calls (0%)'
+
+  const delta = Number(change.current || 0) - Number(change.previous || 0)
+  if (!Number.isFinite(delta) || !Number.isFinite(change.value)) return 'n/a'
+
+  if (delta > 0) return `+${Math.abs(delta)} calls (+${Math.abs(change.value)}%)`
+  if (delta < 0) return `-${Math.abs(delta)} calls (-${Math.abs(change.value)}%)`
+  return '0 calls (0%)'
+}
+
+const formatCompactNumber = (value) => {
+  const n = Number(value || 0)
+  if (!Number.isFinite(n)) return '0'
+
+  const abs = Math.abs(n)
+  if (abs >= 1000000) {
+    const v = (n / 1000000).toFixed(1).replace(/\.0$/, '')
+    return `${v}M`
+  }
+  if (abs >= 1000) {
+    const v = (n / 1000).toFixed(1).replace(/\.0$/, '')
+    return `${v}K`
+  }
+  return `${Math.round(n)}`
+}
+
+const formatChangeAbsoluteCompact = (change) => {
+  if (!change) return 'n/a'
+  if (change.type === 'new') return `+${formatCompactNumber(Math.abs(Number(change.current || 0)))}`
+  if (change.type === 'zero') return '0'
+
+  const delta = Number(change.current || 0) - Number(change.previous || 0)
+  if (!Number.isFinite(delta)) return 'n/a'
+  if (delta > 0) return `+${formatCompactNumber(Math.abs(delta))}`
+  if (delta < 0) return `-${formatCompactNumber(Math.abs(delta))}`
+  return '0'
+}
+
+const formatGrowthPercentOnly = (change) => {
+  if (!change) return 'n/a'
+  if (change.type === 'new') return 'New'
+  if (change.type === 'zero') return '0%'
+  if (!Number.isFinite(change.value)) return 'n/a'
+  if (change.value > 0) return `+${Math.abs(change.value)}%`
+  if (change.value < 0) return `-${Math.abs(change.value)}%`
+  return '0%'
+}
+
+const formatChangeInsightText = (change) => {
+  if (!change) return 'Change data is unavailable.'
+  if (change.type === 'new') return `Calls increased by ${Math.abs(Number(change.current || 0))} (new activity).`
+  if (change.type === 'zero') return 'Calls were flat day-over-day (0%).'
+
+  const delta = Number(change.current || 0) - Number(change.previous || 0)
+  if (!Number.isFinite(delta) || !Number.isFinite(change.value)) return 'Change data is unavailable.'
+  if (delta > 0) return `Calls increased by ${Math.abs(delta)} (+${Math.abs(change.value)}%).`
+  if (delta < 0) return `Calls decreased by ${Math.abs(delta)} (-${Math.abs(change.value)}%).`
+  return 'Calls were flat day-over-day (0%).'
 }
 
 const diffDaysInclusiveUtc = (startYmd, endYmd) => {
@@ -1143,6 +1289,7 @@ const callbackPendingPct = computed(() => {
 const callVolumeCanvas = ref(null)
 let callVolumeChart = null
 const callVolumeView = ref('bar')
+const callVolumeDatasetFilter = ref('all')
 
 const dailyCallVolumeLoading = ref(false)
 const dailyCallVolume = reactive({
@@ -1166,10 +1313,56 @@ const callVolumeSubtitle = computed(() => {
   const start = dailyCallVolume.meta?.start_date
   const end = dailyCallVolume.meta?.end_date
 
-  if (start && end) return `${start} → ${end} • Avg ${avg} calls/day`
-  if (days) return `Last ${days} days • Avg ${avg} calls/day`
-  return dailyCallVolumeLoading.value ? 'Loading…' : '—'
+  if (start && end) return `${start} to ${end} | Avg ${avg} calls/day`
+  if (days) return `Last ${days} days | Avg ${avg} calls/day`
+  return dailyCallVolumeLoading.value ? 'Loading...' : '-'
 })
+
+const callVolumeInsight = computed(() => {
+  const labels = Array.isArray(dailyCallVolume.labels) ? dailyCallVolume.labels : []
+  const total = Array.isArray(dailyCallVolume?.datasets?.total) ? dailyCallVolume.datasets.total : []
+  if (!labels.length || !total.length) return 'No trend insight available for selected range.'
+
+  let peakIndex = 0
+  for (let i = 1; i < total.length; i += 1) {
+    if (Number(total[i] || 0) > Number(total[peakIndex] || 0)) peakIndex = i
+  }
+
+  const peakDate = formatChartDateLabel(labels[peakIndex])
+  const peakValue = Number(total[peakIndex] || 0)
+  const change = getDayOverDayChange(total, peakIndex)
+  const changeText = formatChangeInsightText(change)
+  const mid = Math.floor(total.length / 2)
+  const firstHalf = total.slice(0, Math.max(1, mid))
+  const secondHalf = total.slice(Math.max(1, mid))
+  const avgFirst = firstHalf.length ? firstHalf.reduce((a, b) => a + Number(b || 0), 0) / firstHalf.length : 0
+  const avgSecond = secondHalf.length ? secondHalf.reduce((a, b) => a + Number(b || 0), 0) / secondHalf.length : 0
+
+  let weeklyTone = 'Momentum stayed stable through the week.'
+  if (avgSecond > avgFirst * 1.1) weeklyTone = 'Growth accelerated after mid-week.'
+  if (avgSecond < avgFirst * 0.9) weeklyTone = 'Volume softened after mid-week.'
+
+  return `📈 Calls peaked on ${peakDate} (${peakValue} calls). ${changeText} ${weeklyTone}`
+})
+
+const missedInsightText = computed(() => {
+  if (!missedTotal.value) return 'No missed calls in selected period.'
+  if (callbackPendingPct.value >= 90) return `${callbackPendingPct.value}% missed calls are pending follow-up (high priority).`
+  if (callbackPendingPct.value >= 70) return `${callbackPendingPct.value}% missed calls are still pending callbacks.`
+  if (callbackPendingPct.value >= 40) return `${callbackPendingPct.value}% pending callbacks need follow-up.`
+  return `Good coverage: ${returnedCallsPct.value}% missed calls are already returned.`
+})
+
+const viewMissedCalls = () => {
+  router.push({
+    path: '/call-reports',
+    query: {
+      call_type: 'inbound',
+      call_status: 'Missed',
+      call_back: 'N'
+    }
+  })
+}
 
 const refreshData = async () => {
   await fetchDashboardSummary()
@@ -1203,234 +1396,295 @@ const initCallVolumeChart = () => {
   const ctx = canvas.getContext('2d')
   if (!ctx) return
 
-  const totalStroke = '#0d6efd'
-  const inboundStroke = '#00d4ff'
-  const outboundStroke = '#ff6a00'
-  const pointBg = '#ffffff'
-
   const labels = Array.isArray(dailyCallVolume.labels) ? dailyCallVolume.labels : []
   const inbound = Array.isArray(dailyCallVolume?.datasets?.inbound) ? dailyCallVolume.datasets.inbound : []
   const outbound = Array.isArray(dailyCallVolume?.datasets?.outbound) ? dailyCallVolume.datasets.outbound : []
   const total = Array.isArray(dailyCallVolume?.datasets?.total) ? dailyCallVolume.datasets.total : []
 
-  const makeFillGradient = (chart, rgb) => {
-    const { ctx, chartArea } = chart
-    if (!chartArea) return `rgba(${rgb}, 0.25)`
-    const gradient = ctx.createLinearGradient(0, chartArea.top, 0, chartArea.bottom)
-    gradient.addColorStop(0, `rgba(${rgb}, 0.45)`)
-    gradient.addColorStop(1, `rgba(${rgb}, 0.05)`)
-    return gradient
-  }
+  const totalColor = 'rgba(53, 89, 184, 1)'
+  const totalColorSoft = 'rgba(53, 89, 184, 0.22)'
+  const inboundColor = 'rgba(34, 139, 91, 1)'
+  const inboundColorSoft = 'rgba(34, 139, 91, 0.22)'
+  const outboundColor = 'rgba(224, 139, 71, 1)'
+  const outboundColorSoft = 'rgba(224, 139, 71, 0.22)'
 
   const isBar = callVolumeView.value === 'bar'
+  const filter = callVolumeDatasetFilter.value
+  const showAll = filter === 'all'
+  const showInbound = showAll || filter === 'inbound'
+  const showOutbound = showAll || filter === 'outbound'
+  const showTotal = showAll
+  const singleDatasetMode = !showAll
 
-  const lineDatasets = [
-    {
-      label: 'Outbound',
-      data: outbound,
-      borderColor: outboundStroke,
-      backgroundColor: 'rgba(255, 106, 0, 0.08)',
-      fill: false,
-      cubicInterpolationMode: 'monotone',
-      tension: 0.4,
-      borderWidth: 4,
-      pointRadius: 4,
-      pointHoverRadius: 8,
-      pointHitRadius: 20,
-      pointBackgroundColor: pointBg,
-      pointBorderColor: outboundStroke,
-      pointBorderWidth: 3,
-      pointHoverBorderWidth: 4,
-      order: 3
-    },
-    {
-      label: 'Total',
-      data: total,
-      borderColor: totalStroke,
-      backgroundColor: (context) => makeFillGradient(context.chart, '13, 110, 253'),
-      fill: true,
-      cubicInterpolationMode: 'monotone',
-      tension: 0.4,
-      borderWidth: 5,
-      pointRadius: 4,
-      pointHoverRadius: 8,
-      pointHitRadius: 20,
-      pointBackgroundColor: pointBg,
-      pointBorderColor: totalStroke,
-      pointBorderWidth: 3,
-      pointHoverBorderWidth: 4,
-      order: 1
-    },
-    {
-      label: 'Inbound',
-      data: inbound,
-      borderColor: inboundStroke,
-      backgroundColor: (context) => makeFillGradient(context.chart, '0, 212, 255'),
-      fill: true,
-      cubicInterpolationMode: 'monotone',
-      tension: 0.4,
-      borderWidth: 4,
-      pointRadius: 4,
-      pointHoverRadius: 8,
-      pointHitRadius: 20,
-      pointBackgroundColor: pointBg,
-      pointBorderColor: inboundStroke,
-      pointBorderWidth: 3,
-      pointHoverBorderWidth: 4,
-      order: 2
-    }
-  ]
-
-  const barDatasets = [
-    {
-      label: 'Outbound',
-      data: outbound,
-      backgroundColor: 'rgba(255, 106, 0, 0.85)',
-      hoverBackgroundColor: 'rgba(255, 106, 0, 0.95)',
-      borderColor: 'rgba(255, 106, 0, 1)',
-      borderWidth: 2,
-      borderRadius: 12,
-      borderSkipped: false
-    },
-    {
-      label: 'Total',
-      data: total,
-      backgroundColor: 'rgba(13, 110, 253, 0.75)',
-      hoverBackgroundColor: 'rgba(13, 110, 253, 0.90)',
-      borderColor: 'rgba(13, 110, 253, 1)',
-      borderWidth: 2,
-      borderRadius: 12,
-      borderSkipped: false
-    },
-    {
-      label: 'Inbound',
-      data: inbound,
-      backgroundColor: 'rgba(0, 212, 255, 0.75)',
-      hoverBackgroundColor: 'rgba(0, 212, 255, 0.90)',
-      borderColor: 'rgba(0, 212, 255, 1)',
-      borderWidth: 2,
-      borderRadius: 12,
-      borderSkipped: false
-    }
-  ]
+  const datasets = isBar
+    ? [
+        showOutbound
+          ? {
+              label: 'Outbound',
+              data: outbound,
+              backgroundColor: 'rgba(224, 139, 71, 0.64)',
+              hoverBackgroundColor: 'rgba(224, 139, 71, 0.84)',
+              borderColor: 'rgba(224, 139, 71, 0.95)',
+              borderWidth: 1,
+              borderRadius: { topLeft: 2, topRight: 2, bottomLeft: 0, bottomRight: 0 },
+              borderSkipped: 'bottom',
+              categoryPercentage: singleDatasetMode ? 0.72 : 0.56,
+              barPercentage: singleDatasetMode ? 0.9 : 0.56,
+              maxBarThickness: singleDatasetMode ? 34 : 16
+            }
+          : null,
+        showTotal
+          ? {
+              label: 'Total',
+              data: total,
+              backgroundColor: 'rgba(53, 89, 184, 0.92)',
+              hoverBackgroundColor: 'rgba(53, 89, 184, 1)',
+              borderColor: 'rgba(48, 78, 163, 1)',
+              borderWidth: 1.2,
+              borderRadius: { topLeft: 3, topRight: 3, bottomLeft: 0, bottomRight: 0 },
+              borderSkipped: 'bottom',
+              categoryPercentage: 0.56,
+              barPercentage: 0.8,
+              maxBarThickness: 24
+            }
+          : null,
+        showInbound
+          ? {
+              label: 'Inbound',
+              data: inbound,
+              backgroundColor: 'rgba(34, 139, 91, 0.64)',
+              hoverBackgroundColor: 'rgba(34, 139, 91, 0.84)',
+              borderColor: 'rgba(34, 139, 91, 0.95)',
+              borderWidth: 1,
+              borderRadius: { topLeft: 2, topRight: 2, bottomLeft: 0, bottomRight: 0 },
+              borderSkipped: 'bottom',
+              categoryPercentage: singleDatasetMode ? 0.72 : 0.56,
+              barPercentage: singleDatasetMode ? 0.9 : 0.56,
+              maxBarThickness: singleDatasetMode ? 34 : 16
+            }
+          : null
+      ].filter(Boolean)
+    : [
+        showOutbound
+          ? {
+              label: 'Outbound',
+              data: outbound,
+              borderColor: outboundColor,
+              backgroundColor: outboundColorSoft,
+              _baseColor: outboundColor,
+              _mutedColor: 'rgba(224, 139, 71, 0.24)',
+              tension: 0.35,
+              borderWidth: 2,
+              pointRadius: 2.5,
+              pointHoverRadius: 4.5,
+              fill: false
+            }
+          : null,
+        showTotal
+          ? {
+              label: 'Total',
+              data: total,
+              borderColor: totalColor,
+              backgroundColor: totalColorSoft,
+              _baseColor: totalColor,
+              _mutedColor: 'rgba(53, 89, 184, 0.24)',
+              tension: 0.35,
+              borderWidth: 3,
+              pointRadius: 3,
+              pointHoverRadius: 5.5,
+              fill: false
+            }
+          : null,
+        showInbound
+          ? {
+              label: 'Inbound',
+              data: inbound,
+              borderColor: inboundColor,
+              backgroundColor: inboundColorSoft,
+              _baseColor: inboundColor,
+              _mutedColor: 'rgba(34, 139, 91, 0.24)',
+              tension: 0.35,
+              borderWidth: 2,
+              pointRadius: 2.5,
+              pointHoverRadius: 4.5,
+              fill: false
+            }
+          : null
+      ].filter(Boolean)
 
   const hoverGuidePlugin = {
     id: 'hoverGuide',
     afterDraw(chart) {
       const active = chart.tooltip?.getActiveElements?.() || []
       if (!active.length) return
-
       const { ctx, chartArea } = chart
       const x = active[0].element.x
       ctx.save()
       ctx.beginPath()
       ctx.moveTo(x, chartArea.top)
       ctx.lineTo(x, chartArea.bottom)
-      ctx.lineWidth = 2
-      ctx.strokeStyle = 'rgba(99, 102, 241, 0.3)'
-      ctx.setLineDash([8, 4])
+      ctx.lineWidth = 1
+      ctx.strokeStyle = 'rgba(100, 116, 139, 0.25)'
+      ctx.setLineDash([5, 4])
       ctx.stroke()
+      ctx.restore()
+    }
+  }
+
+  const totalLabelsAndTrendPlugin = {
+    id: 'totalLabelsAndTrend',
+    afterDatasetsDraw(chart) {
+      if (chart.config.type !== 'bar') return
+      const { ctx } = chart
+      ctx.save()
+      ctx.textAlign = 'center'
+
+      const datasetIndexes = showAll
+        ? [chart.data.datasets.findIndex((d) => d.label === 'Total')].filter((idx) => idx >= 0)
+        : chart.data.datasets.map((_, idx) => idx)
+
+      datasetIndexes.forEach((datasetIndex) => {
+        const meta = chart.getDatasetMeta(datasetIndex)
+        const data = chart.data.datasets[datasetIndex]?.data || []
+        if (!meta || meta.hidden) return
+
+        meta.data.forEach((bar, index) => {
+          const value = Number(data[index] || 0)
+          const change = getDayOverDayChange(data, index)
+          const valueY = Math.max(12, bar.y - 6)
+          const changeY = Math.max(10, bar.y - 20)
+
+          ctx.font = '600 10px system-ui, -apple-system, Segoe UI, Roboto, sans-serif'
+          ctx.fillStyle = '#334155'
+          ctx.fillText(formatCompactNumber(value), bar.x, valueY)
+
+          if (index > 0 && Math.abs(valueY - changeY) > 8) {
+            ctx.font = '700 10px system-ui, -apple-system, Segoe UI, Roboto, sans-serif'
+            ctx.fillStyle = change?.type === 'percent'
+              ? (change.value > 0 ? '#16a34a' : change.value < 0 ? '#dc2626' : '#64748b')
+              : (change?.type === 'new' ? '#16a34a' : '#64748b')
+            ctx.fillText(formatChangeAbsoluteCompact(change), bar.x, changeY)
+          }
+        })
+      })
+
       ctx.restore()
     }
   }
 
   callVolumeChart = new Chart(ctx, {
     type: isBar ? 'bar' : 'line',
-    plugins: [hoverGuidePlugin],
+    plugins: [hoverGuidePlugin, totalLabelsAndTrendPlugin],
     data: {
-      // API returns date labels like YYYY-MM-DD
       labels,
-      datasets: isBar ? barDatasets : lineDatasets
+      datasets
     },
     options: {
       devicePixelRatio: 2,
       responsive: true,
       maintainAspectRatio: false,
       interaction: { mode: 'index', intersect: false },
-      layout: { padding: { top: 6, left: 0, right: 6, bottom: 0 } },
+      animation: { duration: 850, easing: 'easeOutCubic' },
+      layout: { padding: { top: 8, left: 4, right: 8, bottom: 0 } },
       plugins: {
         legend: {
           display: true,
           position: 'top',
-          align: 'end',
+          align: 'start',
+          onHover: (event, legendItem, legend) => {
+            legend.chart.canvas.style.cursor = 'pointer'
+            if (isBar) return
+            const chart = legend.chart
+            chart.data.datasets.forEach((ds, idx) => {
+              const active = idx === legendItem.datasetIndex
+              ds.borderColor = active ? ds._baseColor : ds._mutedColor
+              ds.borderWidth = active ? 3.5 : 1.6
+              ds.pointRadius = active ? 3.5 : 2
+              ds.pointHoverRadius = active ? 6 : 3.5
+            })
+            chart.update('none')
+          },
+          onLeave: (event, legendItem, legend) => {
+            legend.chart.canvas.style.cursor = 'default'
+            if (isBar) return
+            const chart = legend.chart
+            chart.data.datasets.forEach((ds) => {
+              ds.borderColor = ds._baseColor || ds.borderColor
+              ds.borderWidth = ds.label === 'Total' ? 3 : 2
+              ds.pointRadius = ds.label === 'Total' ? 3 : 2.5
+              ds.pointHoverRadius = ds.label === 'Total' ? 5.5 : 4.5
+            })
+            chart.update('none')
+          },
           labels: {
             usePointStyle: true,
             pointStyle: 'circle',
-            boxWidth: 10,
-            boxHeight: 10,
-            color: '#1f2937',
-            font: { size: 13, weight: '600' },
-            padding: 15
+            boxWidth: 8,
+            boxHeight: 8,
+            color: '#334155',
+            font: { size: 12, weight: '600' },
+            padding: 14
           }
         },
         tooltip: {
           enabled: true,
-          backgroundColor: 'rgba(17, 24, 39, 0.96)',
+          backgroundColor: 'rgba(15, 23, 42, 0.96)',
           titleColor: '#ffffff',
-          bodyColor: '#ffffff',
+          bodyColor: '#e2e8f0',
           padding: 12,
-          displayColors: true,
-          caretPadding: 10,
-          caretSize: 7,
-          cornerRadius: 12,
+          displayColors: false,
+          cornerRadius: 10,
           borderWidth: 1,
-          borderColor: 'rgba(255, 255, 255, 0.1)',
-          titleFont: {
-            size: 14,
-            weight: '600'
-          },
-          bodyFont: {
-            size: 13,
-            weight: '500'
-          },
+          borderColor: 'rgba(148, 163, 184, 0.26)',
           callbacks: {
-            title: (items) => items?.[0]?.label ?? '',
-            label: (item) => `${item.dataset.label}: ${item.parsed.y}`
+            title: (items) => formatChartDateLabel(items?.[0]?.label ?? ''),
+            label: () => null,
+            afterBody: (items) => {
+              const idx = items?.[0]?.dataIndex
+              if (idx === undefined || idx === null) return []
+              const totalVal = Number(total[idx] || 0)
+              const inboundVal = Number(inbound[idx] || 0)
+              const outboundVal = Number(outbound[idx] || 0)
+              const change = getDayOverDayChange(total, idx)
+              return [
+                `Total Calls: ${formatCompactNumber(totalVal)} (${totalVal})`,
+                `Inbound Calls: ${formatCompactNumber(inboundVal)} (${inboundVal})`,
+                `Outbound Calls: ${formatCompactNumber(outboundVal)} (${outboundVal})`,
+                `Absolute change: ${formatChangeAbsoluteCompact(change)}`,
+                `Growth: ${formatGrowthPercentOnly(change)} vs previous day`
+              ]
+            }
           }
         }
       },
-      datasets: isBar
-        ? {
-            bar: {
-              barPercentage: 0.92,
-              categoryPercentage: 0.85,
-              maxBarThickness: 55
-            }
-          }
-        : undefined,
       scales: {
         x: {
+          offset: true,
           grid: { display: false },
-          ticks: { 
-            color: '#4b5563',
-            font: {
-              size: 12,
-              weight: '500'
-            }
+          ticks: {
+            color: '#64748b',
+            font: { size: 11, weight: '500' },
+            autoSkip: true,
+            maxTicksLimit: 8,
+            callback: (value, index) => formatChartDateLabel(labels[index])
           },
-          border: { display: false },
-          stacked: false
+          border: { display: false }
         },
         y: {
           beginAtZero: true,
-          suggestedMax: Math.max(0, ...(total || [])) + 10,
+          suggestedMax: Math.max(0, ...(total || [])) + 6,
           grid: {
-            color: '#e5e7eb',
-            borderDash: [5, 5],
+            color: 'rgba(148, 163, 184, 0.16)',
             drawTicks: false,
             lineWidth: 1
           },
           ticks: {
-            color: '#6b7280',
+            color: '#64748b',
             padding: 8,
             maxTicksLimit: 5,
-            font: {
-              size: 12,
-              weight: '500'
-            }
+            font: { size: 11, weight: '500' }
           },
-          border: { display: false },
-          stacked: false
+          border: { display: false }
         }
       }
     }
@@ -1458,19 +1712,19 @@ const initMissedCallsChart = () => {
       datasets: [
         {
           data: dataValues,
-          backgroundColor: ['#10b981', '#ff9800'],
+          backgroundColor: ['#16a34a', '#ea580c'],
           borderColor: '#ffffff',
-          borderWidth: 6,
+          borderWidth: 5,
           borderRadius: 16,
           spacing: 3,
-          hoverOffset: 8
+          hoverOffset: 6
         }
       ]
     },
     options: {
       responsive: true,
       maintainAspectRatio: false,
-      cutout: '72%',
+      cutout: '76%',
       plugins: {
         legend: { display: false },
         tooltip: {
@@ -1599,7 +1853,7 @@ onMounted(async () => {
   initMissedCallsChart()
 })
 
-watch(callVolumeView, async () => {
+watch([callVolumeView, callVolumeDatasetFilter], async () => {
   await nextTick()
   initCallVolumeChart()
 })
@@ -1641,11 +1895,150 @@ onBeforeUnmount(() => {
 /* Chart sizing: make it feel balanced on mobile */
 .chart-container {
   height: 320px;
+  border-radius: 14px;
+  border: 1px solid #e6edf7;
+  background: linear-gradient(180deg, #fbfdff 0%, #f2f6fc 100%);
+  padding: 10px;
+}
+
+.daily-chart-card .card-header {
+  padding-bottom: 0.35rem;
+}
+
+.chart-header-wrap {
+  row-gap: 0.75rem !important;
+}
+
+.chart-controls {
+  justify-content: flex-end;
+}
+
+.chart-insight {
+  color: #475569;
+  font-weight: 600;
+}
+
+.view-toggle {
+  background: #edf2f7;
+  border-radius: 12px;
+  padding: 3px;
+}
+
+.view-toggle .btn {
+  border-radius: 8px !important;
+  border: none !important;
+  min-width: 68px;
+  font-weight: 700;
+}
+
+.view-toggle .btn.btn-primary {
+  background: #3559b8;
+}
+
+.view-toggle .btn.btn-outline-primary {
+  color: #334155;
+  background: transparent;
+}
+
+.daily-chart-surface {
+  background:
+    radial-gradient(circle at 0% 0%, rgba(53, 89, 184, 0.09), transparent 30%),
+    linear-gradient(180deg, #fbfdff 0%, #f2f6fc 100%);
 }
 
 .missed-donut {
   width: 200px;
   height: 200px;
+  filter: drop-shadow(0 8px 14px rgba(15, 23, 42, 0.1));
+}
+
+.missed-center h2 {
+  font-size: 2.2rem;
+}
+
+.missed-center p {
+  color: #64748b !important;
+}
+
+.missed-analysis-card .card-header {
+  padding-bottom: 0.35rem;
+}
+
+.missed-analysis-layout {
+  row-gap: 0.8rem;
+}
+
+.missed-stat-item {
+  border-radius: 14px !important;
+  border: 1px solid rgba(148, 163, 184, 0.26) !important;
+  box-shadow: 0 8px 18px rgba(15, 23, 42, 0.06);
+}
+
+.missed-stat-item h4 {
+  font-size: 1.45rem;
+}
+
+.missed-progress {
+  height: 8px;
+  background: rgba(148, 163, 184, 0.24);
+}
+
+.missed-progress .progress-bar {
+  border-radius: 999px;
+}
+
+.bg-pending-light {
+  background-color: rgba(234, 88, 12, 0.12) !important;
+}
+
+.bg-pending {
+  background-color: #ea580c !important;
+}
+
+.text-pending {
+  color: #ea580c !important;
+}
+
+.missed-summary-strip {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.8rem;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 0.6rem 0.8rem;
+}
+
+.missed-summary-strip.is-alert {
+  background: #fff7ed;
+  border-color: #fdba74;
+}
+
+.missed-summary-label {
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #64748b;
+}
+
+.missed-summary-value {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.missed-cta-btn {
+  border-color: #cbd5e1;
+  color: #334155;
+  font-weight: 600;
+}
+
+.missed-cta-btn:hover {
+  border-color: #94a3b8;
+  background: #f8fafc;
+  color: #0f172a;
 }
 
 .loading-overlay {
@@ -1657,11 +2050,30 @@ onBeforeUnmount(() => {
     width: 170px;
     height: 170px;
   }
+
+  .missed-center h2 {
+    font-size: 1.9rem;
+  }
 }
 
 @media (max-width: 575.98px) {
   .chart-container {
-    height: 240px;
+    height: 250px;
+  }
+
+  .chart-controls {
+    width: 100%;
+    justify-content: stretch;
+    gap: 0.5rem !important;
+  }
+
+  .chart-controls .view-toggle {
+    flex: 1 1 auto;
+    width: 100%;
+  }
+
+  .view-toggle .btn {
+    min-width: 0;
   }
 }
 
@@ -1702,6 +2114,26 @@ onBeforeUnmount(() => {
 }
 .icon-box i {
   font-size: 1.25rem;
+}
+.peak-hour-icon-wrap {
+  width: 48px;
+  height: 48px;
+}
+.peak-hour-icon-wrap--primary {
+  background-color: #fef3e7 !important;
+}
+.peak-hour-icon-wrap--secondary {
+  background-color: #f3f4f6 !important;
+}
+.peak-hour-icon {
+  font-size: 18px;
+  line-height: 1;
+}
+.peak-hour-icon--primary {
+  color: #f59e0b !important;
+}
+.peak-hour-icon--secondary {
+  color: #374151 !important;
 }
 .card-round {
   border-radius: 16px;
@@ -1819,3 +2251,6 @@ onBeforeUnmount(() => {
   line-height: 1.2;
 }
 </style>
+
+
+
