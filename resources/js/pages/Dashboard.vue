@@ -486,7 +486,22 @@
                   <div class="spinner-border text-primary" role="status" aria-label="Loading"></div>
                 </div>
               </div>
-              <canvas ref="callVolumeCanvas" class="w-100 h-100" aria-label="Daily Call Volume" role="img"></canvas>
+              <div v-if="!dailyCallVolumeLoading && isDailyCallVolumeEmpty" class="daily-empty-state">
+                <div class="daily-empty-icon" aria-hidden="true">
+                  <i class="far fa-envelope-open"></i>
+                </div>
+                <h6 class="daily-empty-title mb-1">No Call Data Available</h6>
+                <p class="daily-empty-subtitle mb-3">No calls were recorded during this period.</p>
+                <div class="d-flex gap-2 flex-wrap justify-content-center">
+                  <button type="button" class="btn btn-outline-primary btn-sm" @click="viewCallLogs">
+                    View Call Logs
+                  </button>
+                  <button type="button" class="btn btn-primary btn-sm" @click="refreshData">
+                    Refresh
+                  </button>
+                </div>
+              </div>
+              <canvas v-else ref="callVolumeCanvas" class="w-100 h-100" aria-label="Daily Call Volume" role="img"></canvas>
             </div>
           </div>
         </div>
@@ -1318,7 +1333,23 @@ const callVolumeSubtitle = computed(() => {
   return dailyCallVolumeLoading.value ? 'Loading...' : '-'
 })
 
+const hasNonZeroValue = (series) => Array.isArray(series) && series.some((v) => Number(v || 0) > 0)
+
+const isDailyCallVolumeEmpty = computed(() => {
+  const labels = Array.isArray(dailyCallVolume.labels) ? dailyCallVolume.labels : []
+  const total = Array.isArray(dailyCallVolume?.datasets?.total) ? dailyCallVolume.datasets.total : []
+  const inbound = Array.isArray(dailyCallVolume?.datasets?.inbound) ? dailyCallVolume.datasets.inbound : []
+  const outbound = Array.isArray(dailyCallVolume?.datasets?.outbound) ? dailyCallVolume.datasets.outbound : []
+
+  if (!labels.length) return true
+  if (callVolumeDatasetFilter.value === 'inbound') return !hasNonZeroValue(inbound)
+  if (callVolumeDatasetFilter.value === 'outbound') return !hasNonZeroValue(outbound)
+  return !(hasNonZeroValue(total) || hasNonZeroValue(inbound) || hasNonZeroValue(outbound))
+})
+
 const callVolumeInsight = computed(() => {
+  if (isDailyCallVolumeEmpty.value) return 'No call activity detected for this period.'
+
   const labels = Array.isArray(dailyCallVolume.labels) ? dailyCallVolume.labels : []
   const total = Array.isArray(dailyCallVolume?.datasets?.total) ? dailyCallVolume.datasets.total : []
   if (!labels.length || !total.length) return 'No trend insight available for selected range.'
@@ -1342,7 +1373,7 @@ const callVolumeInsight = computed(() => {
   if (avgSecond > avgFirst * 1.1) weeklyTone = 'Growth accelerated after mid-week.'
   if (avgSecond < avgFirst * 0.9) weeklyTone = 'Volume softened after mid-week.'
 
-  return `📈 Calls peaked on ${peakDate} (${peakValue} calls). ${changeText} ${weeklyTone}`
+  return `Calls peaked on ${peakDate} (${peakValue} calls). ${changeText} ${weeklyTone}`
 })
 
 const missedInsightText = computed(() => {
@@ -1362,6 +1393,10 @@ const viewMissedCalls = () => {
       call_back: 'N'
     }
   })
+}
+
+const viewCallLogs = () => {
+  router.push('/call-reports')
 }
 
 const refreshData = async () => {
@@ -1385,13 +1420,15 @@ const resetFilters = async () => {
 }
 
 const initCallVolumeChart = () => {
-  const canvas = callVolumeCanvas.value
-  if (!canvas) return
-
   if (callVolumeChart) {
     callVolumeChart.destroy()
     callVolumeChart = null
   }
+
+  if (isDailyCallVolumeEmpty.value) return
+
+  const canvas = callVolumeCanvas.value
+  if (!canvas) return
 
   const ctx = canvas.getContext('2d')
   if (!ctx) return
@@ -1946,6 +1983,52 @@ onBeforeUnmount(() => {
     linear-gradient(180deg, #fbfdff 0%, #f2f6fc 100%);
 }
 
+.daily-empty-state {
+  height: 100%;
+  min-height: 240px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  padding: 1rem;
+  border-radius: 10px;
+  background:
+    linear-gradient(180deg, rgba(148, 163, 184, 0.06), rgba(148, 163, 184, 0.02)),
+    repeating-linear-gradient(
+      to bottom,
+      transparent 0,
+      transparent 35px,
+      rgba(148, 163, 184, 0.16) 35px,
+      rgba(148, 163, 184, 0.16) 36px
+    );
+}
+
+.daily-empty-icon {
+  width: 54px;
+  height: 54px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.35rem;
+  color: #475569;
+  background: #f1f5f9;
+  border: 1px solid #e2e8f0;
+  margin-bottom: 0.65rem;
+}
+
+.daily-empty-title {
+  font-size: 1.08rem;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.daily-empty-subtitle {
+  font-size: 0.92rem;
+  color: #64748b;
+}
+
 .missed-donut {
   width: 200px;
   height: 200px;
@@ -2251,6 +2334,3 @@ onBeforeUnmount(() => {
   line-height: 1.2;
 }
 </style>
-
-
-

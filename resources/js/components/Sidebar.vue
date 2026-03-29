@@ -29,12 +29,9 @@
               <p>Dashboard</p>
             </router-link>
           </li>
-          
-          <li v-if="!isUser" class="nav-section">
-            <span class="sidebar-mini-icon">
-              <i class="fa fa-ellipsis-h"></i>
-            </span>
-            <h4 class="text-section">Management</h4>
+
+          <li v-if="hasManagementSection" class="nav-section">
+            <h4 class="text-section">MANAGEMENT</h4>
           </li>
           
           <li v-if="showUsers" class="nav-item" :class="{ active: $route.name === 'Users' || $route.name === 'assign-sims' }">
@@ -65,6 +62,10 @@
             </router-link>
           </li>
 
+          <li v-if="hasReportsSection" class="nav-section">
+            <h4 class="text-section">REPORTS</h4>
+          </li>
+
           <li v-if="showCallReports" class="nav-item" :class="{ active: $route.name === 'CallReports' }">
             <router-link to="/call-reports" class="nav-link" @click="handleMenuClick">
               <i class="fas fa-chart-bar"></i>
@@ -77,6 +78,10 @@
               <i class="fas fa-chart-line"></i>
               <p>Summary Report</p>
             </router-link>
+          </li>
+
+          <li v-if="hasOtherSection" class="nav-section">
+            <h4 class="text-section">OTHER</h4>
           </li>
 
           <li v-if="showExcludedNumbers" class="nav-item" :class="{ active: $route.name === 'ExcludedNumbers' }">
@@ -138,6 +143,9 @@ const showCallReports = computed(() => isAdmin.value || isOrganization.value || 
 const showSummaryReport = computed(() => isAdmin.value || isOrganization.value || isManager.value || isUser.value)
 const showExcludedNumbers = computed(() => isAdmin.value || isOrganization.value || isManager.value)
 const showDeveloperApi = computed(() => isAdmin.value || isOrganization.value)
+const hasManagementSection = computed(() => showUsers.value || showOrganizations.value || showTeams.value || showSims.value)
+const hasReportsSection = computed(() => showCallReports.value || showSummaryReport.value)
+const hasOtherSection = computed(() => showExcludedNumbers.value || showDeveloperApi.value || showOrganizationSettings.value || showSettings.value)
 
 const checkMobile = () => {
   isMobile.value = window.innerWidth <= 991.5
@@ -199,5 +207,26 @@ onUnmounted(() => {
   max-width: 200px;
   display: block;
   object-fit: contain;
+}
+
+.nav-section {
+  margin-top: 0.9rem;
+  margin-bottom: 0.2rem;
+}
+
+.nav-section .text-section {
+  font-size: 0.74rem;
+  letter-spacing: 0.16em;
+  font-weight: 700;
+  color: rgba(148, 163, 184, 0.85);
+}
+
+.nav .nav-item .nav-link i {
+  width: 18px;
+  text-align: center;
+}
+
+.nav .nav-item .nav-link p {
+  margin-bottom: 0;
 }
 </style>
