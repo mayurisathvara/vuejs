@@ -21,13 +21,13 @@
         </div>
 
         <h1 id="pricing-title" class="hero-heading mb-6">
-          <span class="text-gray-900">Call Tracking Pricing for </span>
-          <span class="text-transparent bg-clip-text bg-gradient-to-r from-orange-600 to-orange-500">Every Business</span>
+          <span class="text-gray-900">Simple Call Tracking Plans for Every </span>
+          <span class="text-transparent bg-clip-text bg-gradient-to-r from-orange-600 to-orange-500">Business</span>
         </h1>
         
         <!-- Subheading -->
         <p class="text-xl text-gray-700 max-w-4xl mx-auto mb-4 leading-relaxed">
-          Choose the plan that fits your team. Scale as you grow with <strong>flexible pricing</strong> and no hidden fees.
+          Transparent pricing with no hidden fees. Scale as you grow with <strong>full flexibility</strong> and zero lock-ins.
         </p>
         <p class="text-lg text-gray-600 max-w-3xl mx-auto mb-10">
           14-day free trial. No credit card required.
@@ -97,11 +97,12 @@
               
               <div class="mb-6">
                 <span class="text-5xl font-bold text-gray-900">
-                  ${{ billingType === 'monthly' ? plan.monthlyPrice : plan.annualPrice }}
+                  <template v-if="plan.customPrice">Custom</template>
+                  <template v-else>₹{{ billingType === 'monthly' ? plan.monthlyPrice : plan.annualPrice }}</template>
                 </span>
-                <span class="text-gray-600">/month</span>
-                <div v-if="billingType === 'annual'" class="text-sm text-green-600 font-semibold mt-1">
-                  Save ${{ (plan.monthlyPrice - plan.annualPrice) * 12 }}/year
+                <span v-if="!plan.customPrice" class="text-gray-600">/month</span>
+                <div v-if="billingType === 'annual' && !plan.customPrice" class="text-sm text-green-600 font-semibold mt-1">
+                  Save ₹{{ (plan.monthlyPrice - plan.annualPrice) * 12 }}/year
                 </div>
               </div>
 
@@ -275,13 +276,13 @@
               </svg>
             </div>
             <blockquote class="text-xl md:text-2xl text-gray-900 font-medium mb-6 italic max-w-3xl">
-              "Callytics pricing is incredibly transparent. We started with the Professional plan and saw ROI within the first month. The flexibility to scale up has been perfect for our growing business."
+              "Callytics transformed how we track leads. We moved from guesswork to data-driven decisions. Within 60 days, our call conversion rate improved by 38%. The flexible pricing makes it very accessible for businesses like ours."
             </blockquote>
             <div class="w-16 h-16 rounded-full bg-gradient-to-br from-orange-400 to-orange-600 flex items-center justify-center text-white font-bold text-xl mb-3">
-              JM
+              RK
             </div>
-            <div class="font-bold text-gray-900 text-lg">Jennifer Martinez</div>
-            <div class="text-gray-600">Director of Marketing, TechGrowth Solutions</div>
+            <div class="font-bold text-gray-900 text-lg">Rajesh Kumar</div>
+            <div class="text-gray-600">Head of Marketing, Bharat Digital Solutions</div>
           </div>
         </div>
       </div>
@@ -296,10 +297,10 @@
       
       <div class="relative max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
         <h2 id="cta-title" class="text-3xl md:text-4xl font-bold mb-6">
-          Still Have Questions?
+          Ready to Start Tracking Calls?
         </h2>
         <p class="text-xl text-orange-50 mb-8">
-          Our team is here to help you find the perfect plan for your business
+          Join 1,000+ businesses growing smarter with Callytics
         </p>
         <div class="flex flex-col sm:flex-row gap-4 justify-center mb-6">
           <router-link
@@ -307,16 +308,16 @@
             class="inline-block px-8 py-4 bg-white font-bold rounded-lg shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-105"
             style="color: #ff6b00;"
           >
-            Contact Sales
+            Start Free Trial
           </router-link>
           <router-link
             to="/features"
             class="inline-block px-8 py-4 bg-white/10 backdrop-blur-sm border-2 border-white/30 text-white font-bold rounded-lg hover:bg-white/20 transition-all duration-300"
           >
-            View All Features
+            Talk to Sales
           </router-link>
         </div>
-        <p class="text-sm text-orange-100">Join thousands of businesses tracking calls with Callytics</p>
+        <p class="text-sm text-orange-100">No credit card required · Cancel anytime · Dedicated customer support</p>
       </div>
     </section>
   </div>
@@ -331,14 +332,14 @@ const openFaqIndex = ref(null);
 const pricingPlans = [
   {
     name: 'Starter',
-    description: 'Perfect for small businesses getting started',
-    monthlyPrice: 49,
-    annualPrice: 39,
+    description: 'Perfect for small businesses & startups',
+    monthlyPrice: 2999,
+    annualPrice: 2399,
     featured: false,
     cta: 'Start Free Trial',
     features: [
-      '1 Tracking Number',
-      '500 Minutes/month',
+      '2 Tracking Numbers',
+      '1,000 Minutes/month',
       'Basic Analytics Dashboard',
       'Call History & Logs',
       'Email Support',
@@ -348,14 +349,14 @@ const pricingPlans = [
   },
   {
     name: 'Professional',
-    description: 'Most popular for growing businesses',
-    monthlyPrice: 99,
-    annualPrice: 79,
+    description: 'The go-to plan for growing businesses',
+    monthlyPrice: 7999,
+    annualPrice: 6399,
     featured: true,
     cta: 'Start Free Trial',
     features: [
-      '5 Tracking Numbers',
-      '2000 Minutes/month',
+      '10 Tracking Numbers',
+      '5,000 Minutes/month',
       'Advanced Analytics & Reports',
       'Call Recording (Unlimited)',
       'Dynamic Number Insertion',
@@ -367,23 +368,22 @@ const pricingPlans = [
   },
   {
     name: 'Enterprise',
-    description: 'For large teams with custom needs',
-    monthlyPrice: 249,
-    annualPrice: 199,
+    description: 'Built for agencies and large enterprises',
+    customPrice: true,
     featured: false,
     cta: 'Contact Sales',
     features: [
       'Unlimited Tracking Numbers',
       'Unlimited Minutes',
       'Custom Analytics & Dashboards',
-      'AI-Powered Call Analysis',
+      'AI-Powered Call Insights',
       'Advanced Call Recording',
       'White Label Option',
       'Custom Integrations',
       'Dedicated Account Manager',
       'SLA Guarantee',
       'Custom Training & Onboarding',
-      'Advanced Security Features'
+      'Compliance & Data Security'
     ]
   }
 ];
@@ -404,24 +404,24 @@ const comparisonTable = [
 
 const faqs = [
   {
-    question: 'Can I change plans later?',
-    answer: 'Yes! You can upgrade or downgrade your plan at any time. Upgrades take effect immediately, while downgrades apply at the start of your next billing cycle.'
+    question: 'Can I get virtual numbers for call tracking?',
+    answer: 'Yes! We provide dedicated virtual numbers across all major regions. These numbers are DND-compliant and ready to use instantly after sign-up.'
   },
   {
-    question: 'What happens if I exceed my minutes?',
-    answer: 'We\'ll notify you when you reach 80% of your limit. Additional minutes are charged at $0.10/minute. You can also upgrade to a higher plan at any time to get more included minutes.'
+    question: 'Which payment methods do you accept?',
+    answer: 'We accept all major payment methods — UPI (PhonePe, GPay, Paytm), Net Banking, Debit/Credit Cards, and EMI options. Annual plans can also be paid via NEFT/RTGS. All transactions are processed with proper invoices provided.'
   },
   {
-    question: 'Is there a setup fee?',
-    answer: 'No setup fees! All plans include free setup and onboarding assistance to help you get started quickly.'
+    question: 'Can I upgrade or downgrade my plan?',
+    answer: 'Absolutely! You can upgrade your plan at any time and the change takes effect immediately. Downgrades are applied at the start of your next billing cycle. There are no penalties or hidden charges for changing plans.'
   },
   {
-    question: 'Do you offer refunds?',
-    answer: 'We offer a 14-day free trial so you can test our service risk-free. If you\'re not satisfied within the first 30 days of paid service, we\'ll provide a full refund.'
+    question: 'What happens if I exceed my minute limit?',
+    answer: 'You\'ll receive an alert when you reach 80% of your monthly minutes. Additional minutes are billed at a nominal per-minute rate. You can also upgrade your plan mid-cycle to avoid any interruptions in service.'
   },
   {
-    question: 'Can I get a custom plan?',
-    answer: 'Yes! If none of our standard plans fit your needs, contact our sales team to discuss a custom enterprise solution tailored to your requirements.'
+    question: 'Is there a free trial available?',
+    answer: 'Yes! Every plan comes with a 14-day free trial — no credit card required. You get full access to all features of your chosen plan so you can experience the value before committing.'
   }
 ];
 
@@ -454,8 +454,8 @@ onMounted(() => {
       {
         "@type": "Offer",
         "name": "Starter Plan",
-        "price": "49",
-        "priceCurrency": "USD",
+        "price": "2999",
+        "priceCurrency": "INR",
         "priceValidUntil": "2026-12-31",
         "availability": "https://schema.org/InStock",
         "url": "https://callytics.com/pricing",
@@ -464,8 +464,8 @@ onMounted(() => {
       {
         "@type": "Offer",
         "name": "Professional Plan",
-        "price": "99",
-        "priceCurrency": "USD",
+        "price": "7999",
+        "priceCurrency": "INR",
         "priceValidUntil": "2026-12-31",
         "availability": "https://schema.org/InStock",
         "url": "https://callytics.com/pricing",
@@ -474,8 +474,8 @@ onMounted(() => {
       {
         "@type": "Offer",
         "name": "Enterprise Plan",
-        "price": "249",
-        "priceCurrency": "USD",
+        "price": "0",
+        "priceCurrency": "INR",
         "priceValidUntil": "2026-12-31",
         "availability": "https://schema.org/InStock",
         "url": "https://callytics.com/pricing",
@@ -519,6 +519,10 @@ onMounted(() => {
 </script>
 
 <style scoped>
+.hero-heading {
+  font-size: clamp(1.75rem, 2vw + 0.875rem, 2.5rem);
+}
+
 /* Premium Pricing Hero Styles */
 .pricing-hero-section {
   padding-top: 2rem;

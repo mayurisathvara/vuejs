@@ -19,15 +19,15 @@
           <!-- Badge/Label -->
           <div class="inline-flex items-center px-4 py-2 rounded-full bg-white/90 backdrop-blur-sm shadow-lg mb-8 animate-fade-in">
             <span class="w-2 h-2 bg-orange-500 rounded-full mr-2 animate-pulse" aria-hidden="true"></span>
-            <span class="text-sm font-semibold text-orange-600">Trusted by 2,000+ businesses worldwide</span>
+            <span class="text-sm font-semibold text-orange-600">Trusted by 2,000+ businesses across India — Real Estate, Healthcare, E-commerce & more.</span>
           </div>
           
           <h1 class="hero-heading mb-6 animate-fade-in">
-            <span class="text-gray-900">Track, Analyze & Optimize<br/>Every Business Call</span>
+            <span class="text-gray-900">Track, Analyse & Optimise<br/>Every Business Call — In Real Time</span>
           </h1>
           
-          <p class="text-xl md:text-2xl text-gray-600 mb-10 max-w-3xl mx-auto leading-relaxed">
-            Transform your phone conversations into actionable insights. Monitor calls in real-time, record conversations, and boost your marketing ROI with powerful analytics.
+          <p class="text-lg md:text-xl text-gray-600 mb-10 max-w-3xl mx-auto leading-relaxed">
+            Callytics is India's leading call tracking and analytics platform. Monitor inbound & outbound calls, record conversations, measure marketing ROI, and make data-driven decisions — all from one powerful dashboard.
           </p>
           
           <div class="flex flex-col sm:flex-row gap-4 justify-center items-center mb-8">
@@ -36,7 +36,7 @@
               class="cta-button-primary group"
               aria-label="Start your free trial"
             >
-              Start Your Free Trial
+              Start Your Free 14-Day Trial
               <svg class="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
               </svg>
@@ -46,7 +46,7 @@
               class="cta-button-secondary"
               aria-label="View pricing plans"
             >
-              View Pricing
+              View Pricing Plans
             </router-link>
           </div>
           
@@ -68,7 +68,7 @@
               <svg class="w-5 h-5 text-green-500" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
                 <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
               </svg>
-              <span>GDPR Compliant</span>
+              <span>GDPR & TRAI Compliant</span>
             </div>
           </div>
         </div>
@@ -87,10 +87,10 @@
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="text-center mb-16">
           <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-            Powerful Features for Your Business
+            Everything You Need to Track, Analyse & Grow
           </h2>
           <p class="text-xl text-gray-600 max-w-2xl mx-auto">
-            Everything you need to track, analyze, and optimize your phone calls
+            From call recording to advanced analytics — Callytics gives your business complete visibility over every phone conversation.
           </p>
         </div>
 
@@ -109,10 +109,10 @@
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="text-center mb-16">
           <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-            Powerful Admin Features Built for Performance
+            Powerful Admin Controls Built for Performance
           </h2>
           <p class="text-xl text-gray-600 max-w-3xl mx-auto">
-            Everything you need to monitor, manage, and optimize business calls from one centralized platform.
+            Monitor, manage, and optimise your business calls from one centralised platform — designed for teams of all sizes.
           </p>
         </div>
 
@@ -123,7 +123,7 @@
               Real-Time Call Analytics Dashboard
             </h3>
             <p class="text-lg text-gray-600 mb-6 leading-relaxed">
-              Monitor call performance instantly with live metrics, inbound and outbound tracking, missed call analysis, answer rate insights, and peak activity tracking.
+              Get a complete, real-time view of your call operations. Callytics' live dashboard tracks total calls, answer rates, average call duration, inbound vs outbound split, missed call alerts, and daily call volume charts — all updated instantly.
             </p>
             <ul class="space-y-3">
               <li class="flex items-start">
@@ -136,7 +136,7 @@
                 <svg class="w-6 h-6 text-orange-500 mr-3 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
-                <span class="text-gray-700">Answer Rate & Average Duration</span>
+                <span class="text-gray-700">Answer Rate & Avg Duration</span>
               </li>
               <li class="flex items-start">
                 <svg class="w-6 h-6 text-orange-500 mr-3 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
@@ -187,7 +187,7 @@
               Detailed Call Reports & Smart Filtering
             </h3>
             <p class="text-lg text-gray-600 mb-6 leading-relaxed">
-              Access complete call logs with powerful filters. Track agent activity, call status, SIM usage, and export reports for deeper analysis.
+              Access complete call logs with powerful filters. Analyse agent activity, track call status, monitor SIM usage, and export detailed reports by date, department, or agent — for deeper, more accurate business analysis.
             </p>
             <ul class="space-y-3">
               <li class="flex items-start">
@@ -231,7 +231,7 @@
               SIM & Agent Performance Insights
             </h3>
             <p class="text-lg text-gray-600 mb-6 leading-relaxed">
-              Analyze performance at the SIM and agent level with detailed duration metrics, outbound tracking, and missed call summaries.
+              Evaluate performance at both the SIM and agent level. Identify your top performers, track unanswered call patterns, analyse missed call trends, and review outbound activity — all in a structured, tabular view.
             </p>
             <ul class="space-y-3">
               <li class="flex items-start">
@@ -244,7 +244,7 @@
                 <svg class="w-6 h-6 text-orange-500 mr-3 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
-                <span class="text-gray-700">Answered Duration Metrics</span>
+                <span class="text-gray-700">Unanswered Duration Stamps</span>
               </li>
               <li class="flex items-start">
                 <svg class="w-6 h-6 text-orange-500 mr-3 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
@@ -289,10 +289,10 @@
       <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <div class="text-center mb-16">
           <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-            Manage Calls On the Go with Our Mobile App
+            Manage Your Business Calls On the Go
           </h2>
           <p class="text-xl text-gray-600 max-w-3xl mx-auto">
-            Access real-time call data, track performance, and stay updated from anywhere using the Callytics mobile app.
+            Stay connected to your call data from anywhere. The Callytics mobile app gives your team real-time visibility, instant notifications, and full dashboard access — right from your smartphone.
           </p>
         </div>
 
@@ -303,8 +303,8 @@
           <div class="flex flex-col gap-8 flex-1 order-2 lg:order-1">
             <div class="flex items-start gap-4 text-right lg:flex-row flex-row-reverse lg:flex-row-reverse">
               <div>
-                <h3 class="text-lg font-bold text-gray-900 mb-1">Real-time Notifications</h3>
-                <p class="text-sm text-gray-500">Get instant alerts for incoming calls and important events</p>
+                <h3 class="text-lg font-bold text-gray-900 mb-1">Real-Time Notifications</h3>
+                <p class="text-sm text-gray-500">Get instant alerts for missed calls, answered calls, and agent activity — so you never miss a business-critical moment.</p>
               </div>
               <div class="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 app-feature-icon">
                 <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" /></svg>
@@ -313,7 +313,7 @@
             <div class="flex items-start gap-4 text-right lg:flex-row flex-row-reverse lg:flex-row-reverse">
               <div>
                 <h3 class="text-lg font-bold text-gray-900 mb-1">Live Dashboard</h3>
-                <p class="text-sm text-gray-500">Monitor key metrics and analytics from anywhere</p>
+                <p class="text-sm text-gray-500">View live call stats, team performance, and key metrics directly from your mobile — anytime, anywhere.</p>
               </div>
               <div class="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 app-feature-icon">
                 <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg>
@@ -372,7 +372,7 @@
               </div>
               <div>
                 <h3 class="text-lg font-bold text-gray-900 mb-1">Instant Reports</h3>
-                <p class="text-sm text-gray-500">Access detailed call reports and summaries instantly</p>
+                <p class="text-sm text-gray-500">Access detailed call reports, export data, and share insights with your team — all from a single tap on your phone.</p>
               </div>
             </div>
             <div class="flex items-start gap-4">
@@ -381,7 +381,7 @@
               </div>
               <div>
                 <h3 class="text-lg font-bold text-gray-900 mb-1">Secure Access</h3>
-                <p class="text-sm text-gray-500">Protected login with secure authentication</p>
+                <p class="text-sm text-gray-500">Role-based access control with multi-factor authentication ensures your call data stays private and protected.</p>
               </div>
             </div>
           </div>
@@ -390,7 +390,7 @@
 
         <!-- Download Button -->
         <div class="text-center">
-          <p class="text-lg text-gray-600 mb-6 font-medium">Download the app now</p>
+          <p class="text-lg text-gray-600 mb-6 font-medium">Download the Callytics App — Available on Google Play. Start tracking your business calls from your mobile today.</p>
           <a 
             href="#" 
             class="inline-flex items-center px-8 py-4 bg-black text-white rounded-xl hover:bg-gray-900 transition-all duration-300 hover:shadow-xl hover:scale-105"
@@ -413,10 +413,10 @@
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <!-- Section Header -->
         <div class="text-center mb-16">
-          <span class="hiw-badge">Simple Process</span>
-          <h2 class="hiw-title">How Callytics Works</h2>
+          <span class="hiw-badge">SIMPLE 4-STEP PROCESS</span>
+          <h2 class="hiw-title">Get Started in Minutes — No Technical Setup Required</h2>
           <p class="hiw-subtitle">
-            Get started in minutes and transform your call tracking with four simple steps
+            Setting up Callytics is fast and hassle-free. Follow these four simple steps to start tracking and optimising your business calls today.
           </p>
         </div>
 
@@ -435,8 +435,8 @@
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
                 </svg>
               </div>
-              <h3 class="hiw-card-title">Register</h3>
-              <p class="hiw-card-desc">Create your Callytics account in seconds. No credit card required to get started.</p>
+              <h3 class="hiw-card-title">Register Your Account</h3>
+              <p class="hiw-card-desc">Create your free Callytics account in under 2 minutes. No credit card required — just your business email and you're ready to go.</p>
             </div>
           </div>
 
@@ -451,8 +451,8 @@
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 11l0-4m0 0l-2 2m2-2l2 2" />
                 </svg>
               </div>
-              <h3 class="hiw-card-title">Install App</h3>
-              <p class="hiw-card-desc">Download and install the Callytics app on your team's devices in just a few taps.</p>
+              <h3 class="hiw-card-title">Install the Callytics App</h3>
+              <p class="hiw-card-desc">Download and install the Callytics app on your Android device from Google Play. Works seamlessly with your existing SIM and phone setup.</p>
             </div>
           </div>
 
@@ -468,7 +468,7 @@
                 </svg>
               </div>
               <h3 class="hiw-card-title">Automatically Track Calls</h3>
-              <p class="hiw-card-desc">Every inbound and outbound call is captured automatically — no manual logging needed.</p>
+              <p class="hiw-card-desc">Once installed, Callytics starts tracking all inbound and outbound calls automatically — no manual logging, no extra steps needed.</p>
             </div>
           </div>
 
@@ -482,8 +482,8 @@
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                 </svg>
               </div>
-              <h3 class="hiw-card-title">Call Insights Dashboard</h3>
-              <p class="hiw-card-desc">View real-time analytics, performance reports, and actionable insights from your dashboard.</p>
+              <h3 class="hiw-card-title">Access Call Insights Dashboard</h3>
+              <p class="hiw-card-desc">Log in to your dashboard and start viewing real-time analytics, call reports, agent performance, and actionable business insights instantly.</p>
             </div>
           </div>
         </div>
@@ -494,10 +494,10 @@
     <section class="py-20 text-white" style="background: linear-gradient(135deg, #ff6b00 0%, #ff8c33 100%);">
       <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
         <h2 class="text-3xl md:text-4xl font-bold mb-6">
-          Ready to Transform Your Call Tracking?
+          Ready to Take Control of Your Business Calls?
         </h2>
         <p class="text-xl text-orange-50 mb-8">
-          Join thousands of businesses already using Callytics to optimize their marketing
+          Join thousands of growing businesses across India already using Callytics to track calls, improve team performance, and maximise marketing ROI.
         </p>
         <div class="flex flex-col sm:flex-row gap-4 justify-center">
           <router-link
@@ -527,23 +527,23 @@ import summaryReportImg from '@/assets/images/summary_report.png';
 
 const features = [
   {
-    title: 'Real-Time Tracking',
-    description: 'Monitor all incoming calls in real-time with detailed analytics and insights.',
+    title: 'Real-Time Call Tracking',
+    description: 'Monitor every inbound and outbound call as it happens. Get live call data, detailed activity logs, and instant performance insights across your entire team.',
     icon: '<svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>'
   },
   {
-    title: 'Call Recording',
-    description: 'Record and review calls for quality assurance and training purposes.',
+    title: 'Call Recording & Playback',
+    description: 'Record and review business calls for quality assurance, agent training, and compliance. Store, search, and replay conversations anytime from the cloud.',
     icon: '<svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" /></svg>'
   },
   {
-    title: 'Advanced Analytics',
-    description: 'Get detailed reports on call volume, duration, sources, and conversion rates.',
+    title: 'Advanced Call Analytics',
+    description: 'Unlock deep insights on call duration, source attribution, peak hours, and conversion rates. Turn raw call data into actionable business intelligence.',
     icon: '<svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg>'
   },
   {
-    title: 'Smart Integration',
-    description: 'Seamlessly integrate with your marketing tools and analytics platforms for unified data.',
+    title: 'Smart CRM & Tool Integration',
+    description: 'Seamlessly connect Callytics with your existing CRM, marketing platforms, and analytics tools for a unified view of your customer journey.',
     icon: '<svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>'
   }
 ];
@@ -607,6 +607,10 @@ const features = [
 .fade-in-up.delay-300 { transition-delay: 0.3s; }
 
 /* Premium Hero Section Styles */
+.hero-heading {
+  font-size: clamp(1.75rem, 2vw + 0.875rem, 2.5rem);
+}
+
 .hero-section {
   min-height: 75vh;
   display: flex;
