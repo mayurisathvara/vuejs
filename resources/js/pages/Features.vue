@@ -1,84 +1,131 @@
 <template>
   <div>
-    <!-- Hero Section - Premium Modern Design -->
+    <!-- Hero Section - Enhanced Two Column Layout -->
     <section class="relative text-gray-900 overflow-hidden hero-section" role="banner" aria-label="Hero section">
-      <!-- Soft Gradient Background with improved depth -->
-      <div class="absolute inset-0 hero-gradient" aria-hidden="true"></div>
-      
-      <!-- Subtle Pattern Overlay -->
-      <div class="absolute inset-0 hero-pattern" aria-hidden="true"></div>
+      <!-- Soft Gradient Background -->
+      <div class="absolute inset-0 bg-gradient-to-br from-orange-50/50 via-white to-orange-50/30" aria-hidden="true"></div>
       
       <!-- Floating Geometric Shapes for Depth -->
       <div class="absolute top-20 left-10 w-72 h-72 bg-orange-400/10 rounded-full blur-3xl animate-float" aria-hidden="true"></div>
       <div class="absolute bottom-20 right-10 w-96 h-96 bg-orange-300/10 rounded-full blur-3xl animate-float-delayed" aria-hidden="true"></div>
-      <div class="absolute top-1/2 left-1/3 w-64 h-64 bg-orange-500/5 rounded-full blur-2xl" aria-hidden="true"></div>
       
-      <!-- Content Container with shadow -->
-      <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-20">
-        <div class="text-center">
-          <!-- Badge/Label -->
-          <div class="inline-flex items-center px-4 py-2 rounded-full bg-white/90 backdrop-blur-sm shadow-lg mb-8 animate-fade-in">
-            <span class="w-2 h-2 bg-orange-500 rounded-full mr-2 animate-pulse" aria-hidden="true"></span>
-            <span class="text-sm font-semibold text-orange-600">Trusted by 2,000+ businesses across India — Real Estate, Healthcare, E-commerce & more.</span>
+      <!-- Content Container -->
+      <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-20 lg:py-24">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center">
+          
+          <!-- Left Column - Content -->
+          <div class="order-2 lg:order-1">
+            <!-- Badge/Label -->
+            <div class="inline-flex items-center px-3 py-1.5 rounded-full bg-orange-100 mb-6 animate-fade-in">
+              <svg class="w-4 h-4 text-orange-600 mr-2" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
+                <path d="M11 3a1 1 0 10-2 0v1a1 1 0 102 0V3zM15.657 5.757a1 1 0 00-1.414-1.414l-.707.707a1 1 0 001.414 1.414l.707-.707zM18 10a1 1 0 01-1 1h-1a1 1 0 110-2h1a1 1 0 011 1zM5.05 6.464A1 1 0 106.464 5.05l-.707-.707a1 1 0 00-1.414 1.414l.707.707zM5 10a1 1 0 01-1 1H3a1 1 0 110-2h1a1 1 0 011 1zM8 16v-1h4v1a2 2 0 11-4 0zM12 14c.015-.34.208-.646.477-.859a4 4 0 10-4.954 0c.27.213.462.519.476.859h4.002z" />
+              </svg>
+              <span class="text-sm font-semibold text-orange-600 uppercase tracking-wide">Powerful Features</span>
+            </div>
+            
+            <h1 class="text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 mb-6 leading-tight">
+              Everything You Need<br/>
+              to Manage &<br/>
+              <span class="text-transparent bg-clip-text bg-gradient-to-r from-orange-600 to-orange-500">Optimize Your Calls</span>
+            </h1>
+            
+            <p class="text-lg md:text-xl text-gray-600 mb-8 leading-relaxed max-w-xl">
+              From call tracking to AI-powered insights, Callytics gives you complete control over your business communication.
+            </p>
+            
+            <div class="flex flex-col sm:flex-row gap-4 mb-8">
+              <router-link
+                to="/contact"
+                class="inline-flex items-center justify-center px-8 py-4 text-white font-bold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
+                style="background: linear-gradient(135deg, #ff6b00 0%, #ff8c33 100%);"
+                aria-label="Start your free trial"
+              >
+                Start Free Trial
+                <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                </svg>
+              </router-link>
+              <button
+                @click="showDemoModal = true"
+                class="inline-flex items-center justify-center px-8 py-4 bg-white text-gray-900 font-bold rounded-xl border-2 border-gray-300 hover:border-orange-500 hover:text-orange-600 transition-all duration-300"
+                aria-label="View demo"
+              >
+                <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
+                  <path d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" />
+                </svg>
+                View Demo
+              </button>
+            </div>
+            
+            <!-- Trust Indicators -->
+            <div class="flex flex-wrap items-center gap-6 text-sm">
+              <div class="flex items-center gap-2 text-gray-700">
+                <svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                </svg>
+                <span class="font-medium">No credit card required</span>
+              </div>
+              <div class="flex items-center gap-2 text-gray-700">
+                <svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                </svg>
+                <span class="font-medium">14-day free trial</span>
+              </div>
+              <div class="flex items-center gap-2 text-gray-700">
+                <svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                </svg>
+                <span class="font-medium">GDPR & TRAI Compliant</span>
+              </div>
+            </div>
           </div>
           
-          <h1 class="hero-heading mb-6 animate-fade-in">
-            <span class="text-gray-900">Track, Analyse & Optimise<br/>Every Business Call — In Real Time</span>
-          </h1>
-          
-          <p class="text-lg md:text-xl text-gray-600 mb-10 max-w-3xl mx-auto leading-relaxed">
-            Callytics is India's leading call tracking and analytics platform. Monitor inbound & outbound calls, record conversations, measure marketing ROI, and make data-driven decisions — all from one powerful dashboard.
-          </p>
-          
-          <div class="flex flex-col sm:flex-row gap-4 justify-center items-center mb-8">
-            <router-link
-              to="/contact"
-              class="cta-button-primary group"
-              aria-label="Start your free trial"
-            >
-              Start Your Free 14-Day Trial
-              <svg class="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
-              </svg>
-            </router-link>
-            <router-link
-              to="/pricing"
-              class="cta-button-secondary"
-              aria-label="View pricing plans"
-            >
-              View Pricing Plans
-            </router-link>
-          </div>
-          
-          <!-- Trust Indicators - Enhanced -->
-          <div class="flex flex-wrap justify-center items-center gap-6 text-sm text-gray-600 font-medium">
-            <div class="flex items-center gap-2">
-              <svg class="w-5 h-5 text-green-500" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
-                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
-              </svg>
-              <span>No credit card required</span>
-            </div>
-            <div class="flex items-center gap-2">
-              <svg class="w-5 h-5 text-green-500" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
-                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
-              </svg>
-              <span>14-day free trial</span>
-            </div>
-            <div class="flex items-center gap-2">
-              <svg class="w-5 h-5 text-green-500" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
-                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
-              </svg>
-              <span>GDPR & TRAI Compliant</span>
+          <!-- Right Column - Mobile Mockups -->
+          <div class="order-1 lg:order-2 relative">
+            <div class="relative flex justify-center lg:justify-end items-center">
+              <!-- Main Hero Image with Phones -->
+              <div class="relative w-full max-w-2xl">
+                <img 
+                  :src="'/mobile_app/hero_image.png'" 
+                  alt="Callytics mobile app showing call logs and dashboard analytics"
+                  class="w-full h-auto drop-shadow-2xl"
+                  loading="eager"
+                />
+                
+                <!-- Floating Stats Card - Growth -->
+                <div class="absolute top-8 -right-4 lg:right-0 bg-white rounded-2xl shadow-xl p-4 animate-float hidden sm:block">
+                  <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center">
+                      <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                      </svg>
+                    </div>
+                    <div>
+                      <div class="text-2xl font-bold text-gray-900">18%</div>
+                      <div class="text-xs text-gray-500">Growth This Month</div>
+                    </div>
+                  </div>
+                </div>
+                
+                <!-- Floating Stats Card - Duration -->
+                <div class="absolute bottom-20 -left-4 lg:left-0 bg-white rounded-2xl shadow-xl p-4 animate-float-delayed hidden sm:block">
+                  <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-full bg-orange-100 flex items-center justify-center">
+                      <svg class="w-6 h-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                    </div>
+                    <div>
+                      <div class="text-2xl font-bold text-gray-900">4m 32s</div>
+                      <div class="text-xs text-gray-500">Avg Duration</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
+          
         </div>
-      </div>
-
-      <!-- Smooth Wave Transition with Shadow -->
-      <div class="absolute bottom-0 left-0 right-0 wave-container" aria-hidden="true">
-        <svg viewBox="0 0 1440 120" fill="none" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none" class="w-full h-24">
-          <path d="M0 120L60 105C120 90 240 60 360 45C480 30 600 30 720 37.5C840 45 960 60 1080 67.5C1200 75 1320 75 1380 75L1440 75V120H1380C1320 120 1200 120 1080 120C960 120 840 120 720 120C600 120 480 120 360 120C240 120 120 120 60 120H0Z" fill="white"/>
-        </svg>
       </div>
     </section>
 
@@ -516,6 +563,68 @@
         </div>
       </div>
     </section>
+
+    <!-- Demo Modal -->
+    <transition name="modal-fade">
+      <div v-if="showDemoModal" class="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+        <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
+          <!-- Background overlay -->
+          <div 
+            class="fixed inset-0 bg-gray-900 bg-opacity-75 transition-opacity" 
+            aria-hidden="true"
+            @click="showDemoModal = false"
+          ></div>
+
+          <!-- Modal panel -->
+          <div class="inline-block align-bottom bg-white rounded-2xl text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-4xl sm:w-full">
+            <!-- Close button -->
+            <button
+              @click="showDemoModal = false"
+              class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors z-10"
+            >
+              <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+
+            <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+              <div class="text-center">
+                <h3 class="text-2xl font-bold text-gray-900 mb-4" id="modal-title">
+                  Watch Callytics in Action
+                </h3>
+                <p class="text-gray-600 mb-6">
+                  See how Callytics helps businesses track and optimize their call operations
+                </p>
+                
+                <!-- Video placeholder - replace with actual video embed -->
+                <div class="relative bg-gray-900 rounded-xl overflow-hidden" style="padding-bottom: 56.25%;">
+                  <div class="absolute inset-0 flex items-center justify-center">
+                    <div class="text-center">
+                      <svg class="w-20 h-20 text-white mx-auto mb-4 opacity-50" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" />
+                      </svg>
+                      <p class="text-white text-lg">Demo Video Coming Soon</p>
+                      <p class="text-gray-400 text-sm mt-2">Contact us for a personalized demo</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="mt-6">
+                  <router-link
+                    to="/contact"
+                    @click="showDemoModal = false"
+                    class="inline-block px-8 py-3 text-white font-bold rounded-lg shadow-lg hover:shadow-xl transition-all duration-300"
+                    style="background: linear-gradient(135deg, #ff6b00 0%, #ff8c33 100%);"
+                  >
+                    Schedule a Live Demo
+                  </router-link>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </transition>
   </div>
 </template>
 
@@ -524,6 +633,8 @@ import { ref } from 'vue';
 import dashboardImg from '@/assets/images/dashboard.png';
 import callReportImg from '@/assets/images/call_report.png';
 import summaryReportImg from '@/assets/images/summary_report.png';
+
+const showDemoModal = ref(false);
 
 const features = [
   {
@@ -928,6 +1039,32 @@ const features = [
     opacity: 1;
     animation: none;
   }
+}
+
+/* Modal Transitions */
+.modal-fade-enter-active,
+.modal-fade-leave-active {
+  transition: opacity 0.3s ease;
+}
+
+.modal-fade-enter-from,
+.modal-fade-leave-to {
+  opacity: 0;
+}
+
+.modal-fade-enter-active .inline-block,
+.modal-fade-leave-active .inline-block {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.modal-fade-enter-from .inline-block {
+  transform: scale(0.95) translateY(20px);
+  opacity: 0;
+}
+
+.modal-fade-leave-to .inline-block {
+  transform: scale(0.95) translateY(20px);
+  opacity: 0;
 }
 </style>
 
