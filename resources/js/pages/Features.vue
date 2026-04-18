@@ -19,15 +19,15 @@
           <!-- Badge/Label -->
           <div class="inline-flex items-center px-4 py-2 rounded-full bg-white/90 backdrop-blur-sm shadow-lg mb-8 animate-fade-in">
             <span class="w-2 h-2 bg-orange-500 rounded-full mr-2 animate-pulse" aria-hidden="true"></span>
-            <span class="text-sm font-semibold text-orange-600">Trusted by 2,000+ businesses across India — Real Estate, Healthcare, E-commerce & more.</span>
+            <span class="text-sm font-semibold text-orange-600">Trusted by 2,000+ businesses worldwide</span>
           </div>
           
           <h1 class="hero-heading mb-6 animate-fade-in">
-            <span class="text-gray-900">Track, Analyse & Optimise<br/>Every Business Call — In Real Time</span>
+            <span class="text-gray-900">Track, Analyze & Optimize<br/>Every Business Call</span>
           </h1>
           
-          <p class="text-lg md:text-xl text-gray-600 mb-10 max-w-3xl mx-auto leading-relaxed">
-            Callytics is India's leading call tracking and analytics platform. Monitor inbound & outbound calls, record conversations, measure marketing ROI, and make data-driven decisions — all from one powerful dashboard.
+          <p class="text-xl md:text-2xl text-gray-600 mb-10 max-w-3xl mx-auto leading-relaxed">
+            Transform your phone conversations into actionable insights. Monitor calls in real-time, record conversations, and boost your marketing ROI with powerful analytics.
           </p>
           
           <div class="flex flex-col sm:flex-row gap-4 justify-center items-center mb-8">
@@ -36,7 +36,7 @@
               class="cta-button-primary group"
               aria-label="Start your free trial"
             >
-              Start Your Free 14-Day Trial
+              Start Your Free Trial
               <svg class="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
               </svg>
@@ -46,7 +46,7 @@
               class="cta-button-secondary"
               aria-label="View pricing plans"
             >
-              View Pricing Plans
+              View Pricing
             </router-link>
           </div>
           
@@ -68,7 +68,7 @@
               <svg class="w-5 h-5 text-green-500" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
                 <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
               </svg>
-              <span>GDPR & TRAI Compliant</span>
+              <span>GDPR Compliant</span>
             </div>
           </div>
         </div>
@@ -87,10 +87,10 @@
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="text-center mb-16">
           <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-            Everything You Need to Track, Analyse & Grow
+            Powerful Features for Your Business
           </h2>
           <p class="text-xl text-gray-600 max-w-2xl mx-auto">
-            From call recording to advanced analytics — Callytics gives your business complete visibility over every phone conversation.
+            Everything you need to track, analyze, and optimize your phone calls
           </p>
         </div>
 
@@ -109,10 +109,10 @@
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="text-center mb-16">
           <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-            Powerful Admin Controls Built for Performance
+            Powerful Admin Features Built for Performance
           </h2>
           <p class="text-xl text-gray-600 max-w-3xl mx-auto">
-            Monitor, manage, and optimise your business calls from one centralised platform — designed for teams of all sizes.
+            Everything you need to monitor, manage, and optimize business calls from one centralized platform.
           </p>
         </div>
 
@@ -123,7 +123,7 @@
               Real-Time Call Analytics Dashboard
             </h3>
             <p class="text-lg text-gray-600 mb-6 leading-relaxed">
-              Get a complete, real-time view of your call operations. Callytics' live dashboard tracks total calls, answer rates, average call duration, inbound vs outbound split, missed call alerts, and daily call volume charts — all updated instantly.
+              Monitor call performance instantly with live metrics, inbound and outbound tracking, missed call analysis, answer rate insights, and peak activity tracking.
             </p>
             <ul class="space-y-3">
               <li class="flex items-start">
@@ -136,7 +136,7 @@
                 <svg class="w-6 h-6 text-orange-500 mr-3 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
-                <span class="text-gray-700">Answer Rate & Avg Duration</span>
+                <span class="text-gray-700">Answer Rate & Average Duration</span>
               </li>
               <li class="flex items-start">
                 <svg class="w-6 h-6 text-orange-500 mr-3 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
@@ -187,7 +187,7 @@
               Detailed Call Reports & Smart Filtering
             </h3>
             <p class="text-lg text-gray-600 mb-6 leading-relaxed">
-              Access complete call logs with powerful filters. Analyse agent activity, track call status, monitor SIM usage, and export detailed reports by date, department, or agent — for deeper, more accurate business analysis.
+              Access complete call logs with powerful filters. Track agent activity, call status, SIM usage, and export reports for deeper analysis.
             </p>
             <ul class="space-y-3">
               <li class="flex items-start">
@@ -231,7 +231,7 @@
               SIM & Agent Performance Insights
             </h3>
             <p class="text-lg text-gray-600 mb-6 leading-relaxed">
-              Evaluate performance at both the SIM and agent level. Identify your top performers, track unanswered call patterns, analyse missed call trends, and review outbound activity — all in a structured, tabular view.
+              Analyze performance at the SIM and agent level with detailed duration metrics, outbound tracking, and missed call summaries.
             </p>
             <ul class="space-y-3">
               <li class="flex items-start">
@@ -244,7 +244,7 @@
                 <svg class="w-6 h-6 text-orange-500 mr-3 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
-                <span class="text-gray-700">Unanswered Duration Stamps</span>
+                <span class="text-gray-700">Answered Duration Metrics</span>
               </li>
               <li class="flex items-start">
                 <svg class="w-6 h-6 text-orange-500 mr-3 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
@@ -289,47 +289,47 @@
       <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <div class="text-center mb-16">
           <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-            Manage Your Business Calls On the Go
+            Manage Calls On the Go with Our Mobile App
           </h2>
           <p class="text-xl text-gray-600 max-w-3xl mx-auto">
-            Stay connected to your call data from anywhere. The Callytics mobile app gives your team real-time visibility, instant notifications, and full dashboard access — right from your smartphone.
+            Access real-time call data, track performance, and stay updated from anywhere using the Callytics mobile app.
           </p>
         </div>
 
         <!-- Mobile App Showcase -->
-        <div class="flex flex-col lg:flex-row items-center gap-12 lg:gap-8 mb-10">
+        <div class="flex flex-col lg:flex-row items-center gap-12 lg:gap-8 mb-16">
           
           <!-- Left Features -->
           <div class="flex flex-col gap-8 flex-1 order-2 lg:order-1">
             <div class="flex items-start gap-4 text-right lg:flex-row flex-row-reverse lg:flex-row-reverse">
               <div>
-                <h3 class="text-lg font-bold text-gray-900 mb-1">Real-Time Notifications</h3>
-                <p class="text-sm text-gray-500">Get instant alerts for missed calls, answered calls, and agent activity — so you never miss a business-critical moment.</p>
+                <h3 class="text-lg font-bold text-gray-900 mb-1">Real-time Notifications</h3>
+                <p class="text-sm text-gray-500">Get instant alerts for incoming calls and important events</p>
               </div>
-              <div class="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 app-feature-icon">
+              <div class="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0" style="background: linear-gradient(135deg, #ff6b00 0%, #ff8c33 100%);">
                 <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" /></svg>
               </div>
             </div>
             <div class="flex items-start gap-4 text-right lg:flex-row flex-row-reverse lg:flex-row-reverse">
               <div>
                 <h3 class="text-lg font-bold text-gray-900 mb-1">Live Dashboard</h3>
-                <p class="text-sm text-gray-500">View live call stats, team performance, and key metrics directly from your mobile — anytime, anywhere.</p>
+                <p class="text-sm text-gray-500">Monitor key metrics and analytics from anywhere</p>
               </div>
-              <div class="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 app-feature-icon">
+              <div class="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0" style="background: linear-gradient(135deg, #ff6b00 0%, #ff8c33 100%);">
                 <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg>
               </div>
             </div>
           </div>
 
           <!-- Center Phone Screenshots -->
-          <div class="flex items-end justify-center gap-2 sm:gap-3 md:gap-4 flex-shrink-0 order-1 lg:order-2">
+          <div class="flex items-end justify-center gap-4 md:gap-6 flex-shrink-0 order-1 lg:order-2">
             <!-- Call Logs -->
             <div class="flex flex-col items-center group app-screen-card">
               <div class="relative w-36 sm:w-40 md:w-44">
                 <img 
                   :src="'/mobile_app/call_logs.png'" 
                   alt="Callytics mobile app call logs screen"
-                  class="w-full h-auto app-phone-img transition-all duration-500 group-hover:-translate-y-2 group-hover:app-phone-img-hover"
+                  class="w-full h-auto drop-shadow-2xl transition-transform duration-500 group-hover:-translate-y-2"
                   loading="lazy"
                 />
               </div>
@@ -338,12 +338,12 @@
 
             <!-- Dashboard (Center - Larger) -->
             <div class="flex flex-col items-center group app-screen-card -mt-4">
-              <div class="relative w-44 sm:w-48 md:w-56 app-center-phone">
+              <div class="relative w-44 sm:w-48 md:w-56">
                 <div class="absolute -inset-4 rounded-[2.5rem] opacity-20 group-hover:opacity-40 transition-opacity duration-500 blur-2xl" style="background: linear-gradient(135deg, #ff6b00 0%, #ff8c33 100%);"></div>
                 <img 
                   :src="'/mobile_app/dashboard.png'" 
                   alt="Callytics mobile app dashboard"
-                  class="w-full h-auto relative z-10 app-phone-img transition-all duration-500 group-hover:-translate-y-3 group-hover:app-phone-img-hover"
+                  class="w-full h-auto relative z-10 drop-shadow-2xl transition-transform duration-500 group-hover:-translate-y-3"
                   loading="lazy"
                 />
               </div>
@@ -356,7 +356,7 @@
                 <img 
                   :src="'/mobile_app/analytics.png'" 
                   alt="Callytics mobile app analytics screen"
-                  class="w-full h-auto app-phone-img transition-all duration-500 group-hover:-translate-y-2 group-hover:app-phone-img-hover"
+                  class="w-full h-auto drop-shadow-2xl transition-transform duration-500 group-hover:-translate-y-2"
                   loading="lazy"
                 />
               </div>
@@ -367,21 +367,21 @@
           <!-- Right Features -->
           <div class="flex flex-col gap-8 flex-1 order-3">
             <div class="flex items-start gap-4">
-              <div class="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 app-feature-icon">
+              <div class="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0" style="background: linear-gradient(135deg, #ff6b00 0%, #ff8c33 100%);">
                 <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
               </div>
               <div>
                 <h3 class="text-lg font-bold text-gray-900 mb-1">Instant Reports</h3>
-                <p class="text-sm text-gray-500">Access detailed call reports, export data, and share insights with your team — all from a single tap on your phone.</p>
+                <p class="text-sm text-gray-500">Access detailed call reports and summaries instantly</p>
               </div>
             </div>
             <div class="flex items-start gap-4">
-              <div class="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 app-feature-icon">
+              <div class="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0" style="background: linear-gradient(135deg, #ff6b00 0%, #ff8c33 100%);">
                 <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
               </div>
               <div>
                 <h3 class="text-lg font-bold text-gray-900 mb-1">Secure Access</h3>
-                <p class="text-sm text-gray-500">Role-based access control with multi-factor authentication ensures your call data stays private and protected.</p>
+                <p class="text-sm text-gray-500">Protected login with secure authentication</p>
               </div>
             </div>
           </div>
@@ -390,7 +390,7 @@
 
         <!-- Download Button -->
         <div class="text-center">
-          <p class="text-lg text-gray-600 mb-6 font-medium">Download the Callytics App — Available on Google Play. Start tracking your business calls from your mobile today.</p>
+          <p class="text-lg text-gray-600 mb-6 font-medium">Download the app now</p>
           <a 
             href="#" 
             class="inline-flex items-center px-8 py-4 bg-black text-white rounded-xl hover:bg-gray-900 transition-all duration-300 hover:shadow-xl hover:scale-105"
@@ -412,31 +412,39 @@
     <section class="hiw-section" id="how-it-works" role="region" aria-label="How Callytics Works">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <!-- Section Header -->
-        <div class="text-center mb-16">
-          <span class="hiw-badge">SIMPLE 4-STEP PROCESS</span>
-          <h2 class="hiw-title">Get Started in Minutes — No Technical Setup Required</h2>
+        <div class="text-center mb-20">
+          <span class="hiw-badge">Simple Process</span>
+          <h2 class="hiw-title">How Callytics Works</h2>
           <p class="hiw-subtitle">
-            Setting up Callytics is fast and hassle-free. Follow these four simple steps to start tracking and optimising your business calls today.
+            Get started in minutes and transform your call tracking with four simple steps
           </p>
         </div>
 
-        <!-- Steps -->
-        <div class="hiw-steps">
-          <!-- Connector line (Desktop) -->
-          <div class="hiw-connector-line" aria-hidden="true"></div>
+        <!-- Connector dots (Desktop) -->
+        <div class="hidden lg:flex items-center justify-center max-w-2xl mx-auto mb-14" aria-hidden="true">
+          <div class="hiw-dot"></div>
+          <div class="flex-1 hiw-dash"></div>
+          <div class="hiw-dot"></div>
+          <div class="flex-1 hiw-dash"></div>
+          <div class="hiw-dot"></div>
+          <div class="flex-1 hiw-dash"></div>
+          <div class="hiw-dot"></div>
+        </div>
 
+        <!-- Steps Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           <!-- Step 1 -->
           <div class="hiw-card-enter hiw-delay-1">
             <div class="group hiw-card">
               <div class="hiw-card-top-border" aria-hidden="true"></div>
               <div class="hiw-num"><span>1</span></div>
-              <div class="hiw-icon">
+              <div class="hiw-icon group-hover:hiw-icon-hover">
                 <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
                 </svg>
               </div>
-              <h3 class="hiw-card-title">Register Your Account</h3>
-              <p class="hiw-card-desc">Create your free Callytics account in under 2 minutes. No credit card required — just your business email and you're ready to go.</p>
+              <h3 class="hiw-card-title">Register</h3>
+              <p class="hiw-card-desc">Create your Callytics account in seconds. No credit card required to get started.</p>
             </div>
           </div>
 
@@ -445,14 +453,14 @@
             <div class="group hiw-card">
               <div class="hiw-card-top-border" aria-hidden="true"></div>
               <div class="hiw-num"><span>2</span></div>
-              <div class="hiw-icon">
+              <div class="hiw-icon group-hover:hiw-icon-hover">
                 <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 11l0-4m0 0l-2 2m2-2l2 2" />
                 </svg>
               </div>
-              <h3 class="hiw-card-title">Install the Callytics App</h3>
-              <p class="hiw-card-desc">Download and install the Callytics app on your Android device from Google Play. Works seamlessly with your existing SIM and phone setup.</p>
+              <h3 class="hiw-card-title">Install App</h3>
+              <p class="hiw-card-desc">Download and install the Callytics app on your team's devices in just a few taps.</p>
             </div>
           </div>
 
@@ -461,14 +469,14 @@
             <div class="group hiw-card">
               <div class="hiw-card-top-border" aria-hidden="true"></div>
               <div class="hiw-num"><span>3</span></div>
-              <div class="hiw-icon">
+              <div class="hiw-icon group-hover:hiw-icon-hover">
                 <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 3h6m0 0v6m0-6l-7 7" />
                 </svg>
               </div>
               <h3 class="hiw-card-title">Automatically Track Calls</h3>
-              <p class="hiw-card-desc">Once installed, Callytics starts tracking all inbound and outbound calls automatically — no manual logging, no extra steps needed.</p>
+              <p class="hiw-card-desc">Every inbound and outbound call is captured automatically — no manual logging needed.</p>
             </div>
           </div>
 
@@ -477,13 +485,13 @@
             <div class="group hiw-card">
               <div class="hiw-card-top-border" aria-hidden="true"></div>
               <div class="hiw-num"><span>4</span></div>
-              <div class="hiw-icon">
+              <div class="hiw-icon group-hover:hiw-icon-hover">
                 <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                 </svg>
               </div>
-              <h3 class="hiw-card-title">Access Call Insights Dashboard</h3>
-              <p class="hiw-card-desc">Log in to your dashboard and start viewing real-time analytics, call reports, agent performance, and actionable business insights instantly.</p>
+              <h3 class="hiw-card-title">Call Insights Dashboard</h3>
+              <p class="hiw-card-desc">View real-time analytics, performance reports, and actionable insights from your dashboard.</p>
             </div>
           </div>
         </div>
@@ -494,10 +502,10 @@
     <section class="py-20 text-white" style="background: linear-gradient(135deg, #ff6b00 0%, #ff8c33 100%);">
       <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
         <h2 class="text-3xl md:text-4xl font-bold mb-6">
-          Ready to Take Control of Your Business Calls?
+          Ready to Transform Your Call Tracking?
         </h2>
         <p class="text-xl text-orange-50 mb-8">
-          Join thousands of growing businesses across India already using Callytics to track calls, improve team performance, and maximise marketing ROI.
+          Join thousands of businesses already using Callytics to optimize their marketing
         </p>
         <div class="flex flex-col sm:flex-row gap-4 justify-center">
           <router-link
@@ -527,23 +535,23 @@ import summaryReportImg from '@/assets/images/summary_report.png';
 
 const features = [
   {
-    title: 'Real-Time Call Tracking',
-    description: 'Monitor every inbound and outbound call as it happens. Get live call data, detailed activity logs, and instant performance insights across your entire team.',
+    title: 'Real-Time Tracking',
+    description: 'Monitor all incoming calls in real-time with detailed analytics and insights.',
     icon: '<svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>'
   },
   {
-    title: 'Call Recording & Playback',
-    description: 'Record and review business calls for quality assurance, agent training, and compliance. Store, search, and replay conversations anytime from the cloud.',
+    title: 'Call Recording',
+    description: 'Record and review calls for quality assurance and training purposes.',
     icon: '<svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" /></svg>'
   },
   {
-    title: 'Advanced Call Analytics',
-    description: 'Unlock deep insights on call duration, source attribution, peak hours, and conversion rates. Turn raw call data into actionable business intelligence.',
+    title: 'Advanced Analytics',
+    description: 'Get detailed reports on call volume, duration, sources, and conversion rates.',
     icon: '<svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg>'
   },
   {
-    title: 'Smart CRM & Tool Integration',
-    description: 'Seamlessly connect Callytics with your existing CRM, marketing platforms, and analytics tools for a unified view of your customer journey.',
+    title: 'Smart Integration',
+    description: 'Seamlessly integrate with your marketing tools and analytics platforms for unified data.',
     icon: '<svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>'
   }
 ];
@@ -607,10 +615,6 @@ const features = [
 .fade-in-up.delay-300 { transition-delay: 0.3s; }
 
 /* Premium Hero Section Styles */
-.hero-heading {
-  font-size: clamp(1.75rem, 2vw + 0.875rem, 2.5rem);
-}
-
 .hero-section {
   min-height: 75vh;
   display: flex;
@@ -621,37 +625,6 @@ const features = [
 /* Mobile App Screenshot Cards */
 .app-screen-card {
   transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-/* Phone image premium shadow */
-.app-phone-img {
-  filter: drop-shadow(0 8px 20px rgba(0, 0, 0, 0.12)) drop-shadow(0 4px 8px rgba(0, 0, 0, 0.08));
-}
-
-.group:hover .app-phone-img {
-  filter: drop-shadow(0 12px 28px rgba(0, 0, 0, 0.16)) drop-shadow(0 6px 12px rgba(0, 0, 0, 0.1));
-}
-
-/* Center phone prominence */
-.app-center-phone {
-  transform: scale(1.05);
-  transition: transform 0.4s ease;
-}
-
-.group:hover .app-center-phone {
-  transform: scale(1.07);
-}
-
-/* Feature icon containers */
-.app-feature-icon {
-  background: linear-gradient(135deg, #ff6b00 0%, #ff8c33 100%);
-  border-radius: 0.75rem;
-  box-shadow: 0 2px 8px rgba(255, 107, 0, 0.2), 0 1px 3px rgba(0, 0, 0, 0.06);
-  transition: box-shadow 0.3s ease;
-}
-
-.app-feature-icon:hover {
-  box-shadow: 0 4px 14px rgba(255, 107, 0, 0.3), 0 2px 4px rgba(0, 0, 0, 0.08);
 }
 
 .hero-gradient {
@@ -718,28 +691,28 @@ const features = [
 
 /* ===== How Callytics Works ===== */
 .hiw-section {
-  padding: 6rem 0;
-  background: linear-gradient(180deg, #ffffff 0%, #f9fafb 50%, #ffffff 100%);
+  padding: 6.5rem 0;
+  background: #fafafa;
 }
 
-/* Badge */
+/* Badge — clean pill, not loud */
 .hiw-badge {
   display: inline-block;
-  padding: 0.35rem 1.1rem;
+  padding: 0.4rem 1.25rem;
   border-radius: 9999px;
-  font-size: 0.75rem;
-  font-weight: 600;
-  letter-spacing: 0.06em;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
   text-transform: uppercase;
-  color: #ea580c;
-  margin-bottom: 1rem;
-  background: #fff7ed;
-  border: 1px solid #fed7aa;
+  color: #fff;
+  margin-bottom: 1.25rem;
+  background: linear-gradient(135deg, #ff6b00, #ff8c33);
+  box-shadow: 0 3px 10px rgba(255, 107, 0, 0.2);
 }
 
-/* Title */
+/* Title — bold, editorial */
 .hiw-title {
-  font-size: clamp(1.75rem, 4vw, 2.5rem);
+  font-size: clamp(2rem, 5vw, 3rem);
   font-weight: 800;
   color: #111827;
   margin-bottom: 0.75rem;
@@ -749,83 +722,58 @@ const features = [
 
 /* Subtitle */
 .hiw-subtitle {
-  font-size: 1.05rem;
+  font-size: 1.1rem;
   color: #6b7280;
-  max-width: 34rem;
+  max-width: 36rem;
   margin: 0 auto;
   line-height: 1.7;
 }
 
-/* Steps container — 4-col grid with connector line behind */
-.hiw-steps {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 1.5rem;
-  position: relative;
+/* Connector — minimal dots + thin dashes */
+.hiw-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #e5e7eb;
+  border: 2px solid #d1d5db;
+  flex-shrink: 0;
 }
 
-@media (min-width: 768px) {
-  .hiw-steps {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 1.75rem;
-  }
+.hiw-dash {
+  height: 1px;
+  background: repeating-linear-gradient(
+    90deg,
+    #d1d5db 0px,
+    #d1d5db 6px,
+    transparent 6px,
+    transparent 12px
+  );
 }
 
-@media (min-width: 1024px) {
-  .hiw-steps {
-    grid-template-columns: repeat(4, 1fr);
-    gap: 2rem;
-  }
-}
-
-/* Horizontal connector line — sits behind cards at step-number height */
-.hiw-connector-line {
-  display: none;
-}
-
-@media (min-width: 1024px) {
-  .hiw-connector-line {
-    display: block;
-    position: absolute;
-    top: 3.25rem; /* vertically aligns with center of step number */
-    left: calc(12.5% + 1.5rem);
-    right: calc(12.5% + 1.5rem);
-    height: 2px;
-    background: repeating-linear-gradient(
-      90deg,
-      #e5e7eb 0px,
-      #e5e7eb 6px,
-      transparent 6px,
-      transparent 12px
-    );
-    z-index: 0;
-  }
-}
-
-/* Card */
+/* Card — clean white, subtle shadow */
 .hiw-card {
   position: relative;
-  z-index: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
   text-align: center;
-  padding: 2.5rem 1.5rem 2rem;
+  padding: 2.25rem 1.75rem 2rem;
   border-radius: 1rem;
   background: #ffffff;
-  border: 1px solid #f3f4f6;
-  box-shadow: 0 1px 2px rgba(0,0,0,0.03), 0 4px 16px rgba(0,0,0,0.04);
-  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 4px 24px rgba(0,0,0,0.04);
+  transition: all 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   overflow: hidden;
+  cursor: default;
 }
 
 .hiw-card:hover {
-  transform: translateY(-6px);
-  box-shadow: 0 4px 12px rgba(0,0,0,0.05), 0 16px 40px rgba(0,0,0,0.07);
+  transform: translateY(-8px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.06), 0 12px 40px rgba(0,0,0,0.08);
   border-color: #e5e7eb;
 }
 
-/* Orange top stripe — hidden, slides in on hover */
+/* Hidden orange top stripe — reveals on hover */
 .hiw-card-top-border {
   position: absolute;
   top: 0;
@@ -834,7 +782,6 @@ const features = [
   height: 3px;
   background: linear-gradient(90deg, #ff6b00, #ff8c33);
   transform: scaleX(0);
-  transform-origin: left;
   transition: transform 0.35s ease;
 }
 
@@ -842,70 +789,75 @@ const features = [
   transform: scaleX(1);
 }
 
-/* Step number — sits on the connector line */
+/* Step number — orange circle with soft ring */
 .hiw-num {
-  width: 2.75rem;
-  height: 2.75rem;
+  width: 3rem;
+  height: 3rem;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-bottom: 1rem;
+  margin-bottom: 1.25rem;
   background: linear-gradient(135deg, #ff6b00, #ff8c33);
-  box-shadow: 0 0 0 4px #fff, 0 0 0 6px rgba(255, 107, 0, 0.12), 0 2px 8px rgba(255, 107, 0, 0.18);
+  box-shadow: 0 0 0 5px rgba(255, 107, 0, 0.08), 0 2px 8px rgba(255, 107, 0, 0.2);
   transition: box-shadow 0.3s ease;
 }
 
 .hiw-num span {
-  font-size: 1.05rem;
+  font-size: 1.15rem;
   font-weight: 800;
   color: #fff;
   line-height: 1;
 }
 
 .hiw-card:hover .hiw-num {
-  box-shadow: 0 0 0 4px #fff, 0 0 0 8px rgba(255, 107, 0, 0.15), 0 4px 14px rgba(255, 107, 0, 0.25);
+  box-shadow: 0 0 0 6px rgba(255, 107, 0, 0.12), 0 0 0 12px rgba(255, 107, 0, 0.05), 0 3px 12px rgba(255, 107, 0, 0.25);
 }
 
-/* Icon — light peach container, orange icon */
+/* Icon — light peach bg, orange stroke */
 .hiw-icon {
-  width: 3.5rem;
-  height: 3.5rem;
-  border-radius: 0.75rem;
+  width: 3.75rem;
+  height: 3.75rem;
+  border-radius: 0.875rem;
   display: flex;
   align-items: center;
   justify-content: center;
   margin-bottom: 1.25rem;
   background: #FFF4EC;
-  color: #ea580c;
+  color: #e8590c;
   transition: all 0.3s ease;
 }
 
 .hiw-card:hover .hiw-icon {
-  background: #ffedd5;
-  color: #c2410c;
-  transform: scale(1.05);
+  background: linear-gradient(135deg, #ff6b00, #ff8c33);
+  color: #fff;
+  transform: scale(1.08);
+  box-shadow: 0 4px 14px rgba(255, 107, 0, 0.2);
+}
+
+.hiw-icon svg {
+  color: inherit;
 }
 
 /* Card text */
 .hiw-card-title {
-  font-size: 1.05rem;
+  font-size: 1.1rem;
   font-weight: 700;
   color: #111827;
-  margin-bottom: 0.4rem;
+  margin-bottom: 0.5rem;
 }
 
 .hiw-card-desc {
   font-size: 0.85rem;
   line-height: 1.65;
-  color: #6b7280;
+  color: #9ca3af;
 }
 
 /* Staggered entrance */
 @keyframes hiw-slide-up {
   from {
     opacity: 0;
-    transform: translateY(24px);
+    transform: translateY(28px);
   }
   to {
     opacity: 1;
@@ -915,7 +867,7 @@ const features = [
 
 .hiw-card-enter {
   opacity: 0;
-  animation: hiw-slide-up 0.5s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  animation: hiw-slide-up 0.55s cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
 
 .hiw-delay-1 { animation-delay: 0.1s; }

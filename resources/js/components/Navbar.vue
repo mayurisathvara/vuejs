@@ -4,7 +4,7 @@
       <div class="flex justify-between items-center h-16">
         <!-- Logo -->
         <router-link to="/" class="flex items-center">
-          <img src="../assets/images/logo.png" alt="Callytics" class="h-8" />
+          <img src="../assets/images/logo.png" alt="Callytics" class="h-10" />
         </router-link>
 
         <!-- Desktop Navigation -->

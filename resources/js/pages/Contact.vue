@@ -13,24 +13,19 @@
       <div class="absolute bottom-10 right-10 w-56 h-56 bg-orange-300/10 rounded-full blur-3xl animate-float-delayed" aria-hidden="true"></div>
       
       <!-- Content Container -->
-      <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 text-center">
-        <!-- Badge -->
-        <div class="inline-flex items-center px-4 py-2 rounded-full bg-white/90 backdrop-blur-sm shadow-lg mb-8">
-          <span class="w-2 h-2 bg-orange-500 rounded-full mr-2 animate-pulse" aria-hidden="true"></span>
-          <span class="text-sm font-semibold text-orange-600">Get in Touch</span>
-        </div>
-
-        <h1 id="contact-title" class="hero-heading mb-6">
-          <span class="text-gray-900">Talk to Our </span>
-          <span class="text-transparent bg-clip-text bg-gradient-to-r from-orange-600 to-orange-500">Call Tracking Experts</span>
+      <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 text-center">
+        <h1 id="contact-title" class="hero-heading mb-6 text-gray-900">
+          Let's Talk About Your Call Tracking Needs
         </h1>
         
         <!-- Subheading -->
-        <p class="text-xl text-gray-700 max-w-4xl mx-auto mb-4 leading-relaxed">
-          Have questions about pricing, features, or getting started? Our team is ready to help you find the right plan for your business — fast response guaranteed.
+        <p class="text-xl md:text-2xl text-gray-600 max-w-3xl mx-auto mb-6 leading-relaxed">
+          Sales, support, or product questions — our experts are ready to help.
         </p>
-        <p class="text-lg text-gray-600 max-w-3xl mx-auto">
-          Response within 24 hours. Secure communication. Real experts.
+        
+        <!-- Trust Line -->
+        <p class="text-sm md:text-base text-gray-500 font-medium">
+          Fast response. Secure communication. Real experts.
         </p>
       </div>
     </section>
@@ -66,8 +61,8 @@
             </div>
             
             <div class="bg-white rounded-2xl shadow-xl p-8 md:p-12">
-              <h2 id="form-title" class="text-3xl font-bold text-gray-900 mb-2">Send Us a Message</h2>
-              <p class="text-gray-600 mb-8">Fill out the form below and our team will get back to you within 24 business hours.</p>
+              <h2 id="form-title" class="text-3xl font-bold text-gray-900 mb-2">Send us a Message</h2>
+              <p class="text-gray-600 mb-8">Fill out the form below and our team will get back to you within 24 hours.</p>
             
             <form @submit.prevent="handleSubmit" class="space-y-7" novalidate aria-label="Contact form">
               <!-- Name -->
@@ -87,7 +82,7 @@
                   :aria-describedby="errors.name ? 'name-error' : undefined"
                   class="w-full px-4 py-3 border border-gray-300 rounded-lg outline-none transition focus:border-orange-500 focus:ring-2 focus:ring-orange-200"
                   :class="{ 'border-red-500 focus:border-red-500 focus:ring-red-200': errors.name }"
-                  placeholder="Your Full Name"
+                  placeholder="John Doe"
                 />
                 <p v-if="errors.name" id="name-error" class="text-red-500 text-sm mt-1" role="alert">{{ errors.name }}</p>
               </div>
@@ -109,7 +104,7 @@
                   :aria-describedby="errors.email ? 'email-error' : undefined"
                   class="w-full px-4 py-3 border border-gray-300 rounded-lg outline-none transition focus:border-orange-500 focus:ring-2 focus:ring-orange-200"
                   :class="{ 'border-red-500 focus:border-red-500 focus:ring-red-200': errors.email }"
-                  placeholder="your@email.com"
+                  placeholder="john@example.com"
                 />
                 <p v-if="errors.email" id="email-error" class="text-red-500 text-sm mt-1" role="alert">{{ errors.email }}</p>
               </div>
@@ -126,7 +121,7 @@
                   name="phone"
                   aria-label="Phone number optional"
                   class="w-full px-4 py-3 border border-gray-300 rounded-lg outline-none transition focus:border-orange-500 focus:ring-2 focus:ring-orange-200"
-                  placeholder="+91 98765 43210"
+                  placeholder="+1 (555) 123-4567"
                 />
               </div>
 
@@ -142,7 +137,7 @@
                   name="company"
                   aria-label="Company name optional"
                   class="w-full px-4 py-3 border border-gray-300 rounded-lg outline-none transition focus:border-orange-500 focus:ring-2 focus:ring-orange-200"
-                  placeholder="Your Company Name"
+                  placeholder="Your Company"
                 />
               </div>
 
@@ -164,11 +159,10 @@
                   :class="{ 'border-red-500 focus:border-red-500 focus:ring-red-200': errors.subject }"
                 >
                   <option value="">Select a subject</option>
-                  <option value="general">General Enquiry</option>
-                  <option value="sales">Sales & Pricing</option>
+                  <option value="sales">Sales Inquiry / Talk to Sales</option>
+                  <option value="demo">Request a Demo</option>
                   <option value="support">Technical Support</option>
-                  <option value="feature">Feature Request</option>
-                  <option value="partnership">Partnership</option>
+                  <option value="partnership">Partnership Opportunity</option>
                   <option value="other">Other</option>
                 </select>
                 <p v-if="errors.subject" id="subject-error" class="text-red-500 text-sm mt-1" role="alert">{{ errors.subject }}</p>
@@ -191,7 +185,7 @@
                   :aria-describedby="errors.message ? 'message-error' : undefined"
                   class="w-full px-4 py-3 border border-gray-300 rounded-lg outline-none transition resize-none focus:border-orange-500 focus:ring-2 focus:ring-orange-200"
                   :class="{ 'border-red-500 focus:border-red-500 focus:ring-red-200': errors.message }"
-                  placeholder="Tell us about your business and how we can help..."
+                  placeholder="Tell us about your needs..."
                 ></textarea>
                 <p v-if="errors.message" id="message-error" class="text-red-500 text-sm mt-1" role="alert">{{ errors.message }}</p>
                 <p class="text-xs text-gray-500 mt-1">Minimum 10 characters</p>
@@ -221,7 +215,7 @@
                   <svg class="w-4 h-4 mr-1 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
                     <path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd" />
                   </svg>
-                  Your information is safe with us. We never share your data with third parties.
+                  We respect your privacy. Your information will never be shared.
                 </p>
               </div>
 
@@ -251,9 +245,9 @@
                 </div>
                 <div class="ml-4">
                   <p class="text-sm text-gray-700 italic mb-2">
-                    "The Callytics team responded to our query within a few hours and helped us set up call tracking for our entire sales team. Excellent support experience!"
+                    "The Callytics team responded to our inquiry within hours and helped us set up our call tracking in no time. Excellent customer service!"
                   </p>
-                  <p class="text-xs font-semibold text-gray-900">- Priya M., Marketing Head — Ahmedabad</p>
+                  <p class="text-xs font-semibold text-gray-900">- Sarah K., Marketing Director</p>
                 </div>
               </div>
             </div>
@@ -275,8 +269,8 @@
                   </div>
                   <div class="ml-4">
                     <h4 class="font-semibold text-gray-900 mb-1">Email</h4>
-                    <a href="mailto:hello@callytics.io" style="color: #ff6b00;" @mouseover="$event.target.style.color='#cc5500'" @mouseout="$event.target.style.color='#ff6b00'">
-                      hello@callytics.io
+                    <a href="mailto:hello@callytics.com" style="color: #ff6b00;" @mouseover="$event.target.style.color='#cc5500'" @mouseout="$event.target.style.color='#ff6b00'">
+                      hello@callytics.com
                     </a>
                   </div>
                 </div>
@@ -289,8 +283,8 @@
                   </div>
                   <div class="ml-4">
                     <h4 class="font-semibold text-gray-900 mb-1">Phone</h4>
-                    <a href="tel:+919876543210" style="color: #ff6b00;" @mouseover="$event.target.style.color='#cc5500'" @mouseout="$event.target.style.color='#ff6b00'">
-                      +91 98765 43210
+                    <a href="tel:+18001234567" style="color: #ff6b00;" @mouseover="$event.target.style.color='#cc5500'" @mouseout="$event.target.style.color='#ff6b00'">
+                      +1 (800) 123-4567
                     </a>
                   </div>
                 </div>
@@ -305,9 +299,9 @@
                   <div class="ml-4">
                     <h4 class="font-semibold text-gray-900 mb-1">Address</h4>
                     <p class="text-gray-600">
-                      Callytics Technologies Pvt. Ltd., 4th Floor,<br/>
-                      Shree Krishna Centre, Mithakhali Six Roads,<br/>
-                      Ahmedabad — 380009, Gujarat, India
+                      123 Business Avenue<br/>
+                      San Francisco, CA 94102<br/>
+                      United States
                     </p>
                   </div>
                 </div>
@@ -321,8 +315,8 @@
                   <div class="ml-4">
                     <h4 class="font-semibold text-gray-900 mb-1">Business Hours</h4>
                     <p class="text-gray-600">
-                      Monday – Saturday: 9:00 AM – 7:00 PM IST<br/>
-                      Sunday: Closed
+                      Monday - Friday: 9:00 AM - 6:00 PM PST<br/>
+                      Saturday - Sunday: Closed
                     </p>
                   </div>
                 </div>
@@ -337,7 +331,7 @@
               <div class="relative">
                 <h2 class="text-2xl font-bold mb-4">Need Immediate Help?</h2>
                 <p class="text-orange-50 mb-6">
-                  Our support team is available Monday to Saturday to assist you with any urgent queries or issues.
+                  Our support team is available 24/7 to assist you with any urgent issues or questions.
                 </p>
                 <div class="flex flex-col sm:flex-row gap-3">
                   <a
@@ -594,10 +588,6 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.hero-heading {
-  font-size: clamp(1.75rem, 2vw + 0.875rem, 2.5rem);
-}
-
 /* Performance Optimizations */
 /* Use GPU acceleration for animations via transform and opacity properties */
 /* Recommend converting images to WebP format for faster loading */
