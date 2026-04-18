@@ -23,14 +23,15 @@
         <h1 id="services-title" class="hero-heading mb-6">
           <span class="text-gray-900">Call Tracking & </span>
           <span class="text-transparent bg-clip-text bg-gradient-to-r from-orange-600 to-orange-500">Analytics Services</span>
+          <span class="text-gray-900"> Built for Indian Businesses</span>
         </h1>
         
         <!-- Subheading -->
         <p class="text-xl text-gray-700 max-w-4xl mx-auto mb-4 leading-relaxed">
-          Track, analyze, and optimize every business call with <strong>real-time insights</strong> and <strong>performance tracking</strong>.
+          Track, analyse, and optimise every business call with real-time insights, source attribution, and performance tracking — all from one powerful platform.
         </p>
         <p class="text-lg text-gray-600 max-w-3xl mx-auto">
-          Trusted by 10,000+ businesses to turn phone conversations into actionable data.
+          Trusted by 2,000+ businesses across India from Real Estate, Healthcare, E-commerce &amp; more.
         </p>
       </div>
     </section>
@@ -48,17 +49,12 @@
             <div class="text-sm text-gray-600 font-semibold">Calls Tracked</div>
           </div>
           <div class="fade-up" style="animation-delay: 0.2s;">
-            <div class="flex items-center justify-center mb-2">
-              <svg class="w-6 h-6 text-orange-600 mr-2" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
-                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
-              </svg>
-              <span class="text-2xl font-bold text-orange-600">GDPR</span>
-            </div>
-            <div class="text-sm text-gray-600 font-semibold">Compliant</div>
+            <div class="text-4xl font-bold text-orange-600 mb-2">99.9%</div>
+            <div class="text-sm text-gray-600 font-semibold">Platform Uptime</div>
           </div>
           <div class="fade-up" style="animation-delay: 0.3s;">
             <div class="text-4xl font-bold text-orange-600 mb-2">24/7</div>
-            <div class="text-sm text-gray-600 font-semibold">Support</div>
+            <div class="text-sm text-gray-600 font-semibold">Support Available</div>
           </div>
         </div>
       </div>
@@ -133,7 +129,7 @@
             Additional Features
           </h2>
           <p class="text-xl text-gray-600 max-w-2xl mx-auto">
-            Everything you need for complete call management
+            Everything you need to manage, track, and grow your business calls.
           </p>
         </div>
 
@@ -159,7 +155,7 @@
             Why Choose Callytics for Call Tracking Services
           </h2>
           <p class="text-xl text-gray-600 max-w-3xl mx-auto">
-            Industry-leading reliability, security, and support that grows with your business
+            Trusted by Indian businesses for reliability, accuracy, and results that impact the bottom line.
           </p>
         </div>
 
@@ -171,7 +167,7 @@
               </svg>
             </div>
             <h3 class="text-xl font-bold text-gray-900 mb-3">99.9% Uptime</h3>
-            <p class="text-gray-600">Reliable infrastructure with automatic failover ensures your business never misses a call.</p>
+            <p class="text-gray-600">Built on enterprise-grade infrastructure to ensure your call tracking never goes offline — even during peak business hours.</p>
           </div>
 
           <div class="text-center p-8 rounded-xl bg-gradient-to-br from-gray-50 to-white hover:shadow-xl hover:scale-105 transition-all duration-300">
@@ -181,7 +177,7 @@
               </svg>
             </div>
             <h3 class="text-xl font-bold text-gray-900 mb-3">Secure Cloud Infrastructure</h3>
-            <p class="text-gray-600">Enterprise-grade security with SOC 2 compliance and end-to-end encryption.</p>
+            <p class="text-gray-600">All call data, recordings, and reports are encrypted and stored securely. Your business data stays completely private.</p>
           </div>
 
           <div class="text-center p-8 rounded-xl bg-gradient-to-br from-gray-50 to-white hover:shadow-xl hover:scale-105 transition-all duration-300">
@@ -190,8 +186,8 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
               </svg>
             </div>
-            <h3 class="text-xl font-bold text-gray-900 mb-3">Scalable for All Businesses</h3>
-            <p class="text-gray-600">From startups to enterprises, our platform scales seamlessly with your growth.</p>
+            <h3 class="text-xl font-bold text-gray-900 mb-3">Suitable for All Businesses</h3>
+            <p class="text-gray-600">Whether you are a 2-person startup or a 200-person enterprise, Callytics scales with your growth.</p>
           </div>
 
           <div class="text-center p-8 rounded-xl bg-gradient-to-br from-gray-50 to-white hover:shadow-xl hover:scale-105 transition-all duration-300">
@@ -201,14 +197,14 @@
               </svg>
             </div>
             <h3 class="text-xl font-bold text-gray-900 mb-3">Dedicated Support Team</h3>
-            <p class="text-gray-600">24/7 expert support available via phone, email, and live chat to ensure your success.</p>
+            <p class="text-gray-600">Our India-based support team is available Monday to Saturday to help you get the most out of Callytics.</p>
           </div>
         </div>
 
         <!-- Internal Links -->
         <div class="mt-12 text-center">
           <p class="text-gray-700 text-lg mb-6">
-            Explore more about how Callytics can transform your business communications
+            For more information about how Callytics can transform your business, visit our detailed resources centre.
           </p>
           <div class="flex flex-col sm:flex-row gap-4 justify-center">
             <router-link
@@ -221,10 +217,10 @@
               </svg>
             </router-link>
             <router-link
-              to="/about"
+              to="/contact"
               class="inline-flex items-center justify-center px-6 py-3 bg-white text-orange-600 font-bold rounded-lg border-2 border-orange-600 hover:bg-orange-50 transition-all duration-300 hover:scale-105"
             >
-              Learn About Us
+              Start a Free Trial
               <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
               </svg>
@@ -242,7 +238,7 @@
             Industries We Serve
           </h2>
           <p class="text-xl text-gray-600 max-w-2xl mx-auto">
-            Trusted by businesses across various sectors
+            Trusted by businesses across diverse sectors all over India.
           </p>
         </div>
 
@@ -266,11 +262,11 @@
           </div>
           <blockquote class="text-center">
             <p class="text-xl md:text-2xl text-gray-800 font-medium italic mb-6 leading-relaxed">
-              "Callytics transformed how we track and optimize our marketing campaigns. Within 3 months, we increased our call conversion rate by 47% and reduced wasted ad spend by $25,000. The ROI tracking features alone paid for the platform 10x over."
+              "Callytics transformed how we track and optimise our marketing campaigns. Within 2 months, we increased our call conversion rate by 41% and reduced wasted ad spend by ₹80,000. The ROI from call tracking alone has paid for the platform 10x over."
             </p>
             <footer class="text-gray-700">
-              <p class="font-bold text-lg">Michael Rodriguez</p>
-              <p class="text-sm">VP of Marketing, HomeServices Pro</p>
+              <p class="font-bold text-lg">Abhishek Rodrigues</p>
+              <p class="text-sm">Director of Marketing, LeadGen India — Bengaluru</p>
             </footer>
           </blockquote>
         </div>
@@ -284,10 +280,7 @@
           Ready to Get Started?
         </h2>
         <p class="text-xl text-orange-50 mb-4">
-          Let's discuss how Callytics can help your business grow
-        </p>
-        <p class="text-lg text-orange-100 mb-8 font-medium">
-          Start your 14-day free trial today — no credit card required.
+          Join thousands of Indian businesses using Callytics to track calls and grow revenue. No credit card required.
         </p>
         <div class="flex flex-col sm:flex-row gap-4 justify-center">
           <router-link
@@ -316,45 +309,42 @@ const mainServices = [
   {
     category: 'Core Service',
     title: 'Call Tracking & Attribution',
-    description: 'Track every phone call back to its marketing source with precision. Understand which campaigns drive the most valuable calls and optimize your marketing spend accordingly.',
-    benefitTitle: 'Perfect for marketing teams and agencies.',
-    benefitText: 'Eliminate guesswork from your marketing budget by seeing exactly which channels, campaigns, and keywords drive phone leads. Increase ROI by doubling down on what works and cutting what doesn\'t.',
+    description: 'Track every inbound call back to its exact marketing source — Google Ads, Meta, organic search, or offline campaigns. Understand which channels are driving real conversations and stop wasting ad spend on sources that don\'t convert.',
+    benefitTitle: 'Businesses using Callytics call attribution report',
+    benefitText: 'up to 35% reduction in wasted ad spend within the first 90 days.',
     features: [
-      'Dynamic number insertion for website visitors',
+      'Determine which marketing source drives each call',
       'Multi-channel attribution tracking',
       'Campaign-level call analytics',
-      'Source and keyword tracking',
-      'Visitor journey mapping'
+      'Real-time spend optimisation'
     ],
     icon: '<svg class="w-32 h-32" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" /></svg>'
   },
   {
-    category: 'Intelligence',
+    category: 'Core Service',
     title: 'Call Recording & Analysis',
-    description: 'Record, transcribe, and analyze your calls automatically. Gain insights into customer sentiment, agent performance, and conversion opportunities.',
-    benefitTitle: 'Ideal for sales teams and quality assurance.',
-    benefitText: 'Improve sales conversions and customer service quality by reviewing real conversations, identifying coaching opportunities, and ensuring compliance. Turn every call into a learning opportunity.',
+    description: 'Record, store, and analyse every business call automatically. Replay conversations for quality assurance, agent training, and compliance. Never miss a critical detail from any customer interaction again.',
+    benefitTitle: 'All recordings are securely stored on cloud infrastructure',
+    benefitText: 'and accessible anytime from your Callytics dashboard.',
     features: [
       'Automatic call recording',
-      'AI-powered transcription',
-      'Sentiment analysis',
-      'Keyword spotting and alerts',
-      'Quality assurance scoring'
+      'Secure cloud storage',
+      'Keyword search in calls',
+      'Quality review workflows'
     ],
     icon: '<svg class="w-32 h-32" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" /></svg>'
   },
   {
-    category: 'Insights',
+    category: 'Core Service',
     title: 'Advanced Analytics & Reporting',
-    description: 'Get comprehensive insights with customizable dashboards and detailed reports. Make data-driven decisions with real-time analytics and historical trends.',
-    benefitTitle: 'Built for data-driven decision makers.',
-    benefitText: 'Transform call data into actionable insights with powerful reporting tools. Track key metrics, identify trends, and demonstrate clear ROI to stakeholders with custom reports and real-time dashboards.',
+    description: 'Turn your call data into powerful business intelligence. Get detailed reports on call volume, agent performance, peak call hours, missed call trends, and conversion rates — all exportable and shareable with your team.',
+    benefitTitle: 'Suit for data-driven decision makers.',
+    benefitText: 'Our easy-to-read dashboards give managers and business owners full visibility without needing a technical background.',
     features: [
-      'Real-time dashboards',
       'Custom report builder',
-      'Call volume and duration metrics',
+      'Agent performance scorecards',
       'Conversion tracking',
-      'ROI calculation tools',
+      'White-label reports',
       'Exportable data and reports'
     ],
     icon: '<svg class="w-32 h-32" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg>'
@@ -364,48 +354,48 @@ const mainServices = [
 const additionalFeatures = [
   {
     title: 'Call Routing',
-    description: 'Intelligent call routing based on time, location, or caller data',
+    description: 'Route incoming calls to the right agent or department based on time, location, or IVR input.',
     iconPath: 'M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4'
   },
   {
     title: 'IVR System',
-    description: 'Customizable interactive voice response for better call handling',
+    description: 'Set up a professional multi-level IVR phone menu to manage and direct incoming calls efficiently.',
     iconPath: 'M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z'
   },
   {
     title: 'Call Whisper',
-    description: 'Notify agents about call source before answering',
+    description: 'Brief your agents with caller context before they pick up — improve first-call resolution rates.',
     iconPath: 'M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z'
   },
   {
     title: 'SMS Alerts',
-    description: 'Get instant notifications for important calls via SMS',
+    description: 'Get instant SMS notifications for missed calls, new leads, and other important call events.',
     iconPath: 'M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z'
   },
   {
-    title: 'Multi-User Access',
-    description: 'Team collaboration with role-based permissions',
+    title: 'Multi User Access',
+    description: 'Add your entire team with role-based access controls and customised permission levels.',
     iconPath: 'M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z'
   },
   {
     title: 'White Label',
-    description: 'Rebrand the platform with your company identity',
+    description: 'Rebrand the Callytics platform with your own company identity — ideal for agencies and resellers.',
     iconPath: 'M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01'
   }
 ];
 
 const industries = [
-  { name: 'Healthcare', icon: '🏥' },
   { name: 'Real Estate', icon: '🏠' },
+  { name: 'Auto Dealers', icon: '🚘' },
   { name: 'Legal Services', icon: '⚖️' },
   { name: 'Home Services', icon: '🔧' },
   { name: 'E-commerce', icon: '🛒' },
-  { name: 'Insurance', icon: '🛡️' },
+  { name: 'Healthcare', icon: '🏥' },
   { name: 'Automotive', icon: '🚗' },
   { name: 'Education', icon: '🎓' },
   { name: 'Finance', icon: '💰' },
   { name: 'Hospitality', icon: '🏨' },
-  { name: 'Marketing', icon: '📊' },
+  { name: 'Media & Advertising', icon: '📊' },
   { name: 'Technology', icon: '💻' }
 ];
 
@@ -498,6 +488,10 @@ onMounted(() => {
 </script>
 
 <style scoped>
+.hero-heading {
+  font-size: clamp(1.75rem, 2vw + 0.875rem, 2.5rem);
+}
+
 /* Performance Optimizations */
 /* Convert images to WebP format for 25-35% file size reduction */
 /* Lazy load non-critical images using loading="lazy" attribute */

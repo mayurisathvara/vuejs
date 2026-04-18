@@ -9,7 +9,7 @@
             <img src="../assets/images/logo_white.png" alt="Callytics" class="h-8" />
           </div>
           <p class="text-gray-400 mb-4 max-w-md">
-            Advanced call tracking and analytics solution to help businesses understand their customers better and optimize their marketing campaigns.
+            Advanced call tracking and analytics platform helping Indian businesses understand their customers better and optimise their marketing campaigns.
           </p>
           <!-- Social Media Links -->
           <div class="flex space-x-4">

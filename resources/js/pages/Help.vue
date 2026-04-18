@@ -17,20 +17,20 @@
         <!-- Badge -->
         <div class="inline-flex items-center px-4 py-2 rounded-full bg-white/90 backdrop-blur-sm shadow-lg mb-8">
           <span class="w-2 h-2 bg-orange-500 rounded-full mr-2 animate-pulse" aria-hidden="true"></span>
-          <span class="text-sm font-semibold text-orange-600">Support Center</span>
+          <span class="text-sm font-semibold text-orange-600">Support Centre</span>
         </div>
 
         <h1 id="help-title" class="hero-heading mb-6">
-          <span class="text-gray-900">Callytics Help & Support – </span>
+          <span class="text-gray-900">Callytics Help & Support — </span>
           <span class="text-transparent bg-clip-text bg-gradient-to-r from-orange-600 to-orange-500">Get Expert Assistance</span>
         </h1>
         
         <!-- SEO Introduction Paragraph -->
         <p class="text-xl text-gray-700 max-w-4xl mx-auto mb-4 leading-relaxed">
-          Access comprehensive <strong>call tracking support</strong> and <strong>call analytics assistance</strong> from our expert team. Get help with setup, troubleshooting, and maximizing your <strong>business call monitoring platform</strong>.
+          Access comprehensive call tracking support and call analytics assistance from our expert team. Get help with setup, troubleshooting, and maximising your business call monitoring platform.
         </p>
         <p class="text-lg text-gray-600 max-w-3xl mx-auto">
-          We're here 24/7 to ensure you get the most out of Callytics.
+          We are here Monday to Saturday to ensure you get the most out of Callytics.
         </p>
       </div>
     </section>
@@ -65,7 +65,7 @@
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="text-center mb-12">
           <h2 id="support-options-title" class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">How Can We Help You?</h2>
-          <p class="text-xl text-gray-600">Choose the best way to get support</p>
+          <p class="text-xl text-gray-600">Choose the best way to get support from our team.</p>
         </div>
         
         <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -94,7 +94,7 @@
             <h3 class="text-xl font-bold text-gray-900 mb-3">Email Support</h3>
             <p class="text-gray-700 mb-4">Send us a detailed message for complex issues. Attach screenshots and get comprehensive solutions.</p>
             <div class="bg-blue-50 border-l-4 border-blue-500 p-3 mb-6 rounded-r">
-              <p class="text-sm font-semibold text-blue-800"><span class="text-blue-600">⏱️</span> Response Time: Within 2 hours</p>
+              <p class="text-sm font-semibold text-blue-800"><span class="text-blue-600">⏱️</span> Response Time: Within 4 Hours</p>
             </div>
             <router-link to="/contact" class="inline-block px-6 py-2.5 text-white font-semibold rounded-lg hover:shadow-lg transition-all w-full" style="background: linear-gradient(135deg, #ff8c33, #ffb366);">
               Send Email
@@ -108,12 +108,12 @@
               </svg>
             </div>
             <h3 class="text-xl font-bold text-gray-900 mb-3">Phone Support</h3>
-            <p class="text-gray-700 mb-4">Speak directly with our experts for urgent issues or personalized guidance.</p>
+            <p class="text-gray-700 mb-4">Speak directly with our experts for urgent issues or personalised guidance — available Monday to Saturday.</p>
             <div class="bg-purple-50 border-l-4 border-purple-500 p-3 mb-6 rounded-r">
-              <p class="text-sm font-semibold text-purple-800"><span class="text-purple-600">📞</span> Mon-Fri: 9AM-6PM EST</p>
+              <p class="text-sm font-semibold text-purple-800"><span class="text-purple-600">📞</span> Mon–Sat: 9AM–7PM IST</p>
             </div>
-            <a href="tel:+1-800-123-4567" class="inline-block px-6 py-2.5 text-white font-semibold rounded-lg hover:shadow-lg transition-all w-full" style="background: linear-gradient(135deg, #cc5500, #ff6b00);">
-              Call +1-800-123-4567
+            <a href="tel:+919876543210" class="inline-block px-6 py-2.5 text-white font-semibold rounded-lg hover:shadow-lg transition-all w-full" style="background: linear-gradient(135deg, #cc5500, #ff6b00);">
+              Call +91 98765 43210
             </a>
           </div>
         </div>
@@ -189,7 +189,7 @@
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="text-center mb-12">
           <h2 id="resources-title" class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Documentation & Resources</h2>
-          <p class="text-xl text-gray-600">Everything you need to master Callytics and maximize your call tracking ROI</p>
+          <p class="text-xl text-gray-600">Everything you need to master Callytics and maximise your call tracking ROI.</p>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -242,7 +242,7 @@
                 </svg>
                 <div>
                   <h4 class="font-bold text-gray-900 mb-1 group-hover:text-orange-600 transition-colors">Contact Support</h4>
-                  <p class="text-sm text-gray-600">Get personalized assistance from our team</p>
+                  <p class="text-sm text-gray-600">Get connected to an expert from our team</p>
                 </div>
               </div>
             </router-link>
@@ -262,16 +262,16 @@
           
           <div class="relative">
             <p class="text-xl md:text-2xl text-gray-800 font-medium mb-6 leading-relaxed italic">
-              "The Callytics support team resolved our integration issue within minutes. Their expertise and quick response time are unmatched. We couldn't be happier with the level of service!"
+              "The Callytics support team resolved our integration issue within 30 minutes. Their expertise and response time is genuinely unmatched. We have never experienced this level of service from any SaaS platform before."
             </p>
             
             <div class="flex items-center justify-center">
               <div class="w-12 h-12 rounded-full flex items-center justify-center text-white font-bold text-lg mr-4" style="background: linear-gradient(135deg, #ff6b00, #ff8c33);">
-                JM
+                SP
               </div>
               <div class="text-left">
-                <div class="font-bold text-gray-900">Jennifer Martinez</div>
-                <div class="text-sm text-gray-600">Operations Manager, TechFlow Inc.</div>
+                <div class="font-bold text-gray-900">Sneha Patel</div>
+                <div class="text-sm text-gray-600">Operations Manager, InfoTech Solutions — Ahmedabad</div>
               </div>
             </div>
             
@@ -295,12 +295,12 @@
             <div>
               <div class="text-4xl mb-3">🕐</div>
               <h3 class="font-bold text-gray-900 mb-2">Live Support</h3>
-              <p class="text-gray-600">Monday - Friday<br/>9:00 AM - 6:00 PM EST</p>
+              <p class="text-gray-600">Monday – Saturday<br/>9:00 AM – 7:00 PM IST</p>
             </div>
             <div>
               <div class="text-4xl mb-3">📧</div>
               <h3 class="font-bold text-gray-900 mb-2">Email Support</h3>
-              <p class="text-gray-600">24/7 Support<br/>We respond within 2 hours</p>
+              <p class="text-gray-600">24/7 Available<br/>We respond within 4 hours</p>
             </div>
           </div>
           <div class="mt-8 pt-8 border-t border-gray-200">
@@ -328,47 +328,47 @@ const faqSearchQuery = ref('');
 const faqs = [
   {
     question: 'How does call tracking work?',
-    answer: 'Call tracking assigns unique phone numbers to different marketing channels (Google Ads, Facebook, email, etc.). When someone calls, we capture the source, record the call, and provide detailed analytics. This helps you understand which campaigns drive the most valuable calls and optimize your marketing ROI.'
+    answer: 'Callytics assigns unique tracking numbers to each of your marketing channels. When a customer calls, Callytics captures the source, duration, recording, and outcome — giving you complete visibility into which campaigns are generating real business calls.'
   },
   {
     question: 'How do I get started with Callytics?',
-    answer: 'Getting started is easy! Sign up for a free trial, configure your tracking numbers, and you\'ll be tracking calls within minutes. Our onboarding team will guide you through the setup process.'
+    answer: 'Getting started is simple. Register your free account, install the Callytics app on your Android device, and your calls will start tracking automatically within minutes — no technical setup required.'
   },
   {
-    question: 'Is Callytics GDPR and HIPAA compliant?',
-    answer: 'Absolutely! We are fully GDPR compliant and HIPAA certified for healthcare organizations. All data is encrypted at rest and in transit using bank-level 256-bit SSL encryption. We conduct regular security audits and maintain SOC 2 Type II certification.'
+    question: 'Is Callytics GDPR and TRAI compliant?',
+    answer: 'Yes. Callytics is fully compliant with GDPR and TRAI regulations. All call data is encrypted, securely stored, and handled in accordance with Indian and international data protection laws.'
   },
   {
     question: 'How long are call recordings stored?',
-    answer: 'Call recordings are stored securely in the cloud for 12 months on all plans. Enterprise customers can request extended storage periods up to 7 years to meet compliance requirements.'
+    answer: 'Call recordings are stored securely in the cloud for up to 90 days on the Starter plan, 180 days on the Professional plan, and unlimited duration on the Enterprise plan.'
   },
   {
     question: 'Can I upgrade or downgrade my plan anytime?',
-    answer: 'Yes! You can upgrade or downgrade your plan at any time with no penalties. Upgrades take effect immediately, and downgrades apply at your next billing cycle. We\'ll prorate any charges to ensure fair pricing.'
+    answer: 'Yes. You can change your plan at any time from your Callytics dashboard. Upgrades take effect immediately and billing is adjusted on a pro-rata basis.'
   },
   {
-    question: 'Is call recording legal in my state/country?',
-    answer: 'Call recording laws vary by jurisdiction. In most US states, one-party consent is sufficient (meaning you can record if one party consents). We provide customizable call recording notifications to ensure compliance. Our legal team can provide guidance for your specific situation.'
+    question: 'Is call recording legal in India?',
+    answer: 'Call recording for business purposes is permitted in India provided that at least one party to the call is aware of the recording. Callytics recommends informing callers via an IVR announcement before the call connects.'
   },
   {
     question: 'What happens if I exceed my plan limits?',
-    answer: 'We\'ll notify you before you reach your limits. You can upgrade your plan anytime, or purchase additional capacity as needed. We never cut off your service unexpectedly.'
+    answer: 'Your calls will continue uninterrupted. Additional usage beyond your plan limits is billed at a standard per-minute or per-number rate. You will receive a notification before approaching your limit.'
   },
   {
     question: 'Do you offer training for my team?',
-    answer: 'Yes! All plans include comprehensive documentation and video tutorials. Professional and Enterprise customers receive personalized onboarding sessions, live training webinars, and ongoing support from dedicated account managers.'
+    answer: 'Yes. All Professional and Enterprise plan customers receive onboarding support and access to our full video tutorial library. Enterprise customers also receive dedicated training sessions.'
   },
   {
     question: 'Can I port my existing phone numbers to Callytics?',
-    answer: 'Yes, we fully support number porting from any carrier. Our team handles the entire process for you, coordinating with your current provider to ensure zero downtime during the transition. Most ports complete within 7-10 business days.'
+    answer: 'Yes. Number porting is supported on Professional and Enterprise plans. Contact our support team and we will guide you through the porting process step by step.'
   },
   {
-    question: 'What\'s your refund policy?',
-    answer: 'We offer a 30-day money-back guarantee on all plans. If you\'re not satisfied within the first 30 days, we\'ll refund your payment in full, no questions asked.'
+    question: 'What is your refund policy?',
+    answer: 'We offer a 14-day free trial so you can evaluate Callytics risk-free before committing. Refund requests after the trial period are reviewed individually by our billing team.'
   },
   {
-    question: 'Does Callytics work internationally?',
-    answer: 'Yes! We provide local and toll-free tracking numbers in over 70 countries. International call routing, recording, and analytics work seamlessly across all regions. Currency conversion and multi-language support are included.'
+    question: 'Does Callytics work across India?',
+    answer: 'Yes. Callytics works nationwide across all Indian states and supports all major telecom operators including Jio, Airtel, Vi, and BSNL.'
   }
 ];
 
@@ -389,42 +389,42 @@ const resources = [
   {
     icon: '📘',
     title: 'Getting Started Guide',
-    description: 'Step-by-step setup instructions for new users'
+    description: 'Step-by-step instructions for new users.'
   },
   {
     icon: '📹',
     title: 'Video Tutorials',
-    description: 'Watch and learn with our video library'
+    description: 'Watch and learn with our video library.'
   },
   {
     icon: '🔧',
     title: 'API Documentation',
-    description: 'Technical docs for developers and integrations'
+    description: 'Technical docs for developers and integrations.'
   },
   {
     icon: '💡',
     title: 'Best Practices',
-    description: 'Tips and strategies to maximize ROI'
+    description: 'Tips and strategies to maximise your ROI.'
   },
   {
     icon: '📊',
     title: 'Use Cases',
-    description: 'Real-world examples from successful customers'
+    description: 'Real-world examples from successful Indian businesses.'
   },
   {
     icon: '🎓',
     title: 'Webinars',
-    description: 'Join our live training sessions'
+    description: 'Join our live call tracking sessions.'
   },
   {
     icon: '📱',
     title: 'Mobile App Guide',
-    description: 'Learn to use our iOS and Android apps'
+    description: 'Complete guide for iOS and Android app.'
   },
   {
     icon: '🔒',
     title: 'Security & Compliance',
-    description: 'Learn about our security measures'
+    description: 'How we keep your data safe and compliant.'
   }
 ];
 
@@ -504,6 +504,9 @@ onMounted(() => {
 </script>
 
 <style scoped>
+.hero-heading {
+  font-size: clamp(1.75rem, 2vw + 0.875rem, 2.5rem);
+}
 /* Premium Hero Section Styles */
 .hero-section {
   padding-top: 2rem;
