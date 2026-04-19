@@ -4,7 +4,7 @@
       <div class="flex justify-between items-center h-16">
         <!-- Logo -->
         <router-link to="/" class="flex items-center">
-          <img src="../assets/images/logo.png" alt="Callytics" class="h-8" />
+          <img src="../assets/images/logo.png" alt="Callytics" class="h-10" />
         </router-link>
 
         <!-- Desktop Navigation -->
@@ -26,11 +26,11 @@
           </router-link>
 
           <router-link
-            to="/contact"
+            to="#how-it-works"
             class="nav-link"
-            :class="{ 'active': isActive('/contact') }"
+            :class="{ 'active': isActive('#how-it-works') }"
           >
-            Contact
+            How it Works
           </router-link>
 
           <!-- Company Dropdown -->
@@ -76,13 +76,29 @@
                   </svg>
                   Help / Support
                 </router-link>
+                <router-link
+                  to="/contact"
+                  class="dropdown-item"
+                  @click="companyDropdownOpen = false"
+                >
+                  <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                  </svg>
+                  Contact
+                </router-link>
               </div>
             </transition>
           </div>
         </div>
 
-        <!-- CTA Button Desktop -->
-        <div class="hidden md:block">
+        <!-- CTA Buttons Desktop -->
+        <div class="hidden md:flex items-center space-x-3">
+          <router-link
+            to="/login"
+            class="px-6 py-2.5 text-gray-700 font-semibold rounded-lg border-2 border-gray-300 hover:border-orange-500 hover:text-orange-600 transition-all duration-300"
+          >
+            Login
+          </router-link>
           <router-link
             to="/contact"
             class="px-6 py-2.5 text-white font-semibold rounded-lg shadow-md hover:shadow-lg transition-all duration-300 hover:scale-105"
@@ -132,13 +148,13 @@
           </router-link>
 
           <router-link
-            to="/contact"
+            to="#how-it-works"
             @click="mobileMenuOpen = false"
             class="block px-4 py-2.5 rounded-lg text-gray-700 transition-colors font-medium"
-            :class="{ 'text-white': isActive('/contact') }"
-            :style="isActive('/contact') ? 'background-color: #ffe6cc; color: #ff6b00;' : ''"
+            :class="{ 'text-white': isActive('#how-it-works') }"
+            :style="isActive('#how-it-works') ? 'background-color: #ffe6cc; color: #ff6b00;' : ''"
           >
-            Contact
+            How it Works
           </router-link>
 
           <!-- Company Submenu in Mobile -->
@@ -179,9 +195,25 @@
                 >
                   Help / Support
                 </router-link>
+                <router-link
+                  to="/contact"
+                  @click="mobileMenuOpen = false; mobileCompanyOpen = false"
+                  class="block px-4 py-2 rounded-lg text-gray-600 text-sm hover:bg-orange-50 transition-colors"
+                  :style="isActive('/contact') ? 'background-color: #ffe6cc; color: #ff6b00;' : ''"
+                >
+                  Contact
+                </router-link>
               </div>
             </transition>
           </div>
+
+          <router-link
+            to="/login"
+            @click="mobileMenuOpen = false"
+            class="block px-4 py-2.5 text-gray-700 font-semibold rounded-lg text-center border-2 border-gray-300"
+          >
+            Login
+          </router-link>
 
           <router-link
             to="/contact"
@@ -211,7 +243,7 @@ const isActive = (path) => {
 };
 
 const isCompanyActive = computed(() => {
-  return ['/about', '/services', '/help'].includes(route.path);
+  return ['/about', '/services', '/help', '/contact'].includes(route.path);
 });
 </script>
 

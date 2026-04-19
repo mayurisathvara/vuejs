@@ -6,7 +6,7 @@
         <!-- Company Info -->
         <div class="col-span-1 md:col-span-2">
           <div class="mb-4">
-            <img src="../assets/images/logo_white.png" alt="Callytics" class="h-8" />
+            <img src="../assets/images/logo_white.png" alt="Callytics" class="h-10" />
           </div>
           <p class="text-gray-400 mb-4 max-w-md">
             Advanced call tracking and analytics platform helping Indian businesses understand their customers better and optimise their marketing campaigns.

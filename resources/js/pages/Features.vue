@@ -105,32 +105,61 @@
                 />
                 
                 <!-- Floating Stats Card - Growth -->
-                <div class="absolute top-8 -right-4 lg:right-0 bg-white rounded-xl shadow-xl p-3 animate-float hidden sm:block">
+                <div class="absolute top-8 -right-4 lg:right-0 bg-white rounded-xl shadow-xl px-4 py-2 animate-float hidden sm:block min-w-[160px]">
                   <div class="flex items-center gap-2">
                     <div class="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0">
                       <svg class="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
                       </svg>
                     </div>
-                    <div>
-                      <div class="text-xl font-bold text-gray-900 leading-tight">+18%</div>
-                      <div class="text-[10px] font-medium text-gray-600 whitespace-nowrap">Call Growth</div>
-                      <div class="text-[9px] text-gray-400">vs last month</div>
+                    <div class="flex-1">
+                      <div class="text-lg font-bold text-gray-900 leading-none mb-0.5">+18%</div>
+                      <div class="text-[10px] font-medium text-gray-600 whitespace-nowrap leading-tight">Call Growth</div>
                     </div>
                   </div>
                 </div>
                 
                 <!-- Floating Stats Card - Duration -->
-                <div class="absolute bottom-20 -left-4 lg:left-0 bg-white rounded-xl shadow-xl p-3 animate-float-delayed hidden sm:block">
+                <div class="absolute bottom-20 -left-4 lg:left-0 bg-white rounded-xl shadow-xl px-4 py-2 animate-float-delayed hidden sm:block min-w-[160px]">
                   <div class="flex items-center gap-2">
                     <div class="w-8 h-8 rounded-full bg-orange-100 flex items-center justify-center flex-shrink-0">
                       <svg class="w-4 h-4 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                       </svg>
                     </div>
-                    <div>
-                      <div class="text-xl font-bold text-gray-900 leading-tight">4m 32s</div>
-                      <div class="text-[10px] font-medium text-gray-600 whitespace-nowrap">Avg Call Duration</div>
+                    <div class="flex-1">
+                      <div class="text-lg font-bold text-gray-900 leading-none mb-0.5">4m 32s</div>
+                      <div class="text-[10px] font-medium text-gray-600 whitespace-nowrap leading-tight">Avg Call Duration</div>
+                    </div>
+                  </div>
+                </div>
+                
+                <!-- Floating Stats Card - Total Calls -->
+                <div class="absolute top-1/3 -left-8 lg:-left-4 bg-white rounded-xl shadow-xl px-4 py-2 animate-float hidden sm:block min-w-[160px]">
+                  <div class="flex items-center gap-2">
+                    <div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
+                      <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                      </svg>
+                    </div>
+                    <div class="flex-1">
+                      <div class="text-lg font-bold text-gray-900 leading-none mb-0.5">1,247</div>
+                      <div class="text-[10px] font-medium text-gray-600 whitespace-nowrap leading-tight">Total Calls Today</div>
+                    </div>
+                  </div>
+                </div>
+                
+                <!-- Floating Stats Card - Answer Rate -->
+                <div class="absolute bottom-8 -right-8 lg:-right-4 bg-white rounded-xl shadow-xl px-4 py-2 animate-float-delayed hidden sm:block min-w-[160px]">
+                  <div class="flex items-center gap-2">
+                    <div class="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0">
+                      <svg class="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                    </div>
+                    <div class="flex-1">
+                      <div class="text-lg font-bold text-gray-900 leading-none mb-0.5">79%</div>
+                      <div class="text-[10px] font-medium text-gray-600 whitespace-nowrap leading-tight">Answer Rate</div>
                     </div>
                   </div>
                 </div>
@@ -464,88 +493,6 @@
               <div class="text-xl font-semibold -mt-1">Google Play</div>
             </div>
           </a>
-        </div>
-      </div>
-    </section>
-
-    <!-- How Callytics Works Section -->
-    <section class="hiw-section" id="how-it-works" role="region" aria-label="How Callytics Works">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <!-- Section Header -->
-        <div class="text-center mb-16">
-          <span class="hiw-badge">SIMPLE 4-STEP PROCESS</span>
-          <h2 class="hiw-title">Get Started in Minutes — No Technical Setup Required</h2>
-          <p class="hiw-subtitle">
-            Setting up Callytics is fast and hassle-free. Follow these four simple steps to start tracking and optimising your business calls today.
-          </p>
-        </div>
-
-        <!-- Steps -->
-        <div class="hiw-steps">
-          <!-- Connector line (Desktop) -->
-          <div class="hiw-connector-line" aria-hidden="true"></div>
-
-          <!-- Step 1 -->
-          <div class="hiw-card-enter hiw-delay-1">
-            <div class="group hiw-card">
-              <div class="hiw-card-top-border" aria-hidden="true"></div>
-              <div class="hiw-num"><span>1</span></div>
-              <div class="hiw-icon">
-                <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
-                </svg>
-              </div>
-              <h3 class="hiw-card-title">Register Your Account</h3>
-              <p class="hiw-card-desc">Create your free Callytics account in under 2 minutes. No credit card required — just your business email and you're ready to go.</p>
-            </div>
-          </div>
-
-          <!-- Step 2 -->
-          <div class="hiw-card-enter hiw-delay-2">
-            <div class="group hiw-card">
-              <div class="hiw-card-top-border" aria-hidden="true"></div>
-              <div class="hiw-num"><span>2</span></div>
-              <div class="hiw-icon">
-                <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 11l0-4m0 0l-2 2m2-2l2 2" />
-                </svg>
-              </div>
-              <h3 class="hiw-card-title">Install the Callytics App</h3>
-              <p class="hiw-card-desc">Download and install the Callytics app on your Android device from Google Play. Works seamlessly with your existing SIM and phone setup.</p>
-            </div>
-          </div>
-
-          <!-- Step 3 -->
-          <div class="hiw-card-enter hiw-delay-3">
-            <div class="group hiw-card">
-              <div class="hiw-card-top-border" aria-hidden="true"></div>
-              <div class="hiw-num"><span>3</span></div>
-              <div class="hiw-icon">
-                <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 3h6m0 0v6m0-6l-7 7" />
-                </svg>
-              </div>
-              <h3 class="hiw-card-title">Automatically Track Calls</h3>
-              <p class="hiw-card-desc">Once installed, Callytics starts tracking all inbound and outbound calls automatically — no manual logging, no extra steps needed.</p>
-            </div>
-          </div>
-
-          <!-- Step 4 -->
-          <div class="hiw-card-enter hiw-delay-4">
-            <div class="group hiw-card">
-              <div class="hiw-card-top-border" aria-hidden="true"></div>
-              <div class="hiw-num"><span>4</span></div>
-              <div class="hiw-icon">
-                <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                </svg>
-              </div>
-              <h3 class="hiw-card-title">Access Call Insights Dashboard</h3>
-              <p class="hiw-card-desc">Log in to your dashboard and start viewing real-time analytics, call reports, agent performance, and actionable business insights instantly.</p>
-            </div>
-          </div>
         </div>
       </div>
     </section>
