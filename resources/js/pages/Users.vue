@@ -28,7 +28,7 @@
             <input
               v-model="searchQuery"
               type="text"
-              class="form-control search-input-modern"
+                class="form-control search-input-modern"
               placeholder="Search users by name, email, or mobile..."
               @input="handleSearch"
             />
@@ -70,7 +70,7 @@
     </div>
 
     <!-- Users Table -->
-    <div class="card card-round">
+    <div class="card card-round users-table-card">
       <div class="card-body p-0">
         <div class="table-responsive-wrapper">
           <div class="simple-table">
@@ -84,39 +84,44 @@
             <div class="action-buttons">
               <button
                 type="button"
-                class="assign-sim-link"
+                class="assign-sim-btn"
                 @click="goToAssignSims(row)"
                 title="Assign SIMs"
               >
-                <i class="fas fa-link"></i>
+                <i class="fas fa-sim-card"></i>
                 <span>Assign SIM</span>
               </button>
               <button
-                class="action-btn edit-btn"
-                @click="openEditModal(row)"
-                title="Edit User"
+                class="action-menu-trigger"
+                type="button"
+                @click.stop="toggleActionMenu(row.id)"
+                aria-label="Open actions"
+                title="More actions"
               >
-                <i class="fas fa-edit"></i>
+                <i class="fas fa-ellipsis-h"></i>
               </button>
-              <button
-                class="action-btn delete-btn"
-                @click="openDeleteModal(row)"
-                title="Delete User"
-              >
-                <i class="fas fa-trash"></i>
-              </button>
+              <div v-if="activeActionMenu === row.id" class="action-menu" @click.stop>
+                <button type="button" class="action-menu-item" @click="openEditFromMenu(row)">
+                  <i class="fas fa-pen"></i>
+                  <span>Edit</span>
+                </button>
+                <button type="button" class="action-menu-item action-menu-item-danger" @click="openDeleteFromMenu(row)">
+                  <i class="fas fa-trash"></i>
+                  <span>Delete</span>
+                </button>
+              </div>
             </div>
           </template>
           <template #cell-name="{ row }">
-            <div class="d-flex align-items-center">
+            <div class="user-cell">
               <div class="avatar-sm me-2">
-                <div class="avatar-img rounded-circle bg-primary d-flex align-items-center justify-content-center text-white fw-bold" style="width: 32px; height: 32px;">
+                <div class="avatar-img rounded-circle bg-primary d-flex align-items-center justify-content-center text-white fw-bold user-avatar">
                   {{ row.name?.charAt(0) || 'U' }}
                 </div>
               </div>
-              <div>
-                <div class="fw-bold">{{ row.name }}</div>
-                <small class="text-muted">{{ row.email }}</small>
+              <div class="user-info">
+                <div class="user-name">{{ row.name }}</div>
+                <small class="user-email">{{ row.email }}</small>
               </div>
             </div>
           </template>
@@ -356,40 +361,50 @@
   -webkit-overflow-scrolling: touch;
 }
 
-/* Simple table look (match Call Reports) */
+.users-table-card {
+  background: #ffffff;
+  border: 0;
+  border-radius: 14px;
+  box-shadow: 0 10px 28px rgba(15, 23, 42, 0.06);
+}
+
+/* Simple table look */
 .simple-table :deep(.table-responsive) {
-  border: 1px solid #e3e6f0;
-  border-radius: 10px;
+  border: 1px solid #eef2f7;
+  border-radius: 14px;
   overflow: hidden;
 }
 
 .simple-table :deep(table.table) {
   width: 100%;
   min-width: 1200px;
-  border-collapse: collapse;
+  border-collapse: separate;
+  border-spacing: 0;
   margin: 0;
-  font-size: 14px;
+  font-size: 13.5px;
 }
 
 .simple-table :deep(table.table thead th) {
-  background: #f8f9fa;
-  color: #111827;
+  background: #f9fafb;
+  color: #374151;
   font-weight: 600;
   text-transform: none !important;
-  letter-spacing: normal !important;
-  border-bottom: 1px solid #e3e6f0;
-  border-right: 1px solid #e3e6f0;
-  padding: 10px 12px !important;
+  letter-spacing: 0.03em !important;
+  border-bottom: 1px solid #edf1f7;
+  border-right: 1px solid #edf1f7;
+  padding: 13px 14px !important;
+  font-size: 12px;
   vertical-align: middle;
   white-space: nowrap;
 }
 
 .simple-table :deep(table.table tbody td) {
-  border-top: 1px solid #e3e6f0;
-  border-right: 1px solid #e3e6f0;
-  padding: 10px 12px !important;
+  border-top: 1px solid #f1f5f9;
+  border-right: 1px solid #f1f5f9;
+  padding: 14px !important;
   vertical-align: middle;
   background: #fff;
+  transition: background-color 0.2s ease;
 }
 
 .simple-table :deep(table.table thead th:last-child),
@@ -398,8 +413,13 @@
 }
 
 .simple-table :deep(table.table tbody tr:hover) {
-  background: transparent;
+  background: #f9fafb;
 }
+
+.simple-table :deep(table.table tbody tr:hover td) {
+  background: #f9fafb;
+}
+
 .role-text {
   font-weight: 700;
   letter-spacing: 0.04em;
@@ -411,6 +431,74 @@
   position: relative;
   display: flex;
   align-items: center;
+}
+
+.filters-card {
+  background: #ffffff;
+  border: 1px solid #eef2f7;
+  border-radius: 14px;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.05);
+  padding: 14px;
+}
+
+.filters-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+}
+
+.filter-item {
+  min-width: 180px;
+  flex: 1 1 180px;
+}
+
+.filter-search {
+  flex: 2.4 1 360px;
+}
+
+.filter-per-page {
+  flex: 0 1 170px;
+}
+
+.search-box-modern,
+.select-wrapper {
+  position: relative;
+}
+
+.filter-icon,
+.search-icon-modern {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #9ca3af;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.search-input-modern,
+.select-modern {
+  height: 42px;
+  border-radius: 10px;
+  border: 1px solid #e5e7eb;
+  background: #ffffff;
+  font-size: 13px;
+  box-shadow: none;
+}
+
+.search-input-modern {
+  padding-left: 38px;
+}
+
+.select-modern {
+  padding-left: 36px;
+}
+
+.search-input-modern:focus,
+.select-modern:focus {
+  border-color: #cbd5e1;
+  box-shadow: 0 0 0 4px rgba(148, 163, 184, 0.16);
 }
 
 .search-icon {
@@ -564,15 +652,15 @@
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  padding: 4px 10px;
+  padding: 5px 10px;
   border: none;
-  border-radius: 16px;
+  border-radius: 999px;
   font-size: 11px;
-  font-weight: 600;
+  font-weight: 700;
   cursor: pointer;
   transition: all 0.2s ease;
   position: relative;
-  min-width: 80px;
+  min-width: 84px;
   justify-content: center;
 }
 
@@ -599,31 +687,29 @@
 }
 
 .status-badge.status-active {
-  background-color: #d4edda;
-  color: #155724;
+  background-color: #dcfce7;
+  color: #16a34a;
 }
 
 .status-badge.status-active .status-dot {
-  background-color: #28a745;
+  background-color: #16a34a;
 }
 
 .status-badge.status-active:hover {
-  background-color: #c3e6cb;
-  box-shadow: 0 2px 6px rgba(40, 167, 69, 0.2);
+  background-color: #c8f5d5;
 }
 
 .status-badge.status-inactive {
-  background-color: #f8d7da;
-  color: #721c24;
+  background-color: #f3f4f6;
+  color: #6b7280;
 }
 
 .status-badge.status-inactive .status-dot {
-  background-color: #dc3545;
+  background-color: #9ca3af;
 }
 
 .status-badge.status-inactive:hover {
-  background-color: #f5c6cb;
-  box-shadow: 0 2px 6px rgba(220, 53, 69, 0.2);
+  background-color: #e5e7eb;
 }
 
 .status-dropdown-menu {
@@ -701,83 +787,161 @@
 /* Action Button Styles */
 .action-buttons {
   display: flex;
-  gap: 6px;
+  gap: 8px;
   justify-content: flex-end;
   align-items: center;
+  position: relative;
 }
 
-.action-btn {
+.assign-sim-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 7px 12px;
+  border: 1px solid #dbe4f0;
+  border-radius: 9px;
+  background: #f8fafc;
+  color: #3559b8;
+  font-size: 12.5px;
+  font-weight: 700;
+  line-height: 1;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+}
+
+.assign-sim-btn i {
+  font-size: 12px;
+}
+
+.assign-sim-btn:hover {
+  background: #eef2ff;
+  border-color: #c9d5f3;
+  color: #2f4ea2;
+}
+
+.action-menu-trigger {
   width: 32px;
   height: 32px;
-  border: 1px solid #e3e6f0;
-  border-radius: 6px;
-  display: flex;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #6b7280;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   transition: all 0.2s ease;
-  font-size: 14px;
-  background: #fff;
-  position: relative;
-  padding: 0;
-  margin: 0;
-  color: #6c757d;
 }
 
-.action-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+.action-menu-trigger:hover {
+  background: #f8fafc;
+  border-color: #d1d5db;
+  color: #111827;
 }
 
-.action-btn:active {
-  transform: translateY(0);
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+.action-menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  min-width: 142px;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.12);
+  padding: 6px;
+  z-index: 1050;
 }
 
-.assign-sim-link {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  border: none;
+.action-menu-item {
+  width: 100%;
+  border: 0;
   background: transparent;
-  padding: 0;
-  margin-right: 4px;
-  color: var(--bs-primary);
+  color: #374151;
+  border-radius: 8px;
+  padding: 8px 10px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
   font-weight: 600;
-  text-decoration: underline;
-  text-underline-offset: 2px;
-  line-height: 1;
-  cursor: pointer;
-  white-space: nowrap;
+  text-align: left;
+  transition: all 0.2s ease;
 }
 
-.assign-sim-link i {
-  font-size: 14px;
+.action-menu-item:hover {
+  background: #f9fafb;
+  color: #111827;
 }
 
-.assign-sim-link:hover {
-  color: var(--bs-primary);
-  opacity: 0.9;
+.action-menu-item-danger {
+  color: #dc2626;
 }
 
-.edit-btn {
-  color: #4e73df;
+.action-menu-item-danger:hover {
+  background: #fef2f2;
+  color: #b91c1c;
 }
 
-.edit-btn:hover {
-  background: #4e73df;
-  border-color: #4e73df;
-  color: #fff;
+.user-cell {
+  display: flex;
+  align-items: center;
+  gap: 2px;
 }
 
-.delete-btn {
-  color: #e74a3b;
+.user-avatar {
+  width: 34px;
+  height: 34px;
+  font-size: 0.85rem;
 }
 
-.delete-btn:hover {
-  background: #e74a3b;
-  border-color: #e74a3b;
-  color: #fff;
+.user-info {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.user-name {
+  font-weight: 700;
+  color: #111827;
+  line-height: 1.2;
+}
+
+.user-email {
+  color: #6b7280;
+  font-size: 12px;
+  line-height: 1.3;
+}
+
+@media (max-width: 991.98px) {
+  .filter-item {
+    flex: 1 1 calc(50% - 12px);
+    min-width: 170px;
+  }
+
+  .filter-search {
+    flex: 1 1 100%;
+  }
+}
+
+@media (max-width: 575.98px) {
+  .filters-card {
+    padding: 12px;
+  }
+
+  .filter-item,
+  .filter-per-page {
+    flex: 1 1 100%;
+    min-width: 0;
+  }
+
+  .action-buttons {
+    gap: 6px;
+  }
+
+  .assign-sim-btn {
+    padding: 6px 10px;
+  }
 }
 </style>
 
@@ -845,6 +1009,7 @@ const getErrorMessage = (error) => {
 
 // Status dropdown state
 const activeDropdown = ref(null)
+const activeActionMenu = ref(null)
 
 const errors = ref({})
 const errorMessage = ref('')
@@ -1000,6 +1165,16 @@ const openDeleteModal = (user) => {
   showDeleteModal.value = true
 }
 
+const openEditFromMenu = (user) => {
+  activeActionMenu.value = null
+  openEditModal(user)
+}
+
+const openDeleteFromMenu = (user) => {
+  activeActionMenu.value = null
+  openDeleteModal(user)
+}
+
 const closeUserModal = () => {
   showUserModal.value = false
   resetForm()
@@ -1091,6 +1266,7 @@ const handleSubmit = async () => {
 }
 
 const toggleStatusDropdown = (userId) => {
+  activeActionMenu.value = null
   if (activeDropdown.value === userId) {
     activeDropdown.value = null
   } else {
@@ -1100,6 +1276,11 @@ const toggleStatusDropdown = (userId) => {
       adjustDropdownPosition(userId)
     })
   }
+}
+
+const toggleActionMenu = (userId) => {
+  activeDropdown.value = null
+  activeActionMenu.value = activeActionMenu.value === userId ? null : userId
 }
 
 const adjustDropdownPosition = (userId) => {
@@ -1183,6 +1364,9 @@ watch(perPage, () => {
 const handleClickOutside = (event) => {
   if (!event.target.closest('.status-dropdown')) {
     activeDropdown.value = null
+  }
+  if (!event.target.closest('.action-buttons')) {
+    activeActionMenu.value = null
   }
 }
 

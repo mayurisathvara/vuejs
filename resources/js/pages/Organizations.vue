@@ -48,7 +48,7 @@
     </div>
 
     <!-- Organizations Table -->
-    <div class="card card-round">
+    <div class="card card-round users-table-card">
       <div class="card-body p-0">
         <div class="table-responsive-wrapper">
           <div class="simple-table">
@@ -63,29 +63,33 @@
           <template #actions="{ row }">
             <div class="action-buttons">
               <button
-                class="action-btn settings-btn"
+                class="assign-sim-btn"
                 type="button"
                 @click="goToSettings(row.id)"
                 title="Settings"
               >
                 <i class="fas fa-cog"></i>
+                <span>Settings</span>
               </button>
               <button
-                class="action-btn edit-btn"
+                class="action-menu-trigger"
                 type="button"
-                @click="openEditModal(row)"
-                title="Edit"
+                @click.stop="toggleActionMenu(row.id)"
+                aria-label="Open actions"
+                title="More actions"
               >
-                <i class="fas fa-edit"></i>
+                <i class="fas fa-ellipsis-h"></i>
               </button>
-              <button
-                class="action-btn delete-btn"
-                type="button"
-                @click="openDeleteModal(row)"
-                title="Delete"
-              >
-                <i class="fas fa-trash"></i>
-              </button>
+              <div v-if="activeActionMenu === row.id" class="action-menu" @click.stop>
+                <button type="button" class="action-menu-item" @click="openEditFromMenu(row)">
+                  <i class="fas fa-pen"></i>
+                  <span>Edit</span>
+                </button>
+                <button type="button" class="action-menu-item action-menu-item-danger" @click="openDeleteFromMenu(row)">
+                  <i class="fas fa-trash"></i>
+                  <span>Delete</span>
+                </button>
+              </div>
             </div>
           </template>
           <template #cell-name="{ row }">
@@ -94,15 +98,15 @@
             </div>
           </template>
           <template #cell-contact_person="{ row }">
-            <div class="d-flex align-items-center">
+            <div class="user-cell">
               <div class="avatar-sm me-2">
-                <div class="avatar-img rounded-circle bg-success d-flex align-items-center justify-content-center text-white fw-bold" style="width: 32px; height: 32px;">
+                <div class="avatar-img rounded-circle bg-success d-flex align-items-center justify-content-center text-white fw-bold user-avatar">
                   {{ row.name?.charAt(0) || 'O' }}
                 </div>
               </div>
-              <div>
-                <div class="fw-bold">{{ row.name }}</div>
-                <small class="text-muted">{{ row.email }}</small>
+              <div class="user-info">
+                <div class="user-name">{{ row.name }}</div>
+                <small class="user-email">{{ row.email }}</small>
               </div>
             </div>
           </template>
@@ -727,6 +731,265 @@
   border-color: #e74a3b;
   color: #fff;
 }
+
+.users-table-card {
+  background: #ffffff;
+  border: 0;
+  border-radius: 14px;
+  box-shadow: 0 10px 28px rgba(15, 23, 42, 0.06);
+}
+
+.simple-table :deep(.table-responsive) {
+  border: 1px solid #eef2f7;
+  border-radius: 14px;
+}
+
+.simple-table :deep(table.table) {
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: 13.5px;
+}
+
+.simple-table :deep(table.table thead th) {
+  background: #f9fafb;
+  color: #374151;
+  letter-spacing: 0.03em !important;
+  border-bottom: 1px solid #edf1f7;
+  border-right: 1px solid #edf1f7;
+  padding: 13px 14px !important;
+  font-size: 12px;
+}
+
+.simple-table :deep(table.table tbody td) {
+  border-top: 1px solid #f1f5f9;
+  border-right: 1px solid #f1f5f9;
+  padding: 14px !important;
+  transition: background-color 0.2s ease;
+}
+
+.simple-table :deep(table.table tbody tr:hover),
+.simple-table :deep(table.table tbody tr:hover td) {
+  background: #f9fafb;
+}
+
+.filters-card {
+  background: #ffffff;
+  border: 1px solid #eef2f7;
+  border-radius: 14px;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.05);
+  padding: 14px;
+}
+
+.filters-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+}
+
+.filter-item {
+  min-width: 180px;
+  flex: 1 1 180px;
+}
+
+.filter-search {
+  flex: 2.4 1 360px;
+}
+
+.filter-per-page {
+  flex: 0 1 170px;
+}
+
+.search-box-modern,
+.select-wrapper {
+  position: relative;
+}
+
+.filter-icon,
+.search-icon-modern {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #9ca3af;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.search-input-modern,
+.select-modern {
+  height: 42px;
+  border-radius: 10px;
+  border: 1px solid #e5e7eb;
+  background: #ffffff;
+  font-size: 13px;
+  box-shadow: none;
+}
+
+.search-input-modern {
+  padding-left: 38px;
+}
+
+.select-modern {
+  padding-left: 36px;
+}
+
+.search-input-modern:focus,
+.select-modern:focus {
+  border-color: #cbd5e1;
+  box-shadow: 0 0 0 4px rgba(148, 163, 184, 0.16);
+}
+
+.status-badge {
+  padding: 5px 10px;
+  border-radius: 999px;
+  font-weight: 700;
+  min-width: 84px;
+}
+
+.status-badge.status-active {
+  background-color: #dcfce7;
+  color: #16a34a;
+}
+
+.status-badge.status-active .status-dot {
+  background-color: #16a34a;
+}
+
+.status-badge.status-inactive {
+  background-color: #f3f4f6;
+  color: #6b7280;
+}
+
+.status-badge.status-inactive .status-dot {
+  background-color: #9ca3af;
+}
+
+.status-badge.status-active:hover,
+.status-badge.status-inactive:hover {
+  box-shadow: none;
+}
+
+.action-buttons {
+  gap: 8px;
+  position: relative;
+}
+
+.assign-sim-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 7px 12px;
+  border: 1px solid #dbe4f0;
+  border-radius: 9px;
+  background: #f8fafc;
+  color: #3559b8;
+  font-size: 12.5px;
+  font-weight: 700;
+  line-height: 1;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+}
+
+.assign-sim-btn:hover {
+  background: #eef2ff;
+  border-color: #c9d5f3;
+  color: #2f4ea2;
+}
+
+.action-menu-trigger {
+  width: 32px;
+  height: 32px;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #6b7280;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.action-menu-trigger:hover {
+  background: #f8fafc;
+  border-color: #d1d5db;
+  color: #111827;
+}
+
+.action-menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  min-width: 142px;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.12);
+  padding: 6px;
+  z-index: 1050;
+}
+
+.action-menu-item {
+  width: 100%;
+  border: 0;
+  background: transparent;
+  color: #374151;
+  border-radius: 8px;
+  padding: 8px 10px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  text-align: left;
+  transition: all 0.2s ease;
+}
+
+.action-menu-item:hover {
+  background: #f9fafb;
+  color: #111827;
+}
+
+.action-menu-item-danger {
+  color: #dc2626;
+}
+
+.action-menu-item-danger:hover {
+  background: #fef2f2;
+  color: #b91c1c;
+}
+
+.user-cell {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.user-avatar {
+  width: 34px;
+  height: 34px;
+  font-size: 0.85rem;
+}
+
+.user-info {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.user-name {
+  font-weight: 700;
+  color: #111827;
+  line-height: 1.2;
+}
+
+.user-email {
+  color: #6b7280;
+  font-size: 12px;
+  line-height: 1.3;
+}
 </style>
 
 <script setup>
@@ -752,6 +1015,7 @@ const searchTimeout = ref(null)
 
 // Status dropdown state
 const activeDropdown = ref(null)
+const activeActionMenu = ref(null)
 
 // Modal states
 const showOrganizationModal = ref(false)
@@ -852,6 +1116,16 @@ const openEditModal = (organization) => {
 const openDeleteModal = (organization) => {
   organizationToDelete.value = organization
   showDeleteModal.value = true
+}
+
+const openEditFromMenu = (organization) => {
+  activeActionMenu.value = null
+  openEditModal(organization)
+}
+
+const openDeleteFromMenu = (organization) => {
+  activeActionMenu.value = null
+  openDeleteModal(organization)
 }
 
 const closeOrganizationModal = () => {
@@ -974,6 +1248,7 @@ const handleSubmit = async () => {
 }
 
 const toggleStatusDropdown = (organizationId) => {
+  activeActionMenu.value = null
   if (activeDropdown.value === organizationId) {
     activeDropdown.value = null
   } else {
@@ -983,6 +1258,11 @@ const toggleStatusDropdown = (organizationId) => {
       adjustDropdownPosition(organizationId)
     })
   }
+}
+
+const toggleActionMenu = (organizationId) => {
+  activeDropdown.value = null
+  activeActionMenu.value = activeActionMenu.value === organizationId ? null : organizationId
 }
 
 const adjustDropdownPosition = (organizationId) => {
@@ -1069,6 +1349,9 @@ watch(perPage, () => {
 const handleClickOutside = (event) => {
   if (!event.target.closest('.status-dropdown')) {
     activeDropdown.value = null
+  }
+  if (!event.target.closest('.action-buttons')) {
+    activeActionMenu.value = null
   }
 }
 

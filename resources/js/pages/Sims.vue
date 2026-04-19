@@ -87,7 +87,7 @@
     </div>
 
     <!-- SIMs Table -->
-    <div class="card card-round">
+    <div class="card card-round users-table-card">
       <div class="card-body p-0">
         <div class="table-responsive-wrapper">
           <div class="simple-table">
@@ -95,13 +95,36 @@
               :data="simsStore.sims"
               :headers="simHeaders"
               :loading="simsStore.loading"
-              :actions="{ edit: true, delete: true }"
+              :actions="true"
               :checkboxes="true"
               :selectedRows="selectedSims"
               @edit="openEditModal"
               @delete="openDeleteModal"
               @selection-change="handleSelectionChange"
             >
+          <template #actions="{ row }">
+            <div class="action-buttons">
+              <button
+                class="action-menu-trigger"
+                type="button"
+                @click.stop="toggleActionMenu(row.id)"
+                aria-label="Open actions"
+                title="More actions"
+              >
+                <i class="fas fa-ellipsis-h"></i>
+              </button>
+              <div v-if="activeActionMenu === row.id" class="action-menu" @click.stop>
+                <button type="button" class="action-menu-item" @click="openEditFromMenu(row)">
+                  <i class="fas fa-pen"></i>
+                  <span>Edit</span>
+                </button>
+                <button type="button" class="action-menu-item action-menu-item-danger" @click="openDeleteFromMenu(row)">
+                  <i class="fas fa-trash"></i>
+                  <span>Delete</span>
+                </button>
+              </div>
+            </div>
+          </template>
           <template #cell-mobile="{ value }">
             <span class="fw-bold">{{ value }}</span>
           </template>
@@ -1316,6 +1339,215 @@
   padding-top: 0.75rem;
   border-top: 1px solid #e9ecef;
 }
+
+.users-table-card {
+  background: #ffffff;
+  border: 0;
+  border-radius: 14px;
+  box-shadow: 0 10px 28px rgba(15, 23, 42, 0.06);
+}
+
+.simple-table :deep(.table-responsive) {
+  border: 1px solid #eef2f7;
+  border-radius: 14px;
+}
+
+.simple-table :deep(table.table) {
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: 13.5px;
+}
+
+.simple-table :deep(table.table thead th) {
+  background: #f9fafb;
+  color: #374151;
+  letter-spacing: 0.03em !important;
+  border-bottom: 1px solid #edf1f7;
+  border-right: 1px solid #edf1f7;
+  padding: 13px 14px !important;
+  font-size: 12px;
+}
+
+.simple-table :deep(table.table tbody td) {
+  border-top: 1px solid #f1f5f9;
+  border-right: 1px solid #f1f5f9;
+  padding: 14px !important;
+  transition: background-color 0.2s ease;
+}
+
+.simple-table :deep(table.table tbody tr:hover),
+.simple-table :deep(table.table tbody tr:hover td) {
+  background: #f9fafb;
+}
+
+.filters-card {
+  background: #ffffff;
+  border: 1px solid #eef2f7;
+  border-radius: 14px;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.05);
+  padding: 14px;
+}
+
+.filters-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+}
+
+.filter-item {
+  min-width: 180px;
+  flex: 1 1 180px;
+}
+
+.filter-search {
+  flex: 2.4 1 360px;
+}
+
+.filter-per-page {
+  flex: 0 1 170px;
+}
+
+.search-box-modern,
+.select-wrapper {
+  position: relative;
+}
+
+.filter-icon,
+.search-icon-modern {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #9ca3af;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.search-input-modern,
+.select-modern {
+  height: 42px;
+  border-radius: 10px;
+  border: 1px solid #e5e7eb;
+  background: #ffffff;
+  font-size: 13px;
+  box-shadow: none;
+}
+
+.search-input-modern {
+  padding-left: 38px;
+}
+
+.select-modern {
+  padding-left: 36px;
+}
+
+.search-input-modern:focus,
+.select-modern:focus {
+  border-color: #cbd5e1;
+  box-shadow: 0 0 0 4px rgba(148, 163, 184, 0.16);
+}
+
+.status-badge {
+  padding: 5px 10px;
+  border-radius: 999px;
+  font-weight: 700;
+  min-width: 84px;
+}
+
+.status-badge.status-active {
+  background-color: #dcfce7;
+  color: #16a34a;
+}
+
+.status-badge.status-active .status-dot {
+  background-color: #16a34a;
+}
+
+.status-badge.status-inactive {
+  background-color: #f3f4f6;
+  color: #6b7280;
+}
+
+.status-badge.status-inactive .status-dot {
+  background-color: #9ca3af;
+}
+
+.status-badge.status-active:hover,
+.status-badge.status-inactive:hover {
+  box-shadow: none;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+  align-items: center;
+  position: relative;
+}
+
+.action-menu-trigger {
+  width: 32px;
+  height: 32px;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #6b7280;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.action-menu-trigger:hover {
+  background: #f8fafc;
+  border-color: #d1d5db;
+  color: #111827;
+}
+
+.action-menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  min-width: 142px;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.12);
+  padding: 6px;
+  z-index: 1050;
+}
+
+.action-menu-item {
+  width: 100%;
+  border: 0;
+  background: transparent;
+  color: #374151;
+  border-radius: 8px;
+  padding: 8px 10px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  text-align: left;
+  transition: all 0.2s ease;
+}
+
+.action-menu-item:hover {
+  background: #f9fafb;
+  color: #111827;
+}
+
+.action-menu-item-danger {
+  color: #dc2626;
+}
+
+.action-menu-item-danger:hover {
+  background: #fef2f2;
+  color: #b91c1c;
+}
 </style>
 
 <script setup>
@@ -1349,6 +1581,7 @@ const searchTimeout = ref(null)
 
 // Status dropdown state
 const activeDropdown = ref(null)
+const activeActionMenu = ref(null)
 
 // Modal states
 const showSimModal = ref(false)
@@ -1430,6 +1663,7 @@ const formatDate = (date) => {
 }
 
 const toggleStatusDropdown = (simId) => {
+  activeActionMenu.value = null
   if (activeDropdown.value === simId) {
     activeDropdown.value = null
   } else {
@@ -1438,6 +1672,11 @@ const toggleStatusDropdown = (simId) => {
       adjustDropdownPosition(simId)
     })
   }
+}
+
+const toggleActionMenu = (simId) => {
+  activeDropdown.value = null
+  activeActionMenu.value = activeActionMenu.value === simId ? null : simId
 }
 
 const adjustDropdownPosition = (simId) => {
@@ -1532,6 +1771,9 @@ const handleSimSwap = async () => {
 const handleClickOutside = (event) => {
   if (!event.target.closest('.status-dropdown')) {
     activeDropdown.value = null
+  }
+  if (!event.target.closest('.action-buttons')) {
+    activeActionMenu.value = null
   }
 }
 
@@ -1634,6 +1876,16 @@ const openEditModal = async (sim) => {
 const openDeleteModal = (sim) => {
   simToDelete.value = sim
   showDeleteModal.value = true
+}
+
+const openEditFromMenu = (sim) => {
+  activeActionMenu.value = null
+  openEditModal(sim)
+}
+
+const openDeleteFromMenu = (sim) => {
+  activeActionMenu.value = null
+  openDeleteModal(sim)
 }
 
 const closeSimModal = () => {
