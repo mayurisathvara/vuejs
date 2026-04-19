@@ -725,6 +725,7 @@ import flatpickr from 'flatpickr'
 import 'flatpickr/dist/flatpickr.min.css'
 import api from '@/services/api'
 import { useAuthStore } from '@/stores/auth'
+import { formatDateDisplay, formatShortDateDisplay } from '@/utils/dateFormatter'
 
 const authStore = useAuthStore()
 const router = useRouter()
@@ -877,7 +878,7 @@ const formatChartDateLabel = (value) => {
   if (!value) return ''
   const d = new Date(value)
   if (Number.isNaN(d.getTime())) return String(value)
-  return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })
+  return formatShortDateDisplay(d, String(value))
 }
 
 const getDayOverDayChange = (arr, index) => {
@@ -1328,7 +1329,7 @@ const callVolumeSubtitle = computed(() => {
   const start = dailyCallVolume.meta?.start_date
   const end = dailyCallVolume.meta?.end_date
 
-  if (start && end) return `${start} to ${end} | Avg ${avg} calls/day`
+  if (start && end) return `${formatDateDisplay(start, start)} to ${formatDateDisplay(end, end)} | Avg ${avg} calls/day`
   if (days) return `Last ${days} days | Avg ${avg} calls/day`
   return dailyCallVolumeLoading.value ? 'Loading...' : '-'
 })

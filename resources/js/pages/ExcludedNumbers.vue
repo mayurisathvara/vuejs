@@ -11,6 +11,10 @@
             <i class="fas fa-sync-alt me-2"></i>
             <span class="btn-text">Refresh</span>
           </button>
+          <button type="button" class="btn btn-success btn-sm me-2" @click="handleExportCsv">
+            <i class="fas fa-file-export me-2"></i>
+            <span class="btn-text">Export</span>
+          </button>
           <button type="button" class="btn btn-success btn-sm me-2" @click="openImportModal">
             <i class="fas fa-file-csv me-2"></i>
             <span class="btn-text">Import CSV</span>
@@ -321,6 +325,7 @@ import InputField from '@/components/InputField.vue'
 import Pagination from '@/components/Pagination.vue'
 import api from '@/services/api'
 import { showSuccess, showError } from '@/services/toast'
+import { formatDateDisplay, formatExportDate } from '@/utils/dateFormatter'
 
 const authStore = useAuthStore()
 
@@ -419,6 +424,88 @@ const fetchOrganizations = async () => {
 }
 
 const refreshList = () => fetchNumbers()
+
+const escapeCsv = (value) => {
+  if (value === null || value === undefined) return ''
+  return String(value).replace(/"/g, '""')
+}
+
+const fetchAllNumbersForExport = async () => {
+  const allRows = []
+  let page = 1
+  let lastPage = 1
+
+  do {
+    const params = new URLSearchParams({
+      page: String(page),
+      per_page: '1000'
+    })
+
+    if (searchQuery.value) params.append('search', searchQuery.value)
+    if (selectedOrganization.value) params.append('organization_id', selectedOrganization.value)
+
+    const response = await api.get(`/excluded-numbers?${params}`)
+    const pageRows = response.data?.data || []
+    allRows.push(...pageRows)
+
+    lastPage = Number(response.data?.last_page || 1)
+    page += 1
+  } while (page <= lastPage)
+
+  return allRows
+}
+
+const handleExportCsv = async () => {
+  try {
+    const rows = await fetchAllNumbersForExport()
+
+    if (!rows.length) {
+      showError('No excluded numbers available to export.')
+      return
+    }
+
+    const headers = isAdmin.value
+      ? ['Phone Number', 'Label', 'Organization', 'Created']
+      : ['Phone Number', 'Label', 'Created']
+
+    const csvLines = [headers.join(',')]
+
+    rows.forEach((row) => {
+      const baseColumns = [
+        `"${escapeCsv(row.phone_number || '')}"`,
+        `"${escapeCsv(row.label || '')}"`
+      ]
+
+      const createdDate = formatExportDate(row.created_at, '')
+
+      if (isAdmin.value) {
+        baseColumns.push(`"${escapeCsv(row.organization?.name || 'N/A')}"`)
+      }
+
+      baseColumns.push(`"${escapeCsv(createdDate)}"`)
+      csvLines.push(baseColumns.join(','))
+    })
+
+    const csvContent = csvLines.join('\n')
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
+    const link = document.createElement('a')
+    const url = URL.createObjectURL(blob)
+    const stamp = formatExportDate(new Date(), 'export')
+
+    link.setAttribute('href', url)
+    link.setAttribute('download', `excluded_numbers_export_${stamp}.csv`)
+    link.style.visibility = 'hidden'
+
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+    URL.revokeObjectURL(url)
+
+    showSuccess(`Exported ${rows.length} excluded number(s) successfully.`)
+  } catch (error) {
+    showError(error.response?.data?.message || 'Failed to export excluded numbers.')
+  }
+}
 
 // Import handlers
 const openImportModal = () => {
@@ -605,7 +692,7 @@ const handleDelete = async () => {
   }
 }
 
-const formatDate = (date) => new Date(date).toLocaleDateString()
+const formatDate = (date) => formatDateDisplay(date)
 
 watch(perPage, () => fetchNumbers())
 

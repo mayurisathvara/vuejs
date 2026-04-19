@@ -385,6 +385,7 @@ import 'flatpickr/dist/flatpickr.css'
 import Button from '@/components/Button.vue'
 import Table from '@/components/Table.vue'
 import Pagination from '@/components/Pagination.vue'
+import { formatDateDisplay, formatDateTimeDisplay } from '@/utils/dateFormatter'
 
 const authStore = useAuthStore()
 
@@ -866,29 +867,12 @@ const exportFile = async (format) => {
 }
 
 const formatDateTime = (value) => {
-  if (!value) return 'N/A'
-  try {
-    const dt = new Date(value)
-    if (Number.isNaN(dt.getTime())) return value
-    return dt.toLocaleString()
-  } catch {
-    return value
-  }
+  return formatDateTimeDisplay(value, value || 'N/A')
 }
 
 const formatDateOnly = (row) => {
   const value = row?.date || row?.date_time
-  if (!value) return 'N/A'
-  try {
-    const dt = new Date(value)
-    if (!Number.isNaN(dt.getTime())) return dt.toLocaleDateString()
-  } catch {
-    // ignore
-  }
-  // Fallback: try to show YYYY-MM-DD from string
-  const s = String(value)
-  const m = /^(\d{4}-\d{2}-\d{2})/.exec(s)
-  return m ? m[1] : s
+  return formatDateDisplay(value, value || 'N/A')
 }
 
 const formatTimeOnly = (row) => {

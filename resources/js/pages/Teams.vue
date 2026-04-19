@@ -316,6 +316,7 @@ import InputField from '@/components/InputField.vue'
 import Pagination from '@/components/Pagination.vue'
 import api from '@/services/api'
 import { showSuccess, showError } from '@/services/toast'
+import { formatDateDisplay } from '@/utils/dateFormatter'
 
 const authStore = useAuthStore()
 
@@ -561,7 +562,7 @@ const handleDelete = async () => {
 }
 
 const formatDate = (date) => {
-  return new Date(date).toLocaleDateString()
+  return formatDateDisplay(date)
 }
 
 // Watch for changes in perPage

@@ -793,6 +793,7 @@ import Modal from '@/components/Modal.vue'
 import InputField from '@/components/InputField.vue'
 import Pagination from '@/components/Pagination.vue'
 import api from '@/services/api'
+import { formatDateDisplay } from '@/utils/dateFormatter'
 
 const router = useRouter()
 const usersStore = useUsersStore()
@@ -1163,7 +1164,7 @@ const goToAssignSims = (user) => {
 }
 
 const formatDate = (date) => {
-  return new Date(date).toLocaleDateString()
+  return formatDateDisplay(date)
 }
 
 const getStatusBadgeClass = (status) => {

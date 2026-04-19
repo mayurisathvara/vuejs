@@ -129,12 +129,15 @@
 <script setup>
 import { computed, onMounted, reactive, ref } from 'vue'
 import { useRoute } from 'vue-router'
+import { useAuthStore } from '@/stores/auth'
 import api from '@/services/api'
 import { showSuccess, showError } from '@/services/toast'
 import { decryptId } from '@/utils/encryption'
 
 const route = useRoute()
+const authStore = useAuthStore()
 const organizationId = computed(() => decryptId(route.params.organizationId))
+const userRole = computed(() => authStore.user?.role || '')
 
 const loading = ref(false)
 const errorMessage = ref('')
@@ -192,6 +195,10 @@ const fetchSettings = async () => {
   form.enable_working_hours = Boolean(settings.enable_working_hours ?? false)
   form.working_hours = coerceWorkingHours(settings.working_hours)
   form.exclude_numbers_enabled = settings.exclude_numbers_enabled !== undefined ? Number(settings.exclude_numbers_enabled) : 1
+
+  if (userRole.value !== 'admin') {
+    authStore.setDateFormat(form.date_formate)
+  }
 }
 
 const handleRefresh = async () => {
@@ -224,6 +231,9 @@ const handleSave = async () => {
     })
 
     showSuccess('Settings saved successfully')
+    if (userRole.value !== 'admin') {
+      authStore.setDateFormat(form.date_formate)
+    }
     await fetchSettings()
   } catch (e) {
     console.error('Error saving settings:', e)

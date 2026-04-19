@@ -14,6 +14,13 @@ const api = axios.create({
 // Request interceptor
 api.interceptors.request.use(
   (config) => {
+    // Always attach Bearer token from localStorage if available.
+    // This prevents refresh-time 401 when app boot order calls APIs before store init finishes.
+    const authToken = localStorage.getItem('token')
+    if (authToken && !config.headers['Authorization']) {
+      config.headers['Authorization'] = `Bearer ${authToken}`
+    }
+
     // Add CSRF token for Laravel Sanctum
     const token = document.querySelector('meta[name="csrf-token"]')
     if (token) {

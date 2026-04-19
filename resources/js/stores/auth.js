@@ -3,14 +3,75 @@ import { ref, computed } from 'vue'
 import api from '@/services/api'
 
 export const useAuthStore = defineStore('auth', () => {
+  const DEFAULT_ADMIN_DATE_FORMAT = 'Y-m-d'
+  const DATE_FORMAT_STORAGE_KEY = 'date_formate'
+
   // State
   const user = ref(null)
   const token = ref(localStorage.getItem('token'))
   const loading = ref(false)
+  const dateFormat = ref(localStorage.getItem(DATE_FORMAT_STORAGE_KEY) || DEFAULT_ADMIN_DATE_FORMAT)
+
+  // Ensure axios has auth header immediately on store creation (before component mount hooks).
+  if (token.value) {
+    api.defaults.headers.common['Authorization'] = `Bearer ${token.value}`
+  }
 
   // Getters
   const isAuthenticated = computed(() => !!token.value)
   const userRole = computed(() => user.value?.role || null)
+
+  const normalizeDateFormat = (value) => {
+    const allowed = ['Y-m-d', 'd-m-Y', 'm-d-Y', 'd/m/Y', 'm/d/Y', 'Y/m/d']
+    return allowed.includes(value) ? value : DEFAULT_ADMIN_DATE_FORMAT
+  }
+
+  const setDateFormat = (value) => {
+    const normalized = normalizeDateFormat(value)
+    dateFormat.value = normalized
+    localStorage.setItem(DATE_FORMAT_STORAGE_KEY, normalized)
+  }
+
+  const pickDateFormatFromUser = (userData) => {
+    return (
+      userData?.date_formate ||
+      userData?.organization?.date_formate ||
+      userData?.organization?.settings?.date_formate ||
+      null
+    )
+  }
+
+  const syncDateFormat = async (userData = user.value) => {
+    const role = userData?.role || userRole.value
+
+    // Admin always uses fixed default.
+    if (role === 'admin') {
+      setDateFormat(DEFAULT_ADMIN_DATE_FORMAT)
+      return DEFAULT_ADMIN_DATE_FORMAT
+    }
+
+    const fromUser = pickDateFormatFromUser(userData)
+    if (fromUser) {
+      setDateFormat(fromUser)
+      return dateFormat.value
+    }
+
+    const orgId = userData?.organization?.id || userData?.organization_id
+    if (!orgId) {
+      setDateFormat(DEFAULT_ADMIN_DATE_FORMAT)
+      return dateFormat.value
+    }
+
+    try {
+      const res = await api.get(`/organizations/${orgId}/settings`)
+      const orgDateFormat = res.data?.settings?.date_formate
+      setDateFormat(orgDateFormat || DEFAULT_ADMIN_DATE_FORMAT)
+    } catch {
+      setDateFormat(DEFAULT_ADMIN_DATE_FORMAT)
+    }
+
+    return dateFormat.value
+  }
 
   // Actions
   const login = async (credentials) => {
@@ -23,6 +84,7 @@ export const useAuthStore = defineStore('auth', () => {
       token.value = authToken
       localStorage.setItem('token', authToken)
       localStorage.setItem('user', JSON.stringify(userData))
+      await syncDateFormat(userData)
       
       // Set default axios header
       api.defaults.headers.common['Authorization'] = `Bearer ${authToken}`
@@ -45,6 +107,7 @@ export const useAuthStore = defineStore('auth', () => {
       token.value = authToken
       localStorage.setItem('token', authToken)
       localStorage.setItem('user', JSON.stringify(newUser))
+      await syncDateFormat(newUser)
       
       // Set default axios header
       api.defaults.headers.common['Authorization'] = `Bearer ${authToken}`
@@ -68,6 +131,8 @@ export const useAuthStore = defineStore('auth', () => {
     token.value = null
     localStorage.removeItem('token')
     localStorage.removeItem('user')
+    localStorage.removeItem(DATE_FORMAT_STORAGE_KEY)
+    dateFormat.value = DEFAULT_ADMIN_DATE_FORMAT
     delete api.defaults.headers.common['Authorization']
     loading.value = false
 
@@ -87,6 +152,7 @@ export const useAuthStore = defineStore('auth', () => {
       const response = await api.get('/user')
       user.value = response.data
       localStorage.setItem('user', JSON.stringify(response.data))
+      await syncDateFormat(response.data)
       return response.data
     } catch (error) {
       // If token is invalid, logout
@@ -105,12 +171,15 @@ export const useAuthStore = defineStore('auth', () => {
       token.value = storedToken
       user.value = JSON.parse(storedUser)
       api.defaults.headers.common['Authorization'] = `Bearer ${storedToken}`
+      // Best-effort background sync for date format.
+      void syncDateFormat(user.value)
     }
   }
 
   const setUser = (userData) => {
     user.value = userData
     localStorage.setItem('user', JSON.stringify(userData))
+    void syncDateFormat(userData)
   }
 
   return {
@@ -118,6 +187,7 @@ export const useAuthStore = defineStore('auth', () => {
     user,
     token,
     loading,
+    dateFormat,
     // Getters
     isAuthenticated,
     userRole,
@@ -127,6 +197,8 @@ export const useAuthStore = defineStore('auth', () => {
     logout,
     fetchUser,
     initializeAuth,
-    setUser
+    setUser,
+    setDateFormat,
+    syncDateFormat
   }
 })

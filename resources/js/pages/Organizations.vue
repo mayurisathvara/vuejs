@@ -91,7 +91,6 @@
           <template #cell-name="{ row }">
             <div>
               <div class="fw-bold">{{ row.name }}</div>
-              <small class="text-muted">{{ row.email || 'N/A' }}</small>
             </div>
           </template>
           <template #cell-contact_person="{ row }">
@@ -108,6 +107,9 @@
             </div>
           </template>
           <template #cell-mobile="{ value }">
+            {{ value || 'N/A' }}
+          </template>
+          <template #cell-email="{ value }">
             {{ value || 'N/A' }}
           </template>
           <template #cell-app_login_code="{ value }">
@@ -738,6 +740,7 @@ import Modal from '@/components/Modal.vue'
 import InputField from '@/components/InputField.vue'
 import Pagination from '@/components/Pagination.vue'
 import api from '@/services/api'
+import { formatDateDisplay } from '@/utils/dateFormatter'
 
 const organizationsStore = useOrganizationsStore()
 const router = useRouter()
@@ -781,6 +784,7 @@ const getErrorMessage = (error) => {
 const organizationHeaders = [
   { key: 'name', label: 'Organization', class: 'text-start' },
   { key: 'mobile', label: 'Mobile', class: 'text-center' },
+  { key: 'email', label: 'Email', class: 'text-center' },
   { key: 'app_login_code', label: 'App Login Code', class: 'text-center' },
   { key: 'sims_count', label: 'SIMs', class: 'text-center' },
   { key: 'status', label: 'Status', class: 'text-center' },
@@ -1045,7 +1049,7 @@ const getStatusBadgeClass = (status) => {
 }
 
 const formatDate = (date) => {
-  return new Date(date).toLocaleDateString()
+  return formatDateDisplay(date)
 }
 
 // Watch for organization name changes to auto-update app_login_code during creation
@@ -1077,4 +1081,3 @@ onUnmounted(() => {
   document.removeEventListener('click', handleClickOutside)
 })
 </script>
-

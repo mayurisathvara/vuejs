@@ -103,10 +103,7 @@
               @selection-change="handleSelectionChange"
             >
           <template #cell-mobile="{ value }">
-            <div class="d-flex align-items-center">
-              <i class="fas fa-mobile-alt me-2 text-primary"></i>
-              <span class="fw-bold">{{ value }}</span>
-            </div>
+            <span class="fw-bold">{{ value }}</span>
           </template>
           <template #cell-name="{ value }">
             {{ value || 'N/A' }}
@@ -1332,6 +1329,7 @@ import InputField from '@/components/InputField.vue'
 import Pagination from '@/components/Pagination.vue'
 import api from '@/services/api'
 import { showSuccess, showError } from '@/services/toast'
+import { formatDateDisplay, formatExportDate } from '@/utils/dateFormatter'
 
 const simsStore = useSimsStore()
 const authStore = useAuthStore()
@@ -1410,7 +1408,7 @@ const simHeaders = computed(() => {
   headers.push(
     { key: 'team_name', label: 'Team', class: 'text-start' },
     { key: 'status', label: 'Status', class: 'text-start' },
-    { key: 'created_at', label: 'Created At', class: 'text-start' }
+    { key: 'created_at', label: 'Created', class: 'text-start' }
   )
   
   return headers
@@ -1428,12 +1426,7 @@ const formatStatusLabel = (status) => {
 }
 
 const formatDate = (date) => {
-  if (!date) return 'N/A'
-  return new Date(date).toLocaleDateString('en-US', {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric'
-  })
+  return formatDateDisplay(date)
 }
 
 const toggleStatusDropdown = (simId) => {
@@ -1804,7 +1797,7 @@ const handleExportCsv = async () => {
         const name = (sim.name || '').replace(/"/g, '""') // Escape quotes
         const organization = (sim.organization?.name || '').replace(/"/g, '""')
         const team = (sim.team?.name || '').replace(/"/g, '""')
-        const createdAt = sim.created_at ? new Date(sim.created_at).toLocaleDateString('en-US') : ''
+        const createdAt = sim.created_at ? formatExportDate(sim.created_at, '') : ''
         
         csvContent += `"${mobile}","${name}","${organization}","${team}","${createdAt}"\n`
       })
@@ -1815,7 +1808,7 @@ const handleExportCsv = async () => {
         const mobile = sim.mobile || ''
         const name = (sim.name || '').replace(/"/g, '""') // Escape quotes
         const team = (sim.team?.name || '').replace(/"/g, '""')
-        const createdAt = sim.created_at ? new Date(sim.created_at).toLocaleDateString('en-US') : ''
+        const createdAt = sim.created_at ? formatExportDate(sim.created_at, '') : ''
         
         csvContent += `"${mobile}","${name}","${team}","${createdAt}"\n`
       })

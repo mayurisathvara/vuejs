@@ -114,6 +114,7 @@ import api from '@/services/api'
 import { showSuccess } from '@/services/toast'
 
 const authStore = useAuthStore()
+const userRole = computed(() => authStore.user?.role || '')
 
 const organizationId = computed(() => authStore.user?.organization?.id || authStore.user?.organization_id || null)
 
@@ -159,6 +160,10 @@ const fetchSettings = async () => {
 
   form.date_formate = settings.date_formate ?? 'Y-m-d'
   form.exclude_numbers_enabled = settings.exclude_numbers_enabled ?? 1
+
+  if (userRole.value !== 'admin') {
+    authStore.setDateFormat(form.date_formate)
+  }
 }
 
 const handleSave = async () => {
@@ -181,6 +186,9 @@ const handleSave = async () => {
     })
 
     showSuccess('Settings saved successfully')
+    if (userRole.value !== 'admin') {
+      authStore.setDateFormat(form.date_formate)
+    }
     await fetchSettings()
   } catch (e) {
     console.error('Error saving date format setting:', e)
