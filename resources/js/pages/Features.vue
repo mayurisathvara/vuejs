@@ -2,12 +2,23 @@
   <div>
     <!-- Hero Section - Enhanced Two Column Layout -->
     <section class="relative text-gray-900 overflow-hidden hero-section" role="banner" aria-label="Hero section">
-      <!-- Soft Gradient Background -->
-      <div class="absolute inset-0 bg-gradient-to-br from-orange-50/50 via-white to-orange-50/30" aria-hidden="true"></div>
+      <!-- Premium SaaS Gradient Background - Base Layer -->
+      <div class="absolute inset-0" style="background: linear-gradient(135deg, #F9FAFB 0%, #EEF2F7 50%, #F3F4F6 100%);" aria-hidden="true"></div>
       
-      <!-- Floating Geometric Shapes for Depth -->
-      <div class="absolute top-20 left-10 w-72 h-72 bg-orange-400/10 rounded-full blur-3xl animate-float" aria-hidden="true"></div>
-      <div class="absolute bottom-20 right-10 w-96 h-96 bg-orange-300/10 rounded-full blur-3xl animate-float-delayed" aria-hidden="true"></div>
+      <!-- Soft Orange Glow (right-center, behind mobile images) -->
+      <div class="absolute top-1/2 right-0 w-[600px] h-[600px] -translate-y-1/2 opacity-100" 
+           style="background: radial-gradient(circle, rgba(255, 115, 50, 0.25) 0%, transparent 70%);" 
+           aria-hidden="true"></div>
+      
+      <!-- Subtle Purple Glow (bottom-right) -->
+      <div class="absolute bottom-0 right-0 w-[800px] h-[800px] translate-y-1/4 translate-x-1/4 opacity-100" 
+           style="background: radial-gradient(circle, rgba(168, 85, 247, 0.15) 0%, transparent 65%);" 
+           aria-hidden="true"></div>
+      
+      <!-- Very Light Blue Tint (top-left) -->
+      <div class="absolute top-0 left-0 w-[500px] h-[500px] -translate-y-1/4 -translate-x-1/4 opacity-100" 
+           style="background: radial-gradient(circle, rgba(59, 130, 246, 0.08) 0%, transparent 70%);" 
+           aria-hidden="true"></div>
       
       <!-- Content Container -->
       <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-20 lg:py-24">
@@ -50,8 +61,9 @@
                 class="inline-flex items-center justify-center px-8 py-4 bg-white text-gray-900 font-bold rounded-xl border-2 border-gray-300 hover:border-orange-500 hover:text-orange-600 transition-all duration-300"
                 aria-label="View demo"
               >
-                <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
-                  <path d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" />
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
                 View Demo
               </button>
@@ -93,31 +105,32 @@
                 />
                 
                 <!-- Floating Stats Card - Growth -->
-                <div class="absolute top-8 -right-4 lg:right-0 bg-white rounded-2xl shadow-xl p-4 animate-float hidden sm:block">
-                  <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center">
-                      <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div class="absolute top-8 -right-4 lg:right-0 bg-white rounded-xl shadow-xl p-3 animate-float hidden sm:block">
+                  <div class="flex items-center gap-2">
+                    <div class="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0">
+                      <svg class="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
                       </svg>
                     </div>
                     <div>
-                      <div class="text-2xl font-bold text-gray-900">18%</div>
-                      <div class="text-xs text-gray-500">Growth This Month</div>
+                      <div class="text-xl font-bold text-gray-900 leading-tight">+18%</div>
+                      <div class="text-[10px] font-medium text-gray-600 whitespace-nowrap">Call Growth</div>
+                      <div class="text-[9px] text-gray-400">vs last month</div>
                     </div>
                   </div>
                 </div>
                 
                 <!-- Floating Stats Card - Duration -->
-                <div class="absolute bottom-20 -left-4 lg:left-0 bg-white rounded-2xl shadow-xl p-4 animate-float-delayed hidden sm:block">
-                  <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 rounded-full bg-orange-100 flex items-center justify-center">
-                      <svg class="w-6 h-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div class="absolute bottom-20 -left-4 lg:left-0 bg-white rounded-xl shadow-xl p-3 animate-float-delayed hidden sm:block">
+                  <div class="flex items-center gap-2">
+                    <div class="w-8 h-8 rounded-full bg-orange-100 flex items-center justify-center flex-shrink-0">
+                      <svg class="w-4 h-4 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                       </svg>
                     </div>
                     <div>
-                      <div class="text-2xl font-bold text-gray-900">4m 32s</div>
-                      <div class="text-xs text-gray-500">Avg Duration</div>
+                      <div class="text-xl font-bold text-gray-900 leading-tight">4m 32s</div>
+                      <div class="text-[10px] font-medium text-gray-600 whitespace-nowrap">Avg Call Duration</div>
                     </div>
                   </div>
                 </div>
