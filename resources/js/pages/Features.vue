@@ -171,23 +171,51 @@
       </div>
     </section>
 
-    <!-- Features Section -->
-    <section class="py-24 bg-white" id="features" role="region" aria-label="Features">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="text-center mb-16">
-          <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-            Everything You Need to Track, Analyse & Grow
+    <!-- Features Section - Premium SaaS Style -->
+    <section class="py-20 lg:py-28 bg-white relative overflow-hidden" id="features" role="region" aria-label="Features">
+      <!-- Subtle background gradient -->
+      <div class="absolute inset-0 bg-gradient-to-b from-gray-50 via-transparent to-gray-50 pointer-events-none" aria-hidden="true"></div>
+      
+      <!-- Soft gradient accents -->
+      <div class="absolute top-20 right-0 w-96 h-96 rounded-full opacity-5 blur-3xl" style="background: linear-gradient(135deg, #ff6b00, #ff8c33);" aria-hidden="true"></div>
+      <div class="absolute bottom-20 left-0 w-80 h-80 rounded-full opacity-4 blur-3xl" style="background: linear-gradient(135deg, #ff6b00, #ff8c33);" aria-hidden="true"></div>
+      
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+        <!-- Section Header -->
+        <div class="text-center mb-16 lg:mb-20">
+          <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-6 leading-tight max-w-3xl mx-auto">
+            Powerful Call Tracking for Modern Businesses
           </h2>
-          <p class="text-xl text-gray-600 max-w-2xl mx-auto">
-            From call recording to advanced analytics — Callytics gives your business complete visibility over every phone conversation.
+          <p class="text-lg md:text-xl text-gray-600 max-w-2xl mx-auto leading-relaxed">
+            Real-time insights, complete control, and seamless integration—everything you need to maximize call value.
           </p>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-          <article v-for="(feature, index) in features" :key="index" class="feature-card" :class="'fade-in-up delay-' + (index * 100)">
-            <div class="feature-icon" v-html="feature.icon" aria-hidden="true"></div>
-            <h3 class="text-xl font-bold text-gray-900 mb-3">{{ feature.title }}</h3>
-            <p class="text-gray-600">{{ feature.description }}</p>
+        <!-- Premium Feature Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8">
+          <article 
+            v-for="(feature, index) in features" 
+            :key="index" 
+            class="premium-feature-card fade-in-up" 
+            :class="'delay-' + (index * 100)"
+            role="article"
+          >
+            <!-- Icon -->
+            <div class="premium-feature-icon" v-html="feature.icon" aria-hidden="true"></div>
+            
+            <!-- Content -->
+            <h3 class="text-xl font-bold text-gray-900 mb-3 leading-tight">{{ feature.title }}</h3>
+            <p class="text-gray-600 text-sm leading-relaxed mb-5">{{ feature.description }}</p>
+            
+            <!-- Micro-bullet points -->
+            <ul class="space-y-2 pt-5 border-t border-gray-100">
+              <li v-for="(bullet, i) in feature.bullets" :key="i" class="flex items-start gap-2.5 text-xs text-gray-600">
+                <svg class="w-4 h-4 text-orange-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
+                </svg>
+                <span>{{ bullet }}</span>
+              </li>
+            </ul>
           </article>
         </div>
       </div>
@@ -598,24 +626,28 @@ const showDemoModal = ref(false);
 
 const features = [
   {
-    title: 'Real-Time Call Tracking',
-    description: 'Monitor every inbound and outbound call as it happens. Get live call data, detailed activity logs, and instant performance insights across your entire team.',
-    icon: '<svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>'
+    title: 'Track Every Call, Instantly',
+    description: 'See inbound & outbound calls in real-time with complete activity logs and live insights.',
+    bullets: ['Live tracking', 'Call logs', 'Performance insights'],
+    icon: '<svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>'
   },
   {
-    title: 'Call Recording & Playback',
-    description: 'Record and review business calls for quality assurance, agent training, and compliance. Store, search, and replay conversations anytime from the cloud.',
-    icon: '<svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" /></svg>'
+    title: 'Record & Replay Conversations',
+    description: 'Automatically record calls for training, quality checks, and compliance.',
+    bullets: ['Cloud storage', 'Quality assurance', 'Compliance ready'],
+    icon: '<svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" /></svg>'
   },
   {
-    title: 'Advanced Call Analytics',
-    description: 'Unlock deep insights on call duration, source attribution, peak hours, and conversion rates. Turn raw call data into actionable business intelligence.',
-    icon: '<svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg>'
+    title: 'Turn Calls into Insights',
+    description: 'Analyze call data like duration, sources, and conversions to improve performance.',
+    bullets: ['Duration analytics', 'Source tracking', 'Conversion metrics'],
+    icon: '<svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg>'
   },
   {
-    title: 'Smart CRM & Tool Integration',
-    description: 'Seamlessly connect Callytics with your existing CRM, marketing platforms, and analytics tools for a unified view of your customer journey.',
-    icon: '<svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>'
+    title: 'Seamless CRM Integration',
+    description: 'Sync call data with your CRM and marketing tools for a unified customer journey.',
+    bullets: ['CRM sync', 'Multi-tool integration', 'Unified data'],
+    icon: '<svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>'
   }
 ];
 </script>
@@ -758,6 +790,31 @@ const features = [
 
 .cta-button-secondary:hover {
   @apply border-orange-300 shadow-lg scale-105;
+}
+
+/* Premium Feature Cards - SaaS Style */
+.premium-feature-card {
+  @apply p-8 lg:p-10 bg-white rounded-2xl transition-all duration-500 border border-gray-100 flex flex-col;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04), 0 4px 16px rgba(0, 0, 0, 0.04);
+  background: linear-gradient(135deg, #ffffff 0%, #fafbfc 100%);
+}
+
+.premium-feature-card:hover {
+  @apply border-orange-200;
+  box-shadow: 0 8px 24px rgba(255, 107, 0, 0.12), 0 4px 12px rgba(0, 0, 0, 0.06);
+  transform: translateY(-12px) scale(1.01);
+}
+
+.premium-feature-icon {
+  @apply w-14 h-14 rounded-2xl flex items-center justify-center text-white mb-6 transition-all duration-500 flex-shrink-0;
+  background: linear-gradient(135deg, #ff6b00 0%, #ff8c33 100%);
+  box-shadow: 0 4px 16px rgba(255, 107, 0, 0.25);
+}
+
+.premium-feature-card:hover .premium-feature-icon {
+  @apply scale-110;
+  box-shadow: 0 8px 28px rgba(255, 107, 0, 0.35);
+  transform: scale(1.15) rotate(5deg);
 }
 
 /* Feature Cards */
