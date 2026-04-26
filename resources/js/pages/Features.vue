@@ -120,7 +120,7 @@
                 </div>
                 
                 <!-- Floating Stats Card - Duration -->
-                <div class="absolute bottom-20 -left-4 lg:left-0 bg-white rounded-xl shadow-xl px-4 py-2 animate-float-delayed hidden sm:block min-w-[160px]">
+                <div class="absolute bottom-20 left-2 lg:left-14 bg-white rounded-xl shadow-xl px-4 py-2 animate-float-delayed hidden sm:block min-w-[160px]">
                   <div class="flex items-center gap-2">
                     <div class="w-8 h-8 rounded-full bg-orange-100 flex items-center justify-center flex-shrink-0">
                       <svg class="w-4 h-4 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -135,7 +135,7 @@
                 </div>
                 
                 <!-- Floating Stats Card - Total Calls -->
-                <div class="absolute top-1/3 -left-8 lg:-left-4 bg-white rounded-xl shadow-xl px-4 py-2 animate-float hidden sm:block min-w-[160px]">
+                <div class="absolute top-1/3 left-2 lg:left-14 bg-white rounded-xl shadow-xl px-4 py-2 animate-float hidden sm:block min-w-[160px]">
                   <div class="flex items-center gap-2">
                     <div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
                       <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
