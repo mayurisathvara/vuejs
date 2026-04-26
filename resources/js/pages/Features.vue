@@ -398,51 +398,55 @@
     </section>
 
     <!-- Mobile App Section -->
-    <section class="py-24 relative overflow-hidden" id="mobile-app" role="region" aria-label="Mobile app" style="background: linear-gradient(180deg, #ffffff 0%, #fff8f3 30%, #fff1e6 60%, #fff8f3 90%, #ffffff 100%);">
-      <div class="absolute inset-0 overflow-hidden pointer-events-none" aria-hidden="true">
-        <div class="absolute top-20 left-10 w-72 h-72 rounded-full opacity-20 blur-3xl" style="background: #ff6b00;"></div>
-        <div class="absolute bottom-20 right-10 w-96 h-96 rounded-full opacity-10 blur-3xl" style="background: #ff8c33;"></div>
-      </div>
-      <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-        <div class="text-center mb-16">
-          <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+    <section class="py-24 relative overflow-hidden" id="mobile-app" role="region" aria-label="Mobile app" style="background: linear-gradient(180deg, #ffffff 0%, #fff8f3 26%, #fff1e6 58%, #fff8f3 88%, #ffffff 100%);">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+        <div class="text-center mb-14 max-w-3xl mx-auto">
+          <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4 leading-tight">
             Manage Your Business Calls On the Go
           </h2>
-          <p class="text-xl text-gray-600 max-w-3xl mx-auto">
+          <p class="text-lg md:text-xl text-gray-600 leading-relaxed mx-auto">
             Stay connected to your call data from anywhere. The Callytics mobile app gives your team real-time visibility, instant notifications, and full dashboard access — right from your smartphone.
           </p>
         </div>
 
         <!-- Mobile App Showcase -->
-        <div class="flex flex-col lg:flex-row items-center gap-12 lg:gap-8 mb-10">
+        <div class="app-showcase-grid mb-14">
           
           <!-- Left Features -->
-          <div class="flex flex-col gap-8 flex-1 order-2 lg:order-1">
-            <div class="flex items-start gap-4 text-right lg:flex-row flex-row-reverse lg:flex-row-reverse">
-              <div>
-                <h3 class="text-lg font-bold text-gray-900 mb-1">Real-Time Notifications</h3>
-                <p class="text-sm text-gray-500">Get instant alerts for missed calls, answered calls, and agent activity — so you never miss a business-critical moment.</p>
-              </div>
+          <div class="app-feature-stack app-features-left">
+            <div class="app-feature-card">
               <div class="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 app-feature-icon">
-                <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" /></svg>
+                <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" /></svg>
+              </div>
+              <div>
+                <h3 class="text-lg font-bold text-gray-900 mb-3">Real-Time Notifications</h3>
+                <ul class="app-feature-list">
+                  <li>Instant alerts for missed & answered calls</li>
+                  <li>Live agent activity tracking</li>
+                  <li>Never miss a business-critical moment</li>
+                </ul>
               </div>
             </div>
-            <div class="flex items-start gap-4 text-right lg:flex-row flex-row-reverse lg:flex-row-reverse">
-              <div>
-                <h3 class="text-lg font-bold text-gray-900 mb-1">Live Dashboard</h3>
-                <p class="text-sm text-gray-500">View live call stats, team performance, and key metrics directly from your mobile — anytime, anywhere.</p>
-              </div>
+            <div class="app-feature-card">
               <div class="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 app-feature-icon">
-                <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg>
+                <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg>
+              </div>
+              <div>
+                <h3 class="text-lg font-bold text-gray-900 mb-3">Live Dashboard</h3>
+                <ul class="app-feature-list">
+                  <li>View live call stats & team performance</li>
+                  <li>Key metrics at a glance</li>
+                  <li>Available anytime, anywhere from mobile</li>
+                </ul>
               </div>
             </div>
           </div>
 
           <!-- Center Phone Screenshots -->
-          <div class="flex items-end justify-center gap-2 sm:gap-3 md:gap-4 flex-shrink-0 order-1 lg:order-2">
+          <div class="app-phone-row">
             <!-- Call Logs -->
             <div class="flex flex-col items-center group app-screen-card">
-              <div class="relative w-36 sm:w-40 md:w-44">
+              <div class="relative app-phone-side">
                 <img 
                   :src="'/mobile_app/call_logs.png'" 
                   alt="Callytics mobile app call logs screen"
@@ -450,12 +454,12 @@
                   loading="lazy"
                 />
               </div>
-              <span class="mt-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Call Logs</span>
+              <span class="app-phone-label text-gray-500">CALL LOGS</span>
             </div>
 
             <!-- Dashboard (Center - Larger) -->
-            <div class="flex flex-col items-center group app-screen-card -mt-4">
-              <div class="relative w-44 sm:w-48 md:w-56 app-center-phone">
+            <div class="flex flex-col items-center group app-screen-card">
+              <div class="relative app-phone-hero app-center-phone">
                 <div class="absolute -inset-4 rounded-[2.5rem] opacity-20 group-hover:opacity-40 transition-opacity duration-500 blur-2xl" style="background: linear-gradient(135deg, #ff6b00 0%, #ff8c33 100%);"></div>
                 <img 
                   :src="'/mobile_app/dashboard.png'" 
@@ -464,12 +468,12 @@
                   loading="lazy"
                 />
               </div>
-              <span class="mt-3 text-xs font-semibold text-orange-600 uppercase tracking-wider">Dashboard</span>
+              <span class="app-phone-label text-orange-600">DASHBOARD</span>
             </div>
 
             <!-- Analytics -->
             <div class="flex flex-col items-center group app-screen-card">
-              <div class="relative w-36 sm:w-40 md:w-44">
+              <div class="relative app-phone-side">
                 <img 
                   :src="'/mobile_app/analytics.png'" 
                   alt="Callytics mobile app analytics screen"
@@ -477,28 +481,36 @@
                   loading="lazy"
                 />
               </div>
-              <span class="mt-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Analytics</span>
+              <span class="app-phone-label text-gray-500">ANALYTICS</span>
             </div>
           </div>
 
           <!-- Right Features -->
-          <div class="flex flex-col gap-8 flex-1 order-3">
-            <div class="flex items-start gap-4">
+          <div class="app-feature-stack app-features-right">
+            <div class="app-feature-card">
               <div class="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 app-feature-icon">
-                <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
               </div>
               <div>
-                <h3 class="text-lg font-bold text-gray-900 mb-1">Instant Reports</h3>
-                <p class="text-sm text-gray-500">Access detailed call reports, export data, and share insights with your team — all from a single tap on your phone.</p>
+                <h3 class="text-lg font-bold text-gray-900 mb-3">Instant Reports</h3>
+                <ul class="app-feature-list">
+                  <li>Access detailed call reports instantly</li>
+                  <li>Export data with a single tap</li>
+                  <li>Easily share insights with your team</li>
+                </ul>
               </div>
             </div>
-            <div class="flex items-start gap-4">
+            <div class="app-feature-card">
               <div class="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 app-feature-icon">
-                <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
+                <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
               </div>
               <div>
-                <h3 class="text-lg font-bold text-gray-900 mb-1">Secure Access</h3>
-                <p class="text-sm text-gray-500">Role-based access control with multi-factor authentication ensures your call data stays private and protected.</p>
+                <h3 class="text-lg font-bold text-gray-900 mb-3">Secure Access</h3>
+                <ul class="app-feature-list">
+                  <li>Role-based access control</li>
+                  <li>Multi-factor authentication built-in</li>
+                  <li>Your call data stays private & protected</li>
+                </ul>
               </div>
             </div>
           </div>
@@ -506,8 +518,8 @@
         </div>
 
         <!-- Download Button -->
-        <div class="text-center">
-          <p class="text-lg text-gray-600 mb-6 font-medium">Download the Callytics App — Available on Google Play. Start tracking your business calls from your mobile today.</p>
+        <div class="text-center pt-10 border-t border-orange-200/70">
+          <p class="text-lg md:text-xl text-gray-800 mb-6 font-bold max-w-3xl mx-auto">Download the Callytics App — Available on Google Play. Start tracking your business calls from your mobile today.</p>
           <a 
             href="#" 
             class="inline-flex items-center px-8 py-4 bg-black text-white rounded-xl hover:bg-gray-900 transition-all duration-300 hover:shadow-xl hover:scale-105"
@@ -722,6 +734,70 @@ const features = [
 }
 
 /* Mobile App Screenshot Cards */
+.app-showcase-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 2.5rem;
+  align-items: center;
+}
+
+.app-feature-stack {
+  display: grid;
+  gap: 1.75rem;
+}
+
+.app-feature-card {
+  min-height: 0;
+  display: flex;
+  align-items: flex-start;
+  gap: 1.15rem;
+  padding: 0.25rem 0;
+  text-align: left;
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  backdrop-filter: none;
+}
+
+.app-feature-list {
+  display: grid;
+  gap: 0.5rem;
+  color: #4b5563;
+  font-size: 1.02rem;
+  line-height: 1.45;
+  list-style: disc;
+  padding-left: 1.2rem;
+}
+
+.app-feature-list li::marker {
+  color: #F97316;
+}
+
+.app-phone-row {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1.5rem;
+}
+
+.app-phone-side {
+  width: min(11rem, 72vw);
+}
+
+.app-phone-hero {
+  width: min(14rem, 78vw);
+}
+
+.app-phone-label {
+  margin-top: 0.9rem;
+  font-size: 0.72rem;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: 0.18em;
+}
+
 .app-screen-card {
   transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
@@ -755,6 +831,67 @@ const features = [
 
 .app-feature-icon:hover {
   box-shadow: 0 4px 14px rgba(255, 107, 0, 0.3), 0 2px 4px rgba(0, 0, 0, 0.08);
+}
+
+@media (min-width: 640px) {
+  .app-phone-row {
+    flex-direction: row;
+    align-items: flex-end;
+    gap: 0.75rem;
+  }
+
+  .app-phone-side {
+    width: 10rem;
+  }
+
+  .app-phone-hero {
+    width: 12rem;
+  }
+}
+
+@media (min-width: 768px) {
+  .app-showcase-grid {
+    grid-template-columns: minmax(15rem, 0.95fr) minmax(24rem, 1.1fr);
+    grid-template-areas:
+      "left phones"
+      "right phones";
+    gap: 1.75rem 2.5rem;
+  }
+
+  .app-features-left {
+    grid-area: left;
+    align-self: end;
+  }
+
+  .app-features-right {
+    grid-area: right;
+    align-self: start;
+  }
+
+  .app-phone-row {
+    grid-area: phones;
+    align-self: center;
+  }
+}
+
+@media (min-width: 1024px) {
+  .app-showcase-grid {
+    grid-template-columns: minmax(18rem, 1.1fr) minmax(29rem, auto) minmax(18rem, 1.1fr);
+    grid-template-areas: "left phones right";
+    gap: 2.75rem;
+  }
+
+  .app-feature-stack {
+    align-self: center;
+  }
+
+  .app-phone-side {
+    width: 11rem;
+  }
+
+  .app-phone-hero {
+    width: 14rem;
+  }
 }
 
 .hero-gradient {
@@ -1084,4 +1221,3 @@ const features = [
   opacity: 0;
 }
 </style>
-
