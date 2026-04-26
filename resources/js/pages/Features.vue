@@ -391,7 +391,7 @@
     </section>
 
     <!-- Mobile App Section -->
-    <section class="py-24 relative overflow-hidden" id="mobile-app" role="region" aria-label="Mobile app" style="background: linear-gradient(180deg, #ffffff 0%, #fff8f3 26%, #fff1e6 58%, #fff8f3 88%, #ffffff 100%);">
+    <section class="py-24 bg-white relative overflow-hidden" id="mobile-app" role="region" aria-label="Mobile app">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <div class="text-center mb-14 max-w-3xl mx-auto">
           <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4 leading-tight">
