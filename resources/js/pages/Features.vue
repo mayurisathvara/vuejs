@@ -173,13 +173,6 @@
 
     <!-- Features Section - Premium SaaS Style -->
     <section class="py-20 lg:py-28 bg-white relative overflow-hidden" id="features" role="region" aria-label="Features">
-      <!-- Subtle background gradient -->
-      <div class="absolute inset-0 bg-gradient-to-b from-gray-50 via-transparent to-gray-50 pointer-events-none" aria-hidden="true"></div>
-      
-      <!-- Soft gradient accents -->
-      <div class="absolute top-20 right-0 w-96 h-96 rounded-full opacity-5 blur-3xl" style="background: linear-gradient(135deg, #ff6b00, #ff8c33);" aria-hidden="true"></div>
-      <div class="absolute bottom-20 left-0 w-80 h-80 rounded-full opacity-4 blur-3xl" style="background: linear-gradient(135deg, #ff6b00, #ff8c33);" aria-hidden="true"></div>
-      
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <!-- Section Header -->
         <div class="text-center mb-16 lg:mb-20">
