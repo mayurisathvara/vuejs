@@ -37,37 +37,41 @@
 
       <!-- Row 2: Mobile Number | Select Industry -->
       <div class="field-cell">
-        <label class="form-label" for="mobile">Mobile Number <span class="text-danger">*</span></label>
-        <div class="mobile-input-wrap" :class="{ 'has-error': errors.mobile }">
-          <div class="mobile-prefix" aria-label="Country code">+91</div>
-          <input
-            id="mobile"
-            v-model="form.mobile"
-            type="tel"
-            class="form-control mobile-input"
-            placeholder="Enter 10-digit mobile number"
-            maxlength="10"
-            inputmode="numeric"
-            autocomplete="tel"
-            required
-          />
+        <div class="form-group">
+          <label class="form-label" for="mobile">Mobile Number <span class="text-danger">*</span></label>
+          <div class="mobile-input-wrap" :class="{ 'has-error': errors.mobile }">
+            <div class="mobile-prefix" aria-label="Country code">+91</div>
+            <input
+              id="mobile"
+              v-model="form.mobile"
+              type="tel"
+              class="form-control mobile-input"
+              placeholder="Enter 10-digit mobile number"
+              maxlength="10"
+              inputmode="numeric"
+              autocomplete="tel"
+              required
+            />
+          </div>
+          <div v-if="errors.mobile" class="field-error">{{ errors.mobile }}</div>
         </div>
-        <div v-if="errors.mobile" class="field-error">{{ errors.mobile }}</div>
       </div>
       <div class="field-cell">
-        <label class="form-label" for="industry">Select Industry <span class="text-danger">*</span></label>
-        <div class="select-wrap" :class="{ 'has-error': errors.industry }">
-          <select
-            v-model="form.industry"
-            id="industry"
-            class="form-select industry-select"
-          >
-            <option value="" disabled>Choose your industry</option>
-            <option v-for="opt in industries" :key="opt" :value="opt">{{ opt }}</option>
-          </select>
-          <i class="fas fa-chevron-down select-arrow"></i>
+        <div class="form-group">
+          <label class="form-label" for="industry">Select Industry <span class="text-danger">*</span></label>
+          <div class="select-wrap" :class="{ 'has-error': errors.industry }">
+            <select
+              v-model="form.industry"
+              id="industry"
+              class="form-select industry-select"
+            >
+              <option value="" disabled>Choose your industry</option>
+              <option v-for="opt in industries" :key="opt" :value="opt">{{ opt }}</option>
+            </select>
+            <i class="fas fa-chevron-down select-arrow"></i>
+          </div>
+          <div v-if="errors.industry" class="field-error">{{ errors.industry }}</div>
         </div>
-        <div v-if="errors.industry" class="field-error">{{ errors.industry }}</div>
       </div>
 
       <!-- Row 3: Password | Confirm Password -->
