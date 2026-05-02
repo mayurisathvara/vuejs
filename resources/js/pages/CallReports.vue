@@ -21,255 +21,311 @@
     </div>
 
     <div v-show="filtersOpen" class="filters-card" @mousedown="onFiltersMousedown">
-      <div class="row g-3">
-        <div class="col-12 col-md-3">
-          <div class="search-box-modern">
-            <i class="fas fa-calendar-alt search-icon-modern"></i>
-            <input
-              ref="dateRangeEl"
-              v-model="filters.date_range"
-              type="text"
-              class="search-input-modern"
-              placeholder="dd/mm/yyyy - dd/mm/yyyy"
-              readonly
-            />
+      <div class="filters-topbar">
+        <div class="filters-heading">
+          <div class="filters-heading-icon">
+            <i class="fas fa-sliders-h"></i>
           </div>
-          <small class="text-muted">Date Range</small>
+          <div>
+            <h4 class="filters-title">Filter Calls</h4>
+            <p class="filters-subtitle">Narrow results by date, time, call activity, and ownership.</p>
+          </div>
         </div>
 
-        <div class="col-6 col-md-2">
-          <div class="timepicker-wrapper">
-            <div ref="startTimeTriggerEl" class="search-box-modern" @click="toggleTimeDropdown('start')">
-              <i class="fas fa-clock search-icon-modern"></i>
+        <div class="filters-actions">
+          <button
+            type="button"
+            class="btn btn-light border shadow-sm btn-sm filter-action-btn"
+            @click="toggleFilters"
+          >
+            <i class="fas fa-eye-slash me-2"></i>
+            Hide Filters
+          </button>
+          <button
+            type="button"
+            class="btn btn-white border shadow-sm btn-sm filter-action-btn"
+            :disabled="loading"
+            @click="resetAll"
+          >
+            <i class="fas fa-undo me-2"></i>
+            Reset
+          </button>
+          <button
+            type="button"
+            class="btn btn-primary btn-sm filter-action-btn filter-action-primary"
+            :disabled="loading"
+            @click="applySearch"
+          >
+            <span
+              v-if="loading"
+              class="spinner-border spinner-border-sm me-2"
+              role="status"
+              aria-hidden="true"
+            ></span>
+            <i v-else class="fas fa-search me-2"></i>
+            {{ loading ? 'Searching...' : 'Search' }}
+          </button>
+        </div>
+      </div>
+
+      <div class="row g-3 filter-grid">
+        <div class="col-12 col-lg-4">
+          <div class="filter-field">
+            <label class="filter-label">Date Range</label>
+            <div class="search-box-modern filter-control-shell">
+              <i class="fas fa-calendar-alt search-icon-modern"></i>
               <input
-                ref="startTimeEl"
-                v-model="filters.start_time"
+                ref="dateRangeEl"
+                v-model="filters.date_range"
                 type="text"
-                class="search-input-modern time-input"
-                placeholder="HH:MM"
+                class="search-input-modern"
+                placeholder="dd/mm/yyyy - dd/mm/yyyy"
                 readonly
               />
             </div>
-
-            <div v-if="timeDropdownOpen === 'start'" ref="startTimeMenuEl" class="timepicker-menu">
-              <div class="timepicker-selected">
-                <div class="timepicker-selected-box">{{ startTimeParts.hh }}</div>
-                <div class="timepicker-selected-box">{{ startTimeParts.mm }}</div>
-              </div>
-              <div class="timepicker-body">
-                <div class="timepicker-col hours">
-                  <div
-                    v-for="h in timeHours"
-                    :key="`h-${h}`"
-                    class="timepicker-item"
-                    :class="{ 'is-active': h === startTimeParts.hh }"
-                    :data-value="h"
-                    @click="setTimeHour('start', h)"
-                  >
-                    {{ h }}
-                  </div>
-                </div>
-                <div class="timepicker-col minutes">
-                  <div
-                    v-for="m in timeMinutes"
-                    :key="`m-${m}`"
-                    class="timepicker-item"
-                    :class="{ 'is-active': m === startTimeParts.mm }"
-                    :data-value="m"
-                    @click="setTimeMinute('start', m)"
-                  >
-                    {{ m }}
-                  </div>
-                </div>
-              </div>
-            </div>
           </div>
-          <small class="text-muted">Start Time (HH:MM)</small>
         </div>
 
-        <div class="col-6 col-md-2">
-          <div class="timepicker-wrapper">
-            <div ref="endTimeTriggerEl" class="search-box-modern" @click="toggleTimeDropdown('end')">
-              <i class="fas fa-clock search-icon-modern"></i>
-              <input
-                ref="endTimeEl"
-                v-model="filters.end_time"
-                type="text"
-                class="search-input-modern time-input"
-                placeholder="HH:MM"
-                readonly
-              />
-            </div>
-
-            <div v-if="timeDropdownOpen === 'end'" ref="endTimeMenuEl" class="timepicker-menu">
-              <div class="timepicker-selected">
-                <div class="timepicker-selected-box">{{ endTimeParts.hh }}</div>
-                <div class="timepicker-selected-box">{{ endTimeParts.mm }}</div>
-              </div>
-              <div class="timepicker-body">
-                <div class="timepicker-col hours">
-                  <div
-                    v-for="h in timeHours"
-                    :key="`eh-${h}`"
-                    class="timepicker-item"
-                    :class="{ 'is-active': h === endTimeParts.hh }"
-                    :data-value="h"
-                    @click="setTimeHour('end', h)"
-                  >
-                    {{ h }}
-                  </div>
-                </div>
-                <div class="timepicker-col minutes">
-                  <div
-                    v-for="m in timeMinutes"
-                    :key="`em-${m}`"
-                    class="timepicker-item"
-                    :class="{ 'is-active': m === endTimeParts.mm }"
-                    :data-value="m"
-                    @click="setTimeMinute('end', m)"
-                  >
-                    {{ m }}
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-          <small class="text-muted">End Time (HH:MM)</small>
-        </div>
-
-        <div class="col-6 col-md-3">
-          <div class="select-wrapper">
-            <i class="fas fa-exchange-alt filter-icon"></i>
-            <select v-model="filters.call_type" class="form-select select-modern">
-              <option value="">All Call Types</option>
-              <option value="inbound">Inbound</option>
-              <option value="outbound">Outbound</option>
-            </select>
-          </div>
-          <small class="text-muted">Call Type</small>
-        </div>
-
-        <div class="col-6 col-md-2">
-          <div class="select-wrapper">
-            <i class="fas fa-phone-volume filter-icon"></i>
-            <select v-model="filters.call_status" class="form-select select-modern">
-              <option value="">All Status</option>
-              <option value="Answered">Answered</option>
-              <option value="No Answer">No Answer</option>
-              <option value="Missed">Missed</option>
-            </select>
-          </div>
-          <small class="text-muted">Call Status</small>
-        </div>
-
-        <div v-if="isAdmin" class="col-12 col-md-3">
-          <div class="select-wrapper">
-            <i class="fas fa-building filter-icon"></i>
-            <select v-model="filters.organization_id" class="form-select select-modern" @change="onOrganizationChange">
-              <option value="">All Organizations</option>
-              <option v-for="org in options.organizations" :key="org.id" :value="org.id">
-                {{ org.name }}
-              </option>
-            </select>
-          </div>
-          <small class="text-muted">Organization</small>
-        </div>
-
-        <div v-if="!isUser" class="col-12 col-md-3">
-          <div class="select-wrapper">
-            <i class="fas fa-sitemap filter-icon"></i>
-            <select v-model="filters.team_id" class="form-select select-modern" :disabled="optionsLoading || (isAdmin && !filters.organization_id)" @change="onTeamChange">
-              <option value="">All Teams</option>
-              <option v-if="optionsLoading" value="" disabled>Loading...</option>
-              <option v-for="dept in options.teams" :key="dept.id" :value="dept.id">
-                {{ dept.name }}
-              </option>
-            </select>
-          </div>
-          <small class="text-muted">Team</small>
-        </div>
-
-        <div v-if="!isUser" class="col-12 col-md-3">
-          <div class="select-wrapper">
-            <i class="fas fa-user filter-icon"></i>
-            <select v-model="filters.user_id" class="form-select select-modern" :disabled="optionsLoading || (!filters.team_id && options.users.length === 0)" @change="onUserChange">
-              <option value="">All Users</option>
-              <option v-if="optionsLoading" value="" disabled>Loading...</option>
-              <option v-for="u in options.users" :key="u.id" :value="u.id">
-                {{ u.name }}
-              </option>
-            </select>
-          </div>
-          <small class="text-muted">Users</small>
-        </div>
-
-        <div class="col-12 col-md-3">
-          <div class="multiselect-wrapper">
-            <i class="fas fa-sim-card filter-icon"></i>
-            <div ref="simTriggerEl" class="multiselect-trigger" @click="toggleSimDropdown">
-              <span v-if="filters.sim_mobile.length === 0" class="placeholder">All SIM Cards</span>
-              <span v-else class="selected-count">{{ filters.sim_mobile.length }} selected</span>
-              <i class="fas fa-chevron-down dropdown-arrow"></i>
-            </div>
-            <div v-if="simDropdownOpen" ref="simMenuEl" class="multiselect-menu">
-              <div class="multiselect-header">SIM Cards</div>
-              <div class="multiselect-option" @click="selectAllSims">
-                <input type="checkbox" :checked="isAllSimsSelected" readonly />
-                <label>All SIM Cards</label>
-              </div>
-              <div 
-                v-for="sim in options.sims" 
-                :key="simKey(sim)" 
-                class="multiselect-option"
-                @click="toggleSim(sim.mobile)"
-              >
-                <input 
-                  type="checkbox" 
-                  :checked="filters.sim_mobile.includes(sim.mobile)"
+        <div class="col-6 col-lg-4">
+          <div class="filter-field">
+            <label class="filter-label">Start Time</label>
+            <div class="timepicker-wrapper">
+              <div ref="startTimeTriggerEl" class="search-box-modern filter-control-shell" @click="toggleTimeDropdown('start')">
+                <i class="fas fa-clock search-icon-modern"></i>
+                <input
+                  ref="startTimeEl"
+                  v-model="filters.start_time"
+                  type="text"
+                  class="search-input-modern time-input"
+                  placeholder="HH:MM"
                   readonly
                 />
-                <label>{{ sim.mobile }}<span v-if="sim.name"> - {{ sim.name }}</span></label>
+              </div>
+
+              <div v-if="timeDropdownOpen === 'start'" ref="startTimeMenuEl" class="timepicker-menu">
+                <div class="timepicker-selected">
+                  <div class="timepicker-selected-box">{{ startTimeParts.hh }}</div>
+                  <div class="timepicker-selected-box">{{ startTimeParts.mm }}</div>
+                </div>
+                <div class="timepicker-body">
+                  <div class="timepicker-col hours">
+                    <div
+                      v-for="h in timeHours"
+                      :key="`h-${h}`"
+                      class="timepicker-item"
+                      :class="{ 'is-active': h === startTimeParts.hh }"
+                      :data-value="h"
+                      @click="setTimeHour('start', h)"
+                    >
+                      {{ h }}
+                    </div>
+                  </div>
+                  <div class="timepicker-col minutes">
+                    <div
+                      v-for="m in timeMinutes"
+                      :key="`m-${m}`"
+                      class="timepicker-item"
+                      :class="{ 'is-active': m === startTimeParts.mm }"
+                      :data-value="m"
+                      @click="setTimeMinute('start', m)"
+                    >
+                      {{ m }}
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
-          <small class="text-muted">SIM Cards</small>
         </div>
 
-        <div class="col-12 col-md-3">
-          <div class="search-box-modern">
-            <i class="fas fa-hashtag search-icon-modern"></i>
-            <input
-              v-model="filters.caller_number"
-              type="text"
-              class="search-input-modern"
-              placeholder="Customer number"
-            />
+        <div class="col-6 col-lg-4">
+          <div class="filter-field">
+            <label class="filter-label">End Time</label>
+            <div class="timepicker-wrapper">
+              <div ref="endTimeTriggerEl" class="search-box-modern filter-control-shell" @click="toggleTimeDropdown('end')">
+                <i class="fas fa-clock search-icon-modern"></i>
+                <input
+                  ref="endTimeEl"
+                  v-model="filters.end_time"
+                  type="text"
+                  class="search-input-modern time-input"
+                  placeholder="HH:MM"
+                  readonly
+                />
+              </div>
+
+              <div v-if="timeDropdownOpen === 'end'" ref="endTimeMenuEl" class="timepicker-menu">
+                <div class="timepicker-selected">
+                  <div class="timepicker-selected-box">{{ endTimeParts.hh }}</div>
+                  <div class="timepicker-selected-box">{{ endTimeParts.mm }}</div>
+                </div>
+                <div class="timepicker-body">
+                  <div class="timepicker-col hours">
+                    <div
+                      v-for="h in timeHours"
+                      :key="`eh-${h}`"
+                      class="timepicker-item"
+                      :class="{ 'is-active': h === endTimeParts.hh }"
+                      :data-value="h"
+                      @click="setTimeHour('end', h)"
+                    >
+                      {{ h }}
+                    </div>
+                  </div>
+                  <div class="timepicker-col minutes">
+                    <div
+                      v-for="m in timeMinutes"
+                      :key="`em-${m}`"
+                      class="timepicker-item"
+                      :class="{ 'is-active': m === endTimeParts.mm }"
+                      :data-value="m"
+                      @click="setTimeMinute('end', m)"
+                    >
+                      {{ m }}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
-          <small class="text-muted">Customer Number</small>
         </div>
 
-        <div class="col-12 col-md-3">
-          <div class="select-wrapper">
-            <i class="fas fa-undo filter-icon"></i>
-            <select v-model="filters.call_back" class="form-select select-modern">
-              <option value="">All Return Calls</option>
-              <option value="N">Pending</option>
-              <option value="Y">Returned</option>
-            </select>
+        <div class="col-12 col-lg-4">
+          <div class="filter-field">
+            <label class="filter-label">Call Type</label>
+            <div class="select-wrapper filter-control-shell">
+              <i class="fas fa-exchange-alt filter-icon"></i>
+              <select v-model="filters.call_type" class="form-select select-modern">
+                <option value="">All Call Types</option>
+                <option value="inbound">Inbound</option>
+                <option value="outbound">Outbound</option>
+              </select>
+            </div>
           </div>
-          <small class="text-muted">Return Calls</small>
         </div>
 
-        <div class="col-12">
-          <div class="d-flex gap-2 flex-wrap">
-            <button type="button" class="btn btn-primary btn-sm" :disabled="loading" @click="applySearch">
-              <i class="fas fa-search me-2"></i>
-              Search
-            </button>
-            <button type="button" class="btn btn-white border shadow-sm btn-sm" :disabled="loading" @click="resetAll">
-              <i class="fas fa-undo me-2"></i>
-              Reset
-            </button>
+        <div class="col-12 col-lg-4">
+          <div class="filter-field">
+            <label class="filter-label">Status</label>
+            <div class="select-wrapper filter-control-shell">
+              <i class="fas fa-phone-volume filter-icon"></i>
+              <select v-model="filters.call_status" class="form-select select-modern">
+                <option value="">All Status</option>
+                <option value="Answered">Answered</option>
+                <option value="No Answer">No Answer</option>
+                <option value="Missed">Missed</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-12 col-lg-4">
+          <div class="filter-field">
+            <label class="filter-label">Return Calls</label>
+            <div class="select-wrapper filter-control-shell">
+              <i class="fas fa-undo filter-icon"></i>
+              <select v-model="filters.call_back" class="form-select select-modern">
+                <option value="">All Return Calls</option>
+                <option value="N">Pending</option>
+                <option value="Y">Returned</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div v-if="isAdmin" class="col-12 col-lg-4">
+          <div class="filter-field">
+            <label class="filter-label">Organization</label>
+            <div class="select-wrapper filter-control-shell">
+              <i class="fas fa-building filter-icon"></i>
+              <select v-model="filters.organization_id" class="form-select select-modern" @change="onOrganizationChange">
+                <option value="">All Organizations</option>
+                <option v-for="org in options.organizations" :key="org.id" :value="org.id">
+                  {{ org.name }}
+                </option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div v-if="!isUser" class="col-12 col-lg-4">
+          <div class="filter-field">
+            <label class="filter-label">Team</label>
+            <div class="select-wrapper filter-control-shell">
+              <i class="fas fa-sitemap filter-icon"></i>
+              <select v-model="filters.team_id" class="form-select select-modern" :disabled="optionsLoading || (isAdmin && !filters.organization_id)" @change="onTeamChange">
+                <option value="">All Teams</option>
+                <option v-if="optionsLoading" value="" disabled>Loading...</option>
+                <option v-for="dept in options.teams" :key="dept.id" :value="dept.id">
+                  {{ dept.name }}
+                </option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div v-if="!isUser" class="col-12 col-lg-4">
+          <div class="filter-field">
+            <label class="filter-label">Users</label>
+            <div class="select-wrapper filter-control-shell">
+              <i class="fas fa-user filter-icon"></i>
+              <select v-model="filters.user_id" class="form-select select-modern" :disabled="optionsLoading || (!filters.team_id && options.users.length === 0)" @change="onUserChange">
+                <option value="">All Users</option>
+                <option v-if="optionsLoading" value="" disabled>Loading...</option>
+                <option v-for="u in options.users" :key="u.id" :value="u.id">
+                  {{ u.name }}
+                </option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-12 col-lg-4">
+          <div class="filter-field">
+            <label class="filter-label">SIM Cards</label>
+            <div class="multiselect-wrapper filter-control-shell">
+              <i class="fas fa-sim-card filter-icon"></i>
+              <div ref="simTriggerEl" class="multiselect-trigger" @click="toggleSimDropdown">
+                <span v-if="filters.sim_mobile.length === 0" class="placeholder">All SIM Cards</span>
+                <span v-else class="selected-count">{{ filters.sim_mobile.length }} selected</span>
+                <i class="fas fa-chevron-down dropdown-arrow"></i>
+              </div>
+              <div v-if="simDropdownOpen" ref="simMenuEl" class="multiselect-menu">
+                <div class="multiselect-header">SIM Cards</div>
+                <div class="multiselect-option" @click="selectAllSims">
+                  <input type="checkbox" :checked="isAllSimsSelected" readonly />
+                  <label>All SIM Cards</label>
+                </div>
+                <div
+                  v-for="sim in options.sims"
+                  :key="simKey(sim)"
+                  class="multiselect-option"
+                  @click="toggleSim(sim.mobile)"
+                >
+                  <input
+                    type="checkbox"
+                    :checked="filters.sim_mobile.includes(sim.mobile)"
+                    readonly
+                  />
+                  <label>{{ sim.mobile }}<span v-if="sim.name"> - {{ sim.name }}</span></label>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-12 col-lg-4">
+          <div class="filter-field">
+            <label class="filter-label">Customer Number</label>
+            <div class="search-box-modern filter-control-shell">
+              <i class="fas fa-hashtag search-icon-modern"></i>
+              <input
+                v-model="filters.caller_number"
+                type="text"
+                class="search-input-modern"
+                placeholder="Customer number"
+              />
+            </div>
           </div>
         </div>
       </div>
@@ -382,7 +438,6 @@ import { useAuthStore } from '@/stores/auth'
 import flatpickr from 'flatpickr'
 import 'flatpickr/dist/flatpickr.css'
 
-import Button from '@/components/Button.vue'
 import Table from '@/components/Table.vue'
 import Pagination from '@/components/Pagination.vue'
 import { formatDateDisplay, formatDateTimeDisplay } from '@/utils/dateFormatter'
@@ -949,6 +1004,185 @@ onBeforeUnmount(() => {
   min-width: 0 !important;
 }
 
+.filters-card {
+  margin-bottom: 24px;
+  padding: 18px;
+  border: 1px solid #dbe6f3;
+  border-radius: 20px;
+  background: linear-gradient(180deg, #ffffff 0%, #f7fbff 100%);
+  box-shadow: 0 14px 40px rgba(15, 23, 42, 0.06);
+}
+
+.filters-topbar {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 16px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid #e7eef7;
+}
+
+.filters-heading {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+}
+
+.filters-heading-icon {
+  width: 42px;
+  height: 42px;
+  border-radius: 14px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #2563eb;
+  background: linear-gradient(135deg, #e9f2ff 0%, #dbeafe 100%);
+  box-shadow: inset 0 0 0 1px rgba(37, 99, 235, 0.08);
+}
+
+.filters-title {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.filters-subtitle {
+  margin: 4px 0 0;
+  font-size: 12px;
+  color: #64748b;
+}
+
+.filters-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.filter-action-btn {
+  min-height: 38px;
+  padding: 0 14px;
+  border-radius: 12px;
+  font-weight: 600;
+}
+
+.filter-action-primary {
+  min-width: 118px;
+  box-shadow: 0 10px 24px rgba(37, 99, 235, 0.22);
+}
+
+.filter-grid {
+  row-gap: 14px;
+}
+
+.filter-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.filter-label {
+  margin: 0;
+  font-size: 11px;
+  font-weight: 700;
+  color: #64748b;
+  letter-spacing: 0.02em;
+}
+
+.filter-control-shell {
+  position: relative;
+}
+
+.search-box-modern,
+.select-wrapper,
+.multiselect-trigger {
+  border-radius: 12px;
+}
+
+.search-box-modern,
+.select-wrapper {
+  background: #ffffff;
+  border: 1px solid #d7e2f0;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+}
+
+.search-box-modern:hover,
+.select-wrapper:hover,
+.multiselect-trigger:hover {
+  border-color: #adc6ea;
+}
+
+.search-box-modern:focus-within,
+.select-wrapper:focus-within,
+.multiselect-wrapper:focus-within .multiselect-trigger {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.12);
+}
+
+.search-icon-modern,
+.filter-icon,
+.dropdown-arrow {
+  color: #64748b;
+}
+
+.search-input-modern,
+.select-modern,
+.multiselect-trigger {
+  min-height: 42px;
+  font-size: 13px;
+  color: #0f172a;
+  background: transparent;
+}
+
+.search-input-modern,
+.select-modern {
+  border: none !important;
+  box-shadow: none !important;
+  padding: 9px 36px 9px 38px;
+}
+
+.select-modern {
+  border-radius: 12px;
+}
+
+.multiselect-trigger {
+  min-height: 42px;
+  padding-left: 38px;
+  padding-right: 36px;
+  border: 1px solid #d7e2f0;
+}
+
+.filter-action-btn .spinner-border {
+  width: 0.9rem;
+  height: 0.9rem;
+}
+
+.multiselect-menu,
+.timepicker-menu {
+  border: 1px solid #d7e2f0;
+  border-radius: 14px;
+  box-shadow: 0 18px 40px rgba(15, 23, 42, 0.14);
+}
+
+.multiselect-header {
+  background: #f8fbff;
+  color: #334155;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.multiselect-option:hover,
+.timepicker-item:hover {
+  background-color: #f8fbff;
+}
+
+.timepicker-selected-box {
+  background: #2563eb;
+}
+
 /* Responsive Table Wrapper */
 .table-responsive-wrapper {
   overflow-x: auto;
@@ -968,13 +1202,10 @@ onBeforeUnmount(() => {
 
 .timepicker-menu {
   position: absolute;
-  top: calc(100% + 6px);
+  top: calc(100% + 8px);
   left: 0;
   width: 170px;
   background: #fff;
-  border: 1px solid #ced4da;
-  border-radius: 6px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
   z-index: 1100;
   overflow: hidden;
 }
@@ -1208,22 +1439,12 @@ onBeforeUnmount(() => {
   position: relative;
   display: flex;
   align-items: center;
-  padding-left: 35px;
-  padding-right: 35px;
   padding-top: 8px;
   padding-bottom: 8px;
-  border: 1px solid #ced4da;
-  border-radius: 4px;
   background: #fff;
   cursor: pointer;
-  min-height: 38px;
-  transition: border-color 0.15s ease-in-out;
-  font-size: 14px;
+  transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
   line-height: 1.5;
-}
-
-.multiselect-trigger:hover {
-  border-color: #86b7fe;
 }
 
 .multiselect-trigger .placeholder {
@@ -1251,15 +1472,12 @@ onBeforeUnmount(() => {
 
 .multiselect-menu {
   position: absolute;
-  top: calc(100% + 4px);
+  top: calc(100% + 8px);
   left: 0;
   right: 0;
   max-height: 300px;
   overflow-y: auto;
   background: #fff;
-  border: 1px solid #ced4da;
-  border-radius: 4px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   z-index: 1000;
 }
 
@@ -1339,6 +1557,19 @@ onBeforeUnmount(() => {
     align-items: flex-start;
     gap: 16px;
   }
+
+  .filters-topbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .filters-actions {
+    justify-content: stretch;
+  }
+
+  .filter-action-btn {
+    flex: 1 1 160px;
+  }
   
   .datatable-entries,
   .datatable-actions {
@@ -1394,7 +1625,26 @@ onBeforeUnmount(() => {
   }
 
   .filters-card {
-    padding: 12px;
+    padding: 14px;
+    border-radius: 16px;
+  }
+
+  .filters-heading {
+    gap: 10px;
+  }
+
+  .filters-heading-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 12px;
+  }
+
+  .filters-title {
+    font-size: 18px;
+  }
+
+  .filters-subtitle {
+    font-size: 12px;
   }
 
   .btn-sm {
@@ -1404,13 +1654,15 @@ onBeforeUnmount(() => {
 
   .search-input-modern,
   .select-modern {
-    font-size: 13px;
-    padding: 9px 35px 9px 38px;
+    font-size: 12px;
+    min-height: 40px;
+    padding: 9px 34px 9px 36px;
   }
 
   .multiselect-trigger {
-    font-size: 13px;
-    padding: 9px 35px 9px 38px;
+    font-size: 12px;
+    min-height: 40px;
+    padding: 9px 34px 9px 36px;
   }
 
   .action-icon-btn {
