@@ -115,6 +115,12 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/subscription/stats', [\App\Http\Controllers\SubscriptionController::class, 'stats']);
     });
 
+    // Organization billing/subscription page
+    Route::middleware(['role:organization'])->group(function () {
+        Route::get('/subscription/overview', [\App\Http\Controllers\SubscriptionController::class, 'overview']);
+        Route::get('/subscription/renewal-data', [\App\Http\Controllers\SubscriptionController::class, 'renewalData']);
+    });
+
     // Admin subscription management
     Route::middleware(['role:admin'])->group(function () {
         Route::get('/admin/plans', [\App\Http\Controllers\SubscriptionController::class, 'plans']);

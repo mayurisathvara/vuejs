@@ -11,7 +11,6 @@ class Plan extends Model
         'display_name',
         'billing_type',
         'price_per_sim',
-        'sim_limit',
         'trial_days',
         'features',
         'is_active',

@@ -39,6 +39,111 @@ class SubscriptionController extends Controller
         ]);
     }
 
+    /**
+     * GET /subscription/overview
+     *
+     * Organization-only subscription page payload. It returns the latest
+     * subscription row so organizations can still see an expired plan's dates.
+     */
+    public function overview(Request $request): JsonResponse
+    {
+        $user = $request->user();
+        $organizationId = (int) $user->organization_id;
+
+        if (! $organizationId) {
+            return response()->json([
+                'message' => 'No organization linked to this account.',
+            ], 404);
+        }
+
+        // Auto-expire stale active rows before presenting subscription data.
+        SubscriptionService::getActiveSubscription($organizationId);
+
+        $subscription = OrganizationSubscription::with([
+                'plan:id,name,display_name,billing_type,price_per_sim,trial_days,features,is_active',
+            ])
+            ->select([
+                'id',
+                'organization_id',
+                'plan_id',
+                'billing_cycle',
+                'sim_limit',
+                'start_date',
+                'end_date',
+                'status',
+                'created_at',
+                'updated_at',
+            ])
+            ->where('organization_id', $organizationId)
+            ->latest()
+            ->first();
+
+        return response()->json([
+            'success' => true,
+            'data'    => [
+                'stats'        => SubscriptionService::getStats($organizationId),
+                'subscription' => $subscription,
+                'plan'         => $subscription?->plan,
+            ],
+        ]);
+    }
+
+    /**
+     * GET /subscription/renewal-data
+     *
+     * Organization-only payload for the renewal quote page. This intentionally
+     * stops at quote calculation; payment/submit flow will be added later.
+     */
+    public function renewalData(Request $request): JsonResponse
+    {
+        $user = $request->user();
+        $organizationId = (int) $user->organization_id;
+
+        if (! $organizationId) {
+            return response()->json([
+                'message' => 'No organization linked to this account.',
+            ], 404);
+        }
+
+        // Keep subscription status fresh before using the latest subscription.
+        SubscriptionService::getActiveSubscription($organizationId);
+
+        $subscription = OrganizationSubscription::with([
+                'plan:id,name,display_name,billing_type,price_per_sim,trial_days,features,is_active',
+            ])
+            ->select([
+                'id',
+                'organization_id',
+                'plan_id',
+                'billing_cycle',
+                'sim_limit',
+                'start_date',
+                'end_date',
+                'status',
+                'created_at',
+                'updated_at',
+            ])
+            ->where('organization_id', $organizationId)
+            ->latest()
+            ->first();
+
+        $plans = Plan::where('is_active', true)
+            ->select('id', 'name', 'display_name', 'billing_type', 'price_per_sim',
+                     'trial_days', 'features')
+            ->orderBy('price_per_sim')
+            ->get();
+
+        return response()->json([
+            'success' => true,
+            'data'    => [
+                'plans'        => $plans,
+                'stats'        => SubscriptionService::getStats($organizationId),
+                'subscription' => $subscription,
+                'plan'         => $subscription?->plan,
+            ],
+        ]);
+    }
+
     // -------------------------------------------------------------------------
     // Admin-facing endpoints
     // -------------------------------------------------------------------------
@@ -52,7 +157,7 @@ class SubscriptionController extends Controller
     {
         $plans = Plan::where('is_active', true)
             ->select('id', 'name', 'display_name', 'billing_type', 'price_per_sim',
-                     'sim_limit', 'trial_days', 'features')
+                     'trial_days', 'features')
             ->orderBy('price_per_sim')
             ->get();
 
@@ -111,7 +216,7 @@ class SubscriptionController extends Controller
      * Body:
      *   plan_id        int     (required)
      *   billing_cycle  string  monthly | yearly | trial  (required)
-     *   sim_limit      int     optional — override plan's default sim_limit
+     *   sim_limit      int     required - purchased SIM quantity
      *   notes          string  optional — admin notes
      */
     public function assign(Request $request, Organization $organization): JsonResponse
@@ -119,7 +224,7 @@ class SubscriptionController extends Controller
         $validator = Validator::make($request->all(), [
             'plan_id'       => 'required|integer|exists:plans,id',
             'billing_cycle' => 'required|string|in:monthly,yearly,trial',
-            'sim_limit'     => 'nullable|integer|min:1|max:10000',
+            'sim_limit'     => 'required|integer|min:1|max:10000',
             'notes'         => 'nullable|string|max:500',
         ]);
 
@@ -136,7 +241,7 @@ class SubscriptionController extends Controller
             organizationId:   $organization->id,
             plan:             $plan,
             billingCycle:     $request->billing_cycle,
-            simLimitOverride: $request->sim_limit,
+            simLimit:         $request->sim_limit,
             notes:            $request->notes
         );
 

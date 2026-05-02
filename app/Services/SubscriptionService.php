@@ -8,6 +8,8 @@ use App\Models\Sim;
 
 class SubscriptionService
 {
+    private const DEFAULT_TRIAL_SIM_LIMIT = 10;
+
     // -------------------------------------------------------------------------
     // Subscription queries
     // -------------------------------------------------------------------------
@@ -90,7 +92,7 @@ class SubscriptionService
             'organization_id' => $organizationId,
             'plan_id'         => $trialPlan->id,
             'billing_cycle'   => 'trial',
-            'sim_limit'       => $trialPlan->sim_limit,
+            'sim_limit'       => self::DEFAULT_TRIAL_SIM_LIMIT,
             'start_date'      => now()->toDateString(),
             'end_date'        => now()->addDays($trialPlan->trial_days)->toDateString(),
             'status'          => 'active',
@@ -107,22 +109,20 @@ class SubscriptionService
      * @param  int         $organizationId
      * @param  Plan        $plan
      * @param  string      $billingCycle  monthly | yearly | trial
-     * @param  int|null    $simLimitOverride  override plan's default sim_limit
+     * @param  int         $simLimit  purchased SIM quantity for this subscription
      * @param  string|null $notes
      */
     public static function assignPlan(
         int $organizationId,
         Plan $plan,
         string $billingCycle = 'monthly',
-        ?int $simLimitOverride = null,
+        int $simLimit = self::DEFAULT_TRIAL_SIM_LIMIT,
         ?string $notes = null
     ): OrganizationSubscription {
         // Cancel current active subscription (if any)
         OrganizationSubscription::where('organization_id', $organizationId)
             ->where('status', 'active')
             ->update(['status' => 'cancelled']);
-
-        $simLimit = $simLimitOverride ?? $plan->sim_limit;
 
         $endDate = match ($billingCycle) {
             'monthly' => now()->addMonth()->toDateString(),

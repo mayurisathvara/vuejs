@@ -23,6 +23,8 @@ import ChangePassword from '@/pages/ChangePassword.vue'
 import CallReports from '@/pages/CallReports.vue'
 import SummaryReport from '@/pages/SummaryReport.vue'
 import DeveloperApi from '@/pages/DeveloperApi.vue'
+import Subscription from '@/pages/Subscription.vue'
+import SubscriptionRenew from '@/pages/SubscriptionRenew.vue'
 
 const APP_NAME = 'Callytics'
 
@@ -226,6 +228,24 @@ const routes = [
         name: 'DeveloperApi',
         component: DeveloperApi,
         meta: { requiresAuth: true, roles: ['admin', 'organization'], title: 'Developer API' }
+      }
+    ]
+  },
+  {
+    path: '/subscription',
+    component: DefaultLayout,
+    children: [
+      {
+        path: '',
+        name: 'Subscription',
+        component: Subscription,
+        meta: { requiresAuth: true, roles: ['organization'], title: 'Subscription' }
+      },
+      {
+        path: 'renew',
+        name: 'SubscriptionRenew',
+        component: SubscriptionRenew,
+        meta: { requiresAuth: true, roles: ['organization'], title: 'Renew Subscription' }
       }
     ]
   },

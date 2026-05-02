@@ -37,15 +37,22 @@
 
       <!-- Row 2: Mobile Number | Select Industry -->
       <div class="field-cell">
-        <InputField
-          v-model="form.mobile"
-          type="tel"
-          label="Mobile Number"
-          placeholder="Enter 10-digit mobile number"
-          :error="errors.mobile"
-          maxlength="10"
-          required
-        />
+        <label class="form-label" for="mobile">Mobile Number <span class="text-danger">*</span></label>
+        <div class="mobile-input-wrap" :class="{ 'has-error': errors.mobile }">
+          <div class="mobile-prefix" aria-label="Country code">+91</div>
+          <input
+            id="mobile"
+            v-model="form.mobile"
+            type="tel"
+            class="form-control mobile-input"
+            placeholder="Enter 10-digit mobile number"
+            maxlength="10"
+            inputmode="numeric"
+            autocomplete="tel"
+            required
+          />
+        </div>
+        <div v-if="errors.mobile" class="field-error">{{ errors.mobile }}</div>
       </div>
       <div class="field-cell">
         <label class="form-label" for="industry">Select Industry <span class="text-danger">*</span></label>
@@ -256,6 +263,51 @@ const industries = [
   min-width: 0;
 }
 
+.mobile-input-wrap {
+  display: flex;
+  align-items: stretch;
+  height: 48px;
+  border: 1.5px solid #e5e7eb;
+  border-radius: 8px;
+  background: #fff;
+  overflow: hidden;
+  transition: border-color 0.18s, box-shadow 0.18s;
+}
+
+.mobile-input-wrap:focus-within {
+  border-color: #f97316;
+  box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.15);
+}
+
+.mobile-input-wrap.has-error {
+  border-color: #ef4444;
+}
+
+.mobile-prefix {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 72px;
+  padding: 0 0.9rem;
+  color: #111827;
+  background: #f8fafc;
+  border-right: 1.5px solid #e5e7eb;
+  font-size: 0.95rem;
+  font-weight: 700;
+}
+.mobile-input {
+  height: 100%;
+  border: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  padding: 0 0.85rem;
+}
+
+.mobile-input:focus {
+  border: 0 !important;
+  box-shadow: none !important;
+}
+
 /* Terms row */
 .terms-row {
   margin-bottom: 20px;
@@ -356,4 +408,3 @@ const industries = [
   }
 }
 </style>
-

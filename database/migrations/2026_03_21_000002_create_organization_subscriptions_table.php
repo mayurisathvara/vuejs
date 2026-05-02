@@ -13,7 +13,7 @@ return new class extends Migration
             $table->foreignId('organization_id')->constrained('organizations')->onDelete('cascade');
             $table->foreignId('plan_id')->constrained('plans');
             $table->string('billing_cycle')->default('trial'); // trial | monthly | yearly
-            $table->unsignedInteger('sim_limit');              // copied from plan; admin can override
+            $table->unsignedInteger('sim_limit');              // purchased SIM quantity for this organization
             $table->date('start_date');
             $table->date('end_date')->nullable();              // null = forever (paid plans)
             $table->enum('status', ['active', 'expired', 'cancelled'])->default('active');
