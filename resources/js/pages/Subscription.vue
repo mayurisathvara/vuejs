@@ -140,7 +140,7 @@
             </div>
           </div>
 
-          <div class="addon-sims-card">
+          <div class="addon-sims-card" :class="{ 'opacity-75': isTrialPlan }">
             <div class="addon-heading">
               <div>
                 <span class="card-kicker">Add-on SIMs</span>
@@ -149,12 +149,15 @@
               <span class="addon-rate">{{ formatCurrency(addonPricePerSim) }} / SIM</span>
             </div>
 
-            <p class="addon-copy">
+            <p class="addon-copy" v-if="isTrialPlan">
+              Add-on SIMs are not available on free trial accounts. Please upgrade your plan to buy extra SIM capacity.
+            </p>
+            <p class="addon-copy" v-else>
               Add more SIM slots to your current plan. Quantity starts from 1 SIM and the payment flow will be connected later.
             </p>
 
             <div class="addon-quantity">
-              <button type="button" :disabled="addonSimQuantity <= 1" @click="decreaseAddonSims">
+              <button type="button" :disabled="isTrialPlan || addonSimQuantity <= 1" @click="decreaseAddonSims">
                 <i class="fas fa-minus"></i>
               </button>
               <input
@@ -163,9 +166,10 @@
                 min="1"
                 step="1"
                 aria-label="Add-on SIM quantity"
+                :disabled="isTrialPlan"
                 @blur="normalizeAddonSims"
               />
-              <button type="button" @click="increaseAddonSims">
+              <button type="button" :disabled="isTrialPlan" @click="increaseAddonSims">
                 <i class="fas fa-plus"></i>
               </button>
             </div>
@@ -175,7 +179,7 @@
               <strong>{{ formatCurrency(addonTotal) }}</strong>
             </div>
 
-            <button type="button" class="btn addon-pay-button">
+            <button type="button" class="btn addon-pay-button" :disabled="isTrialPlan">
               <i class="fas fa-credit-card me-2"></i>
               Pay for Add-on SIMs
             </button>
@@ -308,6 +312,7 @@ const clamp = (value, min, max) => Math.min(Math.max(value, min), max)
 
 const planName = computed(() => plan.value?.display_name || stats.value.plan_name || 'No Plan')
 const planSlug = computed(() => plan.value?.name || stats.value.plan_slug || '')
+const isTrialPlan = computed(() => planSlug.value === 'free_trial')
 const planTagline = computed(() => {
   if (planSlug.value === 'free_trial') return 'Explore Callytics with trial access before moving to a paid plan.'
   if (planSlug.value === 'advance') return 'Built for growing teams that need scale, automation, and API access.'
@@ -443,9 +448,8 @@ onMounted(fetchSubscription)
 .subscription-hero {
   position: relative;
   overflow: hidden;
-  border-radius: 28px;
-  min-height: 220px;
-  padding: 34px;
+  border-radius: 24px;
+  padding: 26px 32px;
   color: #fff;
   background:
     radial-gradient(circle at 14% 18%, rgba(18, 184, 166, 0.38), transparent 28%),
@@ -508,8 +512,8 @@ onMounted(fetchSubscription)
 }
 
 .subscription-hero h3 {
-  margin: 12px 0 10px;
-  font-size: clamp(2rem, 4vw, 3.8rem);
+  margin: 6px 0 8px;
+  font-size: clamp(1.8rem, 3.5vw, 3.2rem);
   line-height: 0.95;
   font-weight: 900;
   letter-spacing: -0.07em;
@@ -519,15 +523,15 @@ onMounted(fetchSubscription)
   max-width: 580px;
   margin: 0;
   color: rgba(255, 255, 255, 0.76);
-  font-size: 1.02rem;
-  line-height: 1.7;
+  font-size: 0.98rem;
+  line-height: 1.6;
 }
 
 .hero-actions {
   display: flex;
   flex-wrap: wrap;
   gap: 12px;
-  margin-top: 28px;
+  margin-top: 18px;
 }
 
 .hero-refresh {
@@ -967,6 +971,12 @@ onMounted(fetchSubscription)
   cursor: not-allowed;
 }
 
+.addon-quantity input:disabled {
+  opacity: 0.48;
+  cursor: not-allowed;
+  background-color: #f8fafc;
+}
+
 .addon-quantity input {
   width: 100%;
   text-align: center;
@@ -1013,6 +1023,13 @@ onMounted(fetchSubscription)
   font-weight: 900;
   background: linear-gradient(135deg, var(--sub-blue), var(--sub-teal));
   box-shadow: 0 14px 26px rgba(37, 99, 235, 0.22);
+}
+
+.addon-pay-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background: var(--sub-muted);
+  box-shadow: none;
 }
 
 .feature-list {
