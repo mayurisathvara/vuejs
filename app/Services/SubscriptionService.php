@@ -77,6 +77,22 @@ class SubscriptionService
     // -------------------------------------------------------------------------
 
     /**
+     * Snapshot plan pricing/features onto the subscription row.
+     */
+    private static function planSnapshot(Plan $plan, int $simQuantity): array
+    {
+        $pricePerSim = (float) $plan->price_per_sim;
+
+        return [
+            'plan_name'     => $plan->display_name,
+            'price_per_sim' => $pricePerSim,
+            'sim_quantity'  => $simQuantity,
+            'features'      => $plan->features ?? [],
+            'total_amount'  => $pricePerSim * $simQuantity,
+        ];
+    }
+
+    /**
      * Create a Free Trial subscription for a freshly created organization.
      * Safe to call even if the plans table does not yet exist (during migrations).
      */
@@ -96,7 +112,7 @@ class SubscriptionService
             'start_date'      => now()->toDateString(),
             'end_date'        => now()->addDays($trialPlan->trial_days)->toDateString(),
             'status'          => 'active',
-        ]);
+        ] + self::planSnapshot($trialPlan, self::DEFAULT_TRIAL_SIM_LIMIT));
     }
 
     /**
@@ -142,7 +158,7 @@ class SubscriptionService
             'end_date'        => $endDate,
             'status'          => 'active',
             'notes'           => $notes,
-        ]);
+        ] + self::planSnapshot($plan, $simLimit));
 
         // Auto-deactivate excess SIMs when the new limit is lower
         self::enforceSimLimit($organizationId);
@@ -198,17 +214,20 @@ class SubscriptionService
             ->count();
 
         return [
-            'plan_name'           => $subscription?->plan?->display_name ?? 'No Plan',
+            'plan_name'           => $subscription?->plan_name ?? $subscription?->plan?->display_name ?? 'No Plan',
             'plan_slug'           => $subscription?->plan?->name ?? null,
             'billing_cycle'       => $subscription?->billing_cycle,
             'sim_limit'           => $simLimit,
+            'sim_quantity'        => $subscription?->sim_quantity ?? $simLimit,
+            'price_per_sim'       => $subscription?->price_per_sim,
+            'total_amount'        => $subscription?->total_amount,
             'active_sims'         => $activeCount,
             'inactive_sims'       => $inactiveCount,
             'remaining_slots'     => max(0, $simLimit - $activeCount),
             'subscription_status' => $subscription?->status ?? 'none',
             'start_date'          => $subscription?->start_date?->toDateString(),
             'end_date'            => $subscription?->end_date?->toDateString(),
-            'features'            => $subscription?->plan?->features ?? [],
+            'features'            => $subscription?->features ?? $subscription?->plan?->features ?? [],
         ];
     }
 

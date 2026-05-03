@@ -9,19 +9,27 @@ class OrganizationSubscription extends Model
     protected $fillable = [
         'organization_id',
         'plan_id',
+        'plan_name',
+        'price_per_sim',
         'billing_cycle',
         'sim_limit',
+        'sim_quantity',
         'start_date',
         'end_date',
         'status',
         'notes',
+        'features',
+        'total_amount',
     ];
 
     protected function casts(): array
     {
         return [
-            'start_date' => 'date',
-            'end_date'   => 'date',
+            'start_date'    => 'date',
+            'end_date'      => 'date',
+            'features'      => 'array',
+            'price_per_sim' => 'decimal:2',
+            'total_amount'  => 'decimal:2',
         ];
     }
 
