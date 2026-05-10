@@ -448,14 +448,14 @@ onMounted(fetchSubscription)
 .subscription-hero {
   position: relative;
   overflow: hidden;
-  border-radius: 24px;
-  padding: 26px 32px;
+  border-radius: 20px;
+  padding: 20px 28px;
   color: #fff;
   background:
     radial-gradient(circle at 14% 18%, rgba(18, 184, 166, 0.38), transparent 28%),
     radial-gradient(circle at 92% 8%, rgba(249, 115, 22, 0.34), transparent 22%),
     linear-gradient(135deg, #071522 0%, #10233f 52%, #183b5c 100%);
-  box-shadow: 0 28px 60px rgba(16, 35, 63, 0.22);
+  box-shadow: 0 20px 40px rgba(16, 35, 63, 0.15);
 }
 
 .hero-glow {
@@ -512,11 +512,11 @@ onMounted(fetchSubscription)
 }
 
 .subscription-hero h3 {
-  margin: 6px 0 8px;
-  font-size: clamp(1.8rem, 3.5vw, 3.2rem);
-  line-height: 0.95;
+  margin: 6px 0 6px;
+  font-size: clamp(1.5rem, 2.5vw, 2.2rem);
+  line-height: 1.1;
   font-weight: 900;
-  letter-spacing: -0.07em;
+  letter-spacing: -0.05em;
 }
 
 .subscription-hero p {

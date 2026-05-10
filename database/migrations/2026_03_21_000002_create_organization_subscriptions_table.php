@@ -16,7 +16,7 @@ return new class extends Migration
             $table->unsignedInteger('sim_limit');              // purchased SIM quantity for this organization
             $table->date('start_date');
             $table->date('end_date')->nullable();              // null = forever (paid plans)
-            $table->enum('status', ['active', 'expired', 'cancelled'])->default('active');
+            $table->enum('status', ['active', 'expired', 'cancelled','upcoming'])->default('active');
             $table->text('notes')->nullable();                 // admin notes
             $table->timestamps();
         });
