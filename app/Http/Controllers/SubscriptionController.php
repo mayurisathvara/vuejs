@@ -230,6 +230,229 @@ class SubscriptionController extends Controller
         ]);
     }
 
+    /**
+     * GET /subscription/payments
+     *
+     * Paid renewal rows for the authenticated organization.
+     */
+    public function paymentHistory(Request $request): JsonResponse
+    {
+        $user = $request->user();
+        $organizationId = (int) $user->organization_id;
+
+        if (! $organizationId) {
+            return response()->json([
+                'message' => 'No organization linked to this account.',
+            ], 404);
+        }
+
+        $payments = OrganizationSubscription::with('plan:id,name,display_name')
+            ->where('organization_id', $organizationId)
+            ->where('payment_status', 'paid')
+            ->whereNotNull('razorpay_payment_id')
+            ->select([
+                'id',
+                'organization_id',
+                'plan_id',
+                'plan_name',
+                'billing_cycle',
+                'sim_quantity',
+                'amount',
+                'currency',
+                'razorpay_order_id',
+                'razorpay_payment_id',
+                'payment_status',
+                'start_date',
+                'end_date',
+                'status',
+                'created_at',
+            ])
+            ->latest('id')
+            ->get()
+            ->map(fn (OrganizationSubscription $payment) => [
+                'id' => $payment->id,
+                'invoice_number' => $this->invoiceNumber($payment),
+                'plan_name' => $payment->plan_name ?? $payment->plan?->display_name,
+                'billing_cycle' => $payment->billing_cycle,
+                'sim_quantity' => $payment->sim_quantity,
+                'amount' => $payment->amount,
+                'currency' => $payment->currency,
+                'razorpay_order_id' => $payment->razorpay_order_id,
+                'razorpay_payment_id' => $payment->razorpay_payment_id,
+                'payment_status' => $payment->payment_status,
+                'subscription_status' => $payment->status,
+                'start_date' => $payment->start_date?->toDateString(),
+                'end_date' => $payment->end_date?->toDateString(),
+                'paid_at' => $payment->created_at?->toDateTimeString(),
+            ]);
+
+        return response()->json([
+            'success' => true,
+            'data' => $payments,
+        ]);
+    }
+
+    /**
+     * GET /subscription/invoices/{subscription}
+     */
+    public function invoiceView(Request $request, OrganizationSubscription $subscription)
+    {
+        $invoice = $this->invoiceForRequest($request, $subscription);
+
+        return response($invoice['html'])
+            ->header('Content-Type', 'text/html; charset=UTF-8');
+    }
+
+    /**
+     * GET /subscription/invoices/{subscription}/download
+     */
+    public function invoiceDownload(Request $request, OrganizationSubscription $subscription)
+    {
+        $invoice = $this->invoiceForRequest($request, $subscription);
+
+        return response($invoice['html'])
+            ->header('Content-Type', 'text/html; charset=UTF-8')
+            ->header('Content-Disposition', 'attachment; filename="'.$invoice['filename'].'"');
+    }
+
+    private function invoiceForRequest(Request $request, OrganizationSubscription $subscription): array
+    {
+        $organizationId = (int) $request->user()->organization_id;
+
+        if (
+            ! $organizationId ||
+            (int) $subscription->organization_id !== $organizationId ||
+            $subscription->payment_status !== 'paid' ||
+            ! $subscription->razorpay_payment_id
+        ) {
+            abort(404, 'Invoice not found.');
+        }
+
+        $subscription->loadMissing('organization', 'plan');
+
+        $invoiceNumber = $this->invoiceNumber($subscription);
+
+        return [
+            'filename' => strtolower($invoiceNumber).'.html',
+            'html' => $this->renderInvoiceHtml($subscription, $invoiceNumber),
+        ];
+    }
+
+    private function invoiceNumber(OrganizationSubscription $subscription): string
+    {
+        return 'INV-'.str_pad((string) $subscription->id, 6, '0', STR_PAD_LEFT);
+    }
+
+    private function renderInvoiceHtml(OrganizationSubscription $subscription, string $invoiceNumber): string
+    {
+        $organization = $subscription->organization;
+        $currency = $subscription->currency ?: 'INR';
+        $amount = number_format((float) $subscription->amount, 2);
+        $pricePerSim = number_format((float) $subscription->price_per_sim, 2);
+        $paidAt = $subscription->created_at?->format('d M Y, h:i A') ?? '-';
+        $period = ($subscription->start_date?->format('d M Y') ?? '-').' to '.($subscription->end_date?->format('d M Y') ?? '-');
+        $logoUrl = asset('logo/logo_black.png');
+
+        return '<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>'.e($invoiceNumber).' - Callytics Invoice</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; background: #f3f6fb; color: #102033; font-family: Arial, Helvetica, sans-serif; }
+    .page { max-width: 920px; margin: 32px auto; padding: 36px; background: #fff; border: 1px solid #e5ebf3; border-radius: 18px; }
+    .top { display: flex; justify-content: space-between; gap: 24px; border-bottom: 2px solid #10233f; padding-bottom: 24px; }
+    .brand img { display: block; width: 150px; height: auto; }
+    .muted { color: #667085; }
+    h1 { margin: 8px 0 0; font-size: 30px; }
+    h3 { margin: 0 0 10px; font-size: 15px; text-transform: uppercase; letter-spacing: .08em; color: #667085; }
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin: 28px 0; }
+    .box { padding: 18px; border: 1px solid #e5ebf3; border-radius: 12px; background: #fbfdff; }
+    .box p { margin: 5px 0; }
+    table { width: 100%; border-collapse: collapse; margin-top: 18px; }
+    th { text-align: left; background: #10233f; color: #fff; padding: 13px; font-size: 13px; }
+    td { padding: 13px; border-bottom: 1px solid #e5ebf3; vertical-align: top; }
+    .right { text-align: right; }
+    .total { margin-left: auto; width: 320px; margin-top: 20px; }
+    .total-row { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid #e5ebf3; }
+    .grand { font-size: 22px; font-weight: 900; color: #10233f; }
+    .ids { margin-top: 28px; padding-top: 18px; border-top: 1px solid #e5ebf3; font-size: 13px; word-break: break-all; }
+    .actions { display: flex; justify-content: flex-end; margin-bottom: 16px; }
+    button { border: 0; border-radius: 8px; padding: 10px 14px; color: #fff; background: #f97316; font-weight: 800; cursor: pointer; }
+    @media print { body { background: #fff; } .page { margin: 0; max-width: none; border: 0; border-radius: 0; } .actions { display: none; } }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <div class="actions"><button onclick="window.print()">Print / Save PDF</button></div>
+    <div class="top">
+      <div>
+        <div class="brand"><img src="'.e($logoUrl).'" alt="Callytics"></div>
+        <p class="muted">Subscription payment invoice</p>
+      </div>
+      <div class="right">
+        <h1>Invoice</h1>
+        <p><strong>'.e($invoiceNumber).'</strong></p>
+        <p class="muted">Paid on '.e($paidAt).'</p>
+      </div>
+    </div>
+
+    <div class="grid">
+      <div class="box">
+        <h3>Billed To</h3>
+        <p><strong>'.e($organization?->name ?? 'Organization').'</strong></p>
+        <p>'.e($organization?->email ?? '-').'</p>
+        <p>'.e($organization?->mobile ?? '-').'</p>
+      </div>
+      <div class="box">
+        <h3>Payment</h3>
+        <p>Status: <strong>'.e(ucfirst((string) $subscription->payment_status)).'</strong></p>
+        <p>Currency: '.e($currency).'</p>
+        <p>Subscription: '.e(ucfirst((string) $subscription->status)).'</p>
+      </div>
+    </div>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Description</th>
+          <th>Billing Cycle</th>
+          <th class="right">SIMs</th>
+          <th class="right">Rate</th>
+          <th class="right">Amount</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>
+            <strong>'.e($subscription->plan_name ?? $subscription->plan?->display_name ?? 'Subscription Plan').'</strong><br>
+            <span class="muted">Service period: '.e($period).'</span>
+          </td>
+          <td>'.e(ucfirst((string) $subscription->billing_cycle)).'</td>
+          <td class="right">'.e((string) $subscription->sim_quantity).'</td>
+          <td class="right">'.e($currency).' '.e($pricePerSim).'</td>
+          <td class="right">'.e($currency).' '.e($amount).'</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="total">
+      <div class="total-row"><span>Subtotal</span><strong>'.e($currency).' '.e($amount).'</strong></div>
+      <div class="total-row"><span>Tax</span><strong>'.e($currency).' 0.00</strong></div>
+      <div class="total-row grand"><span>Total Paid</span><span>'.e($currency).' '.e($amount).'</span></div>
+    </div>
+
+    <div class="ids">
+      <p><strong>Razorpay Order ID:</strong> '.e($subscription->razorpay_order_id ?? '-').'</p>
+      <p><strong>Razorpay Payment ID:</strong> '.e($subscription->razorpay_payment_id ?? '-').'</p>
+    </div>
+  </div>
+</body>
+</html>';
+    }
+
     // -------------------------------------------------------------------------
     // Admin-facing endpoints
     // -------------------------------------------------------------------------

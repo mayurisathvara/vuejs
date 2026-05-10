@@ -84,6 +84,13 @@
             <h4 class="text-section">BILLING</h4>
           </li>
 
+          <li v-if="showPlans" class="nav-item" :class="{ active: $route.name === 'Plans' }">
+            <router-link to="/plans" class="nav-link" @click="handleMenuClick">
+              <i class="fas fa-list-alt"></i>
+              <p>Plans</p>
+            </router-link>
+          </li>
+
           <li v-if="showSubscription" class="nav-item" :class="{ active: $route.name === 'Subscription' || $route.name === 'SubscriptionRenew' }">
             <router-link to="/subscription" class="nav-link" @click="handleMenuClick">
               <i class="fas fa-credit-card"></i>
@@ -152,12 +159,13 @@ const showSettings = computed(() => isAdmin.value)
 const showOrganizationSettings = computed(() => isOrganization.value)
 const showCallReports = computed(() => isAdmin.value || isOrganization.value || isManager.value || isUser.value)
 const showSummaryReport = computed(() => isAdmin.value || isOrganization.value || isManager.value || isUser.value)
+const showPlans = computed(() => isAdmin.value)
 const showSubscription = computed(() => isOrganization.value)
 const showExcludedNumbers = computed(() => isAdmin.value || isOrganization.value || isManager.value)
 const showDeveloperApi = computed(() => isAdmin.value || isOrganization.value)
 const hasManagementSection = computed(() => showUsers.value || showOrganizations.value || showTeams.value || showSims.value)
 const hasReportsSection = computed(() => showCallReports.value || showSummaryReport.value)
-const hasBillingSection = computed(() => showSubscription.value)
+const hasBillingSection = computed(() => showPlans.value || showSubscription.value)
 const hasOtherSection = computed(() => showExcludedNumbers.value || showDeveloperApi.value || showOrganizationSettings.value || showSettings.value)
 
 const checkMobile = () => {

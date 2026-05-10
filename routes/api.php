@@ -119,13 +119,16 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::middleware(['role:organization'])->group(function () {
         Route::get('/subscription/overview', [\App\Http\Controllers\SubscriptionController::class, 'overview']);
         Route::get('/subscription/renewal-data', [\App\Http\Controllers\SubscriptionController::class, 'renewalData']);
+        Route::get('/subscription/payments', [\App\Http\Controllers\SubscriptionController::class, 'paymentHistory']);
+        Route::get('/subscription/invoices/{subscription}', [\App\Http\Controllers\SubscriptionController::class, 'invoiceView']);
+        Route::get('/subscription/invoices/{subscription}/download', [\App\Http\Controllers\SubscriptionController::class, 'invoiceDownload']);
         Route::post('/subscription/renew/order', [\App\Http\Controllers\SubscriptionController::class, 'createRenewalOrder']);
         Route::post('/subscription/renew/verify', [\App\Http\Controllers\SubscriptionController::class, 'verifyRenewalPayment']);
     });
 
     // Admin subscription management
     Route::middleware(['role:admin'])->group(function () {
-        Route::get('/admin/plans', [\App\Http\Controllers\SubscriptionController::class, 'plans']);
+        Route::apiResource('/admin/plans', \App\Http\Controllers\PlanController::class);
         Route::get('/admin/subscriptions', [\App\Http\Controllers\SubscriptionController::class, 'index']);
         Route::get('/admin/organizations/{organization}/subscription', [\App\Http\Controllers\SubscriptionController::class, 'show']);
         Route::put('/admin/organizations/{organization}/subscription', [\App\Http\Controllers\SubscriptionController::class, 'assign']);

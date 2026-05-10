@@ -21,6 +21,10 @@
           <i class="fas fa-bolt me-2"></i>
           Request Renewal
         </router-link>
+        <button type="button" class="btn history-button" @click="scrollToHistory">
+          <i class="fas fa-history me-2"></i>
+          History
+        </button>
       </div>
     </div>
 
@@ -225,6 +229,81 @@
           </router-link>
         </section>
       </div>
+
+      <section ref="historySection" class="payment-history-card">
+        <div class="section-heading">
+          <div>
+            <span class="card-kicker">Payment History</span>
+            <h5>Invoices</h5>
+          </div>
+          <button type="button" class="small-action history-refresh" :disabled="historyLoading" @click="fetchPaymentHistory">
+            <i class="fas fa-sync-alt me-2" :class="{ 'fa-spin': historyLoading }"></i>
+            Refresh
+          </button>
+        </div>
+
+        <div v-if="historyLoading" class="history-state">
+          <div class="spinner-border spinner-border-sm text-primary" role="status" aria-hidden="true"></div>
+          <span>Loading payment history...</span>
+        </div>
+
+        <div v-else-if="historyError" class="history-state is-error">
+          <i class="fas fa-exclamation-circle"></i>
+          <span>{{ historyError }}</span>
+        </div>
+
+        <div v-else-if="!paymentHistory.length" class="history-empty">
+          No paid invoices are available yet.
+        </div>
+
+        <div v-else class="history-table-wrap">
+          <table class="history-table">
+            <thead>
+              <tr>
+                <th>Invoice</th>
+                <th>Plan</th>
+                <th>Period</th>
+                <th>Payment ID</th>
+                <th class="text-end">Amount</th>
+                <th class="text-end">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="payment in paymentHistory" :key="payment.id">
+                <td>
+                  <strong>{{ payment.invoice_number }}</strong>
+                  <span>{{ formatDateDisplay(payment.paid_at) }}</span>
+                </td>
+                <td>
+                  <strong>{{ payment.plan_name }}</strong>
+                  <span>{{ toTitleCase(payment.billing_cycle) }} · {{ payment.sim_quantity }} SIMs</span>
+                </td>
+                <td>
+                  <strong>{{ formatDateDisplay(payment.start_date) }}</strong>
+                  <span>to {{ formatDateDisplay(payment.end_date) }}</span>
+                </td>
+                <td>
+                  <span class="payment-id">{{ payment.razorpay_payment_id }}</span>
+                </td>
+                <td class="text-end">
+                  <strong>{{ formatCurrency(payment.amount, payment.currency) }}</strong>
+                  <span class="status-text">{{ toTitleCase(payment.payment_status) }}</span>
+                </td>
+                <td class="text-end">
+                  <div class="invoice-actions">
+                    <button type="button" title="View invoice" @click="viewInvoice(payment)">
+                      <i class="fas fa-eye"></i>
+                    </button>
+                    <button type="button" title="Download invoice" @click="downloadInvoice(payment)">
+                      <i class="fas fa-download"></i>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
     </template>
   </div>
 </template>
@@ -238,6 +317,10 @@ const loading = ref(false)
 const error = ref('')
 const payload = ref(null)
 const addonSimQuantity = ref(1)
+const historyLoading = ref(false)
+const historyError = ref('')
+const paymentHistory = ref([])
+const historySection = ref(null)
 
 const stats = computed(() => payload.value?.stats || {})
 const subscription = computed(() => payload.value?.subscription || null)
@@ -273,10 +356,25 @@ const fetchSubscription = async () => {
   try {
     const response = await api.get('/subscription/overview')
     payload.value = response.data?.data || null
+    await fetchPaymentHistory()
   } catch (err) {
     error.value = err.response?.data?.message || 'Unable to load subscription details. Please try again.'
   } finally {
     loading.value = false
+  }
+}
+
+const fetchPaymentHistory = async () => {
+  historyLoading.value = true
+  historyError.value = ''
+
+  try {
+    const response = await api.get('/subscription/payments')
+    paymentHistory.value = Array.isArray(response.data?.data) ? response.data.data : []
+  } catch (err) {
+    historyError.value = err.response?.data?.message || 'Unable to load payment history.'
+  } finally {
+    historyLoading.value = false
   }
 }
 
@@ -293,11 +391,11 @@ const startOfToday = () => {
   return today
 }
 
-const formatCurrency = (value) => {
+const formatCurrency = (value, currency = 'INR') => {
   const numeric = Number(value || 0)
   return new Intl.NumberFormat('en-IN', {
     style: 'currency',
-    currency: 'INR',
+    currency: currency || 'INR',
     maximumFractionDigits: numeric % 1 === 0 ? 0 : 2
   }).format(numeric)
 }
@@ -352,6 +450,72 @@ const decreaseAddonSims = () => {
 
 const increaseAddonSims = () => {
   addonSimQuantity.value = addonQuantity.value + 1
+}
+
+const openInvoiceBlob = (blob, filename, shouldDownload = false) => {
+  const url = URL.createObjectURL(blob)
+
+  if (shouldDownload) {
+    const link = document.createElement('a')
+    link.href = url
+    link.download = filename
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+    URL.revokeObjectURL(url)
+    return
+  }
+
+  window.open(url, '_blank', 'noopener,noreferrer')
+  window.setTimeout(() => URL.revokeObjectURL(url), 60000)
+}
+
+const invoiceFilename = (payment) => `${String(payment.invoice_number || `invoice-${payment.id}`).toLowerCase()}.html`
+
+const viewInvoice = async (payment) => {
+  const invoiceWindow = window.open('', '_blank', 'noopener,noreferrer')
+
+  try {
+    const response = await api.get(`/subscription/invoices/${payment.id}`, {
+      responseType: 'blob',
+      headers: { Accept: 'text/html' }
+    })
+
+    const url = URL.createObjectURL(response.data)
+
+    if (invoiceWindow) {
+      invoiceWindow.location.href = url
+      window.setTimeout(() => URL.revokeObjectURL(url), 60000)
+    } else {
+      openInvoiceBlob(response.data, invoiceFilename(payment), false)
+    }
+  } catch (err) {
+    if (invoiceWindow) invoiceWindow.close()
+    historyError.value = err.response?.data?.message || 'Unable to open invoice.'
+  }
+}
+
+const downloadInvoice = async (payment) => {
+  try {
+    const response = await api.get(`/subscription/invoices/${payment.id}/download`, {
+      responseType: 'blob',
+      headers: { Accept: 'text/html' }
+    })
+    openInvoiceBlob(response.data, invoiceFilename(payment), true)
+  } catch (err) {
+    historyError.value = err.response?.data?.message || 'Unable to download invoice.'
+  }
+}
+
+const scrollToHistory = async () => {
+  if (!paymentHistory.value.length && !historyLoading.value) {
+    await fetchPaymentHistory()
+  }
+
+  historySection.value?.scrollIntoView({
+    behavior: 'smooth',
+    block: 'start'
+  })
 }
 
 const priceCaption = computed(() => {
@@ -548,6 +712,19 @@ onMounted(fetchSubscription)
   box-shadow: 0 16px 32px rgba(249, 115, 22, 0.28);
 }
 
+.history-button {
+  border: 1px solid rgba(255, 255, 255, 0.34);
+  color: #fff;
+  font-weight: 800;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.history-button:hover {
+  color: #fff;
+  border-color: rgba(255, 255, 255, 0.6);
+  background: rgba(255, 255, 255, 0.16);
+}
+
 .subscription-loading,
 .empty-state,
 .subscription-alert {
@@ -619,7 +796,8 @@ onMounted(fetchSubscription)
 .timeline-card,
 .usage-card,
 .features-card,
-.renew-card {
+.renew-card,
+.payment-history-card {
   border: 1px solid var(--sub-line);
   border-radius: 26px;
   background: #fff;
@@ -853,8 +1031,121 @@ onMounted(fetchSubscription)
 
 .usage-card,
 .features-card,
-.renew-card {
+.renew-card,
+.payment-history-card {
   padding: 24px;
+}
+
+.payment-history-card {
+  overflow: hidden;
+}
+
+.history-refresh {
+  border: 0;
+  background: transparent;
+}
+
+.history-state,
+.history-empty {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 18px;
+  border: 1px dashed #cbd5e1;
+  border-radius: 16px;
+  color: var(--sub-muted);
+  background: #f8fafc;
+  font-weight: 800;
+}
+
+.history-state.is-error {
+  color: #b42318;
+  border-color: #fecdca;
+  background: #fffbfa;
+}
+
+.history-table-wrap {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.history-table {
+  width: 100%;
+  min-width: 860px;
+  border-collapse: collapse;
+}
+
+.history-table th {
+  padding: 12px 14px;
+  color: #667085;
+  background: #f8fafc;
+  border-bottom: 1px solid var(--sub-line);
+  font-size: 0.76rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.history-table td {
+  padding: 15px 14px;
+  border-bottom: 1px solid var(--sub-line);
+  vertical-align: middle;
+}
+
+.history-table tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.history-table strong,
+.history-table span {
+  display: block;
+}
+
+.history-table strong {
+  color: var(--sub-ink);
+  font-weight: 900;
+}
+
+.history-table span {
+  margin-top: 3px;
+  color: var(--sub-muted);
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.payment-id {
+  max-width: 190px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.status-text {
+  color: #067647 !important;
+}
+
+.invoice-actions {
+  display: inline-flex;
+  gap: 8px;
+}
+
+.invoice-actions button {
+  width: 36px;
+  height: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--sub-line);
+  border-radius: 10px;
+  color: var(--sub-blue);
+  background: #fff;
+  transition: background 0.18s ease, color 0.18s ease, border-color 0.18s ease;
+}
+
+.invoice-actions button:hover {
+  color: #fff;
+  border-color: var(--sub-blue);
+  background: var(--sub-blue);
 }
 
 .section-heading {

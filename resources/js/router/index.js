@@ -25,6 +25,7 @@ import SummaryReport from '@/pages/SummaryReport.vue'
 import DeveloperApi from '@/pages/DeveloperApi.vue'
 import Subscription from '@/pages/Subscription.vue'
 import SubscriptionRenew from '@/pages/SubscriptionRenew.vue'
+import Plans from '@/pages/Plans.vue'
 
 const APP_NAME = 'Callytics'
 
@@ -228,6 +229,18 @@ const routes = [
         name: 'DeveloperApi',
         component: DeveloperApi,
         meta: { requiresAuth: true, roles: ['admin', 'organization'], title: 'Developer API' }
+      }
+    ]
+  },
+  {
+    path: '/plans',
+    component: DefaultLayout,
+    children: [
+      {
+        path: '',
+        name: 'Plans',
+        component: Plans,
+        meta: { requiresAuth: true, roles: ['admin'], title: 'Plan Management' }
       }
     ]
   },
