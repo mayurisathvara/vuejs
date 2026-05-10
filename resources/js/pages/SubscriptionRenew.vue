@@ -85,7 +85,7 @@
               <span class="eyebrow dark">Calculation</span>
               <h4>Renewal Summary</h4>
             </div>
-            <span class="summary-badge">Quote Only</span>
+            <span class="summary-badge">{{ paymentStatusLabel }}</span>
           </div>
 
           <div class="summary-selected">
@@ -154,13 +154,17 @@
             <strong>{{ selectedPlan ? formatCurrency(total) : '-' }}</strong>
           </div>
 
-          <p class="payment-note">
-            Taxes, invoices, and payment gateway flow are intentionally not submitted here yet.
+          <p v-if="paymentMessage" class="payment-note" :class="paymentMessageType">
+            {{ paymentMessage }}
+          </p>
+          <p v-else class="payment-note">
+            You will be redirected to Razorpay TEST checkout for secure payment verification.
           </p>
 
-          <button type="button" class="btn renew-final-button" :disabled="!selectedPlan">
-            <i class="fas fa-lock me-2"></i>
-            Renew Plan
+          <button type="button" class="btn renew-final-button" :disabled="!canRenew" @click="renewPlan">
+            <span v-if="paymentLoading" class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+            <i v-else class="fas fa-lock me-2"></i>
+            {{ paymentLoading ? 'Opening Checkout...' : 'Renew Plan' }}
           </button>
         </div>
       </aside>
@@ -171,6 +175,7 @@
 <script setup>
 import { computed, onMounted, ref } from 'vue'
 import api from '@/services/api'
+import { showError, showSuccess } from '@/services/toast'
 
 const MIN_SIM_QUANTITY = 5
 
@@ -182,6 +187,9 @@ const stats = ref({})
 const selectedPlanId = ref(null)
 const simQuantity = ref(MIN_SIM_QUANTITY)
 const activeBillingCycle = ref('monthly')
+const paymentLoading = ref(false)
+const paymentMessage = ref('')
+const paymentMessageType = ref('')
 
 const billingTabs = [
   { value: 'monthly', label: 'Monthly' },
@@ -241,6 +249,13 @@ const quotedQuantity = computed(() => {
 })
 const subtotal = computed(() => Number(selectedPlan.value?.price_per_sim || 0) * quotedQuantity.value)
 const total = computed(() => subtotal.value)
+const canRenew = computed(() => Boolean(selectedPlan.value) && !loading.value && !paymentLoading.value)
+const paymentStatusLabel = computed(() => {
+  if (paymentLoading.value) return 'Processing'
+  if (paymentMessageType.value === 'success') return 'Success'
+  if (paymentMessageType.value === 'danger') return 'Failed'
+  return 'Razorpay Test'
+})
 
 const selectPlan = (planId) => {
   selectedPlanId.value = planId
@@ -267,6 +282,128 @@ const decreaseQuantity = () => {
 
 const increaseQuantity = () => {
   simQuantity.value = Number(simQuantity.value || MIN_SIM_QUANTITY) + 1
+}
+
+const loadRazorpayCheckout = () => {
+  return new Promise((resolve, reject) => {
+    if (window.Razorpay) {
+      resolve()
+      return
+    }
+
+    const script = document.createElement('script')
+    script.src = 'https://checkout.razorpay.com/v1/checkout.js'
+    script.async = true
+    script.onload = resolve
+    script.onerror = () => reject(new Error('Unable to load Razorpay checkout.'))
+    document.head.appendChild(script)
+  })
+}
+
+const renewPlan = async () => {
+  if (!selectedPlan.value) return
+
+  normalizeQuantity()
+  paymentLoading.value = true
+  paymentMessage.value = ''
+  paymentMessageType.value = ''
+
+  try {
+    await loadRazorpayCheckout()
+
+    const response = await api.post('/subscription/renew/order', {
+      subscription_plan_id: selectedPlan.value.id,
+      sim_quantity: quotedQuantity.value
+    })
+
+    const data = response.data?.data || {}
+    const order = data.order || {}
+    const quote = data.quote || {}
+
+    if (!order.id || !data.key) {
+      throw new Error('Razorpay order response is incomplete.')
+    }
+
+    const user = JSON.parse(localStorage.getItem('user') || '{}')
+
+    let paymentHandled = false
+
+    const checkout = new window.Razorpay({
+      key: data.key,
+      amount: order.amount,
+      currency: order.currency || quote.currency || 'INR',
+      name: 'Callytics',
+      description: `${quote.plan_name || selectedPlan.value.display_name} subscription renewal`,
+      order_id: order.id,
+      prefill: {
+        name: user.name || '',
+        email: user.email || '',
+        contact: user.mobile || user.phone || ''
+      },
+      notes: {
+        subscription_plan_id: String(selectedPlan.value.id),
+        sim_quantity: String(quotedQuantity.value)
+      },
+      method: {
+        upi: true,
+        card: true,
+        netbanking: true,
+        wallet: true
+      },
+      theme: {
+        color: '#f97316'
+      },
+      handler: async (payment) => {
+        paymentHandled = true
+        await verifyPayment(payment)
+      },
+      modal: {
+        ondismiss: () => {
+          if (paymentHandled) return
+
+          paymentLoading.value = false
+          paymentMessage.value = 'Checkout closed before payment completion.'
+          paymentMessageType.value = 'danger'
+        }
+      }
+    })
+
+    checkout.on('payment.failed', (failure) => {
+      paymentHandled = true
+      paymentLoading.value = false
+      paymentMessage.value = failure.error?.description || 'Payment failed. Please try again.'
+      paymentMessageType.value = 'danger'
+      showError(paymentMessage.value)
+    })
+
+    checkout.open()
+  } catch (err) {
+    paymentLoading.value = false
+    paymentMessage.value = err.response?.data?.message || err.message || 'Unable to start renewal payment.'
+    paymentMessageType.value = 'danger'
+    showError(paymentMessage.value)
+  }
+}
+
+const verifyPayment = async (payment) => {
+  try {
+    const response = await api.post('/subscription/renew/verify', {
+      razorpay_order_id: payment.razorpay_order_id,
+      razorpay_payment_id: payment.razorpay_payment_id,
+      razorpay_signature: payment.razorpay_signature
+    })
+
+    paymentMessage.value = response.data?.message || 'Payment verified and subscription renewed.'
+    paymentMessageType.value = 'success'
+    showSuccess(paymentMessage.value)
+    await fetchRenewalData()
+  } catch (err) {
+    paymentMessage.value = err.response?.data?.message || 'Payment verification failed. Please contact support.'
+    paymentMessageType.value = 'danger'
+    showError(paymentMessage.value)
+  } finally {
+    paymentLoading.value = false
+  }
 }
 
 const normalizeFeatures = (features) => {
@@ -772,6 +909,16 @@ onMounted(fetchRenewalData)
 .payment-note {
   margin: 14px 0;
   font-size: 0.86rem;
+}
+
+.payment-note.success {
+  color: #067647;
+  font-weight: 800;
+}
+
+.payment-note.danger {
+  color: #b42318;
+  font-weight: 800;
 }
 
 .renew-final-button {

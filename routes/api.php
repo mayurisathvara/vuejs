@@ -119,6 +119,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::middleware(['role:organization'])->group(function () {
         Route::get('/subscription/overview', [\App\Http\Controllers\SubscriptionController::class, 'overview']);
         Route::get('/subscription/renewal-data', [\App\Http\Controllers\SubscriptionController::class, 'renewalData']);
+        Route::post('/subscription/renew/order', [\App\Http\Controllers\SubscriptionController::class, 'createRenewalOrder']);
+        Route::post('/subscription/renew/verify', [\App\Http\Controllers\SubscriptionController::class, 'verifyRenewalPayment']);
     });
 
     // Admin subscription management

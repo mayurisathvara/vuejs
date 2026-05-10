@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Organization;
 use App\Models\OrganizationSubscription;
 use App\Models\Plan;
+use App\Services\RazorpaySubscriptionService;
 use App\Services\SubscriptionService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -12,6 +13,8 @@ use Illuminate\Support\Facades\Validator;
 
 class SubscriptionController extends Controller
 {
+    public function __construct(private readonly RazorpaySubscriptionService $razorpaySubscriptions) {}
+
     // -------------------------------------------------------------------------
     // Organization-facing endpoints (any authenticated org user)
     // -------------------------------------------------------------------------
@@ -35,7 +38,7 @@ class SubscriptionController extends Controller
 
         return response()->json([
             'success' => true,
-            'data'    => SubscriptionService::getStats($organizationId),
+            'data' => SubscriptionService::getStats($organizationId),
         ]);
     }
 
@@ -60,8 +63,8 @@ class SubscriptionController extends Controller
         SubscriptionService::getActiveSubscription($organizationId);
 
         $subscription = OrganizationSubscription::with([
-                'plan:id,name,display_name,billing_type,price_per_sim,trial_days,features,is_active',
-            ])
+            'plan:id,name,display_name,billing_type,price_per_sim,trial_days,features,is_active',
+        ])
             ->select([
                 'id',
                 'organization_id',
@@ -85,10 +88,10 @@ class SubscriptionController extends Controller
 
         return response()->json([
             'success' => true,
-            'data'    => [
-                'stats'        => SubscriptionService::getStats($organizationId),
+            'data' => [
+                'stats' => SubscriptionService::getStats($organizationId),
                 'subscription' => $subscription,
-                'plan'         => $subscription?->plan,
+                'plan' => $subscription?->plan,
             ],
         ]);
     }
@@ -114,8 +117,8 @@ class SubscriptionController extends Controller
         SubscriptionService::getActiveSubscription($organizationId);
 
         $subscription = OrganizationSubscription::with([
-                'plan:id,name,display_name,billing_type,price_per_sim,trial_days,features,is_active',
-            ])
+            'plan:id,name,display_name,billing_type,price_per_sim,trial_days,features,is_active',
+        ])
             ->select([
                 'id',
                 'organization_id',
@@ -139,17 +142,90 @@ class SubscriptionController extends Controller
 
         $plans = Plan::where('is_active', true)
             ->select('id', 'name', 'display_name', 'billing_type', 'price_per_sim',
-                     'trial_days', 'features')
+                'trial_days', 'features')
             ->orderBy('price_per_sim')
             ->get();
 
         return response()->json([
             'success' => true,
-            'data'    => [
-                'plans'        => $plans,
-                'stats'        => SubscriptionService::getStats($organizationId),
+            'data' => [
+                'plans' => $plans,
+                'stats' => SubscriptionService::getStats($organizationId),
                 'subscription' => $subscription,
-                'plan'         => $subscription?->plan,
+                'plan' => $subscription?->plan,
+            ],
+        ]);
+    }
+
+    /**
+     * POST /subscription/renew/order
+     *
+     * Create a Razorpay TEST order for the selected paid plan and SIM quantity.
+     */
+    public function createRenewalOrder(Request $request): JsonResponse
+    {
+        $user = $request->user();
+        $organizationId = (int) $user->organization_id;
+
+        if (! $organizationId) {
+            return response()->json([
+                'message' => 'No organization linked to this account.',
+            ], 404);
+        }
+
+        $validated = $request->validate([
+            'subscription_plan_id' => 'required|integer|exists:plans,id',
+            'sim_quantity' => 'required|integer|min:5|max:10000',
+        ]);
+
+        $data = $this->razorpaySubscriptions->createOrder(
+            organizationId: $organizationId,
+            planId: (int) $validated['subscription_plan_id'],
+            simQuantity: (int) $validated['sim_quantity']
+        );
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Razorpay order created.',
+            'data' => $data,
+        ]);
+    }
+
+    /**
+     * POST /subscription/renew/verify
+     *
+     * Verify Razorpay signature and insert a brand-new subscription row.
+     */
+    public function verifyRenewalPayment(Request $request): JsonResponse
+    {
+        $user = $request->user();
+        $organizationId = (int) $user->organization_id;
+
+        if (! $organizationId) {
+            return response()->json([
+                'message' => 'No organization linked to this account.',
+            ], 404);
+        }
+
+        $validated = $request->validate([
+            'razorpay_order_id' => 'required|string|max:255',
+            'razorpay_payment_id' => 'required|string|max:255',
+            'razorpay_signature' => 'required|string|max:255',
+        ]);
+
+        $subscription = $this->razorpaySubscriptions->verifyAndCreateSubscription(
+            organizationId: $organizationId,
+            payload: $validated
+        );
+
+        return response()->json([
+            'success' => true,
+            'message' => $subscription->wasRecentlyCreated
+                ? 'Payment verified and subscription renewed.'
+                : 'Payment already verified. Existing subscription returned.',
+            'data' => [
+                'subscription' => $subscription,
+                'stats' => SubscriptionService::getStats($organizationId),
             ],
         ]);
     }
@@ -167,13 +243,13 @@ class SubscriptionController extends Controller
     {
         $plans = Plan::where('is_active', true)
             ->select('id', 'name', 'display_name', 'billing_type', 'price_per_sim',
-                     'trial_days', 'features')
+                'trial_days', 'features')
             ->orderBy('price_per_sim')
             ->get();
 
         return response()->json([
             'success' => true,
-            'data'    => $plans,
+            'data' => $plans,
         ]);
     }
 
@@ -194,7 +270,7 @@ class SubscriptionController extends Controller
 
         return response()->json([
             'success' => true,
-            'data'    => $subscriptions,
+            'data' => $subscriptions,
         ]);
     }
 
@@ -212,9 +288,9 @@ class SubscriptionController extends Controller
             ->first();
 
         return response()->json([
-            'success'      => true,
+            'success' => true,
             'subscription' => $subscription,
-            'stats'        => SubscriptionService::getStats($organization->id),
+            'stats' => SubscriptionService::getStats($organization->id),
         ]);
     }
 
@@ -232,34 +308,34 @@ class SubscriptionController extends Controller
     public function assign(Request $request, Organization $organization): JsonResponse
     {
         $validator = Validator::make($request->all(), [
-            'plan_id'       => 'required|integer|exists:plans,id',
+            'plan_id' => 'required|integer|exists:plans,id',
             'billing_cycle' => 'required|string|in:monthly,yearly,trial',
-            'sim_limit'     => 'required|integer|min:1|max:10000',
-            'notes'         => 'nullable|string|max:500',
+            'sim_limit' => 'required|integer|min:1|max:10000',
+            'notes' => 'nullable|string|max:500',
         ]);
 
         if ($validator->fails()) {
             return response()->json([
                 'message' => 'Validation failed',
-                'errors'  => $validator->errors(),
+                'errors' => $validator->errors(),
             ], 422);
         }
 
         $plan = Plan::findOrFail($request->plan_id);
 
         $subscription = SubscriptionService::assignPlan(
-            organizationId:   $organization->id,
-            plan:             $plan,
-            billingCycle:     $request->billing_cycle,
-            simLimit:         $request->sim_limit,
-            notes:            $request->notes
+            organizationId: $organization->id,
+            plan: $plan,
+            billingCycle: $request->billing_cycle,
+            simLimit: $request->sim_limit,
+            notes: $request->notes
         );
 
         return response()->json([
-            'success'      => true,
-            'message'      => "Plan \"{$plan->display_name}\" assigned to {$organization->name}.",
+            'success' => true,
+            'message' => "Plan \"{$plan->display_name}\" assigned to {$organization->name}.",
             'subscription' => $subscription->load('plan'),
-            'stats'        => SubscriptionService::getStats($organization->id),
+            'stats' => SubscriptionService::getStats($organization->id),
         ]);
     }
 
@@ -281,7 +357,7 @@ class SubscriptionController extends Controller
         if ($validator->fails()) {
             return response()->json([
                 'message' => 'Validation failed',
-                'errors'  => $validator->errors(),
+                'errors' => $validator->errors(),
             ], 422);
         }
 
@@ -302,10 +378,10 @@ class SubscriptionController extends Controller
         SubscriptionService::enforceSimLimit($organization->id);
 
         return response()->json([
-            'success'      => true,
-            'message'      => 'SIM limit updated.',
+            'success' => true,
+            'message' => 'SIM limit updated.',
             'subscription' => $subscription->fresh()->load('plan'),
-            'stats'        => SubscriptionService::getStats($organization->id),
+            'stats' => SubscriptionService::getStats($organization->id),
         ]);
     }
 }

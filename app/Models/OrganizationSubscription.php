@@ -20,16 +20,25 @@ class OrganizationSubscription extends Model
         'notes',
         'features',
         'total_amount',
+        'amount',
+        'currency',
+        'razorpay_order_id',
+        'razorpay_payment_id',
+        'razorpay_signature',
+        'payment_status',
+        'transaction_payload',
     ];
 
     protected function casts(): array
     {
         return [
-            'start_date'    => 'date',
-            'end_date'      => 'date',
-            'features'      => 'array',
+            'start_date' => 'date',
+            'end_date' => 'date',
+            'features' => 'array',
             'price_per_sim' => 'decimal:2',
-            'total_amount'  => 'decimal:2',
+            'total_amount' => 'decimal:2',
+            'amount' => 'decimal:2',
+            'transaction_payload' => 'array',
         ];
     }
 
