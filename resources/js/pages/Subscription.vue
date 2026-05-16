@@ -1,263 +1,312 @@
 <template>
-  <div class="subscription-page">
-    <div class="subscription-hero">
-      <div class="hero-glow hero-glow-one"></div>
-      <div class="hero-glow hero-glow-two"></div>
+  <div class="sub-page">
 
-      <div class="hero-content">
-        <span class="eyebrow">Organization Billing</span>
-        <h3>Subscription</h3>
-        <p>
-          Track your current plan, SIM allowance, renewal window, and plan features from one clean billing workspace.
-        </p>
+    <!-- Compact Page Header -->
+    <header class="sub-hdr">
+      <div class="sub-hdr-meta">
+        <h4 class="sub-hdr-title">Subscription</h4>
+        <span class="sub-hdr-sub">Billing &amp; Plan Management</span>
       </div>
-
-      <div class="hero-actions">
-        <button type="button" class="btn btn-light hero-refresh" :disabled="loading" @click="fetchSubscription">
-          <i class="fas fa-sync-alt me-2" :class="{ 'fa-spin': loading }"></i>
+      <div class="sub-hdr-actions">
+        <button type="button" class="act-btn" :disabled="loading" @click="fetchSubscription">
+          <i class="fas fa-sync-alt" :class="{ 'fa-spin': loading }"></i>
           Refresh
         </button>
-        <router-link class="btn renew-button" to="/subscription/renew">
-          <i class="fas fa-bolt me-2"></i>
+        <router-link v-if="canRequestRenewal" class="act-btn act-btn--renew" to="/subscription/renew">
+          <i class="fas fa-bolt"></i>
           Request Renewal
         </router-link>
-        <button type="button" class="btn history-button" @click="scrollToHistory">
-          <i class="fas fa-history me-2"></i>
+        <span v-else class="act-btn act-btn--renew act-btn--locked" :title="renewalLockHint">
+          <i class="fas fa-lock"></i>
+          Request Renewal
+        </span>
+        <button type="button" class="act-btn act-btn--ghost" @click="scrollToHistory">
+          <i class="fas fa-history"></i>
           History
         </button>
       </div>
+    </header>
+
+    <!-- Loading -->
+    <div v-if="loading" class="sub-state">
+      <div class="spinner-border spinner-border-sm text-primary" role="status" aria-hidden="true"></div>
+      <span>Loading subscription details…</span>
     </div>
 
-    <div v-if="loading" class="subscription-loading">
-      <div class="spinner-border text-primary" role="status" aria-hidden="true"></div>
-      <span>Loading subscription details...</span>
-    </div>
-
-    <div v-else-if="error" class="alert alert-danger subscription-alert">
-      <i class="fas fa-exclamation-circle me-2"></i>
+    <!-- Error -->
+    <div v-else-if="error" class="sub-state sub-state--err">
+      <i class="fas fa-exclamation-circle"></i>
       {{ error }}
     </div>
 
     <template v-else>
-      <div v-if="!subscription" class="empty-state">
-        <div class="empty-icon">
-          <i class="fas fa-receipt"></i>
-        </div>
+      <!-- Empty state -->
+      <div v-if="!subscription" class="sub-empty">
+        <div class="sub-empty-icon"><i class="fas fa-receipt"></i></div>
         <h4>No subscription found</h4>
         <p>Your organization does not have a subscription record yet. Request a plan setup from billing to start using plan limits.</p>
-        <router-link class="btn renew-button" to="/subscription/renew">Request Plan Setup</router-link>
+        <router-link class="act-btn act-btn--renew" to="/subscription/renew">Request Plan Setup</router-link>
       </div>
 
-      <div v-else class="subscription-grid">
-        <section class="plan-card">
-          <div class="plan-card-top">
-            <div>
-              <span class="card-kicker">Current Plan</span>
-              <h2>{{ planName }}</h2>
-              <p>{{ planTagline }}</p>
-            </div>
-            <span class="status-pill" :class="statusClass">
-              <span></span>
-              {{ statusLabel }}
-            </span>
-          </div>
+      <template v-else>
+        <!-- ── 3-column main cards row ── -->
+        <div class="main-row">
 
-          <div class="price-row">
-            <strong>{{ planPrice }}</strong>
-            <span>{{ priceCaption }}</span>
-          </div>
+          <!-- Current Plan -->
+          <section class="b-card plan-card">
+            <div class="b-card-top">
+              <span class="kicker">Current Plan</span>
+              <span class="status-pill" :class="statusClass">
+                <span class="status-dot"></span>{{ statusLabel }}
+              </span>
+            </div>
+            <h3 class="plan-name">{{ planName }}</h3>
+            <p class="plan-tag">{{ planTagline }}</p>
 
-          <div class="renewal-strip" :class="{ urgent: isRenewalSoon || isExpired }">
-            <div class="renewal-copy">
-              <span>{{ renewalHeadline }}</span>
-              <strong>{{ renewalSubtext }}</strong>
+            <div class="price-row">
+              <strong>{{ planPrice }}</strong>
+              <span>{{ priceCaption }}</span>
             </div>
-            <router-link class="renewal-link" to="/subscription/renew">{{ renewalActionText }}</router-link>
-          </div>
 
-          <div class="plan-meta">
-            <div class="meta-item">
-              <span>Billing Cycle</span>
-              <strong>{{ billingCycleLabel }}</strong>
-            </div>
-            <div class="meta-item">
-              <span>Start Date</span>
-              <strong>{{ formatDateDisplay(subscription.start_date) }}</strong>
-            </div>
-            <div class="meta-item">
-              <span>Expiry Date</span>
-              <strong>{{ endDateLabel }}</strong>
-            </div>
-          </div>
-        </section>
-
-        <aside class="timeline-card">
-          <span class="card-kicker">Plan Timeline</span>
-          <div class="timeline-ring" :style="{ '--progress': `${termProgress}deg` }">
-            <div>
-              <strong>{{ timelineValue }}</strong>
-              <span>{{ timelineLabel }}</span>
-            </div>
-          </div>
-          <div class="timeline-progress">
-            <div class="progress-labels">
-              <span>{{ formatDateDisplay(subscription.start_date) }}</span>
-              <span>{{ endDateLabel }}</span>
-            </div>
-            <div class="progress-track">
-              <span :style="{ width: `${termProgressPercent}%` }"></span>
-            </div>
-          </div>
-        </aside>
-      </div>
-
-      <div v-if="subscription" class="details-grid">
-        <section class="usage-card">
-          <div class="section-heading">
-            <div>
-              <span class="card-kicker">SIM Usage</span>
-              <h5>Plan Capacity</h5>
-            </div>
-            <router-link to="/sims" class="small-action">Manage SIMs</router-link>
-          </div>
-
-          <div class="usage-main">
-            <strong>{{ activeSims }}</strong>
-            <span>of {{ simLimit }} active SIM slots used</span>
-          </div>
-          <div class="usage-track">
-            <span :style="{ width: `${simUsagePercent}%` }"></span>
-          </div>
-
-          <div class="usage-stats">
-            <div>
-              <span>Active SIMs</span>
-              <strong>{{ activeSims }}</strong>
-            </div>
-            <div>
-              <span>Remaining</span>
-              <strong>{{ remainingSlots }}</strong>
-            </div>
-            <div>
-              <span>Inactive</span>
-              <strong>{{ inactiveSims }}</strong>
-            </div>
-          </div>
-
-          <div class="addon-sims-card" :class="{ 'opacity-75': isTrialPlan }">
-            <div class="addon-heading">
-              <div>
-                <span class="card-kicker">Add-on SIMs</span>
-                <h5>Buy extra SIM capacity</h5>
+            <div class="renew-strip" :class="{ urgent: isRenewalSoon || isExpired }">
+              <div class="renew-strip-copy">
+                <span>{{ renewalHeadline }}</span>
+                <strong>{{ renewalSubtext }}</strong>
               </div>
-              <span class="addon-rate">{{ formatCurrency(addonPricePerSim) }} / SIM</span>
+              <router-link v-if="canRequestRenewal" class="accent-link" to="/subscription/renew">{{ renewalActionText }}</router-link>
+              <span v-else class="accent-link accent-link--locked" :title="renewalLockHint">{{ renewalActionText }}</span>
             </div>
 
-            <p class="addon-copy" v-if="isTrialPlan">
-              Add-on SIMs are not available on free trial accounts. Please upgrade your plan to buy extra SIM capacity.
-            </p>
-            <p class="addon-copy" v-else>
-              Add more SIM slots to your current plan. Quantity starts from 1 SIM and the payment flow will be connected later.
-            </p>
+            <div class="plan-meta">
+              <div class="meta-chip">
+                <span>Billing Cycle</span>
+                <strong>{{ billingCycleLabel }}</strong>
+              </div>
+              <div class="meta-chip">
+                <span>Start Date</span>
+                <strong>{{ formatDateDisplay(subscription.start_date) }}</strong>
+              </div>
+              <div class="meta-chip">
+                <span>Expiry</span>
+                <strong>{{ endDateLabel }}</strong>
+              </div>
+            </div>
+          </section>
 
-            <div class="addon-quantity">
-              <button type="button" :disabled="isTrialPlan || addonSimQuantity <= 1" @click="decreaseAddonSims">
-                <i class="fas fa-minus"></i>
+          <!-- SIM Usage -->
+          <section class="b-card usage-card">
+
+            <!-- Header -->
+            <div class="b-card-top">
+              <span class="kicker">SIM Usage</span>
+              <router-link to="/sims" class="accent-link">Manage SIMs</router-link>
+            </div>
+
+            <!-- Capacity row -->
+            <div class="cap-row">
+              <div class="cap-numbers">
+                <strong class="cap-used">{{ activeSims }}</strong>
+                <div class="cap-meta">
+                  <span class="cap-of">of <strong>{{ simLimit }}</strong> SIM slots</span>
+                  <span class="cap-sub">{{ remainingSlots }} slot{{ remainingSlots === 1 ? '' : 's' }} available</span>
+                </div>
+              </div>
+              <span class="cap-badge" :class="simUsagePercent >= 80 ? 'cap-badge--warn' : 'cap-badge--ok'">
+                {{ simUsagePercent }}%
+              </span>
+            </div>
+
+            <!-- Progress bar -->
+            <div class="prog-track prog-track--md">
+              <span :style="{ width: `${simUsagePercent}%` }"></span>
+            </div>
+
+            <!-- Stat chips -->
+            <div class="usage-stats">
+              <div class="stat-chip stat-chip--green">
+                <span class="stat-dot"></span>
+                <div>
+                  <span>Active</span>
+                  <strong>{{ activeSims }}</strong>
+                </div>
+              </div>
+              <div class="stat-chip stat-chip--blue">
+                <span class="stat-dot"></span>
+                <div>
+                  <span>Available</span>
+                  <strong>{{ remainingSlots }}</strong>
+                </div>
+              </div>
+              <div class="stat-chip stat-chip--grey">
+                <span class="stat-dot"></span>
+                <div>
+                  <span>Inactive</span>
+                  <strong>{{ inactiveSims }}</strong>
+                </div>
+              </div>
+            </div>
+
+            <!-- Add-on block -->
+            <div class="addon-blk" :class="{ 'addon-blk--off': isTrialPlan }">
+
+              <!-- Add-on header -->
+              <div class="addon-blk-hdr">
+                <div>
+                  <span class="kicker">Add-on SIMs</span>
+                  <strong class="addon-blk-label">Expand capacity</strong>
+                </div>
+                <span class="addon-rate">{{ formatCurrency(addonPricePerSim) }}/SIM</span>
+              </div>
+
+              <!-- Disabled state note -->
+              <p v-if="isTrialPlan || !canPurchaseAddon" class="addon-state-note">
+                <i class="fas fa-info-circle"></i>
+                <template v-if="isTrialPlan">Not available on trial plan. Upgrade to enable add-ons.</template>
+                <template v-else>Requires an active subscription with a future end date.</template>
+              </p>
+
+              <!-- Proration indicator strip -->
+              <div v-if="canPurchaseAddon" class="proration-strip">
+                <div class="proration-strip-track">
+                  <div class="proration-strip-fill" :style="{ width: `${Math.round(addonProrationFactor * 100)}%` }"></div>
+                </div>
+                <div class="proration-strip-labels">
+                  <span v-if="addonProrationFactor >= 0.999">
+                    <i class="fas fa-calendar-check"></i> Full billing period — {{ addonBillingCycleDays }} days
+                  </span>
+                  <span v-else>
+                    <i class="fas fa-clock"></i> {{ addonRemainingDays }} of {{ addonBillingCycleDays }} days remaining
+                  </span>
+                  <strong>{{ Math.round(addonProrationFactor * 100) }}%</strong>
+                </div>
+              </div>
+
+              <!-- Quantity stepper -->
+              <div class="addon-qty">
+                <button type="button" :disabled="isTrialPlan || addonSimQuantity <= 1" @click="decreaseAddonSims">
+                  <i class="fas fa-minus"></i>
+                </button>
+                <input
+                  v-model.number="addonSimQuantity"
+                  type="number" min="1" step="1"
+                  aria-label="Add-on SIM quantity"
+                  :disabled="isTrialPlan"
+                  @blur="normalizeAddonSims"
+                />
+                <button type="button" :disabled="isTrialPlan" @click="increaseAddonSims">
+                  <i class="fas fa-plus"></i>
+                </button>
+              </div>
+
+              <!-- Calculation breakdown -->
+              <div class="addon-calc">
+                <div class="addon-calc-left">
+                  <span class="addon-calc-formula">
+                    {{ addonQuantity }} SIM{{ addonQuantity === 1 ? '' : 's' }} × {{ formatCurrency(addonPricePerSim) }}
+                    <template v-if="canPurchaseAddon && addonProrationFactor < 0.999"> × {{ Math.round(addonProrationFactor * 100) }}%</template>
+                  </span>
+                </div>
+                <div class="addon-calc-right">
+                  <del v-if="canPurchaseAddon && addonProrationFactor < 0.999" class="addon-full-price">
+                    {{ formatCurrency(addonTotal) }}
+                  </del>
+                  <strong class="addon-due">{{ formatCurrency(canPurchaseAddon ? addonProratedTotal : addonTotal) }}</strong>
+                </div>
+              </div>
+
+              <!-- Payment message -->
+              <div v-if="addonPaymentMessage" class="addon-msg" :class="`addon-msg--${addonPaymentMessageType}`">
+                <i :class="addonPaymentMessageType === 'success' ? 'fas fa-check-circle' : 'fas fa-exclamation-circle'"></i>
+                {{ addonPaymentMessage }}
+              </div>
+
+              <!-- Pay button with amount shown -->
+              <button
+                type="button"
+                class="btn-addon-pay"
+                :disabled="isTrialPlan || addonPaymentLoading || !canPurchaseAddon"
+                @click="payAddonSims"
+              >
+                <span v-if="addonPaymentLoading" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                <i v-else class="fas fa-credit-card"></i>
+                <span v-if="addonPaymentLoading">Opening Checkout…</span>
+                <span v-else>
+                  Pay {{ formatCurrency(canPurchaseAddon ? addonProratedTotal : addonTotal) }}
+                  · {{ addonQuantity }} SIM{{ addonQuantity === 1 ? '' : 's' }}
+                </span>
               </button>
-              <input
-                v-model.number="addonSimQuantity"
-                type="number"
-                min="1"
-                step="1"
-                aria-label="Add-on SIM quantity"
-                :disabled="isTrialPlan"
-                @blur="normalizeAddonSims"
-              />
-              <button type="button" :disabled="isTrialPlan" @click="increaseAddonSims">
-                <i class="fas fa-plus"></i>
-              </button>
-            </div>
 
-            <div class="addon-total-row">
-              <span>Total for {{ addonQuantity }} add-on SIM{{ addonQuantity === 1 ? '' : 's' }}</span>
-              <strong>{{ formatCurrency(addonTotal) }}</strong>
             </div>
+          </section>
 
-            <button type="button" class="btn addon-pay-button" :disabled="isTrialPlan">
-              <i class="fas fa-credit-card me-2"></i>
-              Pay for Add-on SIMs
-            </button>
+          <!-- Plan Timeline -->
+          <section class="b-card timeline-card">
+            <span class="kicker">Plan Timeline</span>
+            <h5 class="b-card-title">Subscription Progress</h5>
+            <div class="ring-center">
+              <div class="timeline-ring" :style="{ '--progress': `${termProgress}deg` }">
+                <div>
+                  <strong>{{ timelineValue }}</strong>
+                  <span>{{ timelineLabel }}</span>
+                </div>
+              </div>
+            </div>
+            <div class="timeline-foot">
+              <div class="bar-labels">
+                <span>{{ formatDateDisplay(subscription.start_date) }}</span>
+                <span>{{ endDateLabel }}</span>
+              </div>
+              <div class="prog-track">
+                <span :style="{ width: `${termProgressPercent}%` }"></span>
+              </div>
+            </div>
+          </section>
+        </div>
+
+        <!-- ── Included Features ── -->
+        <section class="b-card features-card">
+          <div class="b-sec-head">
+            <span class="kicker">Included Features</span>
+            <h5 class="b-card-title">What your plan unlocks</h5>
           </div>
-        </section>
-
-        <section class="features-card">
-          <div class="section-heading">
-            <div>
-              <span class="card-kicker">Included Features</span>
-              <h5>What your plan unlocks</h5>
-            </div>
-          </div>
-
-          <div v-if="featureList.length" class="feature-list">
+          <div v-if="featureList.length" class="feature-grid">
             <div v-for="feature in featureList" :key="feature.key" class="feature-item">
-              <div class="feature-icon">
-                <i :class="feature.icon"></i>
-              </div>
+              <div class="feature-icon"><i :class="feature.icon"></i></div>
               <div>
                 <strong>{{ feature.label }}</strong>
                 <span>{{ feature.description }}</span>
               </div>
             </div>
           </div>
-          <div v-else class="feature-empty">
-            Feature details are not configured for this plan yet.
-          </div>
+          <p v-else class="empty-note">Feature details are not configured for this plan yet.</p>
         </section>
+      </template>
 
-        <section class="renew-card">
-          <div class="renew-card-icon">
-            <i class="fas fa-headset"></i>
-          </div>
-          <span class="card-kicker">Renew Option</span>
-          <h5>Need to renew, upgrade, or extend SIM capacity?</h5>
-          <p>
-            Send a renewal request to billing with your current plan context. The team can extend the subscription or move you to a higher plan.
-          </p>
-          <router-link class="btn renew-button w-100" to="/subscription/renew">
-            <i class="fas fa-paper-plane me-2"></i>
-            {{ renewalActionText }}
-          </router-link>
-        </section>
-      </div>
-
-      <section ref="historySection" class="payment-history-card">
-        <div class="section-heading">
+      <!-- ── Payment History (always visible in v-else context) ── -->
+      <section ref="historySection" class="b-card pay-card">
+        <div class="b-sec-head">
           <div>
-            <span class="card-kicker">Payment History</span>
-            <h5>Invoices</h5>
+            <span class="kicker">Payment History</span>
+            <h5 class="b-card-title">Invoices</h5>
           </div>
-          <button type="button" class="small-action history-refresh" :disabled="historyLoading" @click="fetchPaymentHistory">
-            <i class="fas fa-sync-alt me-2" :class="{ 'fa-spin': historyLoading }"></i>
+          <button type="button" class="act-btn act-btn--sm" :disabled="historyLoading" @click="fetchPaymentHistory">
+            <i class="fas fa-sync-alt" :class="{ 'fa-spin': historyLoading }"></i>
             Refresh
           </button>
         </div>
 
-        <div v-if="historyLoading" class="history-state">
+        <div v-if="historyLoading" class="sub-state">
           <div class="spinner-border spinner-border-sm text-primary" role="status" aria-hidden="true"></div>
-          <span>Loading payment history...</span>
+          <span>Loading payment history…</span>
         </div>
-
-        <div v-else-if="historyError" class="history-state is-error">
+        <div v-else-if="historyError" class="sub-state sub-state--err">
           <i class="fas fa-exclamation-circle"></i>
-          <span>{{ historyError }}</span>
+          {{ historyError }}
         </div>
+        <p v-else-if="!paymentHistory.length" class="empty-note">No paid invoices are available yet.</p>
 
-        <div v-else-if="!paymentHistory.length" class="history-empty">
-          No paid invoices are available yet.
-        </div>
-
-        <div v-else class="history-table-wrap">
-          <table class="history-table">
+        <div v-else class="table-wrap">
+          <table class="pay-table">
             <thead>
               <tr>
                 <th>Invoice</th>
@@ -282,15 +331,13 @@
                   <strong>{{ formatDateDisplay(payment.start_date) }}</strong>
                   <span>to {{ formatDateDisplay(payment.end_date) }}</span>
                 </td>
-                <td>
-                  <span class="payment-id">{{ payment.razorpay_payment_id }}</span>
-                </td>
+                <td><span class="pay-id">{{ payment.razorpay_payment_id }}</span></td>
                 <td class="text-end">
                   <strong>{{ formatCurrency(payment.amount, payment.currency) }}</strong>
-                  <span class="status-text">{{ toTitleCase(payment.payment_status) }}</span>
+                  <span class="pay-status">{{ toTitleCase(payment.payment_status) }}</span>
                 </td>
                 <td class="text-end">
-                  <div class="invoice-actions">
+                  <div class="inv-btns">
                     <button type="button" title="View invoice" @click="viewInvoice(payment)">
                       <i class="fas fa-eye"></i>
                     </button>
@@ -312,11 +359,15 @@
 import { computed, onMounted, ref } from 'vue'
 import api from '@/services/api'
 import { formatDateDisplay } from '@/utils/dateFormatter'
+import { showError, showSuccess } from '@/services/toast'
 
 const loading = ref(false)
 const error = ref('')
 const payload = ref(null)
 const addonSimQuantity = ref(1)
+const addonPaymentLoading = ref(false)
+const addonPaymentMessage = ref('')
+const addonPaymentMessageType = ref('')
 const historyLoading = ref(false)
 const historyError = ref('')
 const paymentHistory = ref([])
@@ -440,6 +491,40 @@ const addonQuantity = computed(() => {
 const addonPricePerSim = computed(() => Number(plan.value?.price_per_sim || 0))
 const addonTotal = computed(() => addonPricePerSim.value * addonQuantity.value)
 
+// Whether add-on SIMs can currently be purchased (active subscription with future end date).
+const canPurchaseAddon = computed(() => {
+  if (isTrialPlan.value) return false
+  if (status.value !== 'active') return false
+  const end = parseDate(subscription.value?.end_date)
+  if (!end) return false
+  return end > startOfToday()
+})
+
+// Proration calculation (mirrors backend logic so the UI shows exact amounts).
+const addonBillingCycleDays = computed(() => {
+  const start = parseDate(subscription.value?.start_date)
+  const end   = parseDate(subscription.value?.end_date)
+  if (!start || !end) return 30
+  return Math.max(1, Math.floor((end.getTime() - start.getTime()) / 86400000))
+})
+
+const addonRemainingDays = computed(() => {
+  if (!canPurchaseAddon.value) return 0
+  const end   = parseDate(subscription.value?.end_date)
+  const today = startOfToday()
+  return Math.max(0, Math.floor((end.getTime() - today.getTime()) / 86400000))
+})
+
+const addonProrationFactor = computed(() =>
+  addonBillingCycleDays.value > 0
+    ? Math.min(1, addonRemainingDays.value / addonBillingCycleDays.value)
+    : 1
+)
+
+const addonProratedTotal = computed(() =>
+  Math.round(addonPricePerSim.value * addonQuantity.value * addonProrationFactor.value * 100) / 100
+)
+
 const normalizeAddonSims = () => {
   addonSimQuantity.value = addonQuantity.value
 }
@@ -540,6 +625,20 @@ const daysRemaining = computed(() => {
 const isExpired = computed(() => status.value === 'expired' || (daysRemaining.value !== null && daysRemaining.value < 0))
 const isRenewalSoon = computed(() => daysRemaining.value !== null && daysRemaining.value >= 0 && daysRemaining.value <= 7)
 
+// Renewal is only allowed when the plan has 1 day or less remaining, or is already expired.
+const canRequestRenewal = computed(() => {
+  if (isExpired.value) return true
+  if (daysRemaining.value === null) return false
+  return daysRemaining.value <= 1
+})
+
+const renewalLockHint = computed(() => {
+  if (daysRemaining.value === null) return 'Renewal is not available for this plan type.'
+  if (daysRemaining.value <= 1) return ''
+  const d = daysRemaining.value
+  return `Renewal opens when 1 day remains (${d} day${d === 1 ? '' : 's'} left).`
+})
+
 const renewalHeadline = computed(() => {
   if (isExpired.value) return 'Subscription expired'
   if (daysRemaining.value === null) return 'Active until cancelled'
@@ -592,850 +691,1090 @@ const featureList = computed(() => {
   })
 })
 
+const loadRazorpayCheckout = () =>
+  new Promise((resolve, reject) => {
+    if (window.Razorpay) { resolve(); return }
+    const script = document.createElement('script')
+    script.src = 'https://checkout.razorpay.com/v1/checkout.js'
+    script.async = true
+    script.onload = resolve
+    script.onerror = () => reject(new Error('Unable to load Razorpay checkout.'))
+    document.head.appendChild(script)
+  })
+
+const payAddonSims = async () => {
+  if (!canPurchaseAddon.value || addonPaymentLoading.value) return
+
+  normalizeAddonSims()
+  addonPaymentLoading.value = true
+  addonPaymentMessage.value = ''
+  addonPaymentMessageType.value = ''
+
+  try {
+    await loadRazorpayCheckout()
+
+    const response = await api.post('/subscription/addon-sim/order', {
+      sim_quantity: addonQuantity.value
+    })
+
+    const data  = response.data?.data || {}
+    const order = data.order || {}
+    const quote = data.quote || {}
+
+    if (!order.id || !data.key) {
+      throw new Error('Razorpay order response is incomplete.')
+    }
+
+    const user = JSON.parse(localStorage.getItem('user') || '{}')
+    let paymentHandled = false
+
+    const checkout = new window.Razorpay({
+      key: data.key,
+      amount: order.amount,
+      currency: order.currency || quote.currency || 'INR',
+      name: 'Callytics',
+      description: `Add-on SIMs — ${addonQuantity.value} SIM(s) prorated for ${quote.remaining_days ?? addonRemainingDays.value} days`,
+      order_id: order.id,
+      prefill: {
+        name: user.name || '',
+        email: user.email || '',
+        contact: user.mobile || user.phone || ''
+      },
+      notes: {
+        type: 'addon_sim',
+        sim_quantity: String(addonQuantity.value)
+      },
+      theme: { color: '#12b8a6' },
+      handler: async (payment) => {
+        paymentHandled = true
+        await verifyAddonPayment(payment)
+      },
+      modal: {
+        ondismiss: () => {
+          if (paymentHandled) return
+          addonPaymentLoading.value = false
+          addonPaymentMessage.value = 'Checkout closed before payment was completed.'
+          addonPaymentMessageType.value = 'danger'
+        }
+      }
+    })
+
+    checkout.on('payment.failed', (failure) => {
+      paymentHandled = true
+      addonPaymentLoading.value = false
+      addonPaymentMessage.value = failure.error?.description || 'Payment failed. Please try again.'
+      addonPaymentMessageType.value = 'danger'
+      showError(addonPaymentMessage.value)
+    })
+
+    checkout.open()
+  } catch (err) {
+    addonPaymentLoading.value = false
+    addonPaymentMessage.value = err.response?.data?.message || err.message || 'Unable to start add-on payment.'
+    addonPaymentMessageType.value = 'danger'
+    showError(addonPaymentMessage.value)
+  }
+}
+
+const verifyAddonPayment = async (payment) => {
+  try {
+    const response = await api.post('/subscription/addon-sim/verify', {
+      razorpay_order_id:   payment.razorpay_order_id,
+      razorpay_payment_id: payment.razorpay_payment_id,
+      razorpay_signature:  payment.razorpay_signature
+    })
+
+    addonPaymentMessage.value = response.data?.message || 'Add-on SIMs activated successfully.'
+    addonPaymentMessageType.value = 'success'
+    showSuccess(addonPaymentMessage.value)
+    await fetchSubscription()
+  } catch (err) {
+    addonPaymentMessage.value = err.response?.data?.message || 'Payment verification failed. Please contact support.'
+    addonPaymentMessageType.value = 'danger'
+    showError(addonPaymentMessage.value)
+  } finally {
+    addonPaymentLoading.value = false
+  }
+}
+
 onMounted(fetchSubscription)
 </script>
 
 <style scoped>
-.subscription-page {
-  --sub-ink: #102033;
-  --sub-muted: #667085;
-  --sub-line: #e5ebf3;
-  --sub-navy: #10233f;
-  --sub-blue: #2563eb;
-  --sub-teal: #12b8a6;
-  --sub-orange: #f97316;
+/* ── Design tokens ── */
+.sub-page {
+  --ink:    #102033;
+  --muted:  #667085;
+  --line:   #e5ebf3;
+  --navy:   #10233f;
+  --blue:   #2563eb;
+  --teal:   #12b8a6;
+  --orange: #f97316;
   display: flex;
   flex-direction: column;
-  gap: 22px;
+  gap: 16px;
 }
 
-.subscription-hero {
-  position: relative;
-  overflow: hidden;
-  border-radius: 20px;
-  padding: 20px 28px;
-  color: #fff;
-  background:
-    radial-gradient(circle at 14% 18%, rgba(18, 184, 166, 0.38), transparent 28%),
-    radial-gradient(circle at 92% 8%, rgba(249, 115, 22, 0.34), transparent 22%),
-    linear-gradient(135deg, #071522 0%, #10233f 52%, #183b5c 100%);
-  box-shadow: 0 20px 40px rgba(16, 35, 63, 0.15);
+/* ── Compact Page Header ── */
+.sub-hdr {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding: 14px 20px;
+  border-radius: 16px;
+  background: #fff;
+  border: 1px solid var(--line);
+  box-shadow: 0 2px 8px rgba(16, 32, 51, 0.05);
 }
 
-.hero-glow {
-  position: absolute;
-  border-radius: 999px;
-  filter: blur(4px);
+.sub-hdr-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.sub-hdr-title {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: var(--ink);
+  letter-spacing: -0.02em;
+}
+
+.sub-hdr-sub {
+  font-size: 0.76rem;
+  color: var(--muted);
+  font-weight: 600;
+}
+
+.sub-hdr-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+/* ── Action buttons ── */
+.act-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 14px;
+  border-radius: 10px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  border: 1px solid var(--line);
+  background: #fff;
+  color: var(--ink);
+  cursor: pointer;
+  text-decoration: none;
+  line-height: 1.4;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.act-btn:hover {
+  background: #f4f6fa;
+  border-color: #c9d3e0;
+  color: var(--ink);
+}
+
+.act-btn--renew {
+  border-color: transparent;
+  background: linear-gradient(135deg, var(--orange), #ffb454);
+  color: #fff !important;
+  box-shadow: 0 4px 14px rgba(249, 115, 22, 0.28);
+}
+
+.act-btn--renew:hover {
+  background: linear-gradient(135deg, #e56a0b, #ffa53e);
+  border-color: transparent;
+}
+
+.act-btn--ghost {
+  background: #f4f6fa;
+  border-color: transparent;
+}
+
+.act-btn--ghost:hover {
+  background: #eaeef4;
+  border-color: transparent;
+}
+
+.act-btn--sm {
+  padding: 5px 10px;
+  font-size: 0.78rem;
+}
+
+.act-btn:disabled {
   opacity: 0.55;
+  cursor: not-allowed;
   pointer-events: none;
 }
 
-.hero-glow-one {
-  width: 230px;
-  height: 230px;
-  right: -90px;
-  bottom: -120px;
-  background: rgba(18, 184, 166, 0.42);
-}
-
-.hero-glow-two {
-  width: 170px;
-  height: 170px;
-  left: 42%;
-  top: -92px;
-  background: rgba(249, 115, 22, 0.34);
-}
-
-.hero-content,
-.hero-actions {
-  position: relative;
-  z-index: 1;
-}
-
-.hero-content {
-  max-width: 640px;
-}
-
-.eyebrow,
-.card-kicker {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 0.72rem;
-  font-weight: 800;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-}
-
-.eyebrow {
-  color: rgba(255, 255, 255, 0.72);
-}
-
-.card-kicker {
-  color: #7c8aa0;
-}
-
-.subscription-hero h3 {
-  margin: 6px 0 6px;
-  font-size: clamp(1.5rem, 2.5vw, 2.2rem);
-  line-height: 1.1;
-  font-weight: 900;
-  letter-spacing: -0.05em;
-}
-
-.subscription-hero p {
-  max-width: 580px;
-  margin: 0;
-  color: rgba(255, 255, 255, 0.76);
-  font-size: 0.98rem;
-  line-height: 1.6;
-}
-
-.hero-actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
-  margin-top: 18px;
-}
-
-.hero-refresh {
-  border: 0;
-  font-weight: 800;
-  color: var(--sub-navy);
-}
-
-.renew-button {
-  border: 0;
-  color: #fff !important;
-  font-weight: 800;
-  background: linear-gradient(135deg, var(--sub-orange), #ffb454);
-  box-shadow: 0 16px 32px rgba(249, 115, 22, 0.28);
-}
-
-.history-button {
-  border: 1px solid rgba(255, 255, 255, 0.34);
-  color: #fff;
-  font-weight: 800;
-  background: rgba(255, 255, 255, 0.08);
-}
-
-.history-button:hover {
-  color: #fff;
-  border-color: rgba(255, 255, 255, 0.6);
-  background: rgba(255, 255, 255, 0.16);
-}
-
-.subscription-loading,
-.empty-state,
-.subscription-alert {
-  border-radius: 22px;
-  background: #fff;
-  border: 1px solid var(--sub-line);
-  box-shadow: 0 18px 40px rgba(16, 32, 51, 0.06);
-}
-
-.subscription-loading {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 28px;
-  color: var(--sub-muted);
-  font-weight: 700;
-}
-
-.subscription-alert {
-  padding: 18px 20px;
-}
-
-.empty-state {
-  padding: 54px 28px;
-  text-align: center;
-}
-
-.empty-icon {
-  width: 76px;
-  height: 76px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 24px;
-  margin-bottom: 18px;
-  color: var(--sub-orange);
-  background: #fff4e8;
-  font-size: 1.8rem;
-}
-
-.empty-state h4 {
-  margin: 0 0 8px;
-  font-weight: 900;
-  color: var(--sub-ink);
-}
-
-.empty-state p {
-  max-width: 540px;
-  margin: 0 auto 20px;
-  color: var(--sub-muted);
-}
-
-.subscription-grid,
-.details-grid {
-  display: grid;
-  gap: 22px;
-}
-
-.subscription-grid {
-  grid-template-columns: minmax(0, 1.65fr) minmax(300px, 0.75fr);
-  align-items: stretch;
-}
-
-.details-grid {
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(280px, 0.72fr);
-}
-
-.plan-card,
-.timeline-card,
-.usage-card,
-.features-card,
-.renew-card,
-.payment-history-card {
-  border: 1px solid var(--sub-line);
-  border-radius: 26px;
-  background: #fff;
-  box-shadow: 0 18px 40px rgba(16, 32, 51, 0.06);
-}
-
-.plan-card {
-  padding: 28px;
-}
-
-.plan-card-top {
-  display: flex;
-  justify-content: space-between;
-  gap: 18px;
-  align-items: flex-start;
-}
-
-.plan-card h2 {
-  margin: 8px 0 8px;
-  color: var(--sub-ink);
-  font-size: clamp(2rem, 3.6vw, 3rem);
-  font-weight: 900;
-  letter-spacing: -0.06em;
-}
-
-.plan-card p {
-  max-width: 520px;
-  margin: 0;
-  color: var(--sub-muted);
-  line-height: 1.65;
-}
-
-.status-pill {
-  flex: 0 0 auto;
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 9px 13px;
-  border-radius: 999px;
-  font-size: 0.78rem;
-  font-weight: 900;
-}
-
-.status-pill span {
-  width: 8px;
-  height: 8px;
-  border-radius: 999px;
-  background: currentColor;
-}
-
-.status-pill.is-active {
-  color: #067647;
-  background: #dcfae6;
-}
-
-.status-pill.is-expired,
-.status-pill.is-cancelled {
-  color: #b42318;
-  background: #fee4e2;
-}
-
-.status-pill.is-empty {
-  color: #475467;
-  background: #f2f4f7;
-}
-
-.price-row {
-  display: flex;
-  align-items: flex-end;
-  gap: 10px;
-  margin-top: 24px;
-  padding-top: 22px;
-  border-top: 1px solid var(--sub-line);
-}
-
-.price-row strong {
-  font-size: 2rem;
-  line-height: 1;
-  color: var(--sub-ink);
-  font-weight: 900;
-  letter-spacing: -0.05em;
-}
-
-.price-row span {
-  margin-bottom: 3px;
-  color: var(--sub-muted);
-  font-weight: 700;
-}
-
-.renewal-strip {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  margin-top: 22px;
-  padding: 16px;
-  border: 1px solid #c7f0eb;
-  border-radius: 18px;
-  background:
-    radial-gradient(circle at 0 0, rgba(18, 184, 166, 0.15), transparent 32%),
-    #f2fffd;
-}
-
-.renewal-strip.urgent {
-  border-color: #fed7aa;
-  background:
-    radial-gradient(circle at 0 0, rgba(249, 115, 22, 0.15), transparent 34%),
-    #fff7ed;
-}
-
-.renewal-copy span {
-  display: block;
-  color: var(--sub-muted);
-  font-size: 0.82rem;
-  font-weight: 800;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-}
-
-.renewal-copy strong {
-  display: block;
-  margin-top: 2px;
-  color: var(--sub-ink);
-  font-size: 1.06rem;
-}
-
-.renewal-link,
-.small-action {
-  color: var(--sub-blue);
-  font-weight: 900;
-  text-decoration: none;
-}
-
-.plan-meta {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 12px;
-  margin-top: 18px;
-}
-
-.meta-item {
-  padding: 15px;
-  border: 1px solid var(--sub-line);
-  border-radius: 16px;
-  background: #fbfdff;
-}
-
-.meta-item span,
-.usage-stats span {
-  display: block;
-  color: var(--sub-muted);
-  font-size: 0.78rem;
-  font-weight: 800;
-}
-
-.meta-item strong,
-.usage-stats strong {
-  display: block;
-  margin-top: 4px;
-  color: var(--sub-ink);
-  font-size: 1rem;
-}
-
-.timeline-card {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 22px;
-  padding: 28px;
-}
-
-.timeline-ring {
-  width: 190px;
-  height: 190px;
-  display: grid;
-  place-items: center;
-  border-radius: 999px;
-  background:
-    radial-gradient(circle closest-side, #fff 72%, transparent 73%),
-    conic-gradient(var(--sub-teal) var(--progress), #edf2f7 0);
-}
-
-.timeline-ring div {
-  text-align: center;
-}
-
-.timeline-ring strong {
-  display: block;
-  color: var(--sub-ink);
-  font-size: 2.1rem;
-  font-weight: 900;
-  letter-spacing: -0.05em;
-}
-
-.timeline-ring span {
-  display: block;
-  color: var(--sub-muted);
-  font-weight: 800;
-}
-
-.timeline-progress {
-  width: 100%;
-}
-
-.progress-labels {
-  display: flex;
-  justify-content: space-between;
-  gap: 12px;
-  margin-bottom: 8px;
-  color: var(--sub-muted);
-  font-size: 0.78rem;
-  font-weight: 800;
-}
-
-.progress-track,
-.usage-track {
-  height: 10px;
-  overflow: hidden;
-  border-radius: 999px;
-  background: #edf2f7;
-}
-
-.progress-track span,
-.usage-track span {
-  display: block;
-  height: 100%;
-  border-radius: inherit;
-  background: linear-gradient(90deg, var(--sub-teal), var(--sub-blue));
-}
-
-.usage-card,
-.features-card,
-.renew-card,
-.payment-history-card {
-  padding: 24px;
-}
-
-.payment-history-card {
-  overflow: hidden;
-}
-
-.history-refresh {
-  border: 0;
-  background: transparent;
-}
-
-.history-state,
-.history-empty {
+/* ── State boxes ── */
+.sub-state {
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 18px;
-  border: 1px dashed #cbd5e1;
-  border-radius: 16px;
-  color: var(--sub-muted);
-  background: #f8fafc;
-  font-weight: 800;
+  padding: 16px 20px;
+  border-radius: 14px;
+  background: #fff;
+  border: 1px solid var(--line);
+  color: var(--muted);
+  font-weight: 600;
+  font-size: 0.9rem;
 }
 
-.history-state.is-error {
+.sub-state--err {
   color: #b42318;
   border-color: #fecdca;
   background: #fffbfa;
 }
 
-.history-table-wrap {
-  width: 100%;
-  overflow-x: auto;
+/* ── Empty state ── */
+.sub-empty {
+  text-align: center;
+  padding: 48px 24px;
+  border-radius: 18px;
+  background: #fff;
+  border: 1px solid var(--line);
+  box-shadow: 0 2px 12px rgba(16, 32, 51, 0.05);
 }
 
-.history-table {
-  width: 100%;
-  min-width: 860px;
-  border-collapse: collapse;
-}
-
-.history-table th {
-  padding: 12px 14px;
-  color: #667085;
-  background: #f8fafc;
-  border-bottom: 1px solid var(--sub-line);
-  font-size: 0.76rem;
-  font-weight: 900;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-}
-
-.history-table td {
-  padding: 15px 14px;
-  border-bottom: 1px solid var(--sub-line);
-  vertical-align: middle;
-}
-
-.history-table tbody tr:last-child td {
-  border-bottom: 0;
-}
-
-.history-table strong,
-.history-table span {
-  display: block;
-}
-
-.history-table strong {
-  color: var(--sub-ink);
-  font-weight: 900;
-}
-
-.history-table span {
-  margin-top: 3px;
-  color: var(--sub-muted);
-  font-size: 0.82rem;
-  font-weight: 700;
-}
-
-.payment-id {
-  max-width: 190px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.status-text {
-  color: #067647 !important;
-}
-
-.invoice-actions {
-  display: inline-flex;
-  gap: 8px;
-}
-
-.invoice-actions button {
-  width: 36px;
-  height: 36px;
+.sub-empty-icon {
+  width: 64px;
+  height: 64px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  border: 1px solid var(--sub-line);
-  border-radius: 10px;
-  color: var(--sub-blue);
-  background: #fff;
-  transition: background 0.18s ease, color 0.18s ease, border-color 0.18s ease;
-}
-
-.invoice-actions button:hover {
-  color: #fff;
-  border-color: var(--sub-blue);
-  background: var(--sub-blue);
-}
-
-.section-heading {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 14px;
-  margin-bottom: 20px;
-}
-
-.section-heading h5,
-.renew-card h5 {
-  margin: 5px 0 0;
-  color: var(--sub-ink);
-  font-size: 1.14rem;
-  font-weight: 900;
-}
-
-.usage-main {
+  border-radius: 20px;
   margin-bottom: 14px;
+  color: var(--orange);
+  background: #fff4e8;
+  font-size: 1.5rem;
 }
 
-.usage-main strong {
-  display: block;
-  color: var(--sub-ink);
-  font-size: 3rem;
-  line-height: 1;
-  font-weight: 900;
-  letter-spacing: -0.06em;
+.sub-empty h4 { margin: 0 0 8px; font-weight: 800; color: var(--ink); }
+.sub-empty p  { max-width: 500px; margin: 0 auto 18px; color: var(--muted); line-height: 1.55; }
+
+/* ── Shared card base ── */
+.b-card {
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  background: #fff;
+  box-shadow: 0 2px 12px rgba(16, 32, 51, 0.06);
 }
 
-.usage-main span {
-  color: var(--sub-muted);
-  font-weight: 700;
-}
-
-.usage-stats {
+/* ── Main 3-col row ── */
+.main-row {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 12px;
-  margin-top: 18px;
+  gap: 16px;
+  align-items: stretch;
 }
 
-.usage-stats div {
-  padding: 14px;
-  border-radius: 16px;
-  background: #f8fafc;
-  border: 1px solid var(--sub-line);
+/* ── Shared card internals ── */
+.kicker {
+  display: block;
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+  color: var(--muted);
 }
 
-.addon-sims-card {
-  margin-top: 24px;
-  padding: 20px;
-  border: 1px solid rgba(37, 99, 235, 0.18);
-  border-radius: 22px;
-  background:
-    radial-gradient(circle at 0 0, rgba(18, 184, 166, 0.13), transparent 34%),
-    linear-gradient(180deg, #fbfdff 0%, #f6fbff 100%);
-}
-
-.addon-heading {
+.b-card-top {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: space-between;
-  gap: 14px;
+  gap: 10px;
   margin-bottom: 10px;
 }
 
-.addon-heading h5 {
-  margin: 5px 0 0;
-  color: var(--sub-ink);
-  font-size: 1.08rem;
-  font-weight: 900;
-}
-
-.addon-rate {
-  flex: 0 0 auto;
-  padding: 7px 11px;
-  border-radius: 999px;
-  color: #175cd3;
-  background: #eff8ff;
-  font-size: 0.82rem;
-  font-weight: 900;
-}
-
-.addon-copy {
-  margin: 0 0 16px;
-  color: var(--sub-muted);
-  line-height: 1.55;
-}
-
-.addon-quantity {
-  display: grid;
-  grid-template-columns: 50px minmax(0, 1fr) 50px;
-  gap: 10px;
-  align-items: center;
-}
-
-.addon-quantity button,
-.addon-quantity input {
-  height: 52px;
-  border: 1px solid var(--sub-line);
-  border-radius: 16px;
-}
-
-.addon-quantity button {
-  color: var(--sub-navy);
-  background: #fff;
-  font-weight: 900;
-}
-
-.addon-quantity button:disabled {
-  opacity: 0.48;
-  cursor: not-allowed;
-}
-
-.addon-quantity input:disabled {
-  opacity: 0.48;
-  cursor: not-allowed;
-  background-color: #f8fafc;
-}
-
-.addon-quantity input {
-  width: 100%;
-  text-align: center;
-  color: var(--sub-ink);
-  background: #fff;
-  font-size: 1.35rem;
-  font-weight: 900;
-  outline: none;
-}
-
-.addon-quantity input:focus {
-  border-color: var(--sub-blue);
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
-}
-
-.addon-total-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  margin-top: 16px;
-  padding: 14px 0;
-  border-top: 1px solid var(--sub-line);
-  border-bottom: 1px solid var(--sub-line);
-}
-
-.addon-total-row span {
-  color: var(--sub-muted);
+.b-card-title {
+  margin: 4px 0 12px;
+  font-size: 0.96rem;
   font-weight: 800;
+  color: var(--ink);
 }
 
-.addon-total-row strong {
-  color: var(--sub-ink);
-  font-size: 1.35rem;
-  font-weight: 900;
-  letter-spacing: -0.04em;
+.accent-link {
+  font-size: 0.8rem;
+  font-weight: 800;
+  color: var(--blue);
+  text-decoration: none;
+  white-space: nowrap;
 }
 
-.addon-pay-button {
-  width: 100%;
-  margin-top: 16px;
-  border: 0;
-  color: #fff;
-  font-weight: 900;
-  background: linear-gradient(135deg, var(--sub-blue), var(--sub-teal));
-  box-shadow: 0 14px 26px rgba(37, 99, 235, 0.22);
-}
+.accent-link:hover { text-decoration: underline; }
 
-.addon-pay-button:disabled {
-  opacity: 0.5;
+.accent-link--locked {
+  opacity: 0.45;
   cursor: not-allowed;
-  background: var(--sub-muted);
-  box-shadow: none;
+  pointer-events: none;
 }
 
-.feature-list {
-  display: grid;
-  gap: 12px;
+/* ── Locked renewal button ── */
+.act-btn--locked {
+  opacity: 0.45;
+  cursor: not-allowed;
+  pointer-events: none;
+  user-select: none;
 }
 
-.feature-item {
-  display: flex;
-  gap: 12px;
-  align-items: flex-start;
-  padding: 14px;
-  border-radius: 18px;
-  border: 1px solid var(--sub-line);
-  background: linear-gradient(180deg, #fff 0%, #fbfdff 100%);
-}
-
-.feature-icon {
-  flex: 0 0 auto;
-  width: 42px;
-  height: 42px;
+/* ── Status pill ── */
+.status-pill {
   display: inline-flex;
   align-items: center;
-  justify-content: center;
-  border-radius: 14px;
-  color: var(--sub-blue);
-  background: #eaf1ff;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 0.71rem;
+  font-weight: 800;
+  flex-shrink: 0;
 }
 
-.feature-item strong {
-  display: block;
-  color: var(--sub-ink);
-  font-weight: 900;
+.status-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: currentColor;
+  flex-shrink: 0;
 }
 
-.feature-item span,
-.feature-empty,
-.renew-card p {
-  color: var(--sub-muted);
-  line-height: 1.55;
-}
+.is-active   { color: #067647; background: #dcfae6; }
+.is-expired,
+.is-cancelled { color: #b42318; background: #fee4e2; }
+.is-empty    { color: #475467; background: #f2f4f7; }
 
-.feature-empty {
-  padding: 18px;
-  border-radius: 16px;
-  background: #f8fafc;
-  border: 1px dashed #cbd5e1;
-}
-
-.renew-card {
+/* ── Current Plan card ── */
+.plan-card {
+  padding: 22px;
   display: flex;
   flex-direction: column;
 }
 
-.renew-card-icon {
-  width: 58px;
-  height: 58px;
+.plan-name {
+  margin: 0 0 4px;
+  font-size: clamp(1.3rem, 1.8vw, 1.75rem);
+  font-weight: 900;
+  letter-spacing: -0.04em;
+  color: var(--ink);
+  line-height: 1.1;
+}
+
+.plan-tag {
+  margin: 0;
+  font-size: 0.83rem;
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+.price-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 1px solid var(--line);
+}
+
+.price-row strong {
+  font-size: 1.55rem;
+  font-weight: 900;
+  letter-spacing: -0.04em;
+  color: var(--ink);
+  line-height: 1;
+}
+
+.price-row span {
+  color: var(--muted);
+  font-size: 0.82rem;
+  font-weight: 600;
+  margin-bottom: 2px;
+}
+
+.renew-strip {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 14px;
+  padding: 12px 14px;
+  border-radius: 14px;
+  border: 1px solid #c7f0eb;
+  background: linear-gradient(135deg, rgba(18, 184, 166, 0.08), #f2fffd);
+}
+
+.renew-strip.urgent {
+  border-color: #fed7aa;
+  background: linear-gradient(135deg, rgba(249, 115, 22, 0.08), #fff7ed);
+}
+
+.renew-strip-copy span {
+  display: block;
+  font-size: 0.68rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+}
+
+.renew-strip-copy strong {
+  display: block;
+  margin-top: 2px;
+  color: var(--ink);
+  font-size: 0.92rem;
+  font-weight: 700;
+}
+
+.plan-meta {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.meta-chip {
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: #fbfdff;
+}
+
+.meta-chip span {
+  display: block;
+  font-size: 0.65rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.09em;
+  color: var(--muted);
+}
+
+.meta-chip strong {
+  display: block;
+  margin-top: 3px;
+  font-size: 0.86rem;
+  font-weight: 800;
+  color: var(--ink);
+}
+
+/* ── SIM Usage card ── */
+.usage-card {
+  padding: 22px;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Capacity row */
+.cap-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.cap-numbers {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.cap-used {
+  font-size: 2.4rem;
+  font-weight: 900;
+  letter-spacing: -0.06em;
+  color: var(--ink);
+  line-height: 1;
+}
+
+.cap-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.cap-of {
+  font-size: 0.82rem;
+  color: var(--muted);
+  font-weight: 600;
+}
+
+.cap-of strong {
+  color: var(--ink);
+  font-weight: 900;
+}
+
+.cap-sub {
+  font-size: 0.74rem;
+  color: var(--teal);
+  font-weight: 700;
+}
+
+.cap-badge {
+  padding: 5px 11px;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 900;
+  flex-shrink: 0;
+}
+
+.cap-badge--ok   { background: #dcfae6; color: #067647; }
+.cap-badge--warn { background: #fef0c7; color: #b54708; }
+
+/* Progress bar variants */
+.prog-track {
+  height: 8px;
+  border-radius: 999px;
+  background: #edf2f7;
+  overflow: hidden;
+}
+
+.prog-track--md { height: 10px; }
+
+.prog-track span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--teal), var(--blue));
+  transition: width 0.4s ease;
+}
+
+/* Stat chips */
+.usage-stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.stat-chip {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 11px 12px;
+  border-radius: 13px;
+  border: 1px solid var(--line);
+  background: #f8fafc;
+}
+
+.stat-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.stat-chip--green .stat-dot { background: var(--teal); }
+.stat-chip--blue  .stat-dot { background: var(--blue); }
+.stat-chip--grey  .stat-dot { background: #94a3b8; }
+
+.stat-chip span {
+  display: block;
+  font-size: 0.65rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.09em;
+  color: var(--muted);
+}
+
+.stat-chip strong {
+  display: block;
+  margin-top: 2px;
+  font-size: 1.05rem;
+  font-weight: 900;
+  color: var(--ink);
+  letter-spacing: -0.02em;
+}
+
+/* ── Add-on block ── */
+.addon-blk {
+  margin-top: 16px;
+  padding: 16px;
+  border-radius: 16px;
+  border: 1px solid rgba(18, 184, 166, 0.2);
+  background: linear-gradient(160deg, #f8fffd 0%, #f0fef9 100%);
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.addon-blk--off { opacity: 0.6; pointer-events: none; }
+
+.addon-blk-hdr {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.addon-blk-label {
+  display: block;
+  margin-top: 3px;
+  font-size: 0.88rem;
+  font-weight: 800;
+  color: var(--ink);
+}
+
+.addon-rate {
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: rgba(18, 184, 166, 0.12);
+  color: #0d9488;
+  font-size: 0.74rem;
+  font-weight: 900;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+/* Disabled state note */
+.addon-state-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 10px 12px;
+  border-radius: 11px;
+  background: #f1f5f9;
+  border: 1px solid var(--line);
+  font-size: 0.8rem;
+  color: var(--muted);
+  font-weight: 600;
+  line-height: 1.45;
+  margin: 0;
+}
+
+.addon-state-note i { color: #94a3b8; margin-top: 1px; flex-shrink: 0; }
+
+/* Proration indicator */
+.proration-strip {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.proration-strip-track {
+  height: 6px;
+  border-radius: 999px;
+  background: rgba(18, 184, 166, 0.15);
+  overflow: hidden;
+}
+
+.proration-strip-fill {
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--teal), #0d9488);
+  transition: width 0.4s ease;
+}
+
+.proration-strip-labels {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 0.77rem;
+}
+
+.proration-strip-labels span { color: var(--muted); font-weight: 600; }
+.proration-strip-labels span i { margin-right: 4px; font-size: 0.7em; color: var(--teal); }
+.proration-strip-labels strong { color: var(--teal); font-weight: 900; }
+
+/* Quantity stepper */
+.addon-qty {
+  display: grid;
+  grid-template-columns: 38px 1fr 38px;
+  gap: 8px;
+  align-items: center;
+}
+
+.addon-qty button,
+.addon-qty input {
+  height: 40px;
+  border: 1px solid rgba(18, 184, 166, 0.25);
+  border-radius: 11px;
+}
+
+.addon-qty button {
+  color: #0d9488;
+  background: rgba(18, 184, 166, 0.08);
+  font-weight: 900;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s;
+}
+
+.addon-qty button:hover { background: rgba(18, 184, 166, 0.16); }
+.addon-qty button:disabled { opacity: 0.44; cursor: not-allowed; }
+
+.addon-qty input {
+  width: 100%;
+  text-align: center;
+  font-size: 1.05rem;
+  font-weight: 900;
+  color: var(--ink);
+  background: #fff;
+  outline: none;
+}
+
+.addon-qty input:disabled { opacity: 0.44; cursor: not-allowed; background: #f8fafc; }
+.addon-qty input:focus { border-color: var(--teal); box-shadow: 0 0 0 3px rgba(18, 184, 166, 0.15); }
+
+/* Calculation row */
+.addon-calc {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 11px;
+  background: #fff;
+  border: 1px solid rgba(18, 184, 166, 0.18);
+}
+
+.addon-calc-formula {
+  font-size: 0.8rem;
+  color: var(--muted);
+  font-weight: 600;
+}
+
+.addon-calc-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+}
+
+.addon-full-price {
+  font-size: 0.75rem;
+  color: var(--muted);
+  font-weight: 600;
+  text-decoration: line-through;
+}
+
+.addon-due {
+  font-size: 1.1rem;
+  font-weight: 900;
+  color: var(--ink);
+  letter-spacing: -0.03em;
+}
+
+/* Payment message */
+.addon-msg {
+  display: flex;
+  align-items: flex-start;
+  gap: 7px;
+  padding: 9px 12px;
+  border-radius: 10px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  line-height: 1.45;
+}
+
+.addon-msg--success { background: #dcfae6; color: #067647; }
+.addon-msg--danger  { background: #fee4e2; color: #b42318; }
+
+.btn-addon-pay {
+  width: 100%;
+  padding: 11px 14px;
+  border: 0;
+  border-radius: 13px;
+  color: #fff;
+  font-size: 0.85rem;
+  font-weight: 800;
+  background: linear-gradient(135deg, #0d9488, var(--teal));
+  box-shadow: 0 4px 16px rgba(18, 184, 166, 0.32);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  transition: opacity 0.15s, box-shadow 0.15s;
+  letter-spacing: -0.01em;
+}
+
+.btn-addon-pay:hover:not(:disabled) {
+  opacity: 0.9;
+  box-shadow: 0 6px 20px rgba(18, 184, 166, 0.4);
+}
+
+.btn-addon-pay:disabled { opacity: 0.45; cursor: not-allowed; background: #94a3b8; box-shadow: none; }
+
+/* ── Plan Timeline card ── */
+.timeline-card {
+  padding: 22px;
+  display: flex;
+  flex-direction: column;
+}
+
+.ring-center {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 14px 0;
+}
+
+.timeline-ring {
+  width: 158px;
+  height: 158px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle closest-side, #fff 72%, transparent 73%),
+    conic-gradient(var(--teal) var(--progress), #edf2f7 0);
+}
+
+.timeline-ring > div { text-align: center; }
+
+.timeline-ring strong {
+  display: block;
+  font-size: 1.75rem;
+  font-weight: 900;
+  letter-spacing: -0.05em;
+  color: var(--ink);
+  line-height: 1;
+}
+
+.timeline-ring span {
+  display: block;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--muted);
+  margin-top: 3px;
+}
+
+.timeline-foot { width: 100%; }
+
+.bar-labels {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 6px;
+  font-size: 0.71rem;
+  font-weight: 700;
+  color: var(--muted);
+}
+
+/* ── Included Features ── */
+.features-card { padding: 20px 22px; }
+
+.b-sec-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+  margin-bottom: 14px;
+}
+
+.feature-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.feature-item {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  padding: 12px;
+  border-radius: 14px;
+  border: 1px solid var(--line);
+  background: linear-gradient(180deg, #fff 0%, #fbfdff 100%);
+}
+
+.feature-icon {
+  flex-shrink: 0;
+  width: 34px;
+  height: 34px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  margin-bottom: 18px;
-  border-radius: 20px;
+  border-radius: 10px;
+  color: var(--blue);
+  background: #eaf1ff;
+  font-size: 0.82rem;
+}
+
+.feature-item strong {
+  display: block;
+  font-size: 0.88rem;
+  font-weight: 800;
+  color: var(--ink);
+}
+
+.feature-item span {
+  display: block;
+  font-size: 0.78rem;
+  color: var(--muted);
+  line-height: 1.45;
+  margin-top: 2px;
+}
+
+.empty-note {
+  padding: 14px 16px;
+  border-radius: 12px;
+  background: #f8fafc;
+  border: 1px dashed #cbd5e1;
+  color: var(--muted);
+  font-size: 0.86rem;
+  margin: 0;
+}
+
+/* ── Payment History ── */
+.pay-card {
+  padding: 20px 22px;
+  overflow: hidden;
+}
+
+.table-wrap {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.pay-table {
+  width: 100%;
+  min-width: 820px;
+  border-collapse: collapse;
+}
+
+.pay-table th {
+  padding: 10px 12px;
+  font-size: 0.69rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.09em;
+  color: var(--muted);
+  background: #f8fafc;
+  border-bottom: 1px solid var(--line);
+  white-space: nowrap;
+}
+
+.pay-table td {
+  padding: 12px;
+  border-bottom: 1px solid var(--line);
+  vertical-align: middle;
+}
+
+.pay-table tbody tr:last-child td { border-bottom: 0; }
+
+.pay-table strong {
+  display: block;
+  font-size: 0.88rem;
+  font-weight: 800;
+  color: var(--ink);
+}
+
+.pay-table td > span {
+  display: block;
+  font-size: 0.76rem;
+  color: var(--muted);
+  font-weight: 600;
+  margin-top: 2px;
+}
+
+.pay-id {
+  max-width: 180px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.78rem !important;
+  color: var(--muted) !important;
+  margin-top: 0 !important;
+}
+
+.pay-status { color: #067647 !important; }
+
+.inv-btns {
+  display: inline-flex;
+  gap: 6px;
+}
+
+.inv-btns button {
+  width: 32px;
+  height: 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  color: var(--blue);
+  background: #fff;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+
+.inv-btns button:hover {
   color: #fff;
-  background: linear-gradient(135deg, var(--sub-navy), var(--sub-blue));
-  box-shadow: 0 18px 30px rgba(37, 99, 235, 0.2);
+  border-color: var(--blue);
+  background: var(--blue);
 }
 
-.renew-card p {
-  margin: 12px 0 22px;
+/* ── Responsive ── */
+@media (max-width: 1100px) {
+  .main-row {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .timeline-card {
+    grid-column: 1 / -1;
+    flex-direction: row;
+    align-items: center;
+    gap: 24px;
+  }
+
+  .ring-center {
+    flex: 0 0 auto;
+    padding: 0;
+  }
+
+  .timeline-foot {
+    flex: 1;
+  }
+
+  .feature-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
 }
 
-.renew-card .btn {
-  margin-top: auto;
-}
+@media (max-width: 767px) {
+  .sub-hdr {
+    flex-direction: column;
+    align-items: flex-start;
+  }
 
-@media (max-width: 1199.98px) {
-  .subscription-grid,
-  .details-grid {
+  .main-row {
     grid-template-columns: 1fr;
   }
-}
 
-@media (max-width: 767.98px) {
-  .subscription-hero {
-    padding: 26px;
-    border-radius: 22px;
+  .timeline-card {
+    grid-column: auto;
+    flex-direction: column;
+    align-items: stretch;
   }
 
-  .hero-actions,
-  .renewal-strip,
-  .plan-card-top,
-  .section-heading {
-    align-items: stretch;
-    flex-direction: column;
+  .ring-center {
+    flex: 1;
+    padding: 14px 0;
   }
 
   .plan-meta,
   .usage-stats {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .feature-grid {
     grid-template-columns: 1fr;
   }
 
-  .addon-heading,
-  .addon-total-row {
-    align-items: stretch;
+  .renew-strip {
     flex-direction: column;
-  }
-
-  .price-row {
     align-items: flex-start;
-    flex-direction: column;
-  }
-
-  .timeline-ring {
-    width: 160px;
-    height: 160px;
   }
 }
 </style>

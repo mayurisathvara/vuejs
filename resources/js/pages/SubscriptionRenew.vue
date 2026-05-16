@@ -1,174 +1,198 @@
 <template>
-  <div class="renew-page">
-    <div v-if="loading" class="renew-loading">
-      <div class="spinner-border text-primary" role="status" aria-hidden="true"></div>
-      <span>Loading renewal options...</span>
+  <div class="rn-page">
+
+    <!-- Loading -->
+    <div v-if="loading" class="rn-state">
+      <div class="spinner-border spinner-border-sm text-primary" role="status" aria-hidden="true"></div>
+      <span>Loading renewal options…</span>
     </div>
 
-    <div v-else-if="error" class="alert alert-danger renew-alert">
-      <i class="fas fa-exclamation-circle me-2"></i>
+    <!-- Error -->
+    <div v-else-if="error" class="rn-state rn-state--err">
+      <i class="fas fa-exclamation-circle"></i>
       {{ error }}
     </div>
 
-    <div v-else class="renew-layout">
-      <section class="plans-panel">
-        <div class="section-heading">
-          <div>
-            <router-link class="back-link" to="/subscription">
-              <i class="fas fa-arrow-left me-2"></i>
-              Back to Subscription
-            </router-link>
-            <span class="eyebrow dark">Available Plans</span>
-            <h4>Select a plan</h4>
+    <template v-else>
+      <!-- Page Header -->
+      <header class="rn-hdr rn-card">
+        <div class="rn-hdr-info">
+          <router-link class="back-link" to="/subscription">
+            <i class="fas fa-arrow-left"></i>
+            Back to Subscription
+          </router-link>
+          <h4 class="rn-hdr-title">Select a Plan</h4>
+          <p class="rn-hdr-sub">Choose your billing cycle and plan to renew or upgrade your subscription.</p>
+        </div>
+        <span v-if="currentPlanName" class="current-chip">
+          <i class="fas fa-tag"></i>
+          Current: {{ currentPlanName }}
+        </span>
+      </header>
+
+      <!-- 2-column layout -->
+      <div class="rn-layout">
+
+        <!-- Plans Panel -->
+        <section class="rn-card plans-panel">
+
+          <!-- Billing tabs -->
+          <div v-if="billingPlans.length" class="billing-tabs" role="tablist" aria-label="Billing cycle">
+            <button
+              v-for="tab in billingTabs"
+              :key="tab.value"
+              type="button"
+              class="billing-tab"
+              :class="{ active: activeBillingCycle === tab.value }"
+              role="tab"
+              :aria-selected="activeBillingCycle === tab.value"
+              @click="selectBillingCycle(tab.value)"
+            >
+              <span>{{ tab.label }}</span>
+              <small>{{ planCountByCycle(tab.value) }} plan{{ planCountByCycle(tab.value) === 1 ? '' : 's' }}</small>
+            </button>
           </div>
-          <span v-if="currentPlanName" class="current-plan-chip">
-            Current: {{ currentPlanName }}
-          </span>
-        </div>
 
-        <div v-if="billingPlans.length" class="billing-tabs" role="tablist" aria-label="Billing cycle">
-          <button
-            v-for="tab in billingTabs"
-            :key="tab.value"
-            type="button"
-            class="billing-tab"
-            :class="{ active: activeBillingCycle === tab.value }"
-            role="tab"
-            :aria-selected="activeBillingCycle === tab.value"
-            @click="selectBillingCycle(tab.value)"
-          >
-            <span>{{ tab.label }}</span>
-            <small>{{ planCountByCycle(tab.value) }} plans</small>
-          </button>
-        </div>
-
-        <div v-if="filteredPlans.length" class="plan-list">
-          <button
-            v-for="plan in filteredPlans"
-            :key="plan.id"
-            type="button"
-            class="renew-plan-card"
-            :class="{ selected: selectedPlanId === plan.id }"
-            @click="selectPlan(plan.id)"
-          >
-            <div class="plan-select-dot">
-              <i v-if="selectedPlanId === plan.id" class="fas fa-check"></i>
-            </div>
-            <div class="plan-main">
-              <div class="plan-title-row">
-                <h5>{{ plan.display_name }}</h5>
-                <span>{{ cycleLabel(plan.billing_type) }}</span>
+          <!-- Plan list -->
+          <div v-if="filteredPlans.length" class="plan-list">
+            <button
+              v-for="plan in filteredPlans"
+              :key="plan.id"
+              type="button"
+              class="plan-item"
+              :class="{ selected: selectedPlanId === plan.id }"
+              @click="selectPlan(plan.id)"
+            >
+              <div class="plan-sel-dot">
+                <i v-if="selectedPlanId === plan.id" class="fas fa-check"></i>
               </div>
-              <p>{{ planDescription(plan) }}</p>
-              <div class="feature-pills">
-                <span v-for="feature in normalizeFeatures(plan.features)" :key="`${plan.id}-${feature}`">
-                  {{ featureLabel(feature) }}
-                </span>
+
+              <div class="plan-body">
+                <div class="plan-name-row">
+                  <h5>{{ plan.display_name }}</h5>
+                  <span class="cycle-badge">{{ cycleLabel(plan.billing_type) }}</span>
+                </div>
+                <p>{{ planDescription(plan) }}</p>
+                <div class="feat-pills" v-if="normalizeFeatures(plan.features).length">
+                  <span v-for="feat in normalizeFeatures(plan.features)" :key="`${plan.id}-${feat}`">
+                    {{ featureLabel(feat) }}
+                  </span>
+                </div>
               </div>
-            </div>
-            <div class="plan-price">
-              <strong>{{ formatCurrency(plan.price_per_sim) }}</strong>
-              <span>per SIM</span>
-            </div>
-          </button>
-        </div>
 
-        <div v-else class="empty-plans">
-          No {{ cycleLabel(activeBillingCycle).toLowerCase() }} plans are available right now.
-        </div>
-      </section>
-
-      <aside class="quote-panel">
-        <div class="summary-card">
-          <div class="summary-header">
-            <div>
-              <span class="eyebrow dark">Calculation</span>
-              <h4>Renewal Summary</h4>
-            </div>
-            <span class="summary-badge">{{ paymentStatusLabel }}</span>
+              <div class="plan-price">
+                <strong>{{ formatCurrency(plan.price_per_sim) }}</strong>
+                <span>per SIM</span>
+              </div>
+            </button>
           </div>
 
-          <div class="summary-selected">
-            <div class="summary-plan-icon">
-              <i class="fas fa-layer-group"></i>
-            </div>
-            <div>
-              <span>Selected Plan</span>
-              <strong>{{ selectedPlan?.display_name || 'Select a plan' }}</strong>
-            </div>
-          </div>
+          <p v-else class="empty-plans">
+            No {{ cycleLabel(activeBillingCycle).toLowerCase() }} plans are available right now.
+          </p>
+        </section>
 
-          <div class="summary-quantity">
-            <div class="summary-quantity-header">
+        <!-- Summary / Quote Panel -->
+        <aside class="quote-col">
+          <div class="rn-card summary-card">
+
+            <!-- Header -->
+            <div class="sum-hdr">
               <div>
-                <span>SIM Quantity</span>
-                <strong>{{ quotedQuantity }} SIMs</strong>
+                <span class="kicker">Calculation</span>
+                <h5 class="sum-title">Renewal Summary</h5>
               </div>
-              <small>Minimum {{ MIN_SIM_QUANTITY }} SIMs</small>
+              <span class="sum-badge" :class="`sum-badge--${paymentMessageType || 'default'}`">
+                {{ paymentStatusLabel }}
+              </span>
             </div>
 
-            <div class="quantity-control">
-              <button type="button" :disabled="simQuantity <= MIN_SIM_QUANTITY" @click="decreaseQuantity">
-                <i class="fas fa-minus"></i>
-              </button>
-              <input
-                v-model.number="simQuantity"
-                type="number"
-                :min="MIN_SIM_QUANTITY"
-                step="1"
-                @blur="normalizeQuantity"
-                aria-label="SIM quantity"
-              />
-              <button type="button" @click="increaseQuantity">
-                <i class="fas fa-plus"></i>
-              </button>
+            <!-- Selected plan display -->
+            <div class="sel-plan">
+              <div class="sel-plan-icon">
+                <i class="fas fa-layer-group"></i>
+              </div>
+              <div>
+                <span class="kicker">Selected Plan</span>
+                <strong>{{ selectedPlan?.display_name || 'No plan selected' }}</strong>
+              </div>
             </div>
 
-            <div class="quantity-note">
-              <i class="fas fa-info-circle me-2"></i>
-              Current subscription quantity: {{ currentSimQuantityLabel }}
+            <!-- SIM Quantity -->
+            <div class="qty-block">
+              <div class="qty-block-hdr">
+                <div>
+                  <span class="kicker">SIM Quantity</span>
+                  <strong class="qty-value">{{ quotedQuantity }} SIMs</strong>
+                </div>
+                <span class="min-tag">Min {{ MIN_SIM_QUANTITY }}</span>
+              </div>
+
+              <div class="qty-ctrl">
+                <button type="button" :disabled="simQuantity <= MIN_SIM_QUANTITY" @click="decreaseQuantity">
+                  <i class="fas fa-minus"></i>
+                </button>
+                <input
+                  v-model.number="simQuantity"
+                  type="number"
+                  :min="MIN_SIM_QUANTITY"
+                  step="1"
+                  @blur="normalizeQuantity"
+                  aria-label="SIM quantity"
+                />
+                <button type="button" @click="increaseQuantity">
+                  <i class="fas fa-plus"></i>
+                </button>
+              </div>
+
+              <div class="qty-note">
+                <i class="fas fa-info-circle"></i>
+                Current subscription: {{ currentSimQuantityLabel }}
+              </div>
             </div>
+
+            <!-- Calculation breakdown -->
+            <div class="calc-rows">
+              <div class="calc-row">
+                <span>Price per SIM</span>
+                <strong>{{ selectedPlan ? formatCurrency(selectedPlan.price_per_sim) : '–' }}</strong>
+              </div>
+              <div class="calc-row">
+                <span>SIM Quantity</span>
+                <strong>{{ quotedQuantity }}</strong>
+              </div>
+              <div class="calc-row">
+                <span>Billing Cycle</span>
+                <strong>{{ selectedPlan ? cycleLabel(selectedPlan.billing_type) : '–' }}</strong>
+              </div>
+              <div class="calc-row">
+                <span>Subtotal</span>
+                <strong>{{ selectedPlan ? formatCurrency(subtotal) : '–' }}</strong>
+              </div>
+            </div>
+
+            <!-- Total -->
+            <div class="total-row">
+              <span>Total Due</span>
+              <strong>{{ selectedPlan ? formatCurrency(total) : '–' }}</strong>
+            </div>
+
+            <!-- Payment note -->
+            <p v-if="paymentMessage" class="pay-note" :class="paymentMessageType">{{ paymentMessage }}</p>
+            <p v-else class="pay-note">
+              You will be redirected to Razorpay TEST checkout for secure payment verification.
+            </p>
+
+            <!-- Pay button -->
+            <button type="button" class="pay-btn" :disabled="!canRenew" @click="renewPlan">
+              <span v-if="paymentLoading" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+              <i v-else class="fas fa-lock"></i>
+              {{ paymentLoading ? 'Opening Checkout…' : 'Renew Plan' }}
+            </button>
           </div>
-
-          <div class="calculation-lines">
-            <div>
-              <span>Price per SIM</span>
-              <strong>{{ selectedPlan ? formatCurrency(selectedPlan.price_per_sim) : '-' }}</strong>
-            </div>
-            <div>
-              <span>SIM Quantity</span>
-              <strong>{{ quotedQuantity }}</strong>
-            </div>
-            <div>
-              <span>Billing Cycle</span>
-              <strong>{{ selectedPlan ? cycleLabel(selectedPlan.billing_type) : '-' }}</strong>
-            </div>
-            <div>
-              <span>Subtotal</span>
-              <strong>{{ selectedPlan ? formatCurrency(subtotal) : '-' }}</strong>
-            </div>
-          </div>
-
-          <div class="total-row">
-            <span>Total</span>
-            <strong>{{ selectedPlan ? formatCurrency(total) : '-' }}</strong>
-          </div>
-
-          <p v-if="paymentMessage" class="payment-note" :class="paymentMessageType">
-            {{ paymentMessage }}
-          </p>
-          <p v-else class="payment-note">
-            You will be redirected to Razorpay TEST checkout for secure payment verification.
-          </p>
-
-          <button type="button" class="btn renew-final-button" :disabled="!canRenew" @click="renewPlan">
-            <span v-if="paymentLoading" class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
-            <i v-else class="fas fa-lock me-2"></i>
-            {{ paymentLoading ? 'Opening Checkout...' : 'Renew Plan' }}
-          </button>
-        </div>
-      </aside>
-    </div>
+        </aside>
+      </div>
+    </template>
   </div>
 </template>
 
@@ -441,523 +465,612 @@ onMounted(fetchRenewalData)
 </script>
 
 <style scoped>
-.renew-page {
-  --renew-ink: #101828;
-  --renew-muted: #667085;
-  --renew-line: #e5ebf3;
-  --renew-blue: #2563eb;
-  --renew-teal: #0fbaa3;
-  --renew-orange: #f97316;
-  --renew-navy: #10233f;
+/* ── Design tokens ── */
+.rn-page {
+  --ink:    #102033;
+  --muted:  #667085;
+  --line:   #e5ebf3;
+  --navy:   #10233f;
+  --blue:   #2563eb;
+  --teal:   #12b8a6;
+  --orange: #f97316;
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 16px;
 }
 
-.back-link {
-  display: flex;
-  align-items: center;
-  width: max-content;
-  margin-bottom: 18px;
-  color: var(--renew-blue);
-  font-weight: 800;
-  text-decoration: none;
-  line-height: 1;
-}
-
-.back-link:hover {
-  color: var(--renew-navy);
-}
-
-.eyebrow {
-  display: inline-flex;
-  font-size: 0.72rem;
-  font-weight: 900;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: #7c8aa0;
-}
-
-.eyebrow.dark {
-  color: #7c8aa0;
-}
-
-.renew-loading,
-.renew-alert,
-.plans-panel,
-.summary-card {
-  border: 1px solid var(--renew-line);
-  border-radius: 26px;
+/* ── Card base ── */
+.rn-card {
+  border: 1px solid var(--line);
+  border-radius: 20px;
   background: #fff;
-  box-shadow: 0 18px 40px rgba(16, 32, 51, 0.06);
+  box-shadow: 0 2px 12px rgba(16, 32, 51, 0.06);
 }
 
-.renew-loading {
+/* ── Shared kicker ── */
+.kicker {
+  display: block;
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+/* ── State boxes ── */
+.rn-state {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 28px;
-  color: var(--renew-muted);
-  font-weight: 800;
+  gap: 10px;
+  padding: 16px 20px;
+  border-radius: 14px;
+  background: #fff;
+  border: 1px solid var(--line);
+  color: var(--muted);
+  font-weight: 600;
+  font-size: 0.9rem;
 }
 
-.renew-alert {
-  padding: 18px 20px;
+.rn-state--err {
+  color: #b42318;
+  border-color: #fecdca;
+  background: #fffbfa;
 }
 
-.renew-layout {
-  display: grid;
-  grid-template-columns: minmax(0, 1.25fr) minmax(340px, 0.75fr);
-  gap: 22px;
-  align-items: start;
-}
-
-.plans-panel,
-.summary-card {
-  padding: 30px;
-}
-
-.section-heading,
-.summary-header {
+/* ── Page Header ── */
+.rn-hdr {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  gap: 18px;
-  margin-bottom: 26px;
+  gap: 16px;
+  padding: 20px 24px;
 }
 
-.section-heading h4,
-.summary-card h4 {
-  margin: 10px 0 0;
-  color: var(--renew-ink);
-  font-size: 1.35rem;
-  font-weight: 900;
-  letter-spacing: -0.03em;
-}
-
-.current-plan-chip,
-.summary-badge {
+.back-link {
   display: inline-flex;
   align-items: center;
-  padding: 8px 12px;
+  gap: 7px;
+  font-size: 0.82rem;
+  font-weight: 800;
+  color: var(--blue);
+  text-decoration: none;
+  margin-bottom: 10px;
+}
+
+.back-link:hover { color: var(--navy); }
+
+.rn-hdr-title {
+  margin: 0 0 4px;
+  font-size: 1.1rem;
+  font-weight: 900;
+  color: var(--ink);
+  letter-spacing: -0.02em;
+}
+
+.rn-hdr-sub {
+  margin: 0;
+  font-size: 0.82rem;
+  color: var(--muted);
+  line-height: 1.5;
+  max-width: 480px;
+}
+
+.current-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 12px;
   border-radius: 999px;
   font-size: 0.78rem;
-  font-weight: 900;
-  white-space: nowrap;
-}
-
-.current-plan-chip {
+  font-weight: 800;
   color: #175cd3;
   background: #eff8ff;
-  margin-top: 32px;
+  white-space: nowrap;
+  flex-shrink: 0;
+  margin-top: 4px;
 }
 
-.summary-badge {
-  color: #b54708;
-  background: #fffaeb;
+/* ── 2-column layout ── */
+.rn-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 340px;
+  gap: 16px;
+  align-items: start;
 }
 
+/* ── Plans Panel ── */
+.plans-panel {
+  padding: 22px;
+}
+
+/* ── Billing Tabs ── */
 .billing-tabs {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 10px;
-  padding: 6px;
-  margin-bottom: 22px;
-  border: 1px solid var(--renew-line);
-  border-radius: 18px;
-  background: #f8fafc;
+  gap: 6px;
+  padding: 5px;
+  background: #f4f6fa;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  margin-bottom: 18px;
 }
 
 .billing-tab {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 10px;
-  min-height: 50px;
-  padding: 10px 14px;
+  gap: 8px;
+  padding: 9px 14px;
   border: 0;
-  border-radius: 14px;
-  color: #64748b;
+  border-radius: 10px;
   background: transparent;
-  font-weight: 900;
-  transition: background 0.18s ease, color 0.18s ease, box-shadow 0.18s ease;
+  color: var(--muted);
+  cursor: pointer;
+  font-weight: 700;
+  transition: background 0.15s, color 0.15s, box-shadow 0.15s;
 }
 
-.billing-tab span {
-  font-size: 0.96rem;
-}
+.billing-tab span { font-size: 0.88rem; }
 
 .billing-tab small {
-  color: inherit;
+  font-size: 0.7rem;
+  font-weight: 800;
   opacity: 0.72;
-  font-size: 0.74rem;
-  font-weight: 900;
+  color: inherit;
 }
 
 .billing-tab.active {
+  background: #fff;
   color: #175cd3;
-  background: #fff;
-  box-shadow: 0 10px 26px rgba(15, 23, 42, 0.08);
+  box-shadow: 0 2px 10px rgba(15, 23, 42, 0.08);
 }
 
+/* ── Plan List ── */
 .plan-list {
-  display: grid;
-  gap: 16px;
-}
-
-.renew-plan-card {
-  width: 100%;
-  display: grid;
-  grid-template-columns: auto minmax(0, 1fr) auto;
-  gap: 16px;
-  align-items: flex-start;
-  padding: 22px;
-  text-align: left;
-  border: 1px solid var(--renew-line);
-  border-radius: 22px;
-  background:
-    radial-gradient(circle at 0 0, rgba(37, 99, 235, 0.06), transparent 26%),
-    #fff;
-  transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
-}
-
-.renew-plan-card:hover,
-.renew-plan-card.selected {
-  transform: translateY(-2px);
-  border-color: rgba(37, 99, 235, 0.5);
-  box-shadow: 0 18px 38px rgba(37, 99, 235, 0.12);
-}
-
-.renew-plan-card.selected {
-  background:
-    radial-gradient(circle at 0 0, rgba(15, 186, 163, 0.16), transparent 30%),
-    linear-gradient(180deg, #ffffff 0%, #f7fbff 100%);
-}
-
-.plan-select-dot {
-  width: 34px;
-  height: 34px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  border: 2px solid #cbd5e1;
-  border-radius: 999px;
-  color: #fff;
-  background: #fff;
-}
-
-.renew-plan-card.selected .plan-select-dot {
-  border-color: var(--renew-teal);
-  background: var(--renew-teal);
-}
-
-.plan-title-row {
   display: flex;
-  align-items: center;
-  flex-wrap: wrap;
+  flex-direction: column;
   gap: 10px;
 }
 
-.plan-title-row h5 {
-  margin: 0;
-  color: var(--renew-ink);
-  font-size: 1.18rem;
-  font-weight: 900;
+.plan-item {
+  width: 100%;
+  display: grid;
+  grid-template-columns: 22px minmax(0, 1fr) auto;
+  gap: 14px;
+  align-items: flex-start;
+  padding: 16px 18px;
+  text-align: left;
+  border: 1.5px solid var(--line);
+  border-radius: 16px;
+  background: #fff;
+  cursor: pointer;
+  transition: border-color 0.15s, box-shadow 0.15s, background 0.15s;
 }
 
-.plan-title-row span {
-  padding: 4px 9px;
-  border-radius: 999px;
-  color: #475467;
-  background: #f2f4f7;
-  font-size: 0.72rem;
-  font-weight: 900;
+.plan-item:hover {
+  border-color: rgba(37, 99, 235, 0.38);
+  box-shadow: 0 4px 18px rgba(37, 99, 235, 0.08);
 }
 
-.plan-main p,
-.payment-note {
-  color: var(--renew-muted);
-  line-height: 1.58;
+.plan-item.selected {
+  border-color: var(--teal);
+  background: linear-gradient(160deg, #f8fffd 0%, #f0fef9 100%);
+  box-shadow: 0 4px 16px rgba(18, 184, 166, 0.12);
 }
 
-.plan-main p {
-  margin: 7px 0 12px;
-}
-
-.feature-pills {
+/* ── Selection dot ── */
+.plan-sel-dot {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 2px solid #d0d8e4;
   display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 0.58rem;
+  flex-shrink: 0;
+  margin-top: 1px;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.plan-item.selected .plan-sel-dot {
+  border-color: var(--teal);
+  background: var(--teal);
+}
+
+/* ── Plan body ── */
+.plan-name-row {
+  display: flex;
+  align-items: center;
   flex-wrap: wrap;
   gap: 8px;
+  margin-bottom: 4px;
 }
 
-.feature-pills span {
-  padding: 5px 9px;
+.plan-name-row h5 {
+  margin: 0;
+  font-size: 0.98rem;
+  font-weight: 900;
+  color: var(--ink);
+}
+
+.cycle-badge {
+  padding: 3px 8px;
+  border-radius: 999px;
+  font-size: 0.68rem;
+  font-weight: 800;
+  color: #475467;
+  background: #f2f4f7;
+}
+
+.plan-item.selected .cycle-badge {
+  color: #0a7060;
+  background: #d1faf4;
+}
+
+.plan-body p {
+  margin: 0 0 8px;
+  font-size: 0.8rem;
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+.feat-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
+.feat-pills span {
+  padding: 3px 8px;
   border-radius: 999px;
   color: #175cd3;
   background: #eff8ff;
-  font-size: 0.75rem;
+  font-size: 0.7rem;
   font-weight: 800;
   text-transform: capitalize;
 }
 
+/* ── Plan price ── */
 .plan-price {
   text-align: right;
+  flex-shrink: 0;
 }
 
 .plan-price strong {
   display: block;
-  color: var(--renew-ink);
-  font-size: 1.4rem;
+  font-size: 1.15rem;
   font-weight: 900;
-  letter-spacing: -0.05em;
+  color: var(--ink);
+  letter-spacing: -0.04em;
+  line-height: 1;
 }
 
 .plan-price span {
-  color: var(--renew-muted);
-  font-size: 0.78rem;
-  font-weight: 800;
+  display: block;
+  font-size: 0.7rem;
+  color: var(--muted);
+  font-weight: 700;
+  margin-top: 2px;
 }
 
+/* ── Empty plans ── */
 .empty-plans {
-  padding: 28px;
+  padding: 18px;
   border: 1px dashed #cbd5e1;
-  border-radius: 18px;
-  color: var(--renew-muted);
+  border-radius: 14px;
+  color: var(--muted);
   background: #f8fafc;
+  font-size: 0.88rem;
+  margin: 0;
 }
 
-.quote-panel {
+/* ── Quote column ── */
+.quote-col {
   position: sticky;
   top: 86px;
 }
 
-.quantity-control {
-  display: grid;
-  grid-template-columns: 54px minmax(0, 1fr) 54px;
-  gap: 10px;
-  align-items: center;
+/* ── Summary Card ── */
+.summary-card {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
 }
 
-.quantity-control button,
-.quantity-control input {
-  height: 54px;
-  border: 1px solid var(--renew-line);
-  border-radius: 16px;
-}
-
-.quantity-control button {
-  color: var(--renew-navy);
-  background: #f8fafc;
-  font-weight: 900;
-}
-
-.quantity-control button:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-.quantity-control input {
-  width: 100%;
-  text-align: center;
-  color: var(--renew-ink);
-  font-size: 1.45rem;
-  font-weight: 900;
-  outline: none;
-}
-
-.quantity-control input:focus {
-  border-color: var(--renew-blue);
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
-}
-
-.quantity-note {
-  margin-top: 14px;
-  padding: 12px;
-  border-radius: 14px;
-  color: #175cd3;
-  background: #eff8ff;
-  font-weight: 800;
-  font-size: 0.88rem;
-}
-
-.summary-quantity {
-  margin-top: 14px;
-  padding: 16px;
-  border: 1px solid var(--renew-line);
-  border-radius: 18px;
-  background:
-    radial-gradient(circle at 0 0, rgba(15, 186, 163, 0.12), transparent 32%),
-    #fbfdff;
-}
-
-.summary-quantity-header {
+.sum-hdr {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  gap: 14px;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.sum-title {
+  margin: 4px 0 0;
+  font-size: 0.98rem;
+  font-weight: 800;
+  color: var(--ink);
+}
+
+.sum-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 800;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.sum-badge--default { color: #b54708; background: #fffaeb; }
+.sum-badge--success { color: #067647; background: #dcfae6; }
+.sum-badge--danger  { color: #b42318; background: #fee4e2; }
+
+/* ── Selected plan row ── */
+.sel-plan {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px;
+  border-radius: 14px;
+  background: #f8fafc;
+  border: 1px solid var(--line);
   margin-bottom: 14px;
 }
 
-.summary-quantity-header span {
-  display: block;
-  color: var(--renew-muted);
-  font-size: 0.8rem;
-  font-weight: 900;
-}
-
-.summary-quantity-header strong {
-  display: block;
-  color: var(--renew-ink);
-  font-size: 1.3rem;
-  font-weight: 900;
-  letter-spacing: -0.04em;
-}
-
-.summary-quantity-header small {
-  padding: 6px 10px;
-  border-radius: 999px;
-  color: #175cd3;
-  background: #eff8ff;
-  font-weight: 900;
-  white-space: nowrap;
-}
-
-.summary-selected {
+.sel-plan-icon {
+  width: 38px;
+  height: 38px;
   display: flex;
-  gap: 12px;
-  align-items: center;
-  padding: 16px;
-  border-radius: 18px;
-  background: #f8fafc;
-  border: 1px solid var(--renew-line);
-}
-
-.summary-plan-icon {
-  width: 56px;
-  height: 56px;
-  display: inline-flex;
   align-items: center;
   justify-content: center;
-  flex: 0 0 auto;
-  border-radius: 14px;
+  border-radius: 11px;
   color: #fff;
-  background: linear-gradient(135deg, var(--renew-navy), var(--renew-blue));
+  background: linear-gradient(135deg, var(--navy), var(--blue));
+  flex-shrink: 0;
 }
 
-.summary-selected span,
-.calculation-lines span,
-.total-row span {
+.sel-plan strong {
   display: block;
-  color: var(--renew-muted);
-  font-size: 0.8rem;
-  font-weight: 900;
+  font-size: 0.92rem;
+  font-weight: 800;
+  color: var(--ink);
+  margin-top: 3px;
 }
 
-.summary-selected strong {
+/* ── Quantity block ── */
+.qty-block {
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: linear-gradient(180deg, #fbfdff 0%, #f5f9ff 100%);
+  margin-bottom: 14px;
+}
+
+.qty-block-hdr {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.qty-value {
   display: block;
-  color: var(--renew-ink);
-  font-size: 1.04rem;
+  margin-top: 3px;
+  font-size: 1.15rem;
   font-weight: 900;
+  color: var(--ink);
+  letter-spacing: -0.03em;
 }
 
-.calculation-lines {
+.min-tag {
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 0.7rem;
+  font-weight: 800;
+  color: #175cd3;
+  background: #eff8ff;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+/* ── Quantity control ── */
+.qty-ctrl {
   display: grid;
-  gap: 12px;
-  margin-top: 16px;
+  grid-template-columns: 40px 1fr 40px;
+  gap: 8px;
+  align-items: center;
 }
 
-.calculation-lines div {
+.qty-ctrl button,
+.qty-ctrl input {
+  height: 40px;
+  border: 1px solid var(--line);
+  border-radius: 11px;
+}
+
+.qty-ctrl button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #fff;
+  color: var(--navy);
+  font-weight: 900;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.qty-ctrl button:hover:not(:disabled) {
+  background: #f0f4fa;
+  border-color: #c9d3e0;
+}
+
+.qty-ctrl button:disabled { opacity: 0.45; cursor: not-allowed; }
+
+.qty-ctrl input {
+  width: 100%;
+  text-align: center;
+  font-size: 1.05rem;
+  font-weight: 900;
+  color: var(--ink);
+  background: #fff;
+  outline: none;
+}
+
+.qty-ctrl input:focus {
+  border-color: var(--blue);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+}
+
+/* ── Quantity note ── */
+.qty-note {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin-top: 10px;
+  padding: 9px 12px;
+  border-radius: 10px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #175cd3;
+  background: #eff8ff;
+}
+
+/* ── Calculation rows ── */
+.calc-rows {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 2px;
+}
+
+.calc-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
-  padding-bottom: 12px;
-  border-bottom: 1px solid var(--renew-line);
+  gap: 10px;
+  padding: 9px 0;
+  border-bottom: 1px solid var(--line);
 }
 
-.calculation-lines strong {
-  color: var(--renew-ink);
-  font-weight: 900;
-  text-align: right;
+.calc-row:last-child { border-bottom: 0; }
+
+.calc-row span {
+  font-size: 0.81rem;
+  color: var(--muted);
+  font-weight: 600;
 }
 
+.calc-row strong {
+  font-size: 0.86rem;
+  font-weight: 800;
+  color: var(--ink);
+}
+
+/* ── Total row ── */
 .total-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  margin-top: 18px;
-  padding: 18px;
-  border-radius: 18px;
-  color: #fff;
+  margin: 12px 0 0;
+  padding: 14px 16px;
+  border-radius: 14px;
   background:
-    radial-gradient(circle at 0 0, rgba(249, 115, 22, 0.34), transparent 36%),
-    linear-gradient(135deg, var(--renew-navy), #173e62);
+    radial-gradient(circle at 0 0, rgba(249, 115, 22, 0.28), transparent 40%),
+    linear-gradient(135deg, var(--navy), #173e62);
 }
 
 .total-row span {
   color: rgba(255, 255, 255, 0.72);
+  font-size: 0.82rem;
+  font-weight: 700;
 }
 
 .total-row strong {
   color: #fff;
-  font-size: 1.8rem;
+  font-size: 1.5rem;
   font-weight: 900;
-  letter-spacing: -0.05em;
+  letter-spacing: -0.04em;
 }
 
-.payment-note {
-  margin: 14px 0;
-  font-size: 0.86rem;
+/* ── Payment note ── */
+.pay-note {
+  margin: 12px 0 0;
+  font-size: 0.78rem;
+  color: var(--muted);
+  line-height: 1.5;
 }
 
-.payment-note.success {
-  color: #067647;
-  font-weight: 800;
-}
+.pay-note.success { color: #067647; font-weight: 700; }
+.pay-note.danger  { color: #b42318; font-weight: 700; }
 
-.payment-note.danger {
-  color: #b42318;
-  font-weight: 800;
-}
-
-.renew-final-button {
+/* ── Pay button ── */
+.pay-btn {
+  margin-top: 14px;
   width: 100%;
+  padding: 12px 16px;
   border: 0;
+  border-radius: 13px;
   color: #fff;
-  font-weight: 900;
-  background: linear-gradient(135deg, var(--renew-orange), #ffb454);
-  box-shadow: 0 16px 32px rgba(249, 115, 22, 0.24);
+  font-size: 0.88rem;
+  font-weight: 800;
+  background: linear-gradient(135deg, var(--orange), #ffb454);
+  box-shadow: 0 6px 20px rgba(249, 115, 22, 0.28);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: box-shadow 0.15s, opacity 0.15s;
 }
 
-.renew-final-button:disabled {
+.pay-btn:hover:not(:disabled) {
+  box-shadow: 0 8px 24px rgba(249, 115, 22, 0.38);
+}
+
+.pay-btn:disabled {
   opacity: 0.55;
+  cursor: not-allowed;
   box-shadow: none;
 }
 
-@media (max-width: 1199.98px) {
-  .renew-layout {
+/* ── Responsive ── */
+@media (max-width: 1100px) {
+  .rn-layout {
     grid-template-columns: 1fr;
   }
 
-  .quote-panel {
+  .quote-col {
     position: static;
+  }
+
+  .summary-card {
+    max-width: 540px;
   }
 }
 
-@media (max-width: 767.98px) {
-  .section-heading,
-  .summary-header,
-  .summary-quantity-header {
+@media (max-width: 767px) {
+  .rn-hdr {
     flex-direction: column;
+    gap: 12px;
   }
 
-  .current-plan-chip {
+  .current-chip {
     margin-top: 0;
   }
 
-  .renew-plan-card {
-    grid-template-columns: auto minmax(0, 1fr);
+  .billing-tabs {
+    grid-template-columns: 1fr;
+  }
+
+  .plan-item {
+    grid-template-columns: 22px minmax(0, 1fr);
+    grid-template-rows: auto auto;
   }
 
   .plan-price {
@@ -965,12 +1078,12 @@ onMounted(fetchRenewalData)
     text-align: left;
   }
 
-  .quantity-control {
-    grid-template-columns: 48px minmax(0, 1fr) 48px;
+  .qty-ctrl {
+    grid-template-columns: 38px 1fr 38px;
   }
 
-  .billing-tabs {
-    grid-template-columns: 1fr;
+  .summary-card {
+    max-width: 100%;
   }
 }
 </style>

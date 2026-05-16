@@ -124,6 +124,8 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/subscription/invoices/{subscription}/download', [\App\Http\Controllers\SubscriptionController::class, 'invoiceDownload']);
         Route::post('/subscription/renew/order', [\App\Http\Controllers\SubscriptionController::class, 'createRenewalOrder']);
         Route::post('/subscription/renew/verify', [\App\Http\Controllers\SubscriptionController::class, 'verifyRenewalPayment']);
+        Route::post('/subscription/addon-sim/order', [\App\Http\Controllers\SubscriptionController::class, 'createAddonOrder']);
+        Route::post('/subscription/addon-sim/verify', [\App\Http\Controllers\SubscriptionController::class, 'verifyAddonPayment']);
     });
 
     // Admin subscription management

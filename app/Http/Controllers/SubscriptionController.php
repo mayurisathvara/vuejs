@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Organization;
 use App\Models\OrganizationSubscription;
 use App\Models\Plan;
+use App\Services\RazorpayAddonSimService;
 use App\Services\RazorpaySubscriptionService;
 use App\Services\SubscriptionService;
 use Illuminate\Http\JsonResponse;
@@ -13,7 +14,10 @@ use Illuminate\Support\Facades\Validator;
 
 class SubscriptionController extends Controller
 {
-    public function __construct(private readonly RazorpaySubscriptionService $razorpaySubscriptions) {}
+    public function __construct(
+        private readonly RazorpaySubscriptionService $razorpaySubscriptions,
+        private readonly RazorpayAddonSimService $razorpayAddons,
+    ) {}
 
     // -------------------------------------------------------------------------
     // Organization-facing endpoints (any authenticated org user)
@@ -451,6 +455,76 @@ class SubscriptionController extends Controller
   </div>
 </body>
 </html>';
+    }
+
+    /**
+     * POST /subscription/addon-sim/order
+     *
+     * Calculate prorated amount for add-on SIMs and create a Razorpay order.
+     * Requires an active subscription with a future end date.
+     */
+    public function createAddonOrder(Request $request): JsonResponse
+    {
+        $user = $request->user();
+        $organizationId = (int) $user->organization_id;
+
+        if (! $organizationId) {
+            return response()->json(['message' => 'No organization linked to this account.'], 404);
+        }
+
+        $validated = $request->validate([
+            'sim_quantity' => 'required|integer|min:1|max:1000',
+        ]);
+
+        $data = $this->razorpayAddons->createAddonOrder(
+            organizationId: $organizationId,
+            simQuantity: (int) $validated['sim_quantity']
+        );
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Add-on SIM order created.',
+            'data'    => $data,
+        ]);
+    }
+
+    /**
+     * POST /subscription/addon-sim/verify
+     *
+     * Verify Razorpay add-on payment signature and expand the subscription SIM limit.
+     */
+    public function verifyAddonPayment(Request $request): JsonResponse
+    {
+        $user = $request->user();
+        $organizationId = (int) $user->organization_id;
+
+        if (! $organizationId) {
+            return response()->json(['message' => 'No organization linked to this account.'], 404);
+        }
+
+        $validated = $request->validate([
+            'razorpay_order_id'   => 'required|string|max:255',
+            'razorpay_payment_id' => 'required|string|max:255',
+            'razorpay_signature'  => 'required|string|max:255',
+        ]);
+
+        $addon = $this->razorpayAddons->verifyAndActivateAddon(
+            organizationId: $organizationId,
+            payload: $validated
+        );
+
+        $simCount = $addon->sim_quantity;
+
+        return response()->json([
+            'success' => true,
+            'message' => $addon->wasRecentlyCreated
+                ? "{$simCount} add-on SIM(s) activated and added to your subscription."
+                : 'Payment already verified. Add-on SIMs are already active.',
+            'data'    => [
+                'addon' => $addon,
+                'stats' => SubscriptionService::getStats($organizationId),
+            ],
+        ]);
     }
 
     // -------------------------------------------------------------------------
