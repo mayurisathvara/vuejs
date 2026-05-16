@@ -7,6 +7,7 @@ use App\Models\OrganizationSubscription;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 
@@ -58,8 +59,15 @@ class RazorpayAddonSimService
             ]);
 
         if ($response->failed()) {
+            Log::error('Razorpay create addon order failed', [
+                'organization_id' => $organizationId,
+                'sim_quantity'    => $simQuantity,
+                'status'          => $response->status(),
+                'body'            => $response->json(),
+            ]);
+
             throw ValidationException::withMessages([
-                'payment' => $response->json('error.description') ?: 'Unable to create Razorpay order.',
+                'payment' => 'Unable to initiate payment. Please try again.',
             ]);
         }
 
@@ -229,8 +237,14 @@ class RazorpayAddonSimService
             ->get("https://api.razorpay.com/v1/orders/{$orderId}");
 
         if ($response->failed()) {
+            Log::error('Razorpay fetch addon order failed', [
+                'order_id' => $orderId,
+                'status'   => $response->status(),
+                'body'     => $response->json(),
+            ]);
+
             throw ValidationException::withMessages([
-                'razorpay_order_id' => $response->json('error.description') ?: 'Unable to fetch Razorpay order.',
+                'razorpay_order_id' => 'Unable to verify payment. Please contact support.',
             ]);
         }
 
@@ -242,8 +256,13 @@ class RazorpayAddonSimService
         $expected = hash_hmac('sha256', "{$orderId}|{$paymentId}", $this->secret());
 
         if (! hash_equals($expected, $signature)) {
+            Log::warning('Razorpay signature verification failed (addon)', [
+                'order_id'   => $orderId,
+                'payment_id' => $paymentId,
+            ]);
+
             throw ValidationException::withMessages([
-                'razorpay_signature' => 'Invalid Razorpay payment signature.',
+                'razorpay_signature' => 'Payment verification failed. Please contact support.',
             ]);
         }
     }

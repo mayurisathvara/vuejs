@@ -241,7 +241,7 @@ class ExcludedNumberController extends Controller
 
                 $rowData     = array_combine($headers, $data);
                 $phoneNumber = trim($rowData['phone_number'] ?? '');
-                $label       = trim($rowData['label'] ?? '');
+                $label       = $this->sanitizeCsvField(trim($rowData['label'] ?? ''));
 
                 if (empty($phoneNumber)) {
                     $errors[] = "Row {$row}: phone_number is required";
@@ -277,10 +277,28 @@ class ExcludedNumberController extends Controller
                 'errors'   => $errors,
             ]);
         } catch (\Exception $e) {
-            return response()->json([
-                'message' => 'Failed to process CSV file.',
-                'error'   => $e->getMessage(),
-            ], 500);
+            \Illuminate\Support\Facades\Log::error('Excluded numbers CSV import failed', [
+                'error'           => $e->getMessage(),
+                'organization_id' => $organizationId ?? null,
+                'ip'              => request()->ip(),
+            ]);
+
+            return response()->json(['message' => 'Failed to process CSV file. Please check the file format.'], 500);
         }
+    }
+
+    /**
+     * Strip formula-injection characters to prevent CSV injection (CWE-1236).
+     * Prefixes dangerous leading chars with a single quote and strips HTML tags.
+     */
+    private function sanitizeCsvField(string $value): string
+    {
+        $value = strip_tags($value);
+
+        if ($value !== '' && in_array($value[0], ['=', '+', '-', '@', "\t", "\r", "\n"], true)) {
+            $value = "'" . $value;
+        }
+
+        return mb_substr($value, 0, 255);
     }
 }

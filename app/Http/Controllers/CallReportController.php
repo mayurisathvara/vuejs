@@ -60,7 +60,7 @@ class CallReportController extends Controller
         $query = $this->buildReportQuery($request);
 
 
-        $perPage = (int) $request->get('per_page', 10);
+        $perPage = min((int) $request->get('per_page', 10), 100);
         $paginator = $query->paginate($perPage);
 
         return response()->json($paginator);

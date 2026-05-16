@@ -7,7 +7,9 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rules\Password;
 use Illuminate\Validation\ValidationException;
 
 class AuthController extends Controller
@@ -18,62 +20,68 @@ class AuthController extends Controller
     public function login(Request $request): JsonResponse
     {
         $validator = Validator::make($request->all(), [
-            'email' => 'required|email',
-            'password' => 'required|string|min:6',
+            'email'    => 'required|email|max:255',
+            'password' => 'required|string|max:255',
         ]);
 
         if ($validator->fails()) {
             return response()->json([
                 'message' => 'Validation failed',
-                'errors' => $validator->errors()
+                'errors'  => $validator->errors(),
             ], 422);
         }
 
         $user = User::with(['organization', 'team'])->where('email', $request->email)->first();
 
-        if (!$user || !Hash::check($request->password, $user->password)) {
-            return response()->json([
-                'message' => 'Invalid credentials'
-            ], 401);
+        if (! $user || ! Hash::check($request->password, $user->password)) {
+            Log::warning('Failed web login attempt', [
+                'email' => $request->email,
+                'ip'    => $request->ip(),
+                'ua'    => $request->userAgent(),
+            ]);
+
+            return response()->json(['message' => 'Invalid credentials'], 401);
         }
 
-        // Check if user account is active
         if ($user->status !== 'active') {
             return response()->json([
-                'message' => 'Your account has been deactivated. Please contact administrator.'
+                'message' => 'Your account has been deactivated. Please contact administrator.',
             ], 403);
         }
 
-        // Check organization status for non-admin users
         if ($user->role !== 'admin' && $user->organization_id) {
-            if (!$user->organization) {
+            if (! $user->organization) {
                 return response()->json([
-                    'message' => 'Organization not found. Please contact administrator.'
+                    'message' => 'Organization not found. Please contact administrator.',
                 ], 403);
             }
 
             if ($user->organization->status !== 'active') {
                 return response()->json([
-                    'message' => 'Your organization has been deactivated. Please contact administrator.'
+                    'message' => 'Your organization has been deactivated. Please contact administrator.',
                 ], 403);
             }
         }
 
+        // Revoke all existing tokens before issuing a new one (prevent token accumulation)
+        $user->tokens()->delete();
         $token = $user->createToken('auth-token')->plainTextToken;
 
+        Log::info('Successful web login', [
+            'user_id' => $user->id,
+            'email'   => $user->email,
+            'ip'      => $request->ip(),
+        ]);
+
         return response()->json([
-            'user' => $user,
-            'token' => $token,
-            'message' => 'Login successful'
+            'user'    => $user,
+            'token'   => $token,
+            'message' => 'Login successful',
         ]);
     }
 
     /**
      * Register a new organization (role = organization).
-     * Creating an Organization automatically:
-     *  - creates the linked User with role=organization  (via Organization::boot)
-     *  - assigns the 14-day Free Trial plan             (via Organization::boot)
-     *  - creates the OrganizationSetting row
      */
     public function register(Request $request): JsonResponse
     {
@@ -82,7 +90,16 @@ class AuthController extends Controller
             'email'                 => 'required|string|email|max:255|unique:organizations,email|unique:users,email',
             'mobile'                => ['required', 'digits:10'],
             'industry'              => 'required|string|max:100',
-            'password'              => 'required|string|min:6|confirmed',
+            'password'              => [
+                'required',
+                'confirmed',
+                Password::min(8)
+                    ->letters()
+                    ->mixedCase()
+                    ->numbers()
+                    ->symbols()
+                    ->uncompromised(),
+            ],
             'password_confirmation' => 'required|string',
         ]);
 
@@ -93,14 +110,11 @@ class AuthController extends Controller
             ], 422);
         }
 
-        // Generate a unique numeric app login code
+        // Generate a unique cryptographically-random 8-char alphanumeric app login code
         do {
-            $code = str_pad((string) random_int(100000, 999999), 6, '0', STR_PAD_LEFT);
+            $code = strtoupper(substr(bin2hex(random_bytes(6)), 0, 8));
         } while (\App\Models\Organization::where('app_login_code', $code)->exists());
 
-        // Creating the Organization triggers boot():
-        //   → syncUser()  → creates User with role=organization
-        //   → assignTrialPlan() → creates 14-day free trial subscription
         $organization = \App\Models\Organization::create([
             'name'           => $request->name,
             'email'          => $request->email,
@@ -111,7 +125,6 @@ class AuthController extends Controller
             'status'         => 'active',
         ]);
 
-        // Create default organization settings
         \App\Models\OrganizationSetting::firstOrCreate(
             ['organization_id' => $organization->id],
             [
@@ -123,12 +136,14 @@ class AuthController extends Controller
             ]
         );
 
-        // Retrieve the auto-created user
-        $user = User::where('organization_id', $organization->id)
-            ->where('role', 'organization')
-            ->first();
-
+        $user  = User::where('organization_id', $organization->id)->where('role', 'organization')->first();
         $token = $user->createToken('auth-token')->plainTextToken;
+
+        Log::info('New organization registered', [
+            'organization_id' => $organization->id,
+            'email'           => $organization->email,
+            'ip'              => $request->ip(),
+        ]);
 
         return response()->json([
             'user'    => $user->load('organization'),
@@ -144,9 +159,7 @@ class AuthController extends Controller
     {
         $request->user()->currentAccessToken()->delete();
 
-        return response()->json([
-            'message' => 'Logout successful'
-        ]);
+        return response()->json(['message' => 'Logout successful']);
     }
 
     /**
@@ -155,9 +168,8 @@ class AuthController extends Controller
     public function user(Request $request): JsonResponse
     {
         $user = $request->user()->load(['organization', 'team']);
-        
-        // Get organization date format
-        $dateFormat = 'Y-m-d'; // default
+
+        $dateFormat = 'Y-m-d';
         if ($user->organization_id && $user->organization) {
             $orgSetting = \App\Models\OrganizationSetting::where('organization_id', $user->organization_id)->first();
             if ($orgSetting && $orgSetting->date_formate) {
@@ -165,7 +177,7 @@ class AuthController extends Controller
             }
         }
         $user->date_format = $dateFormat;
-        
+
         return response()->json($user);
     }
 
@@ -177,28 +189,25 @@ class AuthController extends Controller
         $user = $request->user();
 
         $validator = Validator::make($request->all(), [
-            'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users,email,' . $user->id,
+            'name'    => 'required|string|max:255',
+            'email'   => 'required|string|email|max:255|unique:users,email,' . $user->id,
             'profile' => 'nullable|string|max:500',
         ]);
 
         if ($validator->fails()) {
             return response()->json([
                 'message' => 'Validation failed',
-                'errors' => $validator->errors()
+                'errors'  => $validator->errors(),
             ], 422);
         }
 
         $user->update([
-            'name' => $request->name,
-            'email' => $request->email,
+            'name'    => $request->name,
+            'email'   => $request->email,
             'profile' => $request->profile,
         ]);
 
-        return response()->json([
-            'user' => $user,
-            'message' => 'Profile updated successfully'
-        ]);
+        return response()->json(['user' => $user, 'message' => 'Profile updated successfully']);
     }
 
     /**
@@ -209,32 +218,41 @@ class AuthController extends Controller
         $user = $request->user();
 
         $validator = Validator::make($request->all(), [
-            'current_password' => 'required|string',
-            'new_password' => 'required|string|min:8',
+            'current_password'          => 'required|string',
+            'new_password'              => [
+                'required',
+                'confirmed',
+                Password::min(8)
+                    ->letters()
+                    ->mixedCase()
+                    ->numbers()
+                    ->symbols()
+                    ->uncompromised(),
+            ],
             'new_password_confirmation' => 'required|string|same:new_password',
         ]);
 
         if ($validator->fails()) {
             return response()->json([
                 'message' => 'Validation failed',
-                'errors' => $validator->errors()
+                'errors'  => $validator->errors(),
             ], 422);
         }
 
-        // Check current password
-        if (!Hash::check($request->current_password, $user->password)) {
-            return response()->json([
-                'message' => 'Current password is incorrect'
-            ], 400);
+        if (! Hash::check($request->current_password, $user->password)) {
+            Log::warning('Failed password change attempt', [
+                'user_id' => $user->id,
+                'ip'      => $request->ip(),
+            ]);
+
+            return response()->json(['message' => 'Current password is incorrect'], 400);
         }
 
-        // Update password
-        $user->update([
-            'password' => Hash::make($request->new_password)
-        ]);
+        $user->update(['password' => Hash::make($request->new_password)]);
 
-        return response()->json([
-            'message' => 'Password changed successfully'
-        ]);
+        // Revoke all other tokens after a password change (security best practice)
+        $user->tokens()->where('id', '!=', $request->user()->currentAccessToken()->id)->delete();
+
+        return response()->json(['message' => 'Password changed successfully']);
     }
 }

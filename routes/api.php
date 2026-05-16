@@ -25,32 +25,36 @@ use App\Http\Controllers\DashboardAnalyticsController;
 // Web/VueJS API Routes (Existing Routes)
 // =========================================
 
-// Public routes
-Route::post('/login', [AuthController::class, 'login']);
-Route::post('/register', [AuthController::class, 'register']);
+// Public routes — strict rate limits to prevent brute-force & credential stuffing
+Route::middleware('throttle:5,1')->group(function () {
+    Route::post('/login', [AuthController::class, 'login']);
+    Route::post('/register', [AuthController::class, 'register']);
+});
 
 // Protected routes
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::get('/user', [AuthController::class, 'user']);
-    
-    // Profile routes
-    Route::put('/user/profile', [AuthController::class, 'updateProfile']);
-    Route::post('/user/change-password', [AuthController::class, 'changePassword']);
-    
+
+    // Profile routes — moderate rate limit
+    Route::middleware('throttle:30,1')->group(function () {
+        Route::put('/user/profile', [AuthController::class, 'updateProfile']);
+        Route::post('/user/change-password', [AuthController::class, 'changePassword']);
+    });
+
     // User management routes - Admin, Organization, Manager only
     Route::middleware(['role:admin,organization,manager'])->group(function () {
         Route::get('/users/organizations', [UserController::class, 'getOrganizations']);
         Route::get('/users/teams', [UserController::class, 'getTeamsByOrganization']);
         Route::put('/users/{user}/status', [UserController::class, 'updateStatus']);
-        
+
         // Assign SIMs routes
         Route::get('/users/{user}/assign-sims', [UserController::class, 'getAssignSimsData']);
         Route::post('/users/sims/by-teams', [UserController::class, 'getSimsByTeams']);
         Route::get('/users/{user}/assigned-sims', [UserController::class, 'getAssignedSims']);
         Route::post('/users/{user}/assign-sims', [UserController::class, 'assignSims']);
         Route::get('/users/{user}/available-sims', [UserController::class, 'getAvailableSims']);
-        
+
         Route::apiResource('users', UserController::class);
         Route::get('/users', [UserController::class, 'index']);
     });
@@ -77,21 +81,21 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/organizations/{organization}/settings', [\App\Http\Controllers\OrganizationSettingController::class, 'show']);
         Route::put('/organizations/{organization}/settings', [\App\Http\Controllers\OrganizationSettingController::class, 'update']);
     });
-    
+
     // Organization management routes - Admin only
     Route::middleware(['role:admin'])->group(function () {
         Route::put('/organizations/{organization}/status', [OrganizationController::class, 'updateStatus']);
         Route::apiResource('organizations', OrganizationController::class);
         Route::get('/organizations', [OrganizationController::class, 'index']);
     });
-    
+
     // Team management routes - Admin and Organization only
     Route::middleware(['role:admin,organization'])->group(function () {
         Route::get('/teams/organizations', [TeamController::class, 'getOrganizations']);
         Route::apiResource('teams', TeamController::class);
         Route::get('/teams', [TeamController::class, 'index']);
     });
-    
+
     // Excluded Numbers - Admin, Organization, Manager
     Route::middleware(['role:admin,organization,manager'])->group(function () {
         Route::get('/excluded-numbers/organizations', [\App\Http\Controllers\ExcludedNumberController::class, 'getOrganizations']);
@@ -115,17 +119,25 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/subscription/stats', [\App\Http\Controllers\SubscriptionController::class, 'stats']);
     });
 
-    // Organization billing/subscription page
+    // Organization billing/subscription page — payment endpoints get strict rate limits
     Route::middleware(['role:organization'])->group(function () {
         Route::get('/subscription/overview', [\App\Http\Controllers\SubscriptionController::class, 'overview']);
         Route::get('/subscription/renewal-data', [\App\Http\Controllers\SubscriptionController::class, 'renewalData']);
         Route::get('/subscription/payments', [\App\Http\Controllers\SubscriptionController::class, 'paymentHistory']);
         Route::get('/subscription/invoices/{subscription}', [\App\Http\Controllers\SubscriptionController::class, 'invoiceView']);
         Route::get('/subscription/invoices/{subscription}/download', [\App\Http\Controllers\SubscriptionController::class, 'invoiceDownload']);
-        Route::post('/subscription/renew/order', [\App\Http\Controllers\SubscriptionController::class, 'createRenewalOrder']);
-        Route::post('/subscription/renew/verify', [\App\Http\Controllers\SubscriptionController::class, 'verifyRenewalPayment']);
-        Route::post('/subscription/addon-sim/order', [\App\Http\Controllers\SubscriptionController::class, 'createAddonOrder']);
-        Route::post('/subscription/addon-sim/verify', [\App\Http\Controllers\SubscriptionController::class, 'verifyAddonPayment']);
+
+        // Payment order creation — 10 attempts per minute per user
+        Route::middleware('throttle:10,1')->group(function () {
+            Route::post('/subscription/renew/order', [\App\Http\Controllers\SubscriptionController::class, 'createRenewalOrder']);
+            Route::post('/subscription/addon-sim/order', [\App\Http\Controllers\SubscriptionController::class, 'createAddonOrder']);
+        });
+
+        // Payment verification — 5 attempts per minute (tighter; replaying is suspicious)
+        Route::middleware('throttle:5,1')->group(function () {
+            Route::post('/subscription/renew/verify', [\App\Http\Controllers\SubscriptionController::class, 'verifyRenewalPayment']);
+            Route::post('/subscription/addon-sim/verify', [\App\Http\Controllers\SubscriptionController::class, 'verifyAddonPayment']);
+        });
     });
 
     // Admin subscription management
@@ -144,8 +156,10 @@ Route::middleware('auth:sanctum')->group(function () {
 
 Route::prefix('v1/org')->group(function () {
 
-    // Public: organization login (only role=organization allowed)
-    Route::post('/auth/login', [\App\Http\Controllers\Api\V1\Organization\AuthController::class, 'login']);
+    // Public: organization login — strict throttle
+    Route::middleware('throttle:5,1')->group(function () {
+        Route::post('/auth/login', [\App\Http\Controllers\Api\V1\Organization\AuthController::class, 'login']);
+    });
 
     // Protected: require a valid Bearer token issued by the login above
     Route::middleware(['auth:sanctum', 'role:organization'])->group(function () {
@@ -159,44 +173,44 @@ Route::prefix('v1/org')->group(function () {
 // =========================================
 
 Route::prefix('v1/app')->group(function () {
-    
-    // Public routes
-    Route::post('/login', [\App\Http\Controllers\Api\V1\Auth\LoginController::class, 'login']);
-    
+
+    // Public routes — strict throttle on login
+    Route::middleware('throttle:5,1')->group(function () {
+        Route::post('/login', [\App\Http\Controllers\Api\V1\Auth\LoginController::class, 'login']);
+    });
+
     // Protected routes
     Route::middleware(['auth:sanctum', 'sim.auth'])->group(function () {
         // Auth routes
         Route::post('/logout', [\App\Http\Controllers\Api\V1\Auth\LoginController::class, 'logout']);
         Route::post('/change-password', [\App\Http\Controllers\Api\V1\Auth\ChangePasswordController::class, 'changePassword']);
-        
+
         // Profile routes
         Route::get('/profile', [\App\Http\Controllers\Api\V1\User\ProfileController::class, 'show']);
-        
+
         // Call Log routes
-        Route::post('/call-logs/push',[\App\Http\Controllers\Api\V1\CallLog\CallLogController::class, 'push']);
-		Route::get('/call-logs',[\App\Http\Controllers\Api\V1\CallLog\CallLogController::class, 'list']);
-		
-		//Dashboard 
-		Route::get('/dashboard', [\App\Http\Controllers\Api\V1\Dashboard\DashboardController::class, 'dashboard']);
-		
-		//Analytics
-		Route::get('/analytics/call-type-distribution', [\App\Http\Controllers\Api\V1\Analytics\AnalyticsController::class, 'callTypeDistribution']);
-		Route::get('/analytics/daily-call-volume',[\App\Http\Controllers\Api\V1\Analytics\AnalyticsController::class, 'dailyCallVolume']);
-		Route::get('/analytics/peak-hours',[\App\Http\Controllers\Api\V1\Analytics\AnalyticsController::class, 'peakHours']);
-		Route::get('/analytics/missed-calls',[\App\Http\Controllers\Api\V1\Analytics\AnalyticsController::class, 'missedCallsAnalysis']);
-		
-		// SIM Verification Routes
-		Route::post('/sim/start', [\App\Http\Controllers\Api\V1\Auth\OtpController::class, 'start']);
-		Route::post('/sim/webhook', [\App\Http\Controllers\Api\V1\Auth\OtpController::class, 'webhook']);
-		Route::get('/sim/status/{id}', [\App\Http\Controllers\Api\V1\Auth\OtpController::class, 'status']);
+        Route::post('/call-logs/push', [\App\Http\Controllers\Api\V1\CallLog\CallLogController::class, 'push']);
+        Route::get('/call-logs', [\App\Http\Controllers\Api\V1\CallLog\CallLogController::class, 'list']);
 
+        // Dashboard
+        Route::get('/dashboard', [\App\Http\Controllers\Api\V1\Dashboard\DashboardController::class, 'dashboard']);
 
+        // Analytics
+        Route::get('/analytics/call-type-distribution', [\App\Http\Controllers\Api\V1\Analytics\AnalyticsController::class, 'callTypeDistribution']);
+        Route::get('/analytics/daily-call-volume', [\App\Http\Controllers\Api\V1\Analytics\AnalyticsController::class, 'dailyCallVolume']);
+        Route::get('/analytics/peak-hours', [\App\Http\Controllers\Api\V1\Analytics\AnalyticsController::class, 'peakHours']);
+        Route::get('/analytics/missed-calls', [\App\Http\Controllers\Api\V1\Analytics\AnalyticsController::class, 'missedCallsAnalysis']);
 
-		
+        // SIM Verification — OTP endpoints with dedicated throttle
+        Route::middleware('throttle:10,1')->group(function () {
+            Route::post('/sim/start', [\App\Http\Controllers\Api\V1\Auth\OtpController::class, 'start']);
+            Route::get('/sim/status/{id}', [\App\Http\Controllers\Api\V1\Auth\OtpController::class, 'status']);
+        });
     });
-    
+
+    // SIM webhook — separate from auth middleware, but tightly throttled
+    Route::middleware('throttle:60,1')->post(
+        '/sim/webhook',
+        [\App\Http\Controllers\Api\V1\Auth\OtpController::class, 'webhook']
+    );
 });
-
-
-
-//Mobile Application Routes

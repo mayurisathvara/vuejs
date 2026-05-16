@@ -10,6 +10,7 @@ use App\Services\RazorpaySubscriptionService;
 use App\Services\SubscriptionService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 
 class SubscriptionController extends Controller
@@ -221,6 +222,15 @@ class SubscriptionController extends Controller
             organizationId: $organizationId,
             payload: $validated
         );
+
+        Log::info('Renewal payment verified', [
+            'organization_id'     => $organizationId,
+            'subscription_id'     => $subscription->id,
+            'razorpay_order_id'   => $validated['razorpay_order_id'],
+            'razorpay_payment_id' => $validated['razorpay_payment_id'],
+            'newly_created'       => $subscription->wasRecentlyCreated,
+            'ip'                  => $request->ip(),
+        ]);
 
         return response()->json([
             'success' => true,
@@ -514,6 +524,16 @@ class SubscriptionController extends Controller
         );
 
         $simCount = $addon->sim_quantity;
+
+        Log::info('Addon SIM payment verified', [
+            'organization_id'     => $organizationId,
+            'addon_id'            => $addon->id,
+            'sim_quantity'        => $simCount,
+            'razorpay_order_id'   => $validated['razorpay_order_id'],
+            'razorpay_payment_id' => $validated['razorpay_payment_id'],
+            'newly_created'       => $addon->wasRecentlyCreated,
+            'ip'                  => $request->ip(),
+        ]);
 
         return response()->json([
             'success' => true,

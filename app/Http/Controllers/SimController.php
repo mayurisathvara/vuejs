@@ -444,8 +444,8 @@ class SimController extends Controller
                     continue;
                 }
                 
-                // Validate name
-                $name = trim($rowData['name']);
+                // Validate name — strip formula injection chars (CSV injection / CWE-1236)
+                $name = $this->sanitizeCsvField(trim($rowData['name'] ?? ''));
                 if (empty($name)) {
                     $errors[] = "Row {$row}: Name is required";
                     continue;
@@ -484,10 +484,27 @@ class SimController extends Controller
             ]);
             
         } catch (\Exception $e) {
-            return response()->json([
-                'message' => 'Error processing CSV file: ' . $e->getMessage()
-            ], 500);
+            \Illuminate\Support\Facades\Log::error('SIM CSV import failed', [
+                'error' => $e->getMessage(),
+                'ip'    => request()->ip(),
+            ]);
+
+            return response()->json(['message' => 'Error processing CSV file. Please check the file format.'], 500);
         }
+    }
+
+    /**
+     * Strip formula-injection characters to prevent CSV injection (CWE-1236).
+     */
+    private function sanitizeCsvField(string $value): string
+    {
+        $value = strip_tags($value);
+
+        if ($value !== '' && in_array($value[0], ['=', '+', '-', '@', "\t", "\r", "\n"], true)) {
+            $value = "'" . $value;
+        }
+
+        return mb_substr($value, 0, 255);
     }
 
     // -------------------------------------------------------------------------
