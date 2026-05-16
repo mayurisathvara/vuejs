@@ -31,6 +31,13 @@ Route::middleware('throttle:5,1')->group(function () {
     Route::post('/register', [AuthController::class, 'register']);
 });
 
+// Email verification resend — 3 per minute to prevent abuse
+Route::middleware('throttle:3,1')->post('/email/resend', [AuthController::class, 'resendVerification']);
+
+// Password reset — send link (3/min) and apply token (5/min)
+Route::middleware('throttle:3,1')->post('/forgot-password', [AuthController::class, 'forgotPassword']);
+Route::middleware('throttle:5,1')->post('/reset-password', [AuthController::class, 'resetPassword']);
+
 // Protected routes
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);

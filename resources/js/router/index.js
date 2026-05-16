@@ -9,6 +9,9 @@ import DefaultLayout from '@/layouts/DefaultLayout.vue'
 // Pages
 import Login from '@/pages/Login.vue'
 import Register from '@/pages/Register.vue'
+import VerifyEmail from '@/pages/VerifyEmail.vue'
+import ForgotPassword from '@/pages/ForgotPassword.vue'
+import ResetPassword from '@/pages/ResetPassword.vue'
 import Dashboard from '@/pages/Dashboard.vue'
 import Users from '@/pages/Users.vue'
 import AssignSims from '@/pages/AssignSims.vue'
@@ -75,6 +78,21 @@ const routes = [
         },
       }
     ]
+  },
+  {
+    path: '/verify-email',
+    component: VerifyEmail,
+    meta: { title: 'Verify Email' },
+  },
+  {
+    path: '/forgot-password',
+    component: ForgotPassword,
+    meta: { requiresGuest: true, title: 'Forgot Password' },
+  },
+  {
+    path: '/reset-password',
+    component: ResetPassword,
+    meta: { requiresGuest: true, title: 'Reset Password' },
   },
   {
     path: '/dashboard',

@@ -206,7 +206,7 @@ const handleRegister = async () => {
   }
 
   try {
-    await authStore.register({
+    const result = await authStore.register({
       name:                  form.name,
       email:                 form.email,
       mobile:                form.mobile,
@@ -214,7 +214,11 @@ const handleRegister = async () => {
       password:              form.password,
       password_confirmation: form.password_confirmation,
     })
-    router.push('/dashboard')
+    if (result.requires_verification) {
+      router.push(`/verify-email?email=${encodeURIComponent(result.email)}`)
+    } else {
+      router.push('/dashboard')
+    }
   } catch (error) {
     if (error.response?.status === 422) {
       errors.value = error.response.data.errors || {}

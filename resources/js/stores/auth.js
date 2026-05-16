@@ -101,18 +101,25 @@ export const useAuthStore = defineStore('auth', () => {
     loading.value = true
     try {
       const response = await api.post('/register', userData)
-      const { user: newUser, token: authToken } = response.data
-      
-      user.value = newUser
-      token.value = authToken
-      localStorage.setItem('token', authToken)
-      localStorage.setItem('user', JSON.stringify(newUser))
-      await syncDateFormat(newUser)
-      
-      // Set default axios header
-      api.defaults.headers.common['Authorization'] = `Bearer ${authToken}`
-      
-      return response.data
+      const data = response.data
+
+      // New flow: registration requires email verification — no token issued.
+      if (data.requires_verification) {
+        return data
+      }
+
+      // Fallback: auto-login if a token is returned (legacy / admin-created accounts).
+      const { user: newUser, token: authToken } = data
+      if (newUser && authToken) {
+        user.value = newUser
+        token.value = authToken
+        localStorage.setItem('token', authToken)
+        localStorage.setItem('user', JSON.stringify(newUser))
+        await syncDateFormat(newUser)
+        api.defaults.headers.common['Authorization'] = `Bearer ${authToken}`
+      }
+
+      return data
     } catch (error) {
       throw error
     } finally {

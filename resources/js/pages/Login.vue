@@ -46,7 +46,7 @@
         />
         <span>Remember me</span>
       </label>
-      <a href="#" class="lf-forgot" @click.prevent>Forgot password?</a>
+      <router-link to="/forgot-password" class="lf-forgot">Forgot password?</router-link>
     </div>
 
     <!-- Sign In button -->
@@ -65,47 +65,53 @@
 </template>
 
 <script setup>
-import { reactive, ref } from 'vue'
-import { useRouter } from 'vue-router'
+import { onMounted, reactive, ref } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
+import { showError, showSuccess } from '@/services/toast'
 import InputField from '@/components/InputField.vue'
 import Button from '@/components/Button.vue'
 
-const router = useRouter()
+const router  = useRouter()
+const route   = useRoute()
 const authStore = useAuthStore()
 
 const form = reactive({
-  email: '',
+  email:    '',
   password: '',
-  remember: false
+  remember: false,
 })
 
-const errors = ref({})
+const errors       = ref({})
 const errorMessage = ref('')
 
+onMounted(() => {
+  const v = route.query.verified
+  if (v === '1') {
+    showSuccess('Email verified! You can now log in.')
+  } else if (v === 'already') {
+    showSuccess('Your email is already verified. Please log in.')
+  }
+})
+
 const handleLogin = async () => {
-  errors.value = {}
+  errors.value       = {}
   errorMessage.value = ''
 
-  // Basic validation
-  if (!form.email) {
-    errors.value.email = 'Email is required'
-    return
-  }
-  if (!form.password) {
-    errors.value.password = 'Password is required'
-    return
-  }
+  if (!form.email)    { errors.value.email    = 'Email is required';    return }
+  if (!form.password) { errors.value.password = 'Password is required'; return }
 
   try {
     await authStore.login(form)
     router.push('/dashboard')
   } catch (error) {
-    if (error.response?.status === 422) {
-      // Validation errors
+    if (error.response?.status === 403 && error.response.data?.email_not_verified) {
+      const email = error.response.data?.email || form.email
+      showError('Please verify your email address before logging in.')
+      router.push(`/verify-email?email=${encodeURIComponent(email)}`)
+    } else if (error.response?.status === 422) {
       errors.value = error.response.data.errors || {}
     } else {
-      // General error
       errorMessage.value = error.response?.data?.message || 'Login failed. Please try again.'
     }
   }
