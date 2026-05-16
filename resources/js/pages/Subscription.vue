@@ -91,6 +91,34 @@
                 <strong>{{ endDateLabel }}</strong>
               </div>
             </div>
+
+            <!-- Auto-renew toggle (hidden for trial plans) -->
+            <div v-if="!isTrialPlan" class="auto-renew-row">
+              <div class="auto-renew-info">
+                <i class="fas fa-sync-alt auto-renew-icon" :class="{ 'is-on': autoRenewEnabled }"></i>
+                <div>
+                  <strong>Auto-Renewal</strong>
+                  <span>{{ autoRenewEnabled ? 'Enabled — your plan renews automatically.' : 'Disabled — you must renew manually before expiry.' }}</span>
+                </div>
+              </div>
+              <button
+                type="button"
+                class="toggle-switch"
+                :class="{ 'is-on': autoRenewEnabled, 'is-loading': autoRenewLoading }"
+                :disabled="autoRenewLoading"
+                :aria-label="autoRenewEnabled ? 'Disable auto-renewal' : 'Enable auto-renewal'"
+                :title="autoRenewEnabled ? 'Click to disable auto-renewal' : 'Click to enable auto-renewal'"
+                @click="handleAutoRenewToggle"
+              >
+                <span class="toggle-thumb"></span>
+              </button>
+            </div>
+
+            <!-- Auto-renew failure notice -->
+            <div v-if="autoRenewFailureReason" class="auto-renew-alert">
+              <i class="fas fa-exclamation-triangle"></i>
+              <span>{{ autoRenewFailureReason }}</span>
+            </div>
           </section>
 
           <!-- SIM Usage -->
@@ -372,6 +400,7 @@ const historyLoading = ref(false)
 const historyError = ref('')
 const paymentHistory = ref([])
 const historySection = ref(null)
+const autoRenewLoading = ref(false)
 
 const stats = computed(() => payload.value?.stats || {})
 const subscription = computed(() => payload.value?.subscription || null)
@@ -675,6 +704,33 @@ const termProgressPercent = computed(() => {
   return clamp(Math.round((elapsed / total) * 100), 0, 100)
 })
 const termProgress = computed(() => Math.round((termProgressPercent.value / 100) * 360))
+
+const autoRenewEnabled = computed(() => subscription.value?.auto_renew ?? true)
+const autoRenewFailureReason = computed(() => subscription.value?.auto_renew_failure_reason || null)
+
+const handleAutoRenewToggle = async () => {
+  if (autoRenewLoading.value || !subscription.value) return
+
+  const newValue = !autoRenewEnabled.value
+  autoRenewLoading.value = true
+
+  try {
+    await api.post('/subscription/auto-renew/toggle', { auto_renew: newValue })
+    // Optimistically update the local payload
+    if (payload.value?.subscription) {
+      payload.value.subscription.auto_renew = newValue
+      if (newValue) {
+        payload.value.subscription.auto_renew_failure_reason = null
+        payload.value.subscription.auto_renew_failed_at = null
+      }
+    }
+    showSuccess(newValue ? 'Auto-renewal enabled.' : 'Auto-renewal disabled.')
+  } catch (err) {
+    showError(err.response?.data?.message || 'Failed to update auto-renewal setting.')
+  } finally {
+    autoRenewLoading.value = false
+  }
+}
 
 const featureList = computed(() => {
   const features = plan.value?.features || stats.value.features || []
@@ -1714,6 +1770,101 @@ onMounted(fetchSubscription)
   border-color: var(--blue);
   background: var(--blue);
 }
+
+/* ── Auto-renew toggle ── */
+.auto-renew-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 14px;
+  padding: 12px 14px;
+  border-radius: 14px;
+  border: 1px solid var(--line);
+  background: #f8fafc;
+}
+
+.auto-renew-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+  min-width: 0;
+}
+
+.auto-renew-icon {
+  font-size: 1rem;
+  color: #94a3b8;
+  flex-shrink: 0;
+  transition: color 0.2s;
+}
+
+.auto-renew-icon.is-on { color: #067647; }
+
+.auto-renew-info strong {
+  display: block;
+  font-size: 0.84rem;
+  font-weight: 800;
+  color: var(--ink);
+}
+
+.auto-renew-info span {
+  display: block;
+  font-size: 0.75rem;
+  color: var(--muted);
+  font-weight: 600;
+  margin-top: 1px;
+  line-height: 1.4;
+}
+
+/* Toggle switch */
+.toggle-switch {
+  position: relative;
+  width: 46px;
+  height: 26px;
+  border: none;
+  border-radius: 999px;
+  background: #e2e8f0;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background 0.2s;
+  padding: 0;
+}
+
+.toggle-switch.is-on  { background: #067647; }
+.toggle-switch:disabled { opacity: 0.55; cursor: not-allowed; }
+.toggle-switch.is-loading { opacity: 0.7; }
+
+.toggle-thumb {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.18);
+  transition: transform 0.2s;
+}
+
+.toggle-switch.is-on .toggle-thumb { transform: translateX(20px); }
+
+.auto-renew-alert {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin-top: 8px;
+  padding: 10px 12px;
+  border-radius: 11px;
+  background: #fef0c7;
+  border: 1px solid #fde68a;
+  font-size: 0.8rem;
+  color: #92400e;
+  font-weight: 600;
+  line-height: 1.45;
+}
+
+.auto-renew-alert i { flex-shrink: 0; margin-top: 1px; }
 
 /* ── Responsive ── */
 @media (max-width: 1100px) {

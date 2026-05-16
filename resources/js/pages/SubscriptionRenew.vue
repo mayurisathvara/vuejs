@@ -177,17 +177,40 @@
               <strong>{{ selectedPlan ? formatCurrency(total) : '–' }}</strong>
             </div>
 
+            <!-- Auto-renew toggle -->
+            <div class="auto-renew-toggle-row">
+              <div class="auto-renew-toggle-info">
+                <i class="fas fa-sync-alt" :class="autoRenew ? 'ar-icon--on' : 'ar-icon--off'"></i>
+                <div>
+                  <strong>Auto-Renewal</strong>
+                  <span>{{ autoRenew ? 'Renews automatically each cycle.' : 'One-time payment — renew manually.' }}</span>
+                </div>
+              </div>
+              <button
+                type="button"
+                class="toggle-sw"
+                :class="{ 'is-on': autoRenew }"
+                :aria-label="autoRenew ? 'Disable auto-renewal' : 'Enable auto-renewal'"
+                @click="autoRenew = !autoRenew"
+              >
+                <span class="toggle-th"></span>
+              </button>
+            </div>
+
             <!-- Payment note -->
             <p v-if="paymentMessage" class="pay-note" :class="paymentMessageType">{{ paymentMessage }}</p>
             <p v-else class="pay-note">
-              You will be redirected to Razorpay TEST checkout for secure payment verification.
+              {{ autoRenew
+                ? 'Your card will be charged automatically each billing cycle via Razorpay.'
+                : 'One-time Razorpay payment — you control each renewal manually.' }}
             </p>
 
             <!-- Pay button -->
             <button type="button" class="pay-btn" :disabled="!canRenew" @click="renewPlan">
               <span v-if="paymentLoading" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-              <i v-else class="fas fa-lock"></i>
-              {{ paymentLoading ? 'Opening Checkout…' : 'Renew Plan' }}
+              <i v-else :class="autoRenew ? 'fas fa-sync-alt' : 'fas fa-lock'"></i>
+              <span v-if="paymentLoading">Opening Checkout…</span>
+              <span v-else>{{ autoRenew ? 'Subscribe &amp; Auto-Renew' : 'Pay Once' }}</span>
             </button>
           </div>
         </aside>
@@ -214,6 +237,7 @@ const activeBillingCycle = ref('monthly')
 const paymentLoading = ref(false)
 const paymentMessage = ref('')
 const paymentMessageType = ref('')
+const autoRenew = ref(true)
 
 const billingTabs = [
   { value: 'monthly', label: 'Monthly' },
@@ -326,8 +350,117 @@ const loadRazorpayCheckout = () => {
 
 const renewPlan = async () => {
   if (!selectedPlan.value) return
-
   normalizeQuantity()
+
+  if (autoRenew.value) {
+    await startRecurringCheckout()
+  } else {
+    await startOneTimeCheckout()
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Recurring (auto-renew) checkout via Razorpay Subscriptions API
+// ---------------------------------------------------------------------------
+
+const startRecurringCheckout = async () => {
+  paymentLoading.value = true
+  paymentMessage.value = ''
+  paymentMessageType.value = ''
+
+  try {
+    await loadRazorpayCheckout()
+
+    const response = await api.post('/subscription/recurring/order', {
+      subscription_plan_id: selectedPlan.value.id,
+      sim_quantity: quotedQuantity.value
+    })
+
+    const data         = response.data?.data || {}
+    const rzpSub       = data.subscription  || {}
+    const quote        = data.quote         || {}
+
+    if (!rzpSub.id || !data.key) {
+      throw new Error('Razorpay subscription response is incomplete.')
+    }
+
+    const user           = JSON.parse(localStorage.getItem('user') || '{}')
+    let paymentHandled   = false
+
+    const checkout = new window.Razorpay({
+      key:             data.key,
+      subscription_id: rzpSub.id,
+      name:            'Callytics',
+      description:     `${quote.plan_name || selectedPlan.value.display_name} — auto-renewing subscription`,
+      recurring:       true,
+      prefill: {
+        name:    user.name    || '',
+        email:   user.email   || '',
+        contact: user.mobile  || user.phone || ''
+      },
+      notes: {
+        type:         'recurring',
+        app_plan_id:  String(selectedPlan.value.id),
+        sim_quantity: String(quotedQuantity.value)
+      },
+      theme: { color: '#f97316' },
+      handler: async (payment) => {
+        paymentHandled = true
+        await verifyRecurringPayment(payment)
+      },
+      modal: {
+        ondismiss: () => {
+          if (paymentHandled) return
+          paymentLoading.value = false
+          paymentMessage.value = 'Checkout closed before payment completion.'
+          paymentMessageType.value = 'danger'
+        }
+      }
+    })
+
+    checkout.on('payment.failed', (failure) => {
+      paymentHandled = true
+      paymentLoading.value = false
+      paymentMessage.value = failure.error?.description || 'Payment failed. Please try again.'
+      paymentMessageType.value = 'danger'
+      showError(paymentMessage.value)
+    })
+
+    checkout.open()
+  } catch (err) {
+    paymentLoading.value = false
+    paymentMessage.value = err.response?.data?.message || err.message || 'Unable to start recurring checkout.'
+    paymentMessageType.value = 'danger'
+    showError(paymentMessage.value)
+  }
+}
+
+const verifyRecurringPayment = async (payment) => {
+  try {
+    const response = await api.post('/subscription/recurring/verify', {
+      razorpay_subscription_id: payment.razorpay_subscription_id,
+      razorpay_payment_id:      payment.razorpay_payment_id,
+      razorpay_signature:       payment.razorpay_signature
+    })
+
+    paymentMessage.value = response.data?.message || 'Recurring subscription activated. Auto-renewal is now enabled.'
+    paymentMessageType.value = 'success'
+    showSuccess(paymentMessage.value)
+    await fetchRenewalData()
+  } catch (err) {
+    paymentMessage.value = err.response?.data?.message || 'Payment verification failed. Please contact support.'
+    paymentMessageType.value = 'danger'
+    showError(paymentMessage.value)
+  } finally {
+    paymentLoading.value = false
+  }
+}
+
+// ---------------------------------------------------------------------------
+// One-time checkout via Razorpay Orders API (auto-renew disabled)
+// ---------------------------------------------------------------------------
+
+const startOneTimeCheckout = async () => {
   paymentLoading.value = true
   paymentMessage.value = ''
   paymentMessageType.value = ''
@@ -340,51 +473,42 @@ const renewPlan = async () => {
       sim_quantity: quotedQuantity.value
     })
 
-    const data = response.data?.data || {}
-    const order = data.order || {}
-    const quote = data.quote || {}
+    const data  = response.data?.data || {}
+    const order = data.order          || {}
+    const quote = data.quote          || {}
 
     if (!order.id || !data.key) {
       throw new Error('Razorpay order response is incomplete.')
     }
 
-    const user = JSON.parse(localStorage.getItem('user') || '{}')
-
+    const user         = JSON.parse(localStorage.getItem('user') || '{}')
     let paymentHandled = false
 
     const checkout = new window.Razorpay({
-      key: data.key,
-      amount: order.amount,
-      currency: order.currency || quote.currency || 'INR',
-      name: 'Callytics',
+      key:         data.key,
+      amount:      order.amount,
+      currency:    order.currency || quote.currency || 'INR',
+      name:        'Callytics',
       description: `${quote.plan_name || selectedPlan.value.display_name} subscription renewal`,
-      order_id: order.id,
+      order_id:    order.id,
       prefill: {
-        name: user.name || '',
-        email: user.email || '',
+        name:    user.name   || '',
+        email:   user.email  || '',
         contact: user.mobile || user.phone || ''
       },
       notes: {
         subscription_plan_id: String(selectedPlan.value.id),
-        sim_quantity: String(quotedQuantity.value)
+        sim_quantity:         String(quotedQuantity.value)
       },
-      method: {
-        upi: true,
-        card: true,
-        netbanking: true,
-        wallet: true
-      },
-      theme: {
-        color: '#f97316'
-      },
+      method: { upi: true, card: true, netbanking: true, wallet: true },
+      theme:  { color: '#f97316' },
       handler: async (payment) => {
         paymentHandled = true
-        await verifyPayment(payment)
+        await verifyOneTimePayment(payment)
       },
       modal: {
         ondismiss: () => {
           if (paymentHandled) return
-
           paymentLoading.value = false
           paymentMessage.value = 'Checkout closed before payment completion.'
           paymentMessageType.value = 'danger'
@@ -409,12 +533,12 @@ const renewPlan = async () => {
   }
 }
 
-const verifyPayment = async (payment) => {
+const verifyOneTimePayment = async (payment) => {
   try {
     const response = await api.post('/subscription/renew/verify', {
-      razorpay_order_id: payment.razorpay_order_id,
+      razorpay_order_id:   payment.razorpay_order_id,
       razorpay_payment_id: payment.razorpay_payment_id,
-      razorpay_signature: payment.razorpay_signature
+      razorpay_signature:  payment.razorpay_signature
     })
 
     paymentMessage.value = response.data?.message || 'Payment verified and subscription renewed.'
@@ -1008,6 +1132,75 @@ onMounted(fetchRenewalData)
 
 .pay-note.success { color: #067647; font-weight: 700; }
 .pay-note.danger  { color: #b42318; font-weight: 700; }
+
+/* ── Auto-renew toggle row ── */
+.auto-renew-toggle-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin: 14px 0 0;
+  padding: 12px 14px;
+  border-radius: 14px;
+  border: 1px solid var(--line);
+  background: #f8fafc;
+}
+
+.auto-renew-toggle-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+  min-width: 0;
+}
+
+.ar-icon--on  { color: #067647; font-size: 0.9rem; flex-shrink: 0; }
+.ar-icon--off { color: #94a3b8; font-size: 0.9rem; flex-shrink: 0; }
+
+.auto-renew-toggle-info strong {
+  display: block;
+  font-size: 0.83rem;
+  font-weight: 800;
+  color: var(--ink);
+}
+
+.auto-renew-toggle-info span {
+  display: block;
+  font-size: 0.73rem;
+  color: var(--muted);
+  font-weight: 600;
+  margin-top: 1px;
+  line-height: 1.35;
+}
+
+.toggle-sw {
+  position: relative;
+  width: 44px;
+  height: 24px;
+  border: none;
+  border-radius: 999px;
+  background: #e2e8f0;
+  cursor: pointer;
+  flex-shrink: 0;
+  padding: 0;
+  transition: background 0.2s;
+}
+
+.toggle-sw.is-on { background: #067647; }
+
+.toggle-th {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.16);
+  transition: transform 0.2s;
+}
+
+.toggle-sw.is-on .toggle-th { transform: translateX(20px); }
 
 /* ── Pay button ── */
 .pay-btn {

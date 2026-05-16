@@ -63,6 +63,18 @@
       </div>
     </div>
 
+    <!-- Subscription expiry warning banner -->
+    <div v-if="showExpiryBanner" class="expiry-warning-banner" role="alert">
+      <div class="expiry-warning-inner">
+        <i class="fas fa-exclamation-triangle expiry-warning-icon" aria-hidden="true"></i>
+        <div class="expiry-warning-text">
+          <strong>Your plan expires {{ expiryBannerLabel }}!</strong>
+          <span>Auto-renewal is off. Renew now to avoid service interruption.</span>
+        </div>
+        <router-link to="/subscription/renew" class="expiry-warning-btn">Renew Now</router-link>
+      </div>
+    </div>
+
     <!-- Date Range Modal (Custom Range) -->
     <div
       class="modal fade"
@@ -733,6 +745,26 @@ const router = useRouter()
 const isAdmin = computed(() => authStore.userRole === 'admin')
 const isUser = computed(() => authStore.userRole === 'user')
 
+// Subscription expiry warning (shown when auto-renew is off and plan expires in ≤ 2 days)
+const subscriptionStats = ref(null)
+
+const showExpiryBanner = computed(() => {
+  const s = subscriptionStats.value
+  if (!s) return false
+  if (s.auto_renew !== false) return false
+  if (s.subscription_status !== 'active') return false
+  const days = s.days_until_expiry
+  if (days === null || days === undefined) return false
+  return days >= 0 && days <= 2
+})
+
+const expiryBannerLabel = computed(() => {
+  const days = subscriptionStats.value?.days_until_expiry
+  if (days === 0) return 'today'
+  if (days === 1) return 'tomorrow'
+  return 'in 2 days'
+})
+
 const formatChangePct = (pct) => {
   const n = Number(pct ?? 0)
   const abs = Math.abs(Math.round(n))
@@ -1147,6 +1179,16 @@ const applyCustomRange = async () => {
   setRangeFromDates(customRange.start, customRange.end)
   await fetchDashboardSummary()
   await fetchDailyCallVolume()
+}
+
+const fetchSubscriptionStats = async () => {
+  if (isAdmin.value) return
+  try {
+    const resp = await api.get('/subscription/stats')
+    subscriptionStats.value = resp.data?.data ?? null
+  } catch {
+    // non-fatal — banner simply won't show
+  }
 }
 
 const fetchDashboardOptions = async () => {
@@ -1802,6 +1844,7 @@ const initMissedCallsChart = () => {
 onMounted(async () => {
   // Default to Today
   await selectDatePreset('today', { deferFetch: true })
+  fetchSubscriptionStats()
   await fetchDashboardOptions()
   await fetchDashboardSummary()
   await nextTick()
@@ -2333,5 +2376,60 @@ onBeforeUnmount(() => {
   color: #111827;
   font-size: 0.95rem;
   line-height: 1.2;
+}
+
+/* Subscription expiry warning banner */
+.expiry-warning-banner {
+  background: linear-gradient(90deg, #fff7ed 0%, #fffbeb 100%);
+  border: 1.5px solid #f97316;
+  border-radius: 12px;
+  padding: 14px 20px;
+}
+
+.expiry-warning-inner {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.expiry-warning-icon {
+  color: #f97316;
+  font-size: 1.25rem;
+  flex-shrink: 0;
+}
+
+.expiry-warning-text {
+  flex: 1;
+  min-width: 0;
+}
+
+.expiry-warning-text strong {
+  display: block;
+  color: #9a3412;
+  font-size: 0.95rem;
+  font-weight: 700;
+}
+
+.expiry-warning-text span {
+  color: #7c3211;
+  font-size: 0.875rem;
+}
+
+.expiry-warning-btn {
+  background: #f97316;
+  color: #fff;
+  border-radius: 8px;
+  padding: 8px 18px;
+  font-weight: 700;
+  font-size: 0.875rem;
+  text-decoration: none;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.expiry-warning-btn:hover {
+  background: #ea6c10;
+  color: #fff;
 }
 </style>

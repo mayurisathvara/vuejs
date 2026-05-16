@@ -17,7 +17,8 @@ class Organization extends Model
         'password',
         'mobile',
         'industry',
-		'app_login_code',
+        'app_login_code',
+        'razorpay_customer_id',
         'description',
         'status',
     ];

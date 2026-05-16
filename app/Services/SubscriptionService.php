@@ -213,6 +213,14 @@ class SubscriptionService
             ->whereIn('status', ['inactive', 'inactive_plan_limit'])
             ->count();
 
+        $daysUntilExpiry = null;
+        if ($subscription?->end_date) {
+            $daysUntilExpiry = (int) now()->startOfDay()->diffInDays(
+                $subscription->end_date->copy()->startOfDay(),
+                false
+            );
+        }
+
         return [
             'plan_name'           => $subscription?->plan_name ?? $subscription?->plan?->display_name ?? 'No Plan',
             'plan_slug'           => $subscription?->plan?->name ?? null,
@@ -227,6 +235,8 @@ class SubscriptionService
             'subscription_status' => $subscription?->status ?? 'none',
             'start_date'          => $subscription?->start_date?->toDateString(),
             'end_date'            => $subscription?->end_date?->toDateString(),
+            'auto_renew'          => $subscription?->auto_renew ?? true,
+            'days_until_expiry'   => $daysUntilExpiry,
             'features'            => $subscription?->features ?? $subscription?->plan?->features ?? [],
         ];
     }
