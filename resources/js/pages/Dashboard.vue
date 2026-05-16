@@ -745,7 +745,6 @@ const router = useRouter()
 const isAdmin = computed(() => authStore.userRole === 'admin')
 const isUser = computed(() => authStore.userRole === 'user')
 
-// Subscription expiry warning (shown when auto-renew is off and plan expires in ≤ 2 days)
 const subscriptionStats = ref(null)
 
 const showExpiryBanner = computed(() => {
@@ -755,14 +754,15 @@ const showExpiryBanner = computed(() => {
   if (s.subscription_status !== 'active') return false
   const days = s.days_until_expiry
   if (days === null || days === undefined) return false
-  return days >= 0 && days <= 2
+  const threshold = s.renewal_days_before ?? 2
+  return days >= 0 && days <= threshold
 })
 
 const expiryBannerLabel = computed(() => {
   const days = subscriptionStats.value?.days_until_expiry
   if (days === 0) return 'today'
   if (days === 1) return 'tomorrow'
-  return 'in 2 days'
+  return `in ${days} day${days === 1 ? '' : 's'}`
 })
 
 const formatChangePct = (pct) => {

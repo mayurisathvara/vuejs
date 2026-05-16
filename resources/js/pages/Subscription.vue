@@ -654,18 +654,20 @@ const daysRemaining = computed(() => {
 const isExpired = computed(() => status.value === 'expired' || (daysRemaining.value !== null && daysRemaining.value < 0))
 const isRenewalSoon = computed(() => daysRemaining.value !== null && daysRemaining.value >= 0 && daysRemaining.value <= 7)
 
-// Renewal is only allowed when the plan has 1 day or less remaining, or is already expired.
+const renewalDaysBefore = computed(() => stats.value?.renewal_days_before ?? 2)
+
 const canRequestRenewal = computed(() => {
   if (isExpired.value) return true
   if (daysRemaining.value === null) return false
-  return daysRemaining.value <= 1
+  return daysRemaining.value <= renewalDaysBefore.value
 })
 
 const renewalLockHint = computed(() => {
   if (daysRemaining.value === null) return 'Renewal is not available for this plan type.'
-  if (daysRemaining.value <= 1) return ''
+  if (daysRemaining.value <= renewalDaysBefore.value) return ''
   const d = daysRemaining.value
-  return `Renewal opens when 1 day remains (${d} day${d === 1 ? '' : 's'} left).`
+  const threshold = renewalDaysBefore.value
+  return `Renewal opens when ${threshold} day${threshold === 1 ? '' : 's'} remain (${d} day${d === 1 ? '' : 's'} left).`
 })
 
 const renewalHeadline = computed(() => {

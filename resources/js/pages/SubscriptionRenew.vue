@@ -221,11 +221,13 @@
 
 <script setup>
 import { computed, onMounted, ref } from 'vue'
+import { useRouter } from 'vue-router'
 import api from '@/services/api'
 import { showError, showSuccess } from '@/services/toast'
 
 const MIN_SIM_QUANTITY = 5
 
+const router = useRouter()
 const loading = ref(false)
 const error = ref('')
 const plans = ref([])
@@ -262,6 +264,19 @@ const fetchRenewalData = async () => {
     plans.value = Array.isArray(data.plans) ? data.plans : []
     subscription.value = data.subscription || null
     stats.value = data.stats || {}
+
+    // Guard: block direct URL access when the renewal window hasn't opened yet.
+    // Active subscriptions with more than renewal_days_before days remaining are blocked.
+    const s = stats.value
+    if (s.subscription_status === 'active') {
+      const days = s.days_until_expiry
+      const threshold = s.renewal_days_before ?? 2
+      if (days !== null && days >= 0 && days > threshold) {
+        showError(`Renewal opens ${threshold} day${threshold === 1 ? '' : 's'} before expiry.`)
+        router.replace('/subscription')
+        return
+      }
+    }
 
     const currentQuantity = Number(subscription.value?.sim_limit ?? stats.value?.sim_limit ?? MIN_SIM_QUANTITY)
     simQuantity.value = Math.max(MIN_SIM_QUANTITY, currentQuantity || MIN_SIM_QUANTITY)
