@@ -10,6 +10,7 @@ class OrganizationSubscription extends Model
         'organization_id',
         'plan_id',
         'plan_name',
+        'invoice_number',
         'price_per_sim',
         'billing_cycle',
         'sim_limit',

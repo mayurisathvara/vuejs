@@ -13,6 +13,7 @@ class AddonSimPurchase extends Model
         'organization_id',
         'subscription_id',
         'plan_id',
+        'invoice_number',
         'sim_quantity',
         'price_per_sim',
         'billing_cycle_days',

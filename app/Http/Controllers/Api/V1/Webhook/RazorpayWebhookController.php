@@ -3,8 +3,10 @@
 namespace App\Http\Controllers\Api\V1\Webhook;
 
 use App\Http\Controllers\Controller;
+use App\Jobs\SendSubscriptionPurchaseEmail;
 use App\Models\OrganizationSubscription;
 use App\Models\Plan;
+use App\Services\InvoiceService;
 use App\Services\RazorpayRecurringService;
 use App\Services\SubscriptionService;
 use Carbon\Carbon;
@@ -141,6 +143,9 @@ class RazorpayWebhookController extends Controller
             ]);
 
             SubscriptionService::enforceSimLimit($organizationId);
+
+            InvoiceService::ensureSubscriptionInvoice($subscription);
+            SendSubscriptionPurchaseEmail::dispatch($subscription, 'auto_renewal');
 
             Log::info('Razorpay subscription.charged processed', [
                 'organization_id'          => $organizationId,

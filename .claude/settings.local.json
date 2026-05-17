@@ -2,7 +2,11 @@
   "permissions": {
     "allow": [
       "Bash(Layout)",
-      "Bash(App\")"
+      "Bash(App\")",
+      "Bash(mkdir \"d:\\\\xampp\\\\htdocs\\\\vuejs\\\\resources\\\\views\\\\pdf\" 2>&1)"
+    ],
+    "additionalDirectories": [
+      "d:\\xampp\\htdocs\\vuejs\\resources\\views"
     ]
   }
 }

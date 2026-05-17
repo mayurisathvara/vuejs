@@ -2,9 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Jobs\SendAddonSimPurchaseEmail;
+use App\Jobs\SendSubscriptionPurchaseEmail;
 use App\Models\Organization;
 use App\Models\OrganizationSubscription;
 use App\Models\Plan;
+use App\Services\InvoiceService;
 use App\Services\RazorpayAddonSimService;
 use App\Services\RazorpayRecurringService;
 use App\Services\RazorpaySubscriptionService;
@@ -229,6 +232,11 @@ class SubscriptionController extends Controller
             payload: $validated
         );
 
+        if ($subscription->wasRecentlyCreated) {
+            InvoiceService::ensureSubscriptionInvoice($subscription);
+            SendSubscriptionPurchaseEmail::dispatch($subscription, 'renewal');
+        }
+
         Log::info('Renewal payment verified', [
             'organization_id'     => $organizationId,
             'subscription_id'     => $subscription->id,
@@ -360,7 +368,8 @@ class SubscriptionController extends Controller
 
     private function invoiceNumber(OrganizationSubscription $subscription): string
     {
-        return 'INV-'.str_pad((string) $subscription->id, 6, '0', STR_PAD_LEFT);
+        return $subscription->invoice_number
+            ?? InvoiceService::ensureSubscriptionInvoice($subscription);
     }
 
     private function renderInvoiceHtml(OrganizationSubscription $subscription, string $invoiceNumber): string
@@ -530,6 +539,11 @@ class SubscriptionController extends Controller
         );
 
         $simCount = $addon->sim_quantity;
+
+        if ($addon->wasRecentlyCreated) {
+            InvoiceService::ensureAddonInvoice($addon);
+            SendAddonSimPurchaseEmail::dispatch($addon);
+        }
 
         Log::info('Addon SIM payment verified', [
             'organization_id'     => $organizationId,
