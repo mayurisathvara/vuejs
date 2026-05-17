@@ -7,30 +7,30 @@
           <h3 class="page-title">SIM Management</h3>
         </div>
         <div class="header-actions">
-          <button type="button" class="btn btn-light border btn-sm me-2" @click="refreshSims">
-            <i class="fas fa-sync-alt me-2"></i>
-            <span class="btn-text">Refresh</span>
+          <button type="button" class="hdr-btn hdr-btn--ghost" @click="refreshSims">
+            <i class="fas fa-sync-alt"></i>
+            <span>Refresh</span>
           </button>
           <button
-            v-if="selectedSims.length > 0" 
+            v-if="selectedSims.length > 0"
             type="button"
-            class="btn btn-danger btn-sm me-2"
+            class="hdr-btn hdr-btn--danger"
             @click="openBulkDeleteModal"
           >
-            <i class="fas fa-trash-alt me-2"></i>
-            <span class="btn-text">Delete Selected ({{ selectedSims.length }})</span>
+            <i class="fas fa-trash-alt"></i>
+            <span>Delete ({{ selectedSims.length }})</span>
           </button>
-          <button type="button" class="btn btn-success btn-sm me-2" @click="handleExportCsv">
-            <i class="fas fa-file-export me-2"></i>
-            <span class="btn-text">Export</span>
+          <button type="button" class="hdr-btn hdr-btn--export" @click="handleExportCsv">
+            <i class="fas fa-file-export"></i>
+            <span>Export</span>
           </button>
-          <button type="button" class="btn btn-info btn-sm me-2" @click="openImportModal">
-            <i class="fas fa-file-import me-2"></i>
-            <span class="btn-text">Import</span>
+          <button type="button" class="hdr-btn hdr-btn--import" @click="openImportModal">
+            <i class="fas fa-file-import"></i>
+            <span>Import</span>
           </button>
-          <button type="button" class="btn btn-primary btn-sm" @click="openCreateModal">
-            <i class="fas fa-plus me-2"></i>
-            <span class="btn-text">Add</span>
+          <button type="button" class="hdr-btn hdr-btn--add" @click="openCreateModal">
+            <i class="fas fa-plus"></i>
+            <span>Add SIM</span>
           </button>
         </div>
       </div>
@@ -605,7 +605,6 @@
   letter-spacing: normal !important;
   border-bottom: 1px solid #e3e6f0;
   border-right: 1px solid #e3e6f0;
-  padding: 10px 12px !important;
   vertical-align: middle;
   white-space: nowrap;
 }
@@ -613,7 +612,6 @@
 .simple-table :deep(table.table tbody td) {
   border-top: 1px solid #e3e6f0;
   border-right: 1px solid #e3e6f0;
-  padding: 10px 12px !important;
   vertical-align: middle;
   background: #fff;
 }
@@ -628,37 +626,68 @@
 }
 /* Badge styles are defined globally in app.css */
 
-/* Header pill action buttons (Export/Import) */
-.sim-pill-btn {
-  border-radius: 999px;
-  padding: 8px 16px;
-  font-weight: 600;
-  border: 0;
-  box-shadow: none;
+/* ── Header action buttons ── */
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.hdr-btn {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: 7px;
+  padding: 0 14px;
+  height: 36px;
+  border-radius: 10px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  border: none;
+  cursor: pointer;
+  transition: background 0.15s, box-shadow 0.15s, border-color 0.15s;
+  white-space: nowrap;
+  line-height: 1;
 }
 
-.sim-pill-success {
-  background-color: rgba(var(--bs-success-rgb), 0.15);
-  color: var(--bs-success);
+.hdr-btn i { font-size: 0.8rem; }
+
+.hdr-btn--ghost {
+  background: #fff;
+  color: #374151;
+  border: 1.5px solid #e5e7eb;
+}
+.hdr-btn--ghost:hover {
+  background: #f9fafb;
+  border-color: #d1d5db;
 }
 
-.sim-pill-success:hover {
-  background-color: rgba(var(--bs-success-rgb), 0.22);
-  color: var(--bs-success);
+.hdr-btn--export {
+  background: #dcfce7;
+  color: #15803d;
+}
+.hdr-btn--export:hover { background: #bbf7d0; }
+
+.hdr-btn--import {
+  background: #dbeafe;
+  color: #1d4ed8;
+}
+.hdr-btn--import:hover { background: #bfdbfe; }
+
+.hdr-btn--add {
+  background: linear-gradient(135deg, #f97316, #ffb454);
+  color: #fff;
+  box-shadow: 0 3px 12px rgba(249, 115, 22, 0.28);
+}
+.hdr-btn--add:hover {
+  box-shadow: 0 5px 16px rgba(249, 115, 22, 0.38);
 }
 
-.sim-pill-info {
-  background-color: rgba(var(--bs-info-rgb), 0.15);
-  color: var(--bs-info);
+.hdr-btn--danger {
+  background: #fee2e2;
+  color: #dc2626;
 }
-
-.sim-pill-info:hover {
-  background-color: rgba(var(--bs-info-rgb), 0.22);
-  color: var(--bs-info);
-}
+.hdr-btn--danger:hover { background: #fecaca; }
 
 /* Delete Modal Styling */
 .delete-modal-content {
@@ -1364,14 +1393,14 @@
   letter-spacing: 0.03em !important;
   border-bottom: 1px solid #edf1f7;
   border-right: 1px solid #edf1f7;
-  padding: 13px 14px !important;
+  padding: 10px 14px !important;
   font-size: 12px;
 }
 
 .simple-table :deep(table.table tbody td) {
   border-top: 1px solid #f1f5f9;
   border-right: 1px solid #f1f5f9;
-  padding: 14px !important;
+  padding: 9px 14px !important;
   transition: background-color 0.2s ease;
 }
 

@@ -7,13 +7,11 @@
           <h3 class="page-title">Users Management</h3>
         </div>
         <div class="header-actions">
-          <button type="button" class="btn btn-light border btn-sm me-2" @click="refreshUsers">
-            <i class="fas fa-sync-alt me-2"></i>
-            <span class="btn-text">Refresh</span>
+          <button type="button" class="hdr-btn hdr-btn--ghost" @click="refreshUsers">
+            <i class="fas fa-sync-alt"></i><span>Refresh</span>
           </button>
-          <button type="button" class="btn btn-primary btn-sm" @click="openCreateModal">
-            <i class="fas fa-plus me-2"></i>
-            <span class="btn-text">Add</span>
+          <button type="button" class="hdr-btn hdr-btn--add" @click="openCreateModal">
+            <i class="fas fa-plus"></i><span>Add</span>
           </button>
         </div>
       </div>
@@ -392,7 +390,7 @@
   letter-spacing: 0.03em !important;
   border-bottom: 1px solid #edf1f7;
   border-right: 1px solid #edf1f7;
-  padding: 13px 14px !important;
+  padding: 10px 14px !important;
   font-size: 12px;
   vertical-align: middle;
   white-space: nowrap;
@@ -401,7 +399,7 @@
 .simple-table :deep(table.table tbody td) {
   border-top: 1px solid #f1f5f9;
   border-right: 1px solid #f1f5f9;
-  padding: 14px !important;
+  padding: 9px 14px !important;
   vertical-align: middle;
   background: #fff;
   transition: background-color 0.2s ease;
@@ -419,6 +417,14 @@
 .simple-table :deep(table.table tbody tr:hover td) {
   background: #f9fafb;
 }
+
+.header-actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.hdr-btn { display: inline-flex; align-items: center; gap: 7px; padding: 0 14px; height: 36px; border-radius: 10px; font-size: 0.82rem; font-weight: 700; border: none; cursor: pointer; transition: background 0.15s, box-shadow 0.15s, border-color 0.15s; white-space: nowrap; line-height: 1; }
+.hdr-btn i { font-size: 0.8rem; }
+.hdr-btn--ghost { background: #fff; color: #374151; border: 1.5px solid #e5e7eb; }
+.hdr-btn--ghost:hover { background: #f9fafb; border-color: #d1d5db; }
+.hdr-btn--add { background: linear-gradient(135deg, #f97316, #ffb454); color: #fff; box-shadow: 0 3px 12px rgba(249,115,22,0.28); }
+.hdr-btn--add:hover { box-shadow: 0 5px 16px rgba(249,115,22,0.38); }
 
 .role-text {
   font-weight: 700;

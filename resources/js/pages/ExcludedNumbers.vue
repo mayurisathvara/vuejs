@@ -7,21 +7,17 @@
           <h3 class="page-title">Excluded Numbers</h3>
         </div>
         <div class="header-actions">
-          <button type="button" class="btn btn-light border btn-sm me-2" @click="refreshList">
-            <i class="fas fa-sync-alt me-2"></i>
-            <span class="btn-text">Refresh</span>
+          <button type="button" class="hdr-btn hdr-btn--ghost" @click="refreshList">
+            <i class="fas fa-sync-alt"></i><span>Refresh</span>
           </button>
-          <button type="button" class="btn btn-success btn-sm me-2" @click="handleExportCsv">
-            <i class="fas fa-file-export me-2"></i>
-            <span class="btn-text">Export</span>
+          <button type="button" class="hdr-btn hdr-btn--export" @click="handleExportCsv">
+            <i class="fas fa-file-export"></i><span>Export</span>
           </button>
-          <button type="button" class="btn btn-success btn-sm me-2" @click="openImportModal">
-            <i class="fas fa-file-csv me-2"></i>
-            <span class="btn-text">Import CSV</span>
+          <button type="button" class="hdr-btn hdr-btn--import" @click="openImportModal">
+            <i class="fas fa-file-import"></i><span>Import CSV</span>
           </button>
-          <button type="button" class="btn btn-primary btn-sm" @click="openCreateModal">
-            <i class="fas fa-plus me-2"></i>
-            <span class="btn-text">Add</span>
+          <button type="button" class="hdr-btn hdr-btn--add" @click="openCreateModal">
+            <i class="fas fa-plus"></i><span>Add</span>
           </button>
         </div>
       </div>
@@ -359,14 +355,14 @@
   letter-spacing: 0.03em !important;
   border-bottom: 1px solid #edf1f7;
   border-right: 1px solid #edf1f7;
-  padding: 13px 14px !important;
+  padding: 10px 14px !important;
   font-size: 12px;
 }
 
 .simple-table :deep(table.table tbody td) {
   border-top: 1px solid #f1f5f9;
   border-right: 1px solid #f1f5f9;
-  padding: 14px !important;
+  padding: 9px 14px !important;
   transition: background-color 0.2s ease;
 }
 
@@ -442,6 +438,18 @@
   border-color: #cbd5e1;
   box-shadow: 0 0 0 4px rgba(148, 163, 184, 0.16);
 }
+
+.header-actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.hdr-btn { display: inline-flex; align-items: center; gap: 7px; padding: 0 14px; height: 36px; border-radius: 10px; font-size: 0.82rem; font-weight: 700; border: none; cursor: pointer; transition: background 0.15s, box-shadow 0.15s, border-color 0.15s; white-space: nowrap; line-height: 1; }
+.hdr-btn i { font-size: 0.8rem; }
+.hdr-btn--ghost { background: #fff; color: #374151; border: 1.5px solid #e5e7eb; }
+.hdr-btn--ghost:hover { background: #f9fafb; border-color: #d1d5db; }
+.hdr-btn--export { background: #dcfce7; color: #15803d; }
+.hdr-btn--export:hover { background: #bbf7d0; }
+.hdr-btn--import { background: #dbeafe; color: #1d4ed8; }
+.hdr-btn--import:hover { background: #bfdbfe; }
+.hdr-btn--add { background: linear-gradient(135deg, #f97316, #ffb454); color: #fff; box-shadow: 0 3px 12px rgba(249,115,22,0.28); }
+.hdr-btn--add:hover { box-shadow: 0 5px 16px rgba(249,115,22,0.38); }
 
 .action-buttons {
   display: flex;
