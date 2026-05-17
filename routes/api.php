@@ -133,6 +133,9 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/subscription/payments', [\App\Http\Controllers\SubscriptionController::class, 'paymentHistory']);
         Route::get('/subscription/invoices/{subscription}', [\App\Http\Controllers\SubscriptionController::class, 'invoiceView']);
         Route::get('/subscription/invoices/{subscription}/download', [\App\Http\Controllers\SubscriptionController::class, 'invoiceDownload']);
+        Route::get('/subscription/addon-payments', [\App\Http\Controllers\SubscriptionController::class, 'addonPaymentHistory']);
+        Route::get('/subscription/addon-invoices/{addon}', [\App\Http\Controllers\SubscriptionController::class, 'addonInvoiceView']);
+        Route::get('/subscription/addon-invoices/{addon}/download', [\App\Http\Controllers\SubscriptionController::class, 'addonInvoiceDownload']);
 
         // Auto-renew toggle — moderate limit
         Route::middleware('throttle:20,1')->group(function () {

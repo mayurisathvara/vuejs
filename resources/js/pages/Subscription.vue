@@ -310,74 +310,146 @@
         </section>
       </template>
 
-      <!-- ── Payment History (always visible in v-else context) ── -->
+      <!-- ── Payment History ── -->
       <section ref="historySection" class="b-card pay-card">
         <div class="b-sec-head">
           <div>
             <span class="kicker">Payment History</span>
             <h5 class="b-card-title">Invoices</h5>
           </div>
-          <button type="button" class="act-btn act-btn--sm" :disabled="historyLoading" @click="fetchPaymentHistory">
-            <i class="fas fa-sync-alt" :class="{ 'fa-spin': historyLoading }"></i>
+          <button type="button" class="act-btn act-btn--sm" :disabled="historyLoading || addonHistoryLoading" @click="fetchBothHistories">
+            <i class="fas fa-sync-alt" :class="{ 'fa-spin': historyLoading || addonHistoryLoading }"></i>
             Refresh
           </button>
         </div>
 
-        <div v-if="historyLoading" class="sub-state">
-          <div class="spinner-border spinner-border-sm text-primary" role="status" aria-hidden="true"></div>
-          <span>Loading payment history…</span>
+        <!-- Tab bar -->
+        <div class="pay-tabs">
+          <button type="button" class="pay-tab" :class="{ 'pay-tab--active': activeHistoryTab === 'plan' }" @click="activeHistoryTab = 'plan'">
+            Plan Invoices
+            <span v-if="paymentHistory.length" class="pay-tab-count">{{ paymentHistory.length }}</span>
+          </button>
+          <button type="button" class="pay-tab" :class="{ 'pay-tab--active': activeHistoryTab === 'addon' }" @click="activeHistoryTab = 'addon'">
+            Add-on Invoices
+            <span v-if="addonPaymentHistory.length" class="pay-tab-count pay-tab-count--teal">{{ addonPaymentHistory.length }}</span>
+          </button>
         </div>
-        <div v-else-if="historyError" class="sub-state sub-state--err">
-          <i class="fas fa-exclamation-circle"></i>
-          {{ historyError }}
-        </div>
-        <p v-else-if="!paymentHistory.length" class="empty-note">No paid invoices are available yet.</p>
 
-        <div v-else class="table-wrap">
-          <table class="pay-table">
-            <thead>
-              <tr>
-                <th>Invoice</th>
-                <th>Plan</th>
-                <th>Period</th>
-                <th>Payment ID</th>
-                <th class="text-end">Amount</th>
-                <th class="text-end">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr v-for="payment in paymentHistory" :key="payment.id">
-                <td>
-                  <strong>{{ payment.invoice_number }}</strong>
-                  <span>{{ formatDateDisplay(payment.paid_at) }}</span>
-                </td>
-                <td>
-                  <strong>{{ payment.plan_name }}</strong>
-                  <span>{{ toTitleCase(payment.billing_cycle) }} · {{ payment.sim_quantity }} SIMs</span>
-                </td>
-                <td>
-                  <strong>{{ formatDateDisplay(payment.start_date) }}</strong>
-                  <span>to {{ formatDateDisplay(payment.end_date) }}</span>
-                </td>
-                <td><span class="pay-id">{{ payment.razorpay_payment_id }}</span></td>
-                <td class="text-end">
-                  <strong>{{ formatCurrency(payment.amount, payment.currency) }}</strong>
-                  <span class="pay-status">{{ toTitleCase(payment.payment_status) }}</span>
-                </td>
-                <td class="text-end">
-                  <div class="inv-btns">
-                    <button type="button" title="View invoice" @click="viewInvoice(payment)">
-                      <i class="fas fa-eye"></i>
-                    </button>
-                    <button type="button" title="Download invoice" @click="downloadInvoice(payment)">
-                      <i class="fas fa-download"></i>
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
+        <!-- Plan Invoices tab -->
+        <template v-if="activeHistoryTab === 'plan'">
+          <div v-if="historyLoading" class="sub-state">
+            <div class="spinner-border spinner-border-sm text-primary" role="status" aria-hidden="true"></div>
+            <span>Loading payment history…</span>
+          </div>
+          <div v-else-if="historyError" class="sub-state sub-state--err">
+            <i class="fas fa-exclamation-circle"></i>
+            {{ historyError }}
+          </div>
+          <p v-else-if="!paymentHistory.length" class="empty-note">No paid plan invoices are available yet.</p>
+          <div v-else class="table-wrap">
+            <table class="pay-table">
+              <thead>
+                <tr>
+                  <th>Invoice</th>
+                  <th>Plan</th>
+                  <th>Period</th>
+                  <th>Payment ID</th>
+                  <th class="text-end">Amount</th>
+                  <th class="text-end">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="payment in paymentHistory" :key="payment.id">
+                  <td>
+                    <strong>{{ payment.invoice_number }}</strong>
+                    <span>{{ formatDateDisplay(payment.paid_at) }}</span>
+                  </td>
+                  <td>
+                    <strong>{{ payment.plan_name }}</strong>
+                    <span>{{ toTitleCase(payment.billing_cycle) }} · {{ payment.sim_quantity }} SIMs</span>
+                  </td>
+                  <td>
+                    <strong>{{ formatDateDisplay(payment.start_date) }}</strong>
+                    <span>to {{ formatDateDisplay(payment.end_date) }}</span>
+                  </td>
+                  <td><span class="pay-id">{{ payment.razorpay_payment_id }}</span></td>
+                  <td class="text-end">
+                    <strong>{{ formatCurrency(payment.amount, payment.currency) }}</strong>
+                    <span class="pay-status">{{ toTitleCase(payment.payment_status) }}</span>
+                  </td>
+                  <td class="text-end">
+                    <div class="inv-btns">
+                      <button type="button" title="View invoice" @click="viewInvoice(payment)">
+                        <i class="fas fa-eye"></i>
+                      </button>
+                      <button type="button" title="Download invoice" @click="downloadInvoice(payment)">
+                        <i class="fas fa-download"></i>
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </template>
+
+        <!-- Add-on Invoices tab -->
+        <template v-else-if="activeHistoryTab === 'addon'">
+          <div v-if="addonHistoryLoading" class="sub-state">
+            <div class="spinner-border spinner-border-sm text-primary" role="status" aria-hidden="true"></div>
+            <span>Loading add-on history…</span>
+          </div>
+          <div v-else-if="addonHistoryError" class="sub-state sub-state--err">
+            <i class="fas fa-exclamation-circle"></i>
+            {{ addonHistoryError }}
+          </div>
+          <p v-else-if="!addonPaymentHistory.length" class="empty-note">No add-on SIM purchases found yet.</p>
+          <div v-else class="table-wrap">
+            <table class="pay-table">
+              <thead>
+                <tr>
+                  <th>Invoice</th>
+                  <th>Add-on</th>
+                  <th>Period</th>
+                  <th>Payment ID</th>
+                  <th class="text-end">Amount</th>
+                  <th class="text-end">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="addon in addonPaymentHistory" :key="addon.id">
+                  <td>
+                    <strong>{{ addon.invoice_number }}</strong>
+                    <span>{{ formatDateDisplay(addon.paid_at) }}</span>
+                  </td>
+                  <td>
+                    <strong>{{ addon.plan_name }}</strong>
+                    <span>{{ addon.sim_quantity }} Add-on SIM{{ addon.sim_quantity === 1 ? '' : 's' }}</span>
+                  </td>
+                  <td>
+                    <strong>{{ formatDateDisplay(addon.start_date) }}</strong>
+                    <span>to {{ formatDateDisplay(addon.end_date) }}</span>
+                  </td>
+                  <td><span class="pay-id">{{ addon.razorpay_payment_id }}</span></td>
+                  <td class="text-end">
+                    <strong>{{ formatCurrency(addon.amount, addon.currency) }}</strong>
+                    <span class="pay-status pay-status--teal">Add-on</span>
+                  </td>
+                  <td class="text-end">
+                    <div class="inv-btns">
+                      <button type="button" title="View invoice" @click="viewAddonInvoice(addon)">
+                        <i class="fas fa-eye"></i>
+                      </button>
+                      <button type="button" title="Download invoice" @click="downloadAddonInvoice(addon)">
+                        <i class="fas fa-download"></i>
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </template>
       </section>
     </template>
   </div>
@@ -399,6 +471,10 @@ const addonPaymentMessageType = ref('')
 const historyLoading = ref(false)
 const historyError = ref('')
 const paymentHistory = ref([])
+const addonHistoryLoading = ref(false)
+const addonHistoryError = ref('')
+const addonPaymentHistory = ref([])
+const activeHistoryTab = ref('plan')
 const historySection = ref(null)
 const autoRenewLoading = ref(false)
 
@@ -436,12 +512,16 @@ const fetchSubscription = async () => {
   try {
     const response = await api.get('/subscription/overview')
     payload.value = response.data?.data || null
-    await fetchPaymentHistory()
+    await fetchBothHistories()
   } catch (err) {
     error.value = err.response?.data?.message || 'Unable to load subscription details. Please try again.'
   } finally {
     loading.value = false
   }
+}
+
+const fetchBothHistories = async () => {
+  await Promise.all([fetchPaymentHistory(), fetchAddonPaymentHistory()])
 }
 
 const fetchPaymentHistory = async () => {
@@ -455,6 +535,20 @@ const fetchPaymentHistory = async () => {
     historyError.value = err.response?.data?.message || 'Unable to load payment history.'
   } finally {
     historyLoading.value = false
+  }
+}
+
+const fetchAddonPaymentHistory = async () => {
+  addonHistoryLoading.value = true
+  addonHistoryError.value = ''
+
+  try {
+    const response = await api.get('/subscription/addon-payments')
+    addonPaymentHistory.value = Array.isArray(response.data?.data) ? response.data.data : []
+  } catch (err) {
+    addonHistoryError.value = err.response?.data?.message || 'Unable to load add-on purchase history.'
+  } finally {
+    addonHistoryLoading.value = false
   }
 }
 
@@ -584,7 +678,7 @@ const openInvoiceBlob = (blob, filename, shouldDownload = false) => {
   window.setTimeout(() => URL.revokeObjectURL(url), 60000)
 }
 
-const invoiceFilename = (payment) => `${String(payment.invoice_number || `invoice-${payment.id}`).toLowerCase()}.html`
+const pdfFilename = (inv, id) => `${String(inv || `invoice-${id}`).toLowerCase()}.pdf`
 
 const viewInvoice = async (payment) => {
   const invoiceWindow = window.open('', '_blank', 'noopener,noreferrer')
@@ -592,7 +686,7 @@ const viewInvoice = async (payment) => {
   try {
     const response = await api.get(`/subscription/invoices/${payment.id}`, {
       responseType: 'blob',
-      headers: { Accept: 'text/html' }
+      headers: { Accept: 'application/pdf' }
     })
 
     const url = URL.createObjectURL(response.data)
@@ -601,7 +695,7 @@ const viewInvoice = async (payment) => {
       invoiceWindow.location.href = url
       window.setTimeout(() => URL.revokeObjectURL(url), 60000)
     } else {
-      openInvoiceBlob(response.data, invoiceFilename(payment), false)
+      openInvoiceBlob(response.data, pdfFilename(payment.invoice_number, payment.id), false)
     }
   } catch (err) {
     if (invoiceWindow) invoiceWindow.close()
@@ -613,17 +707,52 @@ const downloadInvoice = async (payment) => {
   try {
     const response = await api.get(`/subscription/invoices/${payment.id}/download`, {
       responseType: 'blob',
-      headers: { Accept: 'text/html' }
+      headers: { Accept: 'application/pdf' }
     })
-    openInvoiceBlob(response.data, invoiceFilename(payment), true)
+    openInvoiceBlob(response.data, pdfFilename(payment.invoice_number, payment.id), true)
   } catch (err) {
     historyError.value = err.response?.data?.message || 'Unable to download invoice.'
   }
 }
 
+const viewAddonInvoice = async (addon) => {
+  const invoiceWindow = window.open('', '_blank', 'noopener,noreferrer')
+
+  try {
+    const response = await api.get(`/subscription/addon-invoices/${addon.id}`, {
+      responseType: 'blob',
+      headers: { Accept: 'application/pdf' }
+    })
+
+    const url = URL.createObjectURL(response.data)
+
+    if (invoiceWindow) {
+      invoiceWindow.location.href = url
+      window.setTimeout(() => URL.revokeObjectURL(url), 60000)
+    } else {
+      openInvoiceBlob(response.data, pdfFilename(addon.invoice_number, addon.id), false)
+    }
+  } catch (err) {
+    if (invoiceWindow) invoiceWindow.close()
+    addonHistoryError.value = err.response?.data?.message || 'Unable to open invoice.'
+  }
+}
+
+const downloadAddonInvoice = async (addon) => {
+  try {
+    const response = await api.get(`/subscription/addon-invoices/${addon.id}/download`, {
+      responseType: 'blob',
+      headers: { Accept: 'application/pdf' }
+    })
+    openInvoiceBlob(response.data, pdfFilename(addon.invoice_number, addon.id), true)
+  } catch (err) {
+    addonHistoryError.value = err.response?.data?.message || 'Unable to download invoice.'
+  }
+}
+
 const scrollToHistory = async () => {
-  if (!paymentHistory.value.length && !historyLoading.value) {
-    await fetchPaymentHistory()
+  if (!paymentHistory.value.length && !addonPaymentHistory.value.length && !historyLoading.value) {
+    await fetchBothHistories()
   }
 
   historySection.value?.scrollIntoView({
@@ -1747,6 +1876,52 @@ onMounted(fetchSubscription)
 }
 
 .pay-status { color: #067647 !important; }
+.pay-status--teal { color: #0d9488 !important; }
+
+/* ── Payment History tabs ── */
+.pay-tabs {
+  display: flex;
+  gap: 0;
+  border-bottom: 1px solid var(--line);
+  margin-bottom: 16px;
+}
+
+.pay-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 9px 16px;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  font-size: 0.84rem;
+  font-weight: 700;
+  color: var(--muted);
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  transition: color 0.15s;
+}
+
+.pay-tab:hover { color: var(--ink); }
+
+.pay-tab--active {
+  color: var(--blue);
+  border-bottom-color: var(--blue);
+}
+
+.pay-tab-count {
+  padding: 2px 7px;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 900;
+  background: #eaf1ff;
+  color: var(--blue);
+}
+
+.pay-tab-count--teal {
+  background: rgba(18, 184, 166, 0.12);
+  color: #0d9488;
+}
 
 .inv-btns {
   display: inline-flex;
