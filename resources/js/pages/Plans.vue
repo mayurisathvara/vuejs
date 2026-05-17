@@ -6,13 +6,11 @@
         <h3>Plan Management</h3>
       </div>
       <div class="header-actions">
-        <button type="button" class="btn btn-light border btn-sm" :disabled="loading" @click="fetchPlans">
-          <i class="fas fa-sync-alt me-2" :class="{ 'fa-spin': loading }"></i>
-          Refresh
+        <button type="button" class="hdr-btn hdr-btn--ghost" :disabled="loading" @click="fetchPlans">
+          <i class="fas fa-sync-alt" :class="{ 'fa-spin': loading }"></i><span>Refresh</span>
         </button>
-        <button type="button" class="btn btn-primary btn-sm" @click="openCreateModal">
-          <i class="fas fa-plus me-2"></i>
-          Add Plan
+        <button type="button" class="hdr-btn hdr-btn--add" @click="openCreateModal">
+          <i class="fas fa-plus"></i><span>Add Plan</span>
         </button>
       </div>
     </div>
@@ -431,6 +429,14 @@ onMounted(fetchPlans)
   min-width: 1040px;
 }
 
+.hdr-btn { display: inline-flex; align-items: center; gap: 7px; padding: 0 14px; height: 36px; border-radius: 10px; font-size: 0.82rem; font-weight: 700; border: none; cursor: pointer; transition: background 0.15s, box-shadow 0.15s, border-color 0.15s; white-space: nowrap; line-height: 1; }
+.hdr-btn:disabled { opacity: 0.55; cursor: not-allowed; }
+.hdr-btn i { font-size: 0.8rem; }
+.hdr-btn--ghost { background: #fff; color: #374151; border: 1.5px solid #e5e7eb; }
+.hdr-btn--ghost:hover:not(:disabled) { background: #f9fafb; border-color: #d1d5db; }
+.hdr-btn--add { background: linear-gradient(135deg, #f97316, #ffb454); color: #fff; box-shadow: 0 3px 12px rgba(249,115,22,0.28); }
+.hdr-btn--add:hover { box-shadow: 0 5px 16px rgba(249,115,22,0.38); }
+
 .table th {
   background: #f9fafb;
   color: #374151;
@@ -438,10 +444,12 @@ onMounted(fetchPlans)
   font-size: 12px;
   font-weight: 900;
   text-transform: uppercase;
+  padding: 10px 14px;
 }
 
 .table td {
   border-top: 1px solid #f1f5f9;
+  padding: 9px 14px;
 }
 
 .table td strong,

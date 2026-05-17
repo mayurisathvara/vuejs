@@ -6,8 +6,8 @@
           <h3 class="page-title">Generated Reports</h3>
           <p class="page-subtitle">Your queued export files, ready for download.</p>
         </div>
-        <button type="button" class="btn btn-light border shadow-sm btn-sm" @click="fetchReports" :disabled="loading">
-          <i class="fas fa-sync-alt me-1" :class="{ 'fa-spin': loading }"></i> Refresh
+        <button type="button" class="hdr-btn hdr-btn--ghost" @click="fetchReports" :disabled="loading">
+          <i class="fas fa-sync-alt" :class="{ 'fa-spin': loading }"></i><span>Refresh</span>
         </button>
       </div>
     </div>
@@ -57,7 +57,7 @@
               </td>
               <td>
                 <span class="status-badge" :class="statusClass(report.status)">
-                  <i class="fas fa-sm me-1" :class="statusIcon(report.status)" :class2="report.status === 'generating' ? 'fa-spin' : ''"></i>
+                  <i class="fas fa-sm me-1" :class="statusIcon(report.status)"></i>
                   {{ statusLabel(report.status) }}
                 </span>
               </td>
@@ -139,8 +139,8 @@
           This action cannot be undone.
         </p>
         <div class="confirm-modal__actions">
-          <button class="btn btn-light border btn-sm" @click="showDeleteModal = false">Cancel</button>
-          <button class="btn btn-danger btn-sm" @click="doDelete" :disabled="deleting === deleteTarget?.id">
+          <button class="hdr-btn hdr-btn--ghost" @click="showDeleteModal = false">Cancel</button>
+          <button class="hdr-btn hdr-btn--danger" @click="doDelete" :disabled="deleting === deleteTarget?.id">
             <i class="fas fa-trash me-1"></i> Delete
           </button>
         </div>
@@ -315,6 +315,14 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
+.hdr-btn { display: inline-flex; align-items: center; gap: 7px; padding: 0 14px; height: 36px; border-radius: 10px; font-size: 0.82rem; font-weight: 700; border: none; cursor: pointer; transition: background 0.15s, box-shadow 0.15s, border-color 0.15s; white-space: nowrap; line-height: 1; }
+.hdr-btn:disabled { opacity: 0.55; cursor: not-allowed; }
+.hdr-btn i { font-size: 0.8rem; }
+.hdr-btn--ghost { background: #fff; color: #374151; border: 1.5px solid #e5e7eb; }
+.hdr-btn--ghost:hover:not(:disabled) { background: #f9fafb; border-color: #d1d5db; }
+.hdr-btn--danger { background: #fee2e2; color: #dc2626; border: 1.5px solid #fecaca; }
+.hdr-btn--danger:hover:not(:disabled) { background: #fecaca; }
+
 .page-title { font-size: 1.3rem; font-weight: 700; color: #0f172a; margin: 0; }
 .page-subtitle { font-size: 0.875rem; color: #64748b; margin: 2px 0 0; }
 

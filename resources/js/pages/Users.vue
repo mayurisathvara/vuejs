@@ -26,7 +26,7 @@
             <input
               v-model="searchQuery"
               type="text"
-                class="form-control search-input-modern"
+              class="form-control search-input-modern"
               placeholder="Search users by name, email, or mobile..."
               @input="handleSearch"
             />
