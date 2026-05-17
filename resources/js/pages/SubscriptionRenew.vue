@@ -800,9 +800,9 @@ onMounted(fetchRenewalData)
 }
 
 .plan-item.selected {
-  border-color: var(--teal);
-  background: linear-gradient(160deg, #f8fffd 0%, #f0fef9 100%);
-  box-shadow: 0 4px 16px rgba(18, 184, 166, 0.12);
+  border-color: var(--orange);
+  background: linear-gradient(160deg, #fff8f2 0%, #fff3e6 100%);
+  box-shadow: 0 4px 16px rgba(249, 115, 22, 0.12);
 }
 
 /* ── Selection dot ── */
@@ -822,8 +822,8 @@ onMounted(fetchRenewalData)
 }
 
 .plan-item.selected .plan-sel-dot {
-  border-color: var(--teal);
-  background: var(--teal);
+  border-color: var(--orange);
+  background: var(--orange);
 }
 
 /* ── Plan body ── */
@@ -852,8 +852,8 @@ onMounted(fetchRenewalData)
 }
 
 .plan-item.selected .cycle-badge {
-  color: #0a7060;
-  background: #d1faf4;
+  color: #c2410c;
+  background: #ffedd5;
 }
 
 .plan-body p {

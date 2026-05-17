@@ -290,24 +290,6 @@
             </div>
           </section>
         </div>
-
-        <!-- ── Included Features ── -->
-        <section class="b-card features-card">
-          <div class="b-sec-head">
-            <span class="kicker">Included Features</span>
-            <h5 class="b-card-title">What your plan unlocks</h5>
-          </div>
-          <div v-if="featureList.length" class="feature-grid">
-            <div v-for="feature in featureList" :key="feature.key" class="feature-item">
-              <div class="feature-icon"><i :class="feature.icon"></i></div>
-              <div>
-                <strong>{{ feature.label }}</strong>
-                <span>{{ feature.description }}</span>
-              </div>
-            </div>
-          </div>
-          <p v-else class="empty-note">Feature details are not configured for this plan yet.</p>
-        </section>
       </template>
 
       <!-- ── Payment History ── -->
@@ -450,6 +432,24 @@
             </table>
           </div>
         </template>
+      </section>
+
+      <!-- ── Included Features ── -->
+      <section class="b-card features-card">
+        <div class="b-sec-head">
+          <span class="kicker">Included Features</span>
+          <h5 class="b-card-title">What your plan unlocks</h5>
+        </div>
+        <div v-if="featureList.length" class="feature-grid">
+          <div v-for="feature in featureList" :key="feature.key" class="feature-item">
+            <div class="feature-icon"><i :class="feature.icon"></i></div>
+            <div>
+              <strong>{{ feature.label }}</strong>
+              <span>{{ feature.description }}</span>
+            </div>
+          </div>
+        </div>
+        <p v-else class="empty-note">Feature details are not configured for this plan yet.</p>
       </section>
     </template>
   </div>
@@ -931,7 +931,7 @@ const payAddonSims = async () => {
         type: 'addon_sim',
         sim_quantity: String(addonQuantity.value)
       },
-      theme: { color: '#12b8a6' },
+      theme: { color: '#f97316' },
       handler: async (payment) => {
         paymentHandled = true
         await verifyAddonPayment(payment)
@@ -1397,7 +1397,7 @@ onMounted(fetchSubscription)
 
 .cap-sub {
   font-size: 0.74rem;
-  color: var(--teal);
+  color: var(--orange);
   font-weight: 700;
 }
 
@@ -1426,7 +1426,7 @@ onMounted(fetchSubscription)
   display: block;
   height: 100%;
   border-radius: inherit;
-  background: linear-gradient(90deg, var(--teal), var(--blue));
+  background: linear-gradient(90deg, var(--orange), #ffb454);
   transition: width 0.4s ease;
 }
 
@@ -1455,7 +1455,7 @@ onMounted(fetchSubscription)
   flex-shrink: 0;
 }
 
-.stat-chip--green .stat-dot { background: var(--teal); }
+.stat-chip--green .stat-dot { background: var(--orange); }
 .stat-chip--blue  .stat-dot { background: var(--blue); }
 .stat-chip--grey  .stat-dot { background: #94a3b8; }
 
@@ -1482,8 +1482,8 @@ onMounted(fetchSubscription)
   margin-top: 16px;
   padding: 16px;
   border-radius: 16px;
-  border: 1px solid rgba(18, 184, 166, 0.2);
-  background: linear-gradient(160deg, #f8fffd 0%, #f0fef9 100%);
+  border: 1px solid rgba(249, 115, 22, 0.2);
+  background: linear-gradient(160deg, #fff8f2 0%, #fff3e6 100%);
   flex: 1;
   display: flex;
   flex-direction: column;
@@ -1510,8 +1510,8 @@ onMounted(fetchSubscription)
 .addon-rate {
   padding: 4px 10px;
   border-radius: 999px;
-  background: rgba(18, 184, 166, 0.12);
-  color: #0d9488;
+  background: rgba(249, 115, 22, 0.12);
+  color: #c2410c;
   font-size: 0.74rem;
   font-weight: 900;
   white-space: nowrap;
@@ -1546,14 +1546,14 @@ onMounted(fetchSubscription)
 .proration-strip-track {
   height: 6px;
   border-radius: 999px;
-  background: rgba(18, 184, 166, 0.15);
+  background: rgba(249, 115, 22, 0.15);
   overflow: hidden;
 }
 
 .proration-strip-fill {
   height: 100%;
   border-radius: inherit;
-  background: linear-gradient(90deg, var(--teal), #0d9488);
+  background: linear-gradient(90deg, var(--orange), #ffb454);
   transition: width 0.4s ease;
 }
 
@@ -1566,8 +1566,8 @@ onMounted(fetchSubscription)
 }
 
 .proration-strip-labels span { color: var(--muted); font-weight: 600; }
-.proration-strip-labels span i { margin-right: 4px; font-size: 0.7em; color: var(--teal); }
-.proration-strip-labels strong { color: var(--teal); font-weight: 900; }
+.proration-strip-labels span i { margin-right: 4px; font-size: 0.7em; color: var(--orange); }
+.proration-strip-labels strong { color: var(--orange); font-weight: 900; }
 
 /* Quantity stepper */
 .addon-qty {
@@ -1580,13 +1580,13 @@ onMounted(fetchSubscription)
 .addon-qty button,
 .addon-qty input {
   height: 40px;
-  border: 1px solid rgba(18, 184, 166, 0.25);
+  border: 1px solid rgba(249, 115, 22, 0.25);
   border-radius: 11px;
 }
 
 .addon-qty button {
-  color: #0d9488;
-  background: rgba(18, 184, 166, 0.08);
+  color: #c2410c;
+  background: rgba(249, 115, 22, 0.08);
   font-weight: 900;
   cursor: pointer;
   display: flex;
@@ -1595,7 +1595,7 @@ onMounted(fetchSubscription)
   transition: background 0.15s;
 }
 
-.addon-qty button:hover { background: rgba(18, 184, 166, 0.16); }
+.addon-qty button:hover { background: rgba(249, 115, 22, 0.16); }
 .addon-qty button:disabled { opacity: 0.44; cursor: not-allowed; }
 
 .addon-qty input {
@@ -1609,7 +1609,7 @@ onMounted(fetchSubscription)
 }
 
 .addon-qty input:disabled { opacity: 0.44; cursor: not-allowed; background: #f8fafc; }
-.addon-qty input:focus { border-color: var(--teal); box-shadow: 0 0 0 3px rgba(18, 184, 166, 0.15); }
+.addon-qty input:focus { border-color: var(--orange); box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.15); }
 
 /* Calculation row */
 .addon-calc {
@@ -1620,7 +1620,7 @@ onMounted(fetchSubscription)
   padding: 10px 12px;
   border-radius: 11px;
   background: #fff;
-  border: 1px solid rgba(18, 184, 166, 0.18);
+  border: 1px solid rgba(249, 115, 22, 0.18);
 }
 
 .addon-calc-formula {
@@ -1673,8 +1673,8 @@ onMounted(fetchSubscription)
   color: #fff;
   font-size: 0.85rem;
   font-weight: 800;
-  background: linear-gradient(135deg, #0d9488, var(--teal));
-  box-shadow: 0 4px 16px rgba(18, 184, 166, 0.32);
+  background: linear-gradient(135deg, var(--orange), #ffb454);
+  box-shadow: 0 4px 16px rgba(249, 115, 22, 0.28);
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -1686,7 +1686,7 @@ onMounted(fetchSubscription)
 
 .btn-addon-pay:hover:not(:disabled) {
   opacity: 0.9;
-  box-shadow: 0 6px 20px rgba(18, 184, 166, 0.4);
+  box-shadow: 0 6px 20px rgba(249, 115, 22, 0.4);
 }
 
 .btn-addon-pay:disabled { opacity: 0.45; cursor: not-allowed; background: #94a3b8; box-shadow: none; }
@@ -1714,7 +1714,7 @@ onMounted(fetchSubscription)
   border-radius: 50%;
   background:
     radial-gradient(circle closest-side, #fff 72%, transparent 73%),
-    conic-gradient(var(--teal) var(--progress), #edf2f7 0);
+    conic-gradient(var(--orange) var(--progress), #edf2f7 0);
 }
 
 .timeline-ring > div { text-align: center; }
@@ -1976,7 +1976,7 @@ onMounted(fetchSubscription)
   transition: color 0.2s;
 }
 
-.auto-renew-icon.is-on { color: #067647; }
+.auto-renew-icon.is-on { color: var(--orange); }
 
 .auto-renew-info strong {
   display: block;
@@ -2008,7 +2008,7 @@ onMounted(fetchSubscription)
   padding: 0;
 }
 
-.toggle-switch.is-on  { background: #067647; }
+.toggle-switch.is-on  { background: var(--orange); }
 .toggle-switch:disabled { opacity: 0.55; cursor: not-allowed; }
 .toggle-switch.is-loading { opacity: 0.7; }
 
