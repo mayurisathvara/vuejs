@@ -26,6 +26,17 @@
       <button type="button" class="btn-close" @click="errorMessage = ''" aria-label="Close"></button>
     </div>
 
+    <div v-if="queueExportMsg" class="queue-export-banner">
+      <div class="queue-export-banner__inner">
+        <span class="queue-export-banner__icon"><i class="fas fa-chart-bar"></i></span>
+        <span class="queue-export-banner__text">{{ queueExportMsg }}</span>
+        <router-link to="/generated-reports" class="queue-export-banner__link">View reports &rarr;</router-link>
+      </div>
+      <button type="button" class="queue-export-banner__close" @click="queueExportMsg = ''" aria-label="Dismiss">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+
     <div v-show="filtersOpen" class="filters-card" @mousedown="onFiltersMousedown">
       <div class="filters-topbar">
         <div class="filters-heading">
@@ -251,25 +262,23 @@
             <button type="button" class="btn btn-light border btn-sm" :disabled="loading" @click="refresh" title="Refresh" aria-label="Refresh data">
               <i :class="loading ? 'fas fa-sync-alt fa-spin' : 'fas fa-sync-alt'"></i>
             </button>
-            <button 
-              class="action-icon-btn" 
-              :disabled="exporting || summaryData.length === 0" 
-              @click="exportFile('excel')" 
-              :title="summaryData.length === 0 ? 'No data to export' : 'Export Excel'" 
-              aria-label="Export to Excel"
+            <button
+              class="action-icon-btn"
+              :disabled="exporting"
+              @click="exportFile('excel')"
+              title="Queue Excel Export"
+              aria-label="Queue Excel Export"
             >
-              <i class="fas fa-file-excel"></i>
-              <span v-if="exporting" class="btn-spinner"></span>
+              <i class="fas" :class="exporting ? 'fa-spinner fa-spin' : 'fa-file-excel'"></i>
             </button>
-            <button 
-              class="action-icon-btn" 
-              :disabled="exporting || summaryData.length === 0" 
-              @click="exportFile('csv')" 
-              :title="summaryData.length === 0 ? 'No data to export' : 'Export CSV'" 
-              aria-label="Export to CSV"
+            <button
+              class="action-icon-btn"
+              :disabled="exporting"
+              @click="exportFile('csv')"
+              title="Queue CSV Export"
+              aria-label="Queue CSV Export"
             >
-              <i class="fas fa-file-alt"></i>
-              <span v-if="exporting" class="btn-spinner"></span>
+              <i class="fas" :class="exporting ? 'fa-spinner fa-spin' : 'fa-file-alt'"></i>
             </button>
           </div>
         </div>
@@ -792,44 +801,18 @@ const simKey = (sim) => {
   return `${sim.mobile}-${sim.id || ''}`
 }
 
+const queueExportMsg = ref('')
+
 const exportFile = async (format) => {
-  if (!appliedFilters.value) {
-    errorMessage.value = 'Please search for data before exporting.'
-    return
-  }
-
-  if (summaryData.value.length === 0) {
-    errorMessage.value = 'No data available to export. Please adjust your filters and try again.'
-    return
-  }
-
-  if (!validateDateRange()) {
-    return
-  }
-
   exporting.value = true
+  queueExportMsg.value = ''
   errorMessage.value = ''
   try {
-    const resp = await api.get('/summary-reports/export', {
-      params: { ...buildParams(true, 1, true), format },
-      responseType: 'blob'
-    })
-
-    const contentDisposition = resp.headers?.['content-disposition'] || ''
-    const filenameMatch = /filename="?([^";]+)"?/i.exec(contentDisposition)
-    const filename = filenameMatch?.[1] || `summary_report.${format === 'excel' ? 'xls' : 'csv'}`
-
-    const url = window.URL.createObjectURL(new Blob([resp.data]))
-    const link = document.createElement('a')
-    link.href = url
-    link.setAttribute('download', filename)
-    document.body.appendChild(link)
-    link.click()
-    link.remove()
-    window.URL.revokeObjectURL(url)
-  } catch (e) {
-    console.error('Error exporting file:', e)
-    errorMessage.value = `Failed to export ${format === 'excel' ? 'Excel' : 'CSV'} file. Please try again.`
+    const filters = buildParams(true, 1, true)
+    const resp = await api.post('/summary-reports/queue-export', { format, filters })
+    queueExportMsg.value = resp.data?.message ?? "Report queued. You'll be notified when it's ready."
+  } catch {
+    errorMessage.value = 'Failed to queue report. Please try again.'
   } finally {
     exporting.value = false
   }
@@ -1780,6 +1763,63 @@ small.text-muted {
 .action-icon-btn i.fa-file-alt {
   color: #3b82f6;
 }
+
+/* Queue export banner */
+.queue-export-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 16px;
+  padding: 12px 16px;
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  border-left: 4px solid #22c55e;
+  border-radius: 8px;
+  font-size: 13.5px;
+}
+.queue-export-banner__inner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+  min-width: 0;
+  flex-wrap: wrap;
+}
+.queue-export-banner__icon {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: #dcfce7;
+  color: #16a34a;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  flex-shrink: 0;
+}
+.queue-export-banner__text {
+  color: #166534;
+  font-weight: 500;
+}
+.queue-export-banner__link {
+  color: #16a34a;
+  font-weight: 600;
+  text-decoration: none;
+  white-space: nowrap;
+}
+.queue-export-banner__link:hover { text-decoration: underline; }
+.queue-export-banner__close {
+  background: none;
+  border: none;
+  color: #86efac;
+  font-size: 13px;
+  cursor: pointer;
+  padding: 2px 4px;
+  line-height: 1;
+  flex-shrink: 0;
+}
+.queue-export-banner__close:hover { color: #16a34a; }
 
 .action-icon-btn:hover:not(:disabled) i.fa-file-excel {
   color: #059669;

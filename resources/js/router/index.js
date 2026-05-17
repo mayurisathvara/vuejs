@@ -25,6 +25,7 @@ import Profile from '@/pages/Profile.vue'
 import ChangePassword from '@/pages/ChangePassword.vue'
 import CallReports from '@/pages/CallReports.vue'
 import SummaryReport from '@/pages/SummaryReport.vue'
+import GeneratedReports from '@/pages/GeneratedReports.vue'
 import DeveloperApi from '@/pages/DeveloperApi.vue'
 import Subscription from '@/pages/Subscription.vue'
 import SubscriptionRenew from '@/pages/SubscriptionRenew.vue'
@@ -211,6 +212,18 @@ const routes = [
         name: 'SummaryReport',
         component: SummaryReport,
         meta: { requiresAuth: true, roles: ['admin', 'organization', 'manager', 'user'], title: 'Summary Report' }
+      }
+    ]
+  },
+  {
+    path: '/generated-reports',
+    component: DefaultLayout,
+    children: [
+      {
+        path: '',
+        name: 'GeneratedReports',
+        component: GeneratedReports,
+        meta: { requiresAuth: true, roles: ['admin', 'organization', 'manager', 'user'], title: 'Generated Reports' }
       }
     ]
   },

@@ -9,6 +9,8 @@ use App\Http\Controllers\TeamController;
 use App\Http\Controllers\CallReportController;
 use App\Http\Controllers\SummaryReportController;
 use App\Http\Controllers\DashboardAnalyticsController;
+use App\Http\Controllers\GeneratedReportController;
+use App\Http\Controllers\NotificationController;
 
 /*
 |--------------------------------------------------------------------------
@@ -154,6 +156,26 @@ Route::middleware('auth:sanctum')->group(function () {
             Route::post('/subscription/renew/verify', [\App\Http\Controllers\SubscriptionController::class, 'verifyRenewalPayment']);
             Route::post('/subscription/addon-sim/verify', [\App\Http\Controllers\SubscriptionController::class, 'verifyAddonPayment']);
             Route::post('/subscription/recurring/verify', [\App\Http\Controllers\SubscriptionController::class, 'verifyRecurringPayment']);
+        });
+    });
+
+    // Notifications — all authenticated users
+    Route::middleware(['role:admin,organization,manager,user'])->group(function () {
+        Route::get('/notifications', [NotificationController::class, 'index']);
+        Route::get('/notifications/unread-count', [NotificationController::class, 'unreadCount']);
+        Route::post('/notifications/{id}/read', [NotificationController::class, 'markRead']);
+        Route::post('/notifications/read-all', [NotificationController::class, 'markAllRead']);
+    });
+
+    // Generated reports — all authenticated users, throttled on queue endpoints
+    Route::middleware(['role:admin,organization,manager,user'])->group(function () {
+        Route::get('/generated-reports', [GeneratedReportController::class, 'index']);
+        Route::get('/generated-reports/{report}/download', [GeneratedReportController::class, 'download']);
+        Route::delete('/generated-reports/{report}', [GeneratedReportController::class, 'destroy']);
+
+        Route::middleware('throttle:20,1')->group(function () {
+            Route::post('/call-reports/queue-export', [GeneratedReportController::class, 'queueCallReport']);
+            Route::post('/summary-reports/queue-export', [GeneratedReportController::class, 'queueSummaryReport']);
         });
     });
 

@@ -82,3 +82,33 @@ Schedule::command('subscriptions:send-reminders')->dailyAt('09:00');
 
 // 02:00 — clean up stale auto-renew flags on long-expired subscriptions
 Schedule::command('subscriptions:cleanup-failed-renewals')->dailyAt('02:00');
+
+// ---------------------------------------------------------------------------
+// Generated report cleanup — delete expired report files and records
+// ---------------------------------------------------------------------------
+
+Artisan::command('reports:cleanup', function () {
+    $retentionDays = (int) config('reports.storage_days', 2);
+
+    $expired = \App\Models\GeneratedReport::where('expires_at', '<', now())
+        ->orWhere(function ($q) {
+            // Also clean up failed/stuck records older than 7 days
+            $q->whereIn('status', ['pending', 'generating', 'failed'])
+              ->where('created_at', '<', now()->subDays(7));
+        })
+        ->get();
+
+    $deleted = 0;
+    foreach ($expired as $report) {
+        if ($report->file_path) {
+            \Illuminate\Support\Facades\Storage::disk('local')->delete($report->file_path);
+        }
+        $report->delete();
+        $deleted++;
+    }
+
+    $this->info("Cleaned up {$deleted} expired report(s). Retention: {$retentionDays} day(s).");
+})->purpose("Delete expired generated report files and records");
+
+// 03:00 — clean up expired generated reports daily
+Schedule::command('reports:cleanup')->dailyAt('03:00');

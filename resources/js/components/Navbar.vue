@@ -42,42 +42,62 @@
               data-bs-toggle="dropdown"
               aria-haspopup="true"
               aria-expanded="false"
+              @click="onNotifDropdownOpen"
             >
               <i class="fa fa-bell"></i>
-              <span class="notification">4</span>
+              <span v-if="unreadCount > 0" class="notification">{{ unreadCount > 99 ? '99+' : unreadCount }}</span>
             </a>
             <ul class="dropdown-menu notif-box animated fadeIn" aria-labelledby="notifDropdown">
               <li>
-                <div class="dropdown-title">You have 4 new notification</div>
+                <div class="dropdown-title d-flex align-items-center justify-content-between">
+                  <span>
+                    {{ unreadCount > 0 ? `${unreadCount} new notification${unreadCount > 1 ? 's' : ''}` : 'Notifications' }}
+                  </span>
+                  <button v-if="unreadCount > 0" type="button" class="notif-mark-all" @click.stop="markAllRead">
+                    Mark all read
+                  </button>
+                </div>
               </li>
               <li>
                 <div class="notif-scroll scrollbar-outer">
                   <div class="notif-center">
-                    <a href="#">
-                      <div class="notif-icon notif-primary">
-                        <i class="fa fa-user-plus"></i>
-                      </div>
-                      <div class="notif-content">
-                        <span class="block">New user registered</span>
-                        <span class="time">5 minutes ago</span>
-                      </div>
-                    </a>
-                    <a href="#">
-                      <div class="notif-icon notif-success">
-                        <i class="fa fa-comment"></i>
-                      </div>
-                      <div class="notif-content">
-                        <span class="block">New comment received</span>
-                        <span class="time">12 minutes ago</span>
-                      </div>
-                    </a>
+                    <!-- Loading -->
+                    <div v-if="notifLoading" class="notif-empty">
+                      <i class="fas fa-spinner fa-spin me-2"></i> Loading…
+                    </div>
+
+                    <!-- Empty -->
+                    <div v-else-if="notifications.length === 0" class="notif-empty">
+                      <i class="fas fa-bell-slash me-2 text-muted"></i> No notifications yet
+                    </div>
+
+                    <!-- List -->
+                    <template v-else>
+                      <a
+                        v-for="notif in notifications"
+                        :key="notif.id"
+                        class="notif-item"
+                        :class="{ 'notif-item--unread': !notif.read_at }"
+                        href="#"
+                        @click.prevent="handleNotifClick(notif)"
+                      >
+                        <div class="notif-icon-wrap" :class="notif.data.status !== 'ready' ? 'notif-icon-wrap--danger' : notif.data.report_type === 'summary_report' ? 'notif-icon-wrap--summary' : 'notif-icon-wrap--call'">
+                          <i class="fas" :class="notif.data.status !== 'ready' ? 'fa-times' : notif.data.report_type === 'summary_report' ? 'fa-chart-bar' : 'fa-phone'"></i>
+                        </div>
+                        <div class="notif-body">
+                          <span class="notif-msg">{{ notif.data.message }}</span>
+                          <span class="notif-time">{{ notifTimeAgo(notif.created_at) }}</span>
+                        </div>
+                        <span v-if="!notif.read_at" class="notif-unread-dot"></span>
+                      </a>
+                    </template>
                   </div>
                 </div>
               </li>
               <li>
-                <a class="see-all" href="javascript:void(0);">
-                  See all notifications<i class="fa fa-angle-right"></i>
-                </a>
+                <router-link class="see-all" to="/generated-reports" @click="markAllRead">
+                  View all reports <i class="fa fa-angle-right"></i>
+                </router-link>
               </li>
             </ul>
           </li>
@@ -174,11 +194,12 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted, onUnmounted, computed } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useAuthStore } from '@/stores/auth'
 import { useRouter } from 'vue-router'
 import Modal from '@/components/Modal.vue'
+import api from '@/services/api'
 
 const authStore = useAuthStore()
 const router = useRouter()
@@ -192,20 +213,88 @@ const organizationAppLoginCode = computed(() => user.value?.organization?.app_lo
 
 const showLogoutModal = ref(false)
 
+// ── Notifications ─────────────────────────────────────────
+const notifications    = ref([])
+const unreadCount      = ref(0)
+const notifLoading     = ref(false)
+const notifDropdownOpen = ref(false)
+let   notifPollTimer   = null
+
+const fetchUnreadCount = async () => {
+  try {
+    const resp = await api.get('/notifications/unread-count')
+    unreadCount.value = resp.data.count ?? 0
+  } catch {
+    // silently fail for background poll
+  }
+}
+
+const fetchNotifications = async () => {
+  notifLoading.value = true
+  try {
+    const resp = await api.get('/notifications')
+    notifications.value = resp.data
+  } catch {
+    // ignore
+  } finally {
+    notifLoading.value = false
+  }
+}
+
+const onNotifDropdownOpen = async () => {
+  notifDropdownOpen.value = true
+  await fetchNotifications()
+}
+
+const markRead = async (id) => {
+  try {
+    await api.post(`/notifications/${id}/read`)
+    const n = notifications.value.find(n => n.id === id)
+    if (n) n.read_at = new Date().toISOString()
+    if (unreadCount.value > 0) unreadCount.value--
+  } catch {
+    // ignore
+  }
+}
+
+const markAllRead = async () => {
+  try {
+    await api.post('/notifications/read-all')
+    notifications.value.forEach(n => { if (!n.read_at) n.read_at = new Date().toISOString() })
+    unreadCount.value = 0
+  } catch {
+    // ignore
+  }
+}
+
+const handleNotifClick = async (notif) => {
+  if (!notif.read_at) await markRead(notif.id)
+  if (notif.data?.url) router.push(notif.data.url)
+}
+
+const notifTimeAgo = (iso) => {
+  if (!iso) return ''
+  const diff = Math.floor((Date.now() - new Date(iso)) / 1000)
+  if (diff < 60)   return 'just now'
+  if (diff < 3600) return Math.floor(diff / 60) + 'm ago'
+  if (diff < 86400) return Math.floor(diff / 3600) + 'h ago'
+  return Math.floor(diff / 86400) + 'd ago'
+}
+
+// ── Sidebar toggle ────────────────────────────────────────
 const checkMobile = () => {
   isMobile.value = window.innerWidth <= 991.5
 }
 
 const toggleSidebar = () => {
   if (isMobile.value) {
-    // For mobile, use nav_open class on html element
     document.documentElement.classList.toggle('nav_open')
   } else {
-    // For desktop, use sidebar-mini class on body
     document.body.classList.toggle('sidebar-mini')
   }
 }
 
+// ── Logout ────────────────────────────────────────────────
 const openLogoutModal = () => {
   showLogoutModal.value = true
 }
@@ -226,6 +315,14 @@ const confirmLogout = async () => {
 onMounted(() => {
   checkMobile()
   window.addEventListener('resize', checkMobile)
+  fetchUnreadCount()
+  // Poll every 30 seconds
+  notifPollTimer = setInterval(fetchUnreadCount, 30000)
+})
+
+onUnmounted(() => {
+  window.removeEventListener('resize', checkMobile)
+  if (notifPollTimer) clearInterval(notifPollTimer)
 })
 </script>
 
@@ -321,5 +418,92 @@ onMounted(() => {
   max-width: 200px;
   display: block;
   object-fit: contain;
+}
+
+/* ── Notification dropdown enhancements ── */
+.notif-mark-all {
+  font-size: 11px;
+  font-weight: 600;
+  color: #2563eb;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  line-height: 1;
+}
+.notif-mark-all:hover { color: #1d4ed8; text-decoration: underline; }
+
+.notif-empty {
+  padding: 2rem 1rem;
+  text-align: center;
+  color: #94a3b8;
+  font-size: 13px;
+}
+
+.notif-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 11px 16px;
+  text-decoration: none !important;
+  position: relative;
+  border-bottom: 1px solid #f1f5f9;
+  transition: background 0.15s;
+}
+.notif-item:hover { background: #f8fafc; }
+.notif-item--unread { background: #f5f9ff; }
+.notif-item--unread:hover { background: #edf4ff; }
+
+.notif-icon-wrap {
+  flex-shrink: 0;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+}
+.notif-icon-wrap--call {
+  background: #dbeafe;
+  color: #2563eb;
+}
+.notif-icon-wrap--summary {
+  background: #f3e8ff;
+  color: #9333ea;
+}
+.notif-icon-wrap--danger {
+  background: #fee2e2;
+  color: #dc2626;
+}
+
+.notif-body {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.notif-msg {
+  font-size: 13px;
+  font-weight: 500;
+  color: #1e293b;
+  line-height: 1.4;
+  display: block;
+  white-space: normal;
+}
+.notif-time {
+  font-size: 11px;
+  color: #94a3b8;
+  display: block;
+}
+
+.notif-unread-dot {
+  flex-shrink: 0;
+  width: 7px;
+  height: 7px;
+  background: #2563eb;
+  border-radius: 50%;
+  align-self: center;
 }
 </style>

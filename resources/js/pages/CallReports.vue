@@ -20,6 +20,17 @@
       </div>
     </div>
 
+    <div v-if="queueExportMsg" class="queue-export-banner">
+      <div class="queue-export-banner__inner">
+        <span class="queue-export-banner__icon"><i class="fas fa-phone"></i></span>
+        <span class="queue-export-banner__text">{{ queueExportMsg }}</span>
+        <router-link to="/generated-reports" class="queue-export-banner__link">View reports &rarr;</router-link>
+      </div>
+      <button type="button" class="queue-export-banner__close" @click="queueExportMsg = ''" aria-label="Dismiss">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+
     <div v-show="filtersOpen" class="filters-card" @mousedown="onFiltersMousedown">
       <div class="filters-topbar">
         <div class="filters-heading">
@@ -348,11 +359,11 @@
             <button type="button" class="btn btn-light border btn-sm" :disabled="loading" @click="refresh" title="Refresh">
               <i class="fas fa-sync-alt"></i>
             </button>
-            <button class="action-icon-btn" :disabled="exporting" @click="exportFile('excel')" title="Export Excel">
-              <i class="fas fa-file-excel"></i>
+            <button class="action-icon-btn" :disabled="exporting" @click="exportFile('excel')" title="Queue Excel Export">
+              <i class="fas" :class="exporting ? 'fa-spinner fa-spin' : 'fa-file-excel'"></i>
             </button>
-            <button class="action-icon-btn" :disabled="exporting" @click="exportFile('csv')" title="Export CSV">
-              <i class="fas fa-file-alt"></i>
+            <button class="action-icon-btn" :disabled="exporting" @click="exportFile('csv')" title="Queue CSV Export">
+              <i class="fas" :class="exporting ? 'fa-spinner fa-spin' : 'fa-file-alt'"></i>
             </button>
           </div>
         </div>
@@ -896,26 +907,17 @@ const simKey = (sim) => {
   return `${sim.mobile}-${sim.id || ''}`
 }
 
+const queueExportMsg = ref('')
+
 const exportFile = async (format) => {
   exporting.value = true
+  queueExportMsg.value = ''
   try {
-    const resp = await api.get('/call-reports/export', {
-      params: { ...buildParams(true, 1, true), format },
-      responseType: 'blob'
-    })
-
-    const contentDisposition = resp.headers?.['content-disposition'] || ''
-    const filenameMatch = /filename="?([^";]+)"?/i.exec(contentDisposition)
-    const filename = filenameMatch?.[1] || `call_reports.${format === 'excel' ? 'xls' : 'csv'}`
-
-    const url = window.URL.createObjectURL(new Blob([resp.data]))
-    const link = document.createElement('a')
-    link.href = url
-    link.setAttribute('download', filename)
-    document.body.appendChild(link)
-    link.click()
-    link.remove()
-    window.URL.revokeObjectURL(url)
+    const filters = buildParams(true, 1, true)
+    const resp = await api.post('/call-reports/queue-export', { format, filters })
+    queueExportMsg.value = resp.data?.message ?? "Report queued. You'll be notified when it's ready."
+  } catch {
+    queueExportMsg.value = 'Failed to queue report. Please try again.'
   } finally {
     exporting.value = false
   }
@@ -1418,6 +1420,63 @@ onBeforeUnmount(() => {
 .action-icon-btn:hover:not(:disabled) i.fa-file-alt {
   color: #2563eb;
 }
+
+/* Queue export banner */
+.queue-export-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 16px;
+  padding: 12px 16px;
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  border-left: 4px solid #3b82f6;
+  border-radius: 8px;
+  font-size: 13.5px;
+}
+.queue-export-banner__inner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+  min-width: 0;
+  flex-wrap: wrap;
+}
+.queue-export-banner__icon {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: #dbeafe;
+  color: #2563eb;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  flex-shrink: 0;
+}
+.queue-export-banner__text {
+  color: #1e40af;
+  font-weight: 500;
+}
+.queue-export-banner__link {
+  color: #2563eb;
+  font-weight: 600;
+  text-decoration: none;
+  white-space: nowrap;
+}
+.queue-export-banner__link:hover { text-decoration: underline; }
+.queue-export-banner__close {
+  background: none;
+  border: none;
+  color: #93c5fd;
+  font-size: 13px;
+  cursor: pointer;
+  padding: 2px 4px;
+  line-height: 1;
+  flex-shrink: 0;
+}
+.queue-export-banner__close:hover { color: #2563eb; }
 
 /* Multiselect styling */
 .select-modern[multiple] {

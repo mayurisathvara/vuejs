@@ -80,6 +80,13 @@
             </router-link>
           </li>
 
+          <li v-if="showCallReports || showSummaryReport" class="nav-item" :class="{ active: $route.name === 'GeneratedReports' }">
+            <router-link to="/generated-reports" class="nav-link" @click="handleMenuClick">
+              <i class="fas fa-file-download"></i>
+              <p>Generated Reports</p>
+            </router-link>
+          </li>
+
           <li v-if="hasBillingSection" class="nav-section">
             <h4 class="text-section">BILLING</h4>
           </li>
