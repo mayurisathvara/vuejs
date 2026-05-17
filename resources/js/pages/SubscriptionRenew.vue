@@ -48,8 +48,8 @@
               :aria-selected="activeBillingCycle === tab.value"
               @click="selectBillingCycle(tab.value)"
             >
-              <span>{{ tab.label }}</span>
-              <small>{{ planCountByCycle(tab.value) }} plan{{ planCountByCycle(tab.value) === 1 ? '' : 's' }}</small>
+              <span class="bt-label">{{ tab.label }}</span>
+              <span class="bt-count">{{ planCountByCycle(tab.value) }} plan{{ planCountByCycle(tab.value) === 1 ? '' : 's' }}</span>
             </button>
           </div>
 
@@ -60,29 +60,44 @@
               :key="plan.id"
               type="button"
               class="plan-item"
-              :class="{ selected: selectedPlanId === plan.id }"
+              :class="{ selected: selectedPlanId === plan.id, 'plan-item--popular': plan.name === 'advance' }"
               @click="selectPlan(plan.id)"
             >
-              <div class="plan-sel-dot">
-                <i v-if="selectedPlanId === plan.id" class="fas fa-check"></i>
-              </div>
+              <!-- Popular badge -->
+              <span v-if="plan.name === 'advance'" class="popular-badge">
+                <i class="fas fa-bolt"></i> Most Popular
+              </span>
 
-              <div class="plan-body">
-                <div class="plan-name-row">
-                  <h5>{{ plan.display_name }}</h5>
-                  <span class="cycle-badge">{{ cycleLabel(plan.billing_type) }}</span>
+              <!-- Top row: icon + radio -->
+              <div class="plan-item-top">
+                <div class="plan-avatar" :class="`plan-avatar--${plan.name}`">
+                  <i :class="planIcon(plan)"></i>
                 </div>
-                <p>{{ planDescription(plan) }}</p>
-                <div class="feat-pills" v-if="normalizeFeatures(plan.features).length">
-                  <span v-for="feat in normalizeFeatures(plan.features)" :key="`${plan.id}-${feat}`">
-                    {{ featureLabel(feat) }}
-                  </span>
+                <div class="plan-sel-dot" :class="{ checked: selectedPlanId === plan.id }">
+                  <i v-if="selectedPlanId === plan.id" class="fas fa-check"></i>
                 </div>
               </div>
 
+              <!-- Name + cycle -->
+              <div class="plan-name-row">
+                <h5>{{ plan.display_name }}</h5>
+                <span class="cycle-badge">{{ cycleLabel(plan.billing_type) }}</span>
+              </div>
+
+              <!-- Description -->
+              <p class="plan-desc-text">{{ planDescription(plan) }}</p>
+
+              <!-- Feature pills -->
+              <div class="feat-pills" v-if="normalizeFeatures(plan.features).length">
+                <span v-for="feat in normalizeFeatures(plan.features)" :key="`${plan.id}-${feat}`">
+                  <i class="fas fa-check"></i> {{ featureLabel(feat) }}
+                </span>
+              </div>
+
+              <!-- Price -->
               <div class="plan-price">
                 <strong>{{ formatCurrency(plan.price_per_sim) }}</strong>
-                <span>per SIM</span>
+                <span>per SIM / mo</span>
               </div>
             </button>
           </div>
@@ -329,6 +344,12 @@ const paymentStatusLabel = computed(() => {
   if (paymentMessageType.value === 'danger') return 'Failed'
   return 'Razorpay Test'
 })
+
+const planIcon = (plan) => {
+  if (plan.name === 'advance') return 'fas fa-bolt'
+  if (plan.name === 'basic') return 'fas fa-layer-group'
+  return 'fas fa-cube'
+}
 
 const selectPlan = (planId) => {
   selectedPlanId.value = planId
@@ -733,77 +754,148 @@ onMounted(fetchRenewalData)
 /* ── Billing Tabs ── */
 .billing-tabs {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 6px;
+  grid-template-columns: 1fr 1fr;
+  gap: 5px;
   padding: 5px;
-  background: #f4f6fa;
+  background: #f1f5f9;
   border: 1px solid var(--line);
-  border-radius: 14px;
-  margin-bottom: 18px;
+  border-radius: 16px;
+  margin-bottom: 20px;
 }
 
 .billing-tab {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 8px;
-  padding: 9px 14px;
+  gap: 10px;
+  padding: 11px 16px;
   border: 0;
-  border-radius: 10px;
+  border-radius: 11px;
   background: transparent;
   color: var(--muted);
   cursor: pointer;
-  font-weight: 700;
   transition: background 0.15s, color 0.15s, box-shadow 0.15s;
 }
 
-.billing-tab span { font-size: 0.88rem; }
-
-.billing-tab small {
-  font-size: 0.7rem;
+.bt-label {
+  font-size: 0.9rem;
   font-weight: 800;
-  opacity: 0.72;
+  letter-spacing: -0.01em;
   color: inherit;
+}
+
+.bt-count {
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.06);
+  color: inherit;
+  white-space: nowrap;
 }
 
 .billing-tab.active {
   background: #fff;
-  color: #175cd3;
-  box-shadow: 0 2px 10px rgba(15, 23, 42, 0.08);
+  color: var(--orange);
+  box-shadow: 0 2px 12px rgba(15, 23, 42, 0.09);
 }
 
-/* ── Plan List ── */
+.billing-tab.active .bt-count {
+  background: #fff7ed;
+  color: #c2410c;
+}
+
+/* ── Plan List — horizontal row of vertical cards ── */
 .plan-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 14px;
+}
+
+/* ── Plan card (vertical) ── */
+.plan-item {
+  position: relative;
   display: flex;
   flex-direction: column;
-  gap: 10px;
-}
-
-.plan-item {
-  width: 100%;
-  display: grid;
-  grid-template-columns: 22px minmax(0, 1fr) auto;
-  gap: 14px;
-  align-items: flex-start;
-  padding: 16px 18px;
+  gap: 0;
+  padding: 18px 16px 16px;
   text-align: left;
   border: 1.5px solid var(--line);
-  border-radius: 16px;
+  border-radius: 18px;
   background: #fff;
   cursor: pointer;
-  transition: border-color 0.15s, box-shadow 0.15s, background 0.15s;
+  overflow: hidden;
+  transition: border-color 0.15s, box-shadow 0.15s, background 0.15s, transform 0.15s;
+  box-shadow: 0 1px 6px rgba(15,23,42,0.05);
 }
 
 .plan-item:hover {
-  border-color: rgba(37, 99, 235, 0.38);
-  box-shadow: 0 4px 18px rgba(37, 99, 235, 0.08);
+  border-color: rgba(249, 115, 22, 0.35);
+  box-shadow: 0 6px 20px rgba(249, 115, 22, 0.1);
+  transform: translateY(-2px);
 }
 
 .plan-item.selected {
   border-color: var(--orange);
-  background: linear-gradient(160deg, #fff8f2 0%, #fff3e6 100%);
-  box-shadow: 0 4px 16px rgba(249, 115, 22, 0.12);
+  background: linear-gradient(160deg, #fffbf7 0%, #fff7ed 100%);
+  box-shadow: 0 6px 22px rgba(249, 115, 22, 0.16);
 }
+
+.plan-item--popular {
+  border-color: #fed7aa;
+}
+
+.plan-item--popular.selected {
+  border-color: var(--orange);
+}
+
+/* Popular badge — pinned to top-center */
+.popular-badge {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 12px;
+  border-radius: 0 0 10px 10px;
+  font-size: 0.63rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: #fff;
+  background: linear-gradient(90deg, var(--orange), #ffb454);
+  white-space: nowrap;
+}
+
+/* ── Card top row: avatar + radio ── */
+.plan-item-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 14px;
+  margin-top: 8px;
+}
+
+/* Plan avatar */
+.plan-avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 13px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  color: #fff;
+  flex-shrink: 0;
+  background: linear-gradient(135deg, #94a3b8, #64748b);
+}
+
+.plan-avatar--advance    { background: linear-gradient(135deg, var(--orange), #ffb454); }
+.plan-avatar--basic      { background: linear-gradient(135deg, var(--blue), #60a5fa); }
+.plan-avatar--free_trial { background: linear-gradient(135deg, #7c3aed, #a78bfa); }
 
 /* ── Selection dot ── */
 .plan-sel-dot {
@@ -817,35 +909,34 @@ onMounted(fetchRenewalData)
   color: #fff;
   font-size: 0.58rem;
   flex-shrink: 0;
-  margin-top: 1px;
   transition: background 0.15s, border-color 0.15s;
 }
 
-.plan-item.selected .plan-sel-dot {
+.plan-sel-dot.checked {
   border-color: var(--orange);
   background: var(--orange);
 }
 
-/* ── Plan body ── */
+/* ── Name + badge ── */
 .plan-name-row {
   display: flex;
   align-items: center;
   flex-wrap: wrap;
-  gap: 8px;
-  margin-bottom: 4px;
+  gap: 6px;
+  margin-bottom: 6px;
 }
 
 .plan-name-row h5 {
   margin: 0;
-  font-size: 0.98rem;
+  font-size: 0.96rem;
   font-weight: 900;
   color: var(--ink);
 }
 
 .cycle-badge {
-  padding: 3px 8px;
+  padding: 2px 8px;
   border-radius: 999px;
-  font-size: 0.68rem;
+  font-size: 0.65rem;
   font-weight: 800;
   color: #475467;
   background: #f2f4f7;
@@ -856,38 +947,56 @@ onMounted(fetchRenewalData)
   background: #ffedd5;
 }
 
-.plan-body p {
-  margin: 0 0 8px;
-  font-size: 0.8rem;
+/* ── Description ── */
+.plan-desc-text {
+  margin: 0 0 10px;
+  font-size: 0.77rem;
   color: var(--muted);
   line-height: 1.5;
+  flex-grow: 1;
 }
 
+/* ── Feature pills ── */
 .feat-pills {
   display: flex;
   flex-wrap: wrap;
   gap: 5px;
+  margin-bottom: 14px;
 }
 
 .feat-pills span {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
   padding: 3px 8px;
   border-radius: 999px;
   color: #175cd3;
   background: #eff8ff;
-  font-size: 0.7rem;
-  font-weight: 800;
-  text-transform: capitalize;
+  border: 1px solid #dbeafe;
+  font-size: 0.67rem;
+  font-weight: 700;
 }
 
-/* ── Plan price ── */
-.plan-price {
-  text-align: right;
-  flex-shrink: 0;
+.feat-pills span i { font-size: 0.55rem; }
+
+.plan-item.selected .feat-pills span {
+  color: #c2410c;
+  background: #ffedd5;
+  border-color: #fed7aa;
 }
+
+/* ── Plan price — pinned to bottom ── */
+.plan-price {
+  padding-top: 12px;
+  border-top: 1px solid var(--line);
+  margin-top: auto;
+}
+
+.plan-item.selected .plan-price { border-top-color: #fed7aa; }
 
 .plan-price strong {
   display: block;
-  font-size: 1.15rem;
+  font-size: 1.3rem;
   font-weight: 900;
   color: var(--ink);
   letter-spacing: -0.04em;
@@ -896,10 +1005,10 @@ onMounted(fetchRenewalData)
 
 .plan-price span {
   display: block;
-  font-size: 0.7rem;
+  font-size: 0.68rem;
   color: var(--muted);
   font-weight: 700;
-  margin-top: 2px;
+  margin-top: 3px;
 }
 
 /* ── Empty plans ── */
@@ -1177,7 +1286,7 @@ onMounted(fetchRenewalData)
   min-width: 0;
 }
 
-.ar-icon--on  { color: #067647; font-size: 0.9rem; flex-shrink: 0; }
+.ar-icon--on  { color: var(--orange); font-size: 0.9rem; flex-shrink: 0; }
 .ar-icon--off { color: #94a3b8; font-size: 0.9rem; flex-shrink: 0; }
 
 .auto-renew-toggle-info strong {
@@ -1209,7 +1318,7 @@ onMounted(fetchRenewalData)
   transition: background 0.2s;
 }
 
-.toggle-sw.is-on { background: #067647; }
+.toggle-sw.is-on { background: var(--orange); }
 
 .toggle-th {
   position: absolute;
@@ -1280,18 +1389,29 @@ onMounted(fetchRenewalData)
     margin-top: 0;
   }
 
-  .billing-tabs {
+  .plan-list {
     grid-template-columns: 1fr;
   }
 
   .plan-item {
-    grid-template-columns: 22px minmax(0, 1fr);
-    grid-template-rows: auto auto;
+    flex-direction: row;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+    padding: 14px;
+  }
+
+  .plan-item-top {
+    margin-bottom: 0;
+    margin-top: 0;
   }
 
   .plan-price {
-    grid-column: 2;
-    text-align: left;
+    margin-top: 0;
+    padding-top: 0;
+    border-top: none;
+    text-align: right;
+    margin-left: auto;
   }
 
   .qty-ctrl {
