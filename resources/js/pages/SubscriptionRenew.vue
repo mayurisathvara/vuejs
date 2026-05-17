@@ -48,8 +48,18 @@
               :aria-selected="activeBillingCycle === tab.value"
               @click="selectBillingCycle(tab.value)"
             >
-              <span class="bt-label">{{ tab.label }}</span>
-              <span class="bt-count">{{ planCountByCycle(tab.value) }} plan{{ planCountByCycle(tab.value) === 1 ? '' : 's' }}</span>
+              <div class="bt-left">
+                <span class="bt-icon">
+                  <i :class="tab.value === 'monthly' ? 'fas fa-calendar' : 'fas fa-calendar-alt'"></i>
+                </span>
+                <div class="bt-text">
+                  <span class="bt-label">{{ tab.label }}</span>
+                  <span class="bt-sub">{{ planCountByCycle(tab.value) }} plan{{ planCountByCycle(tab.value) === 1 ? '' : 's' }} available</span>
+                </div>
+              </div>
+              <span class="bt-check" v-if="activeBillingCycle === tab.value">
+                <i class="fas fa-check"></i>
+              </span>
             </button>
           </div>
 
@@ -755,12 +765,12 @@ onMounted(fetchRenewalData)
 .billing-tabs {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 5px;
-  padding: 5px;
+  gap: 6px;
+  padding: 6px;
   background: #f1f5f9;
   border: 1px solid var(--line);
-  border-radius: 16px;
-  margin-bottom: 20px;
+  border-radius: 18px;
+  margin-bottom: 22px;
 }
 
 .billing-tab {
@@ -768,41 +778,89 @@ onMounted(fetchRenewalData)
   align-items: center;
   justify-content: space-between;
   gap: 10px;
-  padding: 11px 16px;
+  padding: 12px 14px;
   border: 0;
-  border-radius: 11px;
+  border-radius: 13px;
   background: transparent;
   color: var(--muted);
   cursor: pointer;
-  transition: background 0.15s, color 0.15s, box-shadow 0.15s;
-}
-
-.bt-label {
-  font-size: 0.9rem;
-  font-weight: 800;
-  letter-spacing: -0.01em;
-  color: inherit;
-}
-
-.bt-count {
-  font-size: 0.7rem;
-  font-weight: 700;
-  padding: 2px 8px;
-  border-radius: 999px;
-  background: rgba(0, 0, 0, 0.06);
-  color: inherit;
-  white-space: nowrap;
+  transition: background 0.18s, color 0.18s, box-shadow 0.18s;
+  text-align: left;
 }
 
 .billing-tab.active {
   background: #fff;
-  color: var(--orange);
-  box-shadow: 0 2px 12px rgba(15, 23, 42, 0.09);
+  color: var(--ink);
+  box-shadow: 0 2px 16px rgba(15, 23, 42, 0.10);
 }
 
-.billing-tab.active .bt-count {
-  background: #fff7ed;
-  color: #c2410c;
+/* Icon square */
+.bt-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.9rem;
+  flex-shrink: 0;
+  background: rgba(0, 0, 0, 0.06);
+  color: var(--muted);
+  transition: background 0.18s, color 0.18s;
+}
+
+.billing-tab.active .bt-icon {
+  background: linear-gradient(135deg, var(--orange), #ffb454);
+  color: #fff;
+}
+
+.bt-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.bt-text {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.bt-label {
+  font-size: 0.88rem;
+  font-weight: 800;
+  color: var(--ink);
+  letter-spacing: -0.01em;
+  line-height: 1;
+}
+
+.billing-tab:not(.active) .bt-label {
+  color: var(--muted);
+}
+
+.bt-sub {
+  font-size: 0.67rem;
+  font-weight: 600;
+  color: var(--muted);
+  line-height: 1;
+}
+
+.billing-tab.active .bt-sub {
+  color: var(--muted);
+}
+
+/* Check indicator */
+.bt-check {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--orange), #ffb454);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  font-size: 0.55rem;
+  color: #fff;
 }
 
 /* ── Plan List — horizontal row of vertical cards ── */
