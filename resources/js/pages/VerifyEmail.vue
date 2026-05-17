@@ -24,7 +24,7 @@
       <!-- Default: check inbox -->
       <template v-else>
         <div class="ve-icon-wrap">
-          <i class="fas fa-envelope-open-text ve-icon"></i>
+          <i class="fas fa-envelope-open ve-icon"></i>
         </div>
         <h1 class="ve-title">Check Your Email</h1>
         <p class="ve-sub">

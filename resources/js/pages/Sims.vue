@@ -1871,10 +1871,12 @@ const openCreateModal = async () => {
   isEditing.value = false
   resetForm()
   
-  // For non-admin users, fetch teams after organization is auto-set
-  if ((isOrganization.value || isManager.value) && organizations.value.length > 0) {
-    simForm.organization_id = organizations.value[0].id
-    await handleOrganizationChange()
+  // For non-admin users, set org from the logged-in user and fetch their teams
+  if (isOrganization.value || isManager.value) {
+    simForm.organization_id = authStore.user?.organization_id || ''
+    if (simForm.organization_id) {
+      await handleOrganizationChange()
+    }
   }
   
   showSimModal.value = true
@@ -2298,9 +2300,10 @@ onMounted(() => {
   // For admin users, fetch organizations first
   if (isAdmin.value) {
     fetchOrganizations()
-  } else if (isOrganization.value) {
-    // For organization users, fetch teams directly using their organization
-    fetchTeamsByOrganization()
+  } else if (isOrganization.value || isManager.value) {
+    // Fetch teams for the sidebar filter using the logged-in user's organization
+    const orgId = authStore.user?.organization_id
+    if (orgId) fetchTeamsByOrganization(orgId)
   }
 
   document.addEventListener('click', handleClickOutside)

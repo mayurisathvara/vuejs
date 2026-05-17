@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use App\Models\Organization;
 use App\Models\Sim;
+use App\Services\SubscriptionService;
 
 class LoginController extends Controller
 {
@@ -44,6 +45,19 @@ class LoginController extends Controller
         if ($sim->status !== 'active') {
             return response()->json([
                 'message' => 'Your SIM is inactive. Please contact your administrator.',
+            ], 403);
+        }
+
+        // Block login if the organization's subscription has expired
+        if (! SubscriptionService::isSubscriptionActive($org->id)) {
+            Log::warning('Mobile app login blocked — plan expired', [
+                'organization_id' => $org->id,
+                'mobile'          => $mobile,
+                'ip'              => $request->ip(),
+            ]);
+
+            return response()->json([
+                'message' => 'Your organization\'s plan has expired. Please contact your administrator to renew.',
             ], 403);
         }
 

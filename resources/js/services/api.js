@@ -53,20 +53,19 @@ api.interceptors.response.use(
     }
     
     // Handle 403 errors (forbidden - insufficient permissions)
+    // Skip global handling for cases the calling code manages itself
+    // (email_not_verified, plan_expired, SIM_LIMIT_REACHED, etc.)
     if (error.response?.status === 403) {
-      // Show error message
-      const message = error.response?.data?.message || 'You do not have permission to access this resource.'
-      
-      // Use Vue's toast/notification if available, otherwise alert
-      if (window.$toast) {
-        window.$toast.error(message)
-      } else {
-        alert(message)
-      }
-      
-      // Redirect to dashboard
-      if (window.location.pathname !== '/dashboard') {
-        window.location.href = '/dashboard'
+      const data = error.response?.data || {}
+
+      if (!data.email_not_verified && !data.error && !data.code) {
+        const message = data.message || 'You do not have permission to access this resource.'
+        if (window.$toast) {
+          window.$toast.error(message)
+        }
+        if (window.location.pathname !== '/dashboard') {
+          window.location.href = '/dashboard'
+        }
       }
     }
     

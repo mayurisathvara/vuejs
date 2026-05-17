@@ -5,10 +5,13 @@ namespace App\Services;
 use App\Models\OrganizationSubscription;
 use App\Models\Plan;
 use App\Models\Sim;
+use Illuminate\Support\Facades\Cache;
+use Laravel\Sanctum\PersonalAccessToken;
 
 class SubscriptionService
 {
     private const DEFAULT_TRIAL_SIM_LIMIT = 10;
+    private const SUBSCRIPTION_CACHE_TTL  = 300; // 5 minutes
 
     // -------------------------------------------------------------------------
     // Subscription queries
@@ -20,6 +23,14 @@ class SubscriptionService
      */
     public static function getActiveSubscription(int $organizationId): ?OrganizationSubscription
     {
+        $cacheKey = "sub_active:{$organizationId}";
+        $cached   = Cache::get($cacheKey, 'MISS');
+
+        if ($cached !== 'MISS') {
+            // false is stored when there is no active subscription — avoids re-querying
+            return ($cached instanceof OrganizationSubscription) ? $cached : null;
+        }
+
         $subscription = OrganizationSubscription::with('plan')
             ->where('organization_id', $organizationId)
             ->where('status', 'active')
@@ -28,8 +39,12 @@ class SubscriptionService
 
         if ($subscription && $subscription->end_date && $subscription->end_date->isPast()) {
             $subscription->update(['status' => 'expired']);
+            self::revokeOrgSimTokens($subscription->organization_id);
+            Cache::forget($cacheKey);
             return null;
         }
+
+        Cache::put($cacheKey, $subscription ?? false, self::SUBSCRIPTION_CACHE_TTL);
 
         return $subscription;
     }
@@ -73,6 +88,23 @@ class SubscriptionService
     }
 
     // -------------------------------------------------------------------------
+    // Token revocation
+    // -------------------------------------------------------------------------
+
+    /**
+     * Revoke all mobile-app Sanctum tokens for every SIM in the organization.
+     * Called automatically when a subscription is detected as expired.
+     */
+    private static function revokeOrgSimTokens(int $organizationId): void
+    {
+        $simIds = Sim::where('organization_id', $organizationId)->pluck('id');
+
+        PersonalAccessToken::where('tokenable_type', Sim::class)
+            ->whereIn('tokenable_id', $simIds)
+            ->delete();
+    }
+
+    // -------------------------------------------------------------------------
     // Plan assignment
     // -------------------------------------------------------------------------
 
@@ -104,7 +136,7 @@ class SubscriptionService
             return null; // Plans not seeded yet (e.g. first migration run)
         }
 
-        return OrganizationSubscription::create([
+        $subscription = OrganizationSubscription::create([
             'organization_id' => $organizationId,
             'plan_id'         => $trialPlan->id,
             'billing_cycle'   => 'trial',
@@ -113,6 +145,10 @@ class SubscriptionService
             'end_date'        => now()->addDays($trialPlan->trial_days)->toDateString(),
             'status'          => 'active',
         ] + self::planSnapshot($trialPlan, self::DEFAULT_TRIAL_SIM_LIMIT));
+
+        Cache::forget("sub_active:{$organizationId}");
+
+        return $subscription;
     }
 
     /**
@@ -159,6 +195,8 @@ class SubscriptionService
             'status'          => 'active',
             'notes'           => $notes,
         ] + self::planSnapshot($plan, $simLimit));
+
+        Cache::forget("sub_active:{$organizationId}");
 
         // Auto-deactivate excess SIMs when the new limit is lower
         self::enforceSimLimit($organizationId);
