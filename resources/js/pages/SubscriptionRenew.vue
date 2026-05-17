@@ -265,13 +265,23 @@ const fetchRenewalData = async () => {
     subscription.value = data.subscription || null
     stats.value = data.stats || {}
 
-    // Guard: block direct URL access when the renewal window hasn't opened yet.
-    // Active subscriptions with more than renewal_days_before days remaining are blocked.
+    // Guard: mirrors canRequestRenewal in Subscription.vue exactly.
+    // Expired (status or negative days) → always allow.
+    // Active with no end date → block. Active with days > threshold → block.
     const s = stats.value
-    if (s.subscription_status === 'active') {
+    const isExpiredOrNegative =
+      s.subscription_status === 'expired' ||
+      (s.days_until_expiry !== null && s.days_until_expiry < 0)
+
+    if (!isExpiredOrNegative) {
       const days = s.days_until_expiry
       const threshold = s.renewal_days_before ?? 2
-      if (days !== null && days >= 0 && days > threshold) {
+      if (days === null) {
+        showError('Renewal is not available for this plan type.')
+        router.replace('/subscription')
+        return
+      }
+      if (days > threshold) {
         showError(`Renewal opens ${threshold} day${threshold === 1 ? '' : 's'} before expiry.`)
         router.replace('/subscription')
         return
@@ -458,10 +468,9 @@ const verifyRecurringPayment = async (payment) => {
       razorpay_signature:       payment.razorpay_signature
     })
 
-    paymentMessage.value = response.data?.message || 'Recurring subscription activated. Auto-renewal is now enabled.'
-    paymentMessageType.value = 'success'
-    showSuccess(paymentMessage.value)
-    await fetchRenewalData()
+    const message = response.data?.message || 'Recurring subscription activated. Auto-renewal is now enabled.'
+    showSuccess(message)
+    router.replace('/subscription')
   } catch (err) {
     paymentMessage.value = err.response?.data?.message || 'Payment verification failed. Please contact support.'
     paymentMessageType.value = 'danger'
@@ -556,10 +565,9 @@ const verifyOneTimePayment = async (payment) => {
       razorpay_signature:  payment.razorpay_signature
     })
 
-    paymentMessage.value = response.data?.message || 'Payment verified and subscription renewed.'
-    paymentMessageType.value = 'success'
-    showSuccess(paymentMessage.value)
-    await fetchRenewalData()
+    const message = response.data?.message || 'Payment verified and subscription renewed.'
+    showSuccess(message)
+    router.replace('/subscription')
   } catch (err) {
     paymentMessage.value = err.response?.data?.message || 'Payment verification failed. Please contact support.'
     paymentMessageType.value = 'danger'
