@@ -1151,24 +1151,12 @@ const prepareCustomRange = () => {
   if (customRange.start > todayYmd) customRange.start = todayYmd
   if (customRange.end > todayYmd) customRange.end = todayYmd
 
-  // Enforce max 1-month window from the selected start
-  const startUtc = parseYmdUtc(customRange.start)
-  if (startUtc) {
-    const maxAllowedUtc = addDaysUtc(startUtc, MAX_CUSTOM_RANGE_DAYS - 1)
-    const maxAllowedYmd = formatYmdUtc(maxAllowedUtc)
-    if (customRange.end > maxAllowedYmd) customRange.end = maxAllowedYmd
-  }
-
   if (customRangePicker) {
-    const start = parseYmdUtc(customRange.start)
-    if (start) {
-      const maxAllowed = addDaysUtc(start, MAX_CUSTOM_RANGE_DAYS - 1)
-      const todayUtc = parseYmdUtc(todayYmd)
-      const maxDateUtc = todayUtc && todayUtc.getTime() < maxAllowed.getTime() ? todayUtc : maxAllowed
-      customRangePicker.set('maxDate', new Date(maxDateUtc.getTime()))
-    } else {
-      customRangePicker.set('maxDate', today)
-    }
+    // Always reset maxDate to today when opening — the per-selection limit
+    // (start + MAX_CUSTOM_RANGE_DAYS) is applied dynamically in onChange once
+    // the user picks a start date. Without this reset, a previously selected
+    // past-year start would lock the calendar to that old month.
+    customRangePicker.set('maxDate', today)
     customRangePicker.setDate([customRange.start, customRange.end], false)
   }
 }
