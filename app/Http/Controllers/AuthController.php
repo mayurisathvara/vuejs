@@ -122,9 +122,26 @@ class AuthController extends Controller
             ], 422);
         }
 
-        // Generate a unique cryptographically-random 8-char alphanumeric app login code
+        // Generate name-prefixed code matching admin UI format: {3-LETTER-PREFIX}-XXXX-XXXX
+        $chars     = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // no I/O/1/0 to avoid confusion
+        $nameClean = strtoupper(preg_replace('/[^a-zA-Z]/', '', $request->name));
+        if (strlen($nameClean) >= 3) {
+            $prefix = substr($nameClean, 0, 3);
+        } elseif (strlen($nameClean) > 0) {
+            $prefix = $nameClean;
+            while (strlen($prefix) < 3) {
+                $prefix .= $chars[random_int(0, strlen($chars) - 1)];
+            }
+        } else {
+            $prefix = 'ORG';
+        }
+
         do {
-            $code = strtoupper(substr(bin2hex(random_bytes(6)), 0, 8));
+            $raw = '';
+            for ($i = 0; $i < 8; $i++) {
+                $raw .= $chars[random_int(0, strlen($chars) - 1)];
+            }
+            $code = $prefix . '-' . substr($raw, 0, 4) . '-' . substr($raw, 4, 4);
         } while (\App\Models\Organization::where('app_login_code', $code)->exists());
 
         $organization = \App\Models\Organization::create([

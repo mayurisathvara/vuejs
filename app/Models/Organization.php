@@ -100,8 +100,9 @@ class Organization extends Model
             // Update existing user
             $this->user->update($userData);
         } else {
-            // Create new user
-            User::create($userData + ['organization_id' => $this->id]);
+            // Create new user — admin-created, so auto-verify email
+            $user = User::create($userData + ['organization_id' => $this->id]);
+            $user->markEmailAsVerified();
         }
     }
 

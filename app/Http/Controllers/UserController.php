@@ -242,6 +242,9 @@ class UserController extends Controller
             'status' => $request->status ?? 'active',
         ]);
 
+        // Admin-created accounts are trusted — skip email verification
+        $user->markEmailAsVerified();
+
         // Load relationships for response
         $user->load(['organization:id,name', 'team:id,name']);
 
