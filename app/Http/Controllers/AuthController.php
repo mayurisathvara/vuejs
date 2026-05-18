@@ -154,6 +154,12 @@ class AuthController extends Controller
             'status'         => 'active',
         ]);
 
+        // Create a default department for the new organization
+        \App\Models\Team::create([
+            'name'            => 'Customer Support',
+            'organization_id' => $organization->id,
+        ]);
+
         \App\Models\OrganizationSetting::firstOrCreate(
             ['organization_id' => $organization->id],
             [
