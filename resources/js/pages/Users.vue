@@ -92,13 +92,13 @@
               <button
                 class="action-menu-trigger"
                 type="button"
-                @click.stop="toggleActionMenu(row.id)"
+                @click.stop="toggleActionMenu(row.id, $event)"
                 aria-label="Open actions"
                 title="More actions"
               >
                 <i class="fas fa-ellipsis-h"></i>
               </button>
-              <div v-if="activeActionMenu === row.id" class="action-menu" @click.stop>
+              <div v-if="activeActionMenu === row.id" class="action-menu" :style="actionMenuPosition" @click.stop>
                 <button type="button" class="action-menu-item" @click="openEditFromMenu(row)">
                   <i class="fas fa-pen"></i>
                   <span>Edit</span>
@@ -847,16 +847,14 @@
 }
 
 .action-menu {
-  position: absolute;
-  top: calc(100% + 6px);
-  right: 0;
+  position: fixed;
   min-width: 142px;
   background: #ffffff;
   border: 1px solid #e5e7eb;
   border-radius: 10px;
   box-shadow: 0 12px 28px rgba(15, 23, 42, 0.12);
   padding: 6px;
-  z-index: 1050;
+  z-index: 9999;
 }
 
 .action-menu-item {
@@ -1016,6 +1014,7 @@ const getErrorMessage = (error) => {
 // Status dropdown state
 const activeDropdown = ref(null)
 const activeActionMenu = ref(null)
+const actionMenuPosition = ref({})
 
 const errors = ref({})
 const errorMessage = ref('')
@@ -1284,9 +1283,18 @@ const toggleStatusDropdown = (userId) => {
   }
 }
 
-const toggleActionMenu = (userId) => {
+const toggleActionMenu = (userId, event) => {
   activeDropdown.value = null
-  activeActionMenu.value = activeActionMenu.value === userId ? null : userId
+  if (activeActionMenu.value === userId) {
+    activeActionMenu.value = null
+    return
+  }
+  const rect = event.currentTarget.getBoundingClientRect()
+  actionMenuPosition.value = {
+    top: (rect.bottom + 4) + 'px',
+    right: (window.innerWidth - rect.right) + 'px',
+  }
+  activeActionMenu.value = userId
 }
 
 const adjustDropdownPosition = (userId) => {

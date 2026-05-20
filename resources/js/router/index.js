@@ -329,8 +329,6 @@ router.beforeEach(async (to, from, next) => {
   } else if (requiresGuest && authStore.isAuthenticated) {
     next('/dashboard')
   } else if (requiredRoles && !requiredRoles.includes(userRole)) {
-    // User doesn't have required role, redirect to dashboard
-    alert('You do not have permission to access this page.')
     next('/dashboard')
   } else {
     next()

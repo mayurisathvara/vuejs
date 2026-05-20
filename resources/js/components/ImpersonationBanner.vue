@@ -31,7 +31,11 @@ const authStore = useAuthStore()
 const router = useRouter()
 
 const handleBack = async () => {
-  await authStore.stopImpersonating()
+  try {
+    await authStore.stopImpersonating()
+  } catch (error) {
+    console.error('Failed to stop impersonation:', error)
+  }
   router.push('/organizations')
 }
 </script>

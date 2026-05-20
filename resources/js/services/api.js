@@ -39,19 +39,29 @@ api.interceptors.response.use(
     return response
   },
   (error) => {
+    // Requests can opt out of global side-effects by setting _skipGlobalErrorHandling: true
+    // in their config (e.g. background token-revocation calls in stopImpersonating).
+    if (error.config?._skipGlobalErrorHandling) {
+      return Promise.reject(error)
+    }
+
     // Handle 401 errors (unauthorized)
     if (error.response?.status === 401) {
-      // Clear auth data
+      // Clear all auth data, including any impersonation remnants, so a subsequent
+      // login does not inherit a stale impersonation banner or broken session.
       localStorage.removeItem('token')
       localStorage.removeItem('user')
+      localStorage.removeItem('admin_token')
+      localStorage.removeItem('admin_user')
+      localStorage.removeItem('impersonated_org_name')
       delete api.defaults.headers.common['Authorization']
-      
+
       // Redirect to login if not already there
       if (window.location.pathname !== '/login') {
         window.location.href = '/login'
       }
     }
-    
+
     // Handle 403 errors (forbidden - insufficient permissions)
     // Skip global handling for cases the calling code manages itself
     // (email_not_verified, plan_expired, SIM_LIMIT_REACHED, etc.)
@@ -68,7 +78,7 @@ api.interceptors.response.use(
         }
       }
     }
-    
+
     return Promise.reject(error)
   }
 )

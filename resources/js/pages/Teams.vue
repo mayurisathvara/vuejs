@@ -72,13 +72,13 @@
               <button
                 class="action-menu-trigger"
                 type="button"
-                @click.stop="toggleActionMenu(row.id)"
+                @click.stop="toggleActionMenu(row.id, $event)"
                 aria-label="Open actions"
                 title="More actions"
               >
                 <i class="fas fa-ellipsis-h"></i>
               </button>
-              <div v-if="activeActionMenu === row.id" class="action-menu" @click.stop>
+              <div v-if="activeActionMenu === row.id" class="action-menu" :style="actionMenuPosition" @click.stop>
                 <button type="button" class="action-menu-item" @click="openEditFromMenu(row)">
                   <i class="fas fa-pen"></i>
                   <span>Edit</span>
@@ -183,12 +183,17 @@
       @close="closeDeleteModal"
       @confirm="handleDelete"
     >
-      <p>Are you sure you want to delete this team?</p>
-      <div v-if="teamToDelete" class="alert alert-warning">
-        <strong>{{ teamToDelete.name }}</strong><br>
-        <small>{{ teamToDelete.organization?.name || 'N/A' }}</small>
+      <div class="delete-modal-content">
+        <p class="delete-question">Are you sure you want to delete this team?</p>
+        <div v-if="teamToDelete" class="info-card">
+          <div class="info-name">{{ teamToDelete.name }}</div>
+          <div class="info-sub">{{ teamToDelete.organization?.name || 'N/A' }}</div>
+        </div>
+        <p class="warning-text">
+          <i class="fas fa-exclamation-triangle me-2"></i>
+          This action cannot be undone.
+        </p>
       </div>
-      <p class="text-danger">This action cannot be undone.</p>
     </Modal>
   </div>
 </template>
@@ -199,40 +204,42 @@
   -webkit-overflow-scrolling: touch;
 }
 
-/* Simple table look (match Call Reports) */
+/* Simple table look */
 .simple-table :deep(.table-responsive) {
-  border: 1px solid #e3e6f0;
-  border-radius: 10px;
-  overflow: hidden;
+  border: 1px solid #eef2f7;
+  border-radius: 14px;
 }
 
 .simple-table :deep(table.table) {
   width: 100%;
-  min-width: 1200px;
-  border-collapse: collapse;
+  min-width: 800px;
+  border-collapse: separate;
+  border-spacing: 0;
   margin: 0;
-  font-size: 14px;
+  font-size: 13.5px;
 }
 
 .simple-table :deep(table.table thead th) {
-  background: #f8f9fa;
-  color: #111827;
+  background: #f9fafb;
+  color: #374151;
   font-weight: 600;
   text-transform: none !important;
-  letter-spacing: normal !important;
-  border-bottom: 1px solid #e3e6f0;
-  border-right: 1px solid #e3e6f0;
-  padding: 10px 12px !important;
+  letter-spacing: 0.03em !important;
+  border-bottom: 1px solid #edf1f7;
+  border-right: 1px solid #edf1f7;
+  padding: 10px 14px !important;
+  font-size: 12px;
   vertical-align: middle;
   white-space: nowrap;
 }
 
 .simple-table :deep(table.table tbody td) {
-  border-top: 1px solid #e3e6f0;
-  border-right: 1px solid #e3e6f0;
-  padding: 10px 12px !important;
+  border-top: 1px solid #f1f5f9;
+  border-right: 1px solid #f1f5f9;
+  padding: 9px 14px !important;
   vertical-align: middle;
   background: #fff;
+  transition: background-color 0.2s ease;
 }
 
 .simple-table :deep(table.table thead th:last-child),
@@ -240,8 +247,9 @@
   border-right: none;
 }
 
-.simple-table :deep(table.table tbody tr:hover) {
-  background: transparent;
+.simple-table :deep(table.table tbody tr:hover),
+.simple-table :deep(table.table tbody tr:hover td) {
+  background: #f9fafb;
 }
 .search-box-wrapper {
   position: relative;
@@ -471,16 +479,56 @@
 }
 
 .action-menu {
-  position: absolute;
-  top: calc(100% + 6px);
-  right: 0;
+  position: fixed;
   min-width: 142px;
   background: #ffffff;
   border: 1px solid #e5e7eb;
   border-radius: 10px;
   box-shadow: 0 12px 28px rgba(15, 23, 42, 0.12);
   padding: 6px;
-  z-index: 1050;
+  z-index: 9999;
+}
+
+/* Delete modal styles */
+.delete-modal-content {
+  padding: 8px 0;
+}
+
+.delete-question {
+  font-size: 15px;
+  color: #3a3b45;
+  margin-bottom: 20px;
+  font-weight: 500;
+  line-height: 1.5;
+}
+
+.info-card {
+  background-color: #f8f9fc;
+  border: 1px solid #e3e6f0;
+  border-radius: 8px;
+  padding: 16px 20px;
+  margin-bottom: 20px;
+}
+
+.info-name {
+  font-size: 16px;
+  font-weight: 600;
+  color: #2c2d3a;
+  margin-bottom: 4px;
+}
+
+.info-sub {
+  font-size: 13px;
+  color: #6c757d;
+}
+
+.warning-text {
+  color: #dc3545;
+  font-size: 14px;
+  font-weight: 500;
+  margin: 0;
+  display: flex;
+  align-items: center;
 }
 
 .action-menu-item {
@@ -572,6 +620,7 @@ const showDeleteModal = ref(false)
 const isEditing = ref(false)
 const teamToDelete = ref(null)
 const activeActionMenu = ref(null)
+const actionMenuPosition = ref({})
 
 // Form data
 const teamForm = reactive({
@@ -723,8 +772,17 @@ const openDeleteFromMenu = (team) => {
   openDeleteModal(team)
 }
 
-const toggleActionMenu = (teamId) => {
-  activeActionMenu.value = activeActionMenu.value === teamId ? null : teamId
+const toggleActionMenu = (teamId, event) => {
+  if (activeActionMenu.value === teamId) {
+    activeActionMenu.value = null
+    return
+  }
+  const rect = event.currentTarget.getBoundingClientRect()
+  actionMenuPosition.value = {
+    top: (rect.bottom + 4) + 'px',
+    right: (window.innerWidth - rect.right) + 'px',
+  }
+  activeActionMenu.value = teamId
 }
 
 const handleClickOutside = (event) => {

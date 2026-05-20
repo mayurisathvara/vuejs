@@ -60,6 +60,11 @@ class ImpersonationController extends Controller
     {
         $token = $request->user()->currentAccessToken();
 
+        // Reject attempts to delete a real session token via this endpoint.
+        if (!str_starts_with($token->name, 'impersonation:')) {
+            return response()->json(['message' => 'Not an impersonation session.'], 422);
+        }
+
         Log::info('Impersonation token revoked', [
             'token_name' => $token->name,
             'user_id'    => $request->user()->id,

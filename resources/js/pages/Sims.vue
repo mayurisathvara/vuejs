@@ -107,13 +107,13 @@
               <button
                 class="action-menu-trigger"
                 type="button"
-                @click.stop="toggleActionMenu(row.id)"
+                @click.stop="toggleActionMenu(row.id, $event)"
                 aria-label="Open actions"
                 title="More actions"
               >
                 <i class="fas fa-ellipsis-h"></i>
               </button>
-              <div v-if="activeActionMenu === row.id" class="action-menu" @click.stop>
+              <div v-if="activeActionMenu === row.id" class="action-menu" :style="actionMenuPosition" @click.stop>
                 <button type="button" class="action-menu-item" @click="openEditFromMenu(row)">
                   <i class="fas fa-pen"></i>
                   <span>Edit</span>
@@ -582,38 +582,42 @@
   -webkit-overflow-scrolling: touch;
 }
 
-/* Simple table look (match Call Reports) */
+/* Simple table look */
 .simple-table :deep(.table-responsive) {
-  border: 1px solid #e3e6f0;
-  border-radius: 10px;
-  overflow: hidden;
+  border: 1px solid #eef2f7;
+  border-radius: 14px;
 }
 
 .simple-table :deep(table.table) {
   width: 100%;
   min-width: 1200px;
-  border-collapse: collapse;
+  border-collapse: separate;
+  border-spacing: 0;
   margin: 0;
-  font-size: 14px;
+  font-size: 13.5px;
 }
 
 .simple-table :deep(table.table thead th) {
-  background: #f8f9fa;
-  color: #111827;
+  background: #f9fafb;
+  color: #374151;
   font-weight: 600;
   text-transform: none !important;
-  letter-spacing: normal !important;
-  border-bottom: 1px solid #e3e6f0;
-  border-right: 1px solid #e3e6f0;
+  letter-spacing: 0.03em !important;
+  border-bottom: 1px solid #edf1f7;
+  border-right: 1px solid #edf1f7;
+  padding: 10px 14px !important;
+  font-size: 12px;
   vertical-align: middle;
   white-space: nowrap;
 }
 
 .simple-table :deep(table.table tbody td) {
-  border-top: 1px solid #e3e6f0;
-  border-right: 1px solid #e3e6f0;
+  border-top: 1px solid #f1f5f9;
+  border-right: 1px solid #f1f5f9;
+  padding: 9px 14px !important;
   vertical-align: middle;
   background: #fff;
+  transition: background-color 0.2s ease;
 }
 
 .simple-table :deep(table.table thead th:last-child),
@@ -621,8 +625,9 @@
   border-right: none;
 }
 
-.simple-table :deep(table.table tbody tr:hover) {
-  background: transparent;
+.simple-table :deep(table.table tbody tr:hover),
+.simple-table :deep(table.table tbody tr:hover td) {
+  background: #f9fafb;
 }
 /* Badge styles are defined globally in app.css */
 
@@ -1536,16 +1541,14 @@
 }
 
 .action-menu {
-  position: absolute;
-  top: calc(100% + 6px);
-  right: 0;
+  position: fixed;
   min-width: 142px;
   background: #ffffff;
   border: 1px solid #e5e7eb;
   border-radius: 10px;
   box-shadow: 0 12px 28px rgba(15, 23, 42, 0.12);
   padding: 6px;
-  z-index: 1050;
+  z-index: 9999;
 }
 
 .action-menu-item {
@@ -1611,6 +1614,7 @@ const searchTimeout = ref(null)
 // Status dropdown state
 const activeDropdown = ref(null)
 const activeActionMenu = ref(null)
+const actionMenuPosition = ref({})
 
 // Modal states
 const showSimModal = ref(false)
@@ -1703,9 +1707,18 @@ const toggleStatusDropdown = (simId) => {
   }
 }
 
-const toggleActionMenu = (simId) => {
+const toggleActionMenu = (simId, event) => {
   activeDropdown.value = null
-  activeActionMenu.value = activeActionMenu.value === simId ? null : simId
+  if (activeActionMenu.value === simId) {
+    activeActionMenu.value = null
+    return
+  }
+  const rect = event.currentTarget.getBoundingClientRect()
+  actionMenuPosition.value = {
+    top: (rect.bottom + 4) + 'px',
+    right: (window.innerWidth - rect.right) + 'px',
+  }
+  activeActionMenu.value = simId
 }
 
 const adjustDropdownPosition = (simId) => {

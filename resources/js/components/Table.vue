@@ -31,8 +31,11 @@
           </td>
         </tr>
         <tr v-else-if="!data.length">
-          <td :colspan="(checkboxes ? 1 : 0) + headers.length + (actions ? 1 : 0)" class="text-center py-4 text-muted">
-            No data available
+          <td :colspan="(checkboxes ? 1 : 0) + headers.length + (actions ? 1 : 0)" class="empty-state-cell">
+            <div class="empty-state">
+              <i class="fas fa-inbox empty-state-icon"></i>
+              <p class="empty-state-text">No data available</p>
+            </div>
           </td>
         </tr>
         <tr v-else v-for="(row, rowIndex) in data" :key="rowIndex">
@@ -227,6 +230,30 @@
   color: #fff !important;
 }
 
+
+/* Empty state */
+.empty-state-cell {
+  padding: 48px 16px !important;
+}
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.empty-state-icon {
+  font-size: 32px;
+  color: #d1d5db;
+}
+
+.empty-state-text {
+  font-size: 14px;
+  color: #9ca3af;
+  margin: 0;
+  font-weight: 500;
+}
 
 /* Responsive adjustments */
 @media (max-width: 768px) {

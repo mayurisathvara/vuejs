@@ -84,6 +84,13 @@ export const useAuthStore = defineStore('auth', () => {
       const response = await api.post('/login', credentials)
       const { user: userData, token: authToken } = response.data
 
+      // Clear any stale impersonation state before establishing a fresh session.
+      localStorage.removeItem('admin_token')
+      localStorage.removeItem('admin_user')
+      localStorage.removeItem('impersonated_org_name')
+      isImpersonating.value = false
+      impersonatedOrgName.value = null
+
       user.value = userData
       token.value = authToken
       localStorage.setItem('token', authToken)
@@ -257,9 +264,21 @@ export const useAuthStore = defineStore('auth', () => {
     // Restore admin session immediately.
     user.value = adminUser
     token.value = adminToken
-    localStorage.setItem('token', adminToken)
-    localStorage.setItem('user', JSON.stringify(adminUser))
-    api.defaults.headers.common['Authorization'] = `Bearer ${adminToken}`
+
+    // Guard against null adminToken storing the literal string "null" in localStorage.
+    if (adminToken) {
+      localStorage.setItem('token', adminToken)
+      api.defaults.headers.common['Authorization'] = `Bearer ${adminToken}`
+    } else {
+      localStorage.removeItem('token')
+      delete api.defaults.headers.common['Authorization']
+    }
+
+    if (adminUser) {
+      localStorage.setItem('user', JSON.stringify(adminUser))
+    } else {
+      localStorage.removeItem('user')
+    }
 
     // Clear impersonation data.
     localStorage.removeItem('admin_token')
@@ -271,12 +290,17 @@ export const useAuthStore = defineStore('auth', () => {
     await syncDateFormat(adminUser)
 
     // Best-effort revoke the impersonation token in the background.
-    void api
-      .post('/admin/impersonate/stop', null, {
-        headers: { Authorization: `Bearer ${impToken}` },
-        timeout: 4000,
-      })
-      .catch(() => {})
+    // _skipGlobalErrorHandling prevents the 401 interceptor from wiping the
+    // just-restored admin session if the impersonation token is already invalid.
+    if (impToken) {
+      void api
+        .post('/admin/impersonate/stop', null, {
+          headers: { Authorization: `Bearer ${impToken}` },
+          timeout: 4000,
+          _skipGlobalErrorHandling: true,
+        })
+        .catch(() => {})
+    }
   }
 
   return {
