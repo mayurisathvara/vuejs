@@ -11,6 +11,7 @@ use App\Http\Controllers\SummaryReportController;
 use App\Http\Controllers\DashboardAnalyticsController;
 use App\Http\Controllers\GeneratedReportController;
 use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\ImpersonationController;
 
 /*
 |--------------------------------------------------------------------------
@@ -91,8 +92,15 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::put('/organizations/{organization}/settings', [\App\Http\Controllers\OrganizationSettingController::class, 'update']);
     });
 
+    // Impersonation stop — any authenticated user (called with the org impersonation token)
+    // Must be defined before the parameterized start route to prevent path ambiguity.
+    Route::post('/admin/impersonate/stop', [ImpersonationController::class, 'stop']);
+
     // Organization management routes - Admin only
     Route::middleware(['role:admin'])->group(function () {
+        // Impersonation start — admin creates a token for the target org's user account
+        Route::post('/admin/impersonate/{organization}', [ImpersonationController::class, 'start']);
+
         Route::put('/organizations/{organization}/status', [OrganizationController::class, 'updateStatus']);
         Route::apiResource('organizations', OrganizationController::class);
         Route::get('/organizations', [OrganizationController::class, 'index']);

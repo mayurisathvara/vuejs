@@ -83,6 +83,10 @@
                   <i class="fas fa-pen"></i>
                   <span>Edit</span>
                 </button>
+                <button type="button" class="action-menu-item action-menu-item-login" @click="openImpersonateModal(row)">
+                  <i class="fas fa-sign-in-alt"></i>
+                  <span>Login as Org</span>
+                </button>
                 <button type="button" class="action-menu-item action-menu-item-danger" @click="openDeleteFromMenu(row)">
                   <i class="fas fa-trash"></i>
                   <span>Delete</span>
@@ -324,6 +328,40 @@
           This action cannot be undone.
         </p>
       </div>
+    </Modal>
+
+    <!-- Login as Org Confirmation Modal -->
+    <Modal
+      :show="showImpersonateConfirm"
+      title="Login as Organization"
+      @close="closeImpersonateModal"
+    >
+      <div class="delete-modal-content">
+        <p class="delete-question">You are about to access this organization's account as an admin.</p>
+        <div v-if="orgToImpersonate" class="info-card impersonate-info-card">
+          <div class="impersonate-icon-row">
+            <span class="impersonate-avatar">{{ orgToImpersonate.name?.charAt(0) || 'O' }}</span>
+          </div>
+          <div class="info-name">{{ orgToImpersonate.name }}</div>
+          <div class="info-email">{{ orgToImpersonate.email }}</div>
+        </div>
+        <p class="impersonate-notice">
+          <i class="fas fa-shield-alt me-2"></i>
+          A warning banner will be shown while you are inside the organization. All organization
+          permissions and subscription limits apply normally during this session.
+        </p>
+      </div>
+      <template #footer>
+        <Button variant="secondary" @click="closeImpersonateModal">Cancel</Button>
+        <Button
+          variant="primary"
+          :loading="authStore.loading"
+          @click="handleLoginAsOrg"
+        >
+          <i class="fas fa-sign-in-alt me-1"></i>
+          Confirm Login
+        </Button>
+      </template>
     </Modal>
   </div>
 </template>
@@ -966,6 +1004,55 @@
   color: #b91c1c;
 }
 
+.action-menu-item-login {
+  color: #0369a1;
+}
+
+.action-menu-item-login:hover {
+  background: #f0f9ff;
+  color: #0284c7;
+}
+
+/* Impersonation confirm modal */
+.impersonate-info-card {
+  text-align: center;
+  padding: 20px;
+}
+
+.impersonate-icon-row {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 12px;
+}
+
+.impersonate-avatar {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #0ea5e9, #3b82f6);
+  color: #fff;
+  font-size: 22px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.impersonate-notice {
+  font-size: 13px;
+  color: #6b7280;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 12px 14px;
+  margin: 0;
+  line-height: 1.6;
+}
+
+.impersonate-notice i {
+  color: #3b82f6;
+}
+
 .user-cell {
   display: flex;
   align-items: center;
@@ -1001,6 +1088,7 @@
 import { ref, reactive, onMounted, onUnmounted, watch, nextTick } from 'vue'
 import { useRouter } from 'vue-router'
 import { useOrganizationsStore } from '@/stores/organizations'
+import { useAuthStore } from '@/stores/auth'
 import { encryptId } from '@/utils/encryption'
 import Button from '@/components/Button.vue'
 import Table from '@/components/Table.vue'
@@ -1011,6 +1099,7 @@ import api from '@/services/api'
 import { formatDateDisplay } from '@/utils/dateFormatter'
 
 const organizationsStore = useOrganizationsStore()
+const authStore = useAuthStore()
 const router = useRouter()
 
 // Search and filters
@@ -1027,6 +1116,10 @@ const showOrganizationModal = ref(false)
 const showDeleteModal = ref(false)
 const isEditing = ref(false)
 const organizationToDelete = ref(null)
+
+// Impersonation state
+const showImpersonateConfirm = ref(false)
+const orgToImpersonate = ref(null)
 
 // Form data
 const organizationForm = reactive({
@@ -1315,6 +1408,29 @@ const getStatusIndicatorClass = (status) => {
 
 const getStatusDotClass = (status) => {
   return status === 'active' ? 'active' : 'inactive'
+}
+
+const openImpersonateModal = (organization) => {
+  activeActionMenu.value = null
+  orgToImpersonate.value = organization
+  showImpersonateConfirm.value = true
+}
+
+const closeImpersonateModal = () => {
+  showImpersonateConfirm.value = false
+  orgToImpersonate.value = null
+}
+
+const handleLoginAsOrg = async () => {
+  if (!orgToImpersonate.value) return
+  try {
+    await authStore.loginAsOrg(orgToImpersonate.value.id)
+    closeImpersonateModal()
+    router.push('/dashboard')
+  } catch (error) {
+    console.error('Impersonation failed:', error)
+    alert(error?.response?.data?.message || error?.message || 'Failed to login as organization.')
+  }
 }
 
 const handleDelete = async () => {

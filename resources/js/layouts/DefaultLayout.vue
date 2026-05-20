@@ -5,6 +5,9 @@
     <!-- End Sidebar -->
 
     <div class="main-panel">
+      <!-- Impersonation warning banner -->
+      <ImpersonationBanner />
+
       <!-- Navbar -->
       <Navbar />
       <!-- End Navbar -->
@@ -26,6 +29,7 @@ import { onMounted } from 'vue'
 import Sidebar from '@/components/Sidebar.vue'
 import Navbar from '@/components/Navbar.vue'
 import Footer from '@/components/Footer.vue'
+import ImpersonationBanner from '@/components/ImpersonationBanner.vue'
 
 onMounted(() => {
   // Initialize UI scripts if needed

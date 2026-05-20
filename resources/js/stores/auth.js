@@ -12,6 +12,10 @@ export const useAuthStore = defineStore('auth', () => {
   const loading = ref(false)
   const dateFormat = ref(localStorage.getItem(DATE_FORMAT_STORAGE_KEY) || DEFAULT_ADMIN_DATE_FORMAT)
 
+  // Impersonation state — persisted in localStorage so page refresh survives
+  const isImpersonating = ref(!!localStorage.getItem('admin_token'))
+  const impersonatedOrgName = ref(localStorage.getItem('impersonated_org_name') || null)
+
   // Ensure axios has auth header immediately on store creation (before component mount hooks).
   if (token.value) {
     api.defaults.headers.common['Authorization'] = `Bearer ${token.value}`
@@ -79,16 +83,16 @@ export const useAuthStore = defineStore('auth', () => {
     try {
       const response = await api.post('/login', credentials)
       const { user: userData, token: authToken } = response.data
-      
+
       user.value = userData
       token.value = authToken
       localStorage.setItem('token', authToken)
       localStorage.setItem('user', JSON.stringify(userData))
       await syncDateFormat(userData)
-      
+
       // Set default axios header
       api.defaults.headers.common['Authorization'] = `Bearer ${authToken}`
-      
+
       return response.data
     } catch (error) {
       throw error
@@ -141,6 +145,14 @@ export const useAuthStore = defineStore('auth', () => {
     localStorage.removeItem(DATE_FORMAT_STORAGE_KEY)
     dateFormat.value = DEFAULT_ADMIN_DATE_FORMAT
     delete api.defaults.headers.common['Authorization']
+
+    // Clear any lingering impersonation state on full logout.
+    localStorage.removeItem('admin_token')
+    localStorage.removeItem('admin_user')
+    localStorage.removeItem('impersonated_org_name')
+    isImpersonating.value = false
+    impersonatedOrgName.value = null
+
     loading.value = false
 
     // Best-effort revoke in background; do not block UI.
@@ -173,7 +185,7 @@ export const useAuthStore = defineStore('auth', () => {
   const initializeAuth = () => {
     const storedToken = localStorage.getItem('token')
     const storedUser = localStorage.getItem('user')
-    
+
     if (storedToken && storedUser) {
       token.value = storedToken
       user.value = JSON.parse(storedUser)
@@ -181,6 +193,10 @@ export const useAuthStore = defineStore('auth', () => {
       // Best-effort background sync for date format.
       void syncDateFormat(user.value)
     }
+
+    // Restore impersonation state after page refresh.
+    isImpersonating.value = !!localStorage.getItem('admin_token')
+    impersonatedOrgName.value = localStorage.getItem('impersonated_org_name') || null
   }
 
   const setUser = (userData) => {
@@ -189,12 +205,88 @@ export const useAuthStore = defineStore('auth', () => {
     void syncDateFormat(userData)
   }
 
+  /**
+   * Admin-only: switch into an organization's account without a password.
+   * Saves the current admin session and swaps in a new org token.
+   */
+  const loginAsOrg = async (organizationId) => {
+    if (isImpersonating.value) {
+      throw new Error('Already in an impersonation session. Click "Back to Admin" first.')
+    }
+
+    loading.value = true
+    try {
+      const response = await api.post(`/admin/impersonate/${organizationId}`)
+      const { user: orgUser, token: impToken, organization_name } = response.data
+
+      // Persist admin session before switching.
+      localStorage.setItem('admin_token', token.value)
+      localStorage.setItem('admin_user', JSON.stringify(user.value))
+      localStorage.setItem('impersonated_org_name', organization_name)
+
+      // Switch to org session.
+      user.value = orgUser
+      token.value = impToken
+      localStorage.setItem('token', impToken)
+      localStorage.setItem('user', JSON.stringify(orgUser))
+      api.defaults.headers.common['Authorization'] = `Bearer ${impToken}`
+
+      isImpersonating.value = true
+      impersonatedOrgName.value = organization_name
+
+      await syncDateFormat(orgUser)
+
+      return response.data
+    } catch (error) {
+      throw error
+    } finally {
+      loading.value = false
+    }
+  }
+
+  /**
+   * Restore the saved admin session and revoke the impersonation token in the background.
+   */
+  const stopImpersonating = async () => {
+    const impToken = token.value
+
+    const adminToken = localStorage.getItem('admin_token')
+    const adminUserRaw = localStorage.getItem('admin_user')
+    const adminUser = adminUserRaw ? JSON.parse(adminUserRaw) : null
+
+    // Restore admin session immediately.
+    user.value = adminUser
+    token.value = adminToken
+    localStorage.setItem('token', adminToken)
+    localStorage.setItem('user', JSON.stringify(adminUser))
+    api.defaults.headers.common['Authorization'] = `Bearer ${adminToken}`
+
+    // Clear impersonation data.
+    localStorage.removeItem('admin_token')
+    localStorage.removeItem('admin_user')
+    localStorage.removeItem('impersonated_org_name')
+    isImpersonating.value = false
+    impersonatedOrgName.value = null
+
+    await syncDateFormat(adminUser)
+
+    // Best-effort revoke the impersonation token in the background.
+    void api
+      .post('/admin/impersonate/stop', null, {
+        headers: { Authorization: `Bearer ${impToken}` },
+        timeout: 4000,
+      })
+      .catch(() => {})
+  }
+
   return {
     // State
     user,
     token,
     loading,
     dateFormat,
+    isImpersonating,
+    impersonatedOrgName,
     // Getters
     isAuthenticated,
     userRole,
@@ -206,6 +298,8 @@ export const useAuthStore = defineStore('auth', () => {
     initializeAuth,
     setUser,
     setDateFormat,
-    syncDateFormat
+    syncDateFormat,
+    loginAsOrg,
+    stopImpersonating,
   }
 })
