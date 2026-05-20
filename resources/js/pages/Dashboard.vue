@@ -1,7 +1,7 @@
 <template>
   <div class="dashboard-page">
     <!-- Page Header -->
-    <div class="d-flex align-items-left align-items-md-center flex-column flex-md-row pt-2 pb-0 gap-2">
+    <div class="d-flex align-items-start align-items-md-center flex-column flex-md-row pt-2 pb-0 gap-2">
       <div>
         <h3 class="fw-bold mb-1">Dashboard</h3>
         <p class="text-muted mb-0">Welcome back! Here's your call activity overview.</p>
@@ -53,7 +53,7 @@
 
         <button
           type="button"
-          class="btn btn-light border shadow-sm btn-sm"
+          class="btn btn-white border shadow-sm"
           @click="refreshData"
           aria-label="Refresh"
           title="Refresh"
@@ -343,7 +343,7 @@
                   <i class="fas fa-phone text-danger" style="font-size: 1.3rem;"></i>
                 </div>
                 <div>
-                  <p class="text-muted mb-1">Outbound</p>
+                  <p class="text-muted small mb-1">Outbound</p>
                   <h2 class="fw-bold mb-0">{{ dashboardSummary.outbound_calls.toLocaleString() }}</h2>
                 </div>
               </div>
@@ -366,7 +366,7 @@
                   <i class="fas fa-phone text-info" style="font-size: 1.3rem;"></i>
                 </div>
                 <div>
-                  <p class="text-muted mb-1">Inbound</p>
+                  <p class="text-muted small mb-1">Inbound</p>
                   <h2 class="fw-bold mb-0">{{ dashboardSummary.inbound_calls.toLocaleString() }}</h2>
                 </div>
               </div>
@@ -389,7 +389,7 @@
                   <i class="fas fa-phone-slash text-warning" style="font-size: 1.3rem;"></i>
                 </div>
                 <div>
-                  <p class="text-muted mb-1">Missed Calls</p>
+                  <p class="text-muted small mb-1">Missed Calls</p>
                   <h2 class="fw-bold mb-0">{{ dashboardSummary.missed_calls.toLocaleString() }}</h2>
                 </div>
               </div>
@@ -412,7 +412,7 @@
                   <i class="fas fa-users text-orange" style="font-size: 1.3rem;"></i>
                 </div>
                 <div>
-                  <p class="text-muted mb-1">Unique Calls</p>
+                  <p class="text-muted small mb-1">Unique Calls</p>
                   <h2 class="fw-bold mb-0">{{ dashboardSummary.unique_calls.toLocaleString() }}</h2>
                 </div>
               </div>
@@ -540,7 +540,7 @@
             <div class="breakdown-items mt-3">
               <div class="d-flex justify-content-between align-items-center py-2 border-bottom">
                 <div class="d-flex align-items-center">
-                  <i class="fas fa-phone icon-accent me-2"></i>
+                  <i class="fas fa-phone text-success me-2"></i>
                   <span>Answered</span>
                 </div>
                 <span class="fw-bold">{{ dashboardSummary.breakdown.outbound.answered.toLocaleString() }}</span>
@@ -611,9 +611,12 @@
             <p class="text-muted small">Highest activity periods</p>
           </div>
           <div class="card-body px-4 pb-4">
-            <div v-if="peakHours.length === 0" class="text-center text-muted py-4">
-              <div class="fw-semibold">No data found</div>
-              <div class="small">Try adjusting filters or date range.</div>
+            <div v-if="peakHours.length === 0" class="peak-empty-state">
+              <div class="peak-empty-icon">
+                <i class="fas fa-clock"></i>
+              </div>
+              <div class="fw-semibold text-secondary">No data found</div>
+              <div class="small text-muted">Try adjusting filters or date range.</div>
             </div>
             <div v-else>
               <div
@@ -2061,6 +2064,29 @@ onBeforeUnmount(() => {
   color: #64748b;
 }
 
+.peak-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 2rem 1rem;
+  text-align: center;
+}
+
+.peak-empty-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  color: #94a3b8;
+  background: #f1f5f9;
+  border: 1px solid #e2e8f0;
+  margin-bottom: 0.5rem;
+}
+
 .missed-donut {
   width: 200px;
   height: 200px;
@@ -2169,9 +2195,7 @@ onBeforeUnmount(() => {
   .missed-center h2 {
     font-size: 1.9rem;
   }
-}
 
-@media (max-width: 575.98px) {
   .chart-container {
     height: 250px;
   }
