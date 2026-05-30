@@ -18,6 +18,9 @@
         @input="$emit('update:modelValue', $event.target.value)"
         @blur="$emit('blur', $event)"
         @focus="$emit('focus', $event)"
+        @copy="props.type === 'password' && $event.preventDefault()"
+        @cut="props.type === 'password' && $event.preventDefault()"
+        @paste="props.type === 'password' && $event.preventDefault()"
       />
       <button
         v-if="isPasswordWithToggle"

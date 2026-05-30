@@ -14,7 +14,7 @@
         </button>
         <router-link v-if="canRequestRenewal" class="act-btn act-btn--renew" to="/subscription/renew">
           <i class="fas fa-bolt"></i>
-          Request Renewal
+          {{ isTrialPlan ? 'Upgrade Plan' : 'Request Renewal' }}
         </router-link>
         <span v-else class="act-btn act-btn--renew act-btn--locked" :title="renewalLockHint">
           <i class="fas fa-lock"></i>
@@ -786,12 +786,14 @@ const isRenewalSoon = computed(() => daysRemaining.value !== null && daysRemaini
 const renewalDaysBefore = computed(() => stats.value?.renewal_days_before ?? 2)
 
 const canRequestRenewal = computed(() => {
+  if (isTrialPlan.value) return true
   if (isExpired.value) return true
   if (daysRemaining.value === null) return false
   return daysRemaining.value <= renewalDaysBefore.value
 })
 
 const renewalLockHint = computed(() => {
+  if (isTrialPlan.value) return ''
   if (daysRemaining.value === null) return 'Renewal is not available for this plan type.'
   if (daysRemaining.value <= renewalDaysBefore.value) return ''
   const d = daysRemaining.value
@@ -800,6 +802,7 @@ const renewalLockHint = computed(() => {
 })
 
 const renewalHeadline = computed(() => {
+  if (isTrialPlan.value) return 'Free Trial Active'
   if (isExpired.value) return 'Subscription expired'
   if (daysRemaining.value === null) return 'Active until cancelled'
   if (daysRemaining.value === 0) return 'Expires today'
@@ -808,13 +811,17 @@ const renewalHeadline = computed(() => {
 })
 
 const renewalSubtext = computed(() => {
+  if (isTrialPlan.value) return 'Upgrade to a paid plan at any time.'
   if (isExpired.value) return 'Renew now to keep SIM capacity active.'
   if (daysRemaining.value === null) return 'No end date is configured for this plan.'
   if (daysRemaining.value === 0) return 'Your plan reaches expiry today.'
   return `${daysRemaining.value} day${daysRemaining.value === 1 ? '' : 's'} remaining`
 })
 
-const renewalActionText = computed(() => (isExpired.value || isRenewalSoon.value ? 'Renew Now' : 'Request Renewal'))
+const renewalActionText = computed(() => {
+  if (isTrialPlan.value) return 'Upgrade Plan'
+  return isExpired.value || isRenewalSoon.value ? 'Renew Now' : 'Request Renewal'
+})
 
 const timelineValue = computed(() => {
   if (isExpired.value) return 'Expired'

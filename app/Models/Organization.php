@@ -11,6 +11,8 @@ class Organization extends Model
 {
     use HasFactory;
 
+    public bool $autoVerifyUser = false;
+
     protected $fillable = [
         'name',
         'email',
@@ -100,9 +102,10 @@ class Organization extends Model
             // Update existing user
             $this->user->update($userData);
         } else {
-            // Create new user — admin-created, so auto-verify email
             $user = User::create($userData + ['organization_id' => $this->id]);
-            $user->markEmailAsVerified();
+            if ($this->autoVerifyUser) {
+                $user->markEmailAsVerified();
+            }
         }
     }
 

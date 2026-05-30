@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\OrganizationSubscription;
 use App\Models\Plan;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
@@ -112,8 +113,15 @@ class RazorpaySubscriptionService
                 ->first();
 
             $latestExpiry = $latest?->end_date ? Carbon::parse($latest->end_date) : null;
+            $isActiveTrial = $latest && $latest->status === 'active' && $latest->billing_cycle === 'trial';
 
-            if ($latestExpiry && $latestExpiry->greaterThan($today)) {
+            if ($isActiveTrial) {
+                // Cancel the free trial immediately so the paid plan activates now
+                $latest->update(['status' => 'cancelled']);
+                Cache::forget("sub_active:{$organizationId}");
+                $startDate = $today->copy();
+                $status = 'active';
+            } elseif ($latestExpiry && $latestExpiry->greaterThan($today)) {
                 $startDate = $latestExpiry->copy()->addDay();
                 $status = 'upcoming';
             } else {

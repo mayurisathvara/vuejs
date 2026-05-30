@@ -291,14 +291,16 @@ const fetchRenewalData = async () => {
     stats.value = data.stats || {}
 
     // Guard: mirrors canRequestRenewal in Subscription.vue exactly.
+    // Free trial users can upgrade at any time.
     // Expired (status or negative days) → always allow.
     // Active with no end date → block. Active with days > threshold → block.
     const s = stats.value
+    const isCurrentlyTrial = s.plan_slug === 'free_trial'
     const isExpiredOrNegative =
       s.subscription_status === 'expired' ||
       (s.days_until_expiry !== null && s.days_until_expiry < 0)
 
-    if (!isExpiredOrNegative) {
+    if (!isCurrentlyTrial && !isExpiredOrNegative) {
       const days = s.days_until_expiry
       const threshold = s.renewal_days_before ?? 2
       if (days === null) {

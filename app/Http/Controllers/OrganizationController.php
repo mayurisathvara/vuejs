@@ -74,7 +74,7 @@ class OrganizationController extends Controller
             ? (string) $request->app_login_code
             : $this->generateUniqueAppLoginCode();
 
-        $organization = Organization::create([
+        $organization = new Organization([
             'name' => $request->name,
             'email' => $request->email,
             'app_login_code' => $appLoginCode,
@@ -83,6 +83,8 @@ class OrganizationController extends Controller
             'description' => $request->description,
             'status' => $request->status,
         ]);
+        $organization->autoVerifyUser = true;
+        $organization->save();
 
         // Create default organization_settings row
         \App\Models\OrganizationSetting::create([
