@@ -569,7 +569,7 @@
           ></div>
 
           <!-- Modal panel -->
-          <div class="inline-block align-bottom bg-white rounded-2xl text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-4xl sm:w-full">
+          <div class="relative inline-block align-bottom bg-white rounded-2xl text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-4xl sm:w-full">
             <!-- Close button -->
             <button
               @click="showDemoModal = false"
@@ -622,12 +622,28 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
 import dashboardImg from '@/assets/images/dashboard.png';
 import callReportImg from '@/assets/images/call_report.png';
 import summaryReportImg from '@/assets/images/summary_report.png';
 
 const showDemoModal = ref(false);
+
+onMounted(() => {
+  const observer = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('is-visible');
+          observer.unobserve(entry.target);
+        }
+      });
+    },
+    { threshold: 0.1 }
+  );
+
+  document.querySelectorAll('.fade-in-up').forEach((el) => observer.observe(el));
+});
 
 const features = [
   {
@@ -703,9 +719,21 @@ const features = [
 
 /* Scroll-triggered fade-in animations */
 .fade-in-up {
-  opacity: 0;
-  transform: translateY(30px);
-  transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+  opacity: 1;
+  transform: translateY(0);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .fade-in-up {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+  }
+
+  .fade-in-up.is-visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .fade-in-up.delay-0 { transition-delay: 0s; }
@@ -966,13 +994,6 @@ const features = [
   @apply scale-110;
 }
 
-/* Add intersection observer for scroll animations */
-@media (prefers-reduced-motion: no-preference) {
-  .fade-in-up {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
 
 /* ===== How Callytics Works ===== */
 .hiw-section {

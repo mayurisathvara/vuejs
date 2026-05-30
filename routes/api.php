@@ -1,6 +1,6 @@
 <?php
 
-use Illuminate\Http\Request;
+use App\Http\Controllers\ContactController;
 use Illuminate\Support\Facades\Route;
 
-// API routes not needed for static website
+Route::post('/contact', [ContactController::class, 'store']);

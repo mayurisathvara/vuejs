@@ -225,9 +225,21 @@
                 </p>
               </div>
 
+              <!-- Server Error Message -->
+              <transition name="fade">
+                <div v-if="submitError" class="bg-red-50 border-l-4 border-red-500 p-4 rounded-lg" role="alert">
+                  <div class="flex items-start">
+                    <svg class="w-6 h-6 text-red-500 mr-3 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
+                      <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+                    </svg>
+                    <p class="text-red-800 font-medium">{{ submitError }}</p>
+                  </div>
+                </div>
+              </transition>
+
               <!-- Success Message -->
               <transition name="fade">
-                <div v-if="showSuccess" class="bg-green-50 border-l-4 border-green-500 p-4 rounded-lg" role="alert">
+                <div v-if="showSuccess" class="bg-green-50 border-l-4 border-green-500 p-4 rounded-lg" role="status">
                   <div class="flex items-start">
                     <svg class="w-6 h-6 text-green-500 mr-3 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
                       <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
@@ -295,37 +307,6 @@
                   </div>
                 </div>
 
-                <div class="flex items-start">
-                  <div class="w-12 h-12 rounded-lg flex items-center justify-center flex-shrink-0" style="background-color: #ffe6cc;">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="color: #ff6b00;">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                    </svg>
-                  </div>
-                  <div class="ml-4">
-                    <h4 class="font-semibold text-gray-900 mb-1">Address</h4>
-                    <p class="text-gray-600">
-                      Callytics Technologies Pvt. Ltd., 4th Floor,<br/>
-                      Shree Krishna Centre, Mithakhali Six Roads,<br/>
-                      Ahmedabad — 380009, Gujarat, India
-                    </p>
-                  </div>
-                </div>
-
-                <div class="flex items-start">
-                  <div class="w-12 h-12 rounded-lg flex items-center justify-center flex-shrink-0" style="background-color: #ffe6cc;">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="color: #ff6b00;">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                  </div>
-                  <div class="ml-4">
-                    <h4 class="font-semibold text-gray-900 mb-1">Business Hours</h4>
-                    <p class="text-gray-600">
-                      Monday – Saturday: 9:00 AM – 7:00 PM IST<br/>
-                      Sunday: Closed
-                    </p>
-                  </div>
-                </div>
               </div>
             </div>
 
@@ -339,19 +320,16 @@
                 <p class="text-orange-50 mb-6">
                   Our support team is available Monday to Saturday to assist you with any urgent queries or issues.
                 </p>
-                <div class="flex flex-col sm:flex-row gap-3">
+                <div>
                   <a
                     href="mailto:support@callytics.com"
-                    class="inline-block bg-white font-bold px-6 py-3 rounded-lg hover:shadow-xl transition-all duration-300 hover:scale-105 text-center"
+                    class="inline-flex items-center gap-2 bg-white font-bold px-6 py-3 rounded-lg hover:shadow-xl transition-all duration-300 hover:scale-105 text-center"
                     style="color: #ff6b00;"
                   >
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                    </svg>
                     Email Support
-                  </a>
-                  <a
-                    href="tel:+18001234567"
-                    class="inline-block bg-white/10 backdrop-blur-sm border-2 border-white/30 text-white font-bold px-6 py-3 rounded-lg hover:bg-white/20 transition-all duration-300 text-center"
-                  >
-                    Call Now
                   </a>
                 </div>
               </div>
@@ -365,6 +343,8 @@
 
 <script setup>
 import { ref, reactive, onMounted } from 'vue';
+
+const submitError = ref('');
 
 const formData = reactive({
   name: '',
@@ -445,9 +425,10 @@ const validateForm = () => {
   return isValid;
 };
 
-const handleSubmit = () => {
+const handleSubmit = async () => {
+  submitError.value = '';
+
   if (!validateForm()) {
-    // Scroll to first error
     const firstError = document.querySelector('[aria-invalid="true"]');
     if (firstError) {
       firstError.focus();
@@ -458,12 +439,37 @@ const handleSubmit = () => {
 
   isSubmitting.value = true;
 
-  // Simulate form submission (replace with actual API call)
-  setTimeout(() => {
-    isSubmitting.value = false;
-    showSuccess.value = true;
+  try {
+    const response = await fetch('/api/contact', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+      body: JSON.stringify({ ...formData }),
+    });
 
-    // Reset form
+    const data = await response.json();
+
+    if (!response.ok) {
+      if (response.status === 422 && data.errors) {
+        Object.keys(data.errors).forEach((field) => {
+          if (field in errors) {
+            errors[field] = data.errors[field][0];
+          }
+        });
+        const firstError = document.querySelector('[aria-invalid="true"]');
+        if (firstError) {
+          firstError.focus();
+          firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      } else {
+        submitError.value = data.message || 'Something went wrong. Please try again.';
+      }
+      return;
+    }
+
+    showSuccess.value = true;
     formData.name = '';
     formData.email = '';
     formData.phone = '';
@@ -471,19 +477,22 @@ const handleSubmit = () => {
     formData.subject = '';
     formData.message = '';
 
-    // Scroll to success message
     setTimeout(() => {
-      const successMessage = document.querySelector('[role="alert"]');
+      const successMessage = document.querySelector('[role="status"]');
       if (successMessage) {
         successMessage.scrollIntoView({ behavior: 'smooth', block: 'center' });
       }
     }, 100);
 
-    // Hide success message after 8 seconds
     setTimeout(() => {
       showSuccess.value = false;
     }, 8000);
-  }, 1500);
+
+  } catch {
+    submitError.value = 'Network error. Please check your connection and try again.';
+  } finally {
+    isSubmitting.value = false;
+  }
 };
 
 // Add structured data for SEO

@@ -26,9 +26,9 @@
           </router-link>
 
           <router-link
-            to="#how-it-works"
+            to="/#features"
             class="nav-link"
-            :class="{ 'active': isActive('#how-it-works') }"
+            :class="{ 'active': isActive('/#features') }"
           >
             How it Works
           </router-link>
@@ -93,12 +93,12 @@
 
         <!-- CTA Buttons Desktop -->
         <div class="hidden md:flex items-center space-x-3">
-          <router-link
-            to="/login"
+          <a
+            href="#"
             class="px-6 py-2.5 text-gray-700 font-semibold rounded-lg border-2 border-gray-300 hover:border-orange-500 hover:text-orange-600 transition-all duration-300"
           >
             Login
-          </router-link>
+          </a>
           <router-link
             to="/contact"
             class="px-6 py-2.5 text-white font-semibold rounded-lg shadow-md hover:shadow-lg transition-all duration-300 hover:scale-105"
@@ -148,11 +148,11 @@
           </router-link>
 
           <router-link
-            to="#how-it-works"
+            to="/#features"
             @click="mobileMenuOpen = false"
             class="block px-4 py-2.5 rounded-lg text-gray-700 transition-colors font-medium"
-            :class="{ 'text-white': isActive('#how-it-works') }"
-            :style="isActive('#how-it-works') ? 'background-color: #ffe6cc; color: #ff6b00;' : ''"
+            :class="{ 'text-white': isActive('/#features') }"
+            :style="isActive('/#features') ? 'background-color: #ffe6cc; color: #ff6b00;' : ''"
           >
             How it Works
           </router-link>
@@ -207,13 +207,13 @@
             </transition>
           </div>
 
-          <router-link
-            to="/login"
+          <a
+            href="#"
             @click="mobileMenuOpen = false"
             class="block px-4 py-2.5 text-gray-700 font-semibold rounded-lg text-center border-2 border-gray-300"
           >
             Login
-          </router-link>
+          </a>
 
           <router-link
             to="/contact"
@@ -239,6 +239,9 @@ const companyDropdownOpen = ref(false);
 const mobileCompanyOpen = ref(false);
 
 const isActive = (path) => {
+  if (path.startsWith('/#')) {
+    return route.path === '/' && route.hash === path.substring(1);
+  }
   return route.path === path;
 };
 
