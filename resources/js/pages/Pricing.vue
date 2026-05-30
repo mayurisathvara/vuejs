@@ -13,28 +13,28 @@
       <div class="absolute bottom-10 right-10 w-72 h-72 bg-orange-300/10 rounded-full blur-3xl animate-float-delayed" aria-hidden="true"></div>
       
       <!-- Content Container -->
-      <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 text-center">
+      <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 text-center">
         <!-- Badge -->
-        <div class="inline-flex items-center px-4 py-2 rounded-full bg-white/90 backdrop-blur-sm shadow-lg mb-8">
+        <div class="inline-flex items-center px-4 py-2 rounded-full bg-white/90 backdrop-blur-sm shadow-lg mb-4">
           <span class="w-2 h-2 bg-orange-500 rounded-full mr-2 animate-pulse" aria-hidden="true"></span>
           <span class="text-sm font-semibold text-orange-600">Simple & Transparent Pricing</span>
         </div>
 
-        <h1 id="pricing-title" class="hero-heading mb-6">
+        <h1 id="pricing-title" class="hero-heading mb-3">
           <span class="text-gray-900">Simple Call Tracking Plans for Every </span>
           <span class="text-transparent bg-clip-text bg-gradient-to-r from-orange-600 to-orange-500">Business</span>
         </h1>
         
         <!-- Subheading -->
-        <p class="text-xl text-gray-700 max-w-4xl mx-auto mb-4 leading-relaxed">
+        <p class="text-lg text-gray-700 max-w-3xl mx-auto mb-2 leading-relaxed">
           Transparent pricing with no hidden fees. Scale as you grow with <strong>full flexibility</strong> and zero lock-ins.
         </p>
-        <p class="text-lg text-gray-600 max-w-3xl mx-auto mb-10">
+        <p class="text-base text-gray-600 max-w-2xl mx-auto mb-5">
           14-day free trial. No credit card required.
         </p>
         
         <!-- Billing Toggle -->
-        <div class="inline-flex items-center bg-white/90 backdrop-blur-sm rounded-lg p-1 shadow-lg border border-orange-100 mb-6">
+        <div class="inline-flex items-center bg-white/90 backdrop-blur-sm rounded-lg p-1 shadow-lg border border-orange-100 mb-4">
           <button
             @click="billingType = 'monthly'"
             class="px-6 py-2 rounded-md font-semibold transition-all duration-300"
@@ -79,10 +79,10 @@
     </section>
 
     <!-- Pricing Cards -->
-    <section id="pricing-plans" class="py-24 bg-gray-50" aria-labelledby="plans-title">
+    <section id="pricing-plans" class="py-10 bg-gray-50" aria-labelledby="plans-title">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <h2 id="plans-title" class="sr-only">Pricing Plans</h2>
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-5 max-w-6xl mx-auto">
           <article v-for="(plan, index) in pricingPlans" :key="index" 
                class="pricing-card"
                :class="{ 'featured': plan.featured }"
@@ -91,12 +91,12 @@
               ⭐ Most Popular
             </div>
             
-            <div class="p-8">
-              <h3 class="text-2xl font-bold text-gray-900 mb-2">{{ plan.name }}</h3>
-              <p class="text-gray-600 mb-6">{{ plan.description }}</p>
-              
-              <div class="mb-6">
-                <span class="text-5xl font-bold text-gray-900">
+            <div class="p-5">
+              <h3 class="text-lg font-bold text-gray-900 mb-1">{{ plan.name }}</h3>
+              <p class="text-gray-600 text-sm mb-3">{{ plan.description }}</p>
+
+              <div class="mb-3">
+                <span class="text-3xl font-bold text-gray-900">
                   <template v-if="plan.customPrice">Custom</template>
                   <template v-else>₹{{ billingType === 'monthly' ? plan.monthlyPrice : plan.annualPrice }}</template>
                 </span>
@@ -108,7 +108,7 @@
 
               <router-link
                 to="/contact"
-                class="block w-full py-3 px-6 text-center font-semibold rounded-lg transition-all duration-300 mb-4"
+                class="block w-full py-2 px-5 text-center font-semibold rounded-lg transition-all duration-300 mb-2"
                 :class="plan.featured ? 'text-white hover:shadow-xl hover:scale-105' : 'bg-gray-100 text-gray-900 hover:bg-gray-200'"
                 :style="plan.featured ? 'background: linear-gradient(135deg, #ff6b00 0%, #ff8c33 100%);' : ''"
               >
@@ -116,16 +116,16 @@
               </router-link>
               
               <!-- Urgency Text -->
-              <p class="text-xs text-gray-500 text-center mb-6 italic">
+              <p class="text-xs text-gray-500 text-center mb-3 italic">
                 Start your free trial today — upgrade anytime.
               </p>
 
               <div class="space-y-4">
                 <div class="border-t border-gray-200 pt-4">
                   <p class="font-semibold text-gray-900 mb-3">Features:</p>
-                  <ul class="space-y-3">
-                    <li v-for="(feature, idx) in plan.features" :key="idx" class="flex items-start text-gray-700">
-                      <svg class="w-5 h-5 text-green-500 mr-3 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                  <ul class="space-y-2">
+                    <li v-for="(feature, idx) in plan.features" :key="idx" class="flex items-start text-sm text-gray-700">
+                      <svg class="w-4 h-4 text-green-500 mr-2 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                       </svg>
                       <span>{{ feature }}</span>
@@ -140,9 +140,9 @@
     </section>
 
     <!-- Feature Comparison -->
-    <section id="feature-comparison" class="py-24 bg-white" aria-labelledby="comparison-title">
+    <section id="feature-comparison" class="py-12 bg-white" aria-labelledby="comparison-title">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="text-center mb-16">
+        <div class="text-center mb-8">
           <h2 id="comparison-title" class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
             Feature Comparison
           </h2>
@@ -203,7 +203,7 @@
         </div>
         
         <!-- Mini CTA Below Comparison -->
-        <div class="mt-16 text-center">
+        <div class="mt-8 text-center">
           <p class="text-gray-700 mb-6 text-lg">Ready to choose your plan?</p>
           <router-link to="/contact" 
             class="inline-flex items-center px-8 py-4 bg-gradient-to-r from-orange-600 to-orange-500 text-white font-bold rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105">
@@ -218,9 +218,9 @@
     </section>
 
     <!-- FAQ -->
-    <section id="pricing-faq" class="py-24 bg-gray-50" aria-labelledby="faq-title">
+    <section id="pricing-faq" class="py-12 bg-gray-50" aria-labelledby="faq-title">
       <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="text-center mb-16">
+        <div class="text-center mb-8">
           <h2 id="faq-title" class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
             Pricing FAQs
           </h2>
@@ -266,7 +266,7 @@
     </section>
 
     <!-- Testimonial Section -->
-    <section id="testimonial" class="py-20 bg-white" aria-label="Customer testimonial">
+    <section id="testimonial" class="py-10 bg-white" aria-label="Customer testimonial">
       <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="bg-gradient-to-br from-orange-50 to-orange-100 rounded-2xl p-8 md:p-12 shadow-xl">
           <div class="flex flex-col items-center text-center">
@@ -289,7 +289,7 @@
     </section>
 
     <!-- Final CTA -->
-    <section id="final-cta" class="relative py-24 text-white overflow-hidden" aria-labelledby="cta-title">
+    <section id="final-cta" class="relative py-12 text-white overflow-hidden" aria-labelledby="cta-title">
       <!-- Enhanced Gradient Background -->
       <div class="absolute inset-0 bg-gradient-to-br from-orange-600 via-orange-500 to-orange-400"></div>
       <div class="absolute inset-0 bg-[radial-gradient(circle_at_top_right,_rgba(255,255,255,0.1)_0%,_transparent_50%)]"></div>
@@ -525,8 +525,8 @@ onMounted(() => {
 
 /* Premium Pricing Hero Styles */
 .pricing-hero-section {
-  padding-top: 2rem;
-  padding-bottom: 2rem;
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
   background: linear-gradient(180deg, #fff8f3 0%, #ffffff 100%);
 }
 
@@ -586,21 +586,20 @@ onMounted(() => {
 
 /* Featured plan with enhanced scaling and shadow */
 .pricing-card.featured {
-  transform: scale(1.08);
-  box-shadow: 0 25px 50px -12px rgba(255, 107, 0, 0.25), 
-              0 20px 25px -5px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 20px 40px -10px rgba(255, 107, 0, 0.2),
+              0 10px 20px -5px rgba(0, 0, 0, 0.08);
   border: 2px solid #ff6b00;
   z-index: 10;
 }
 
 .pricing-card.featured:hover {
-  transform: scale(1.10) translateY(-8px);
-  box-shadow: 0 30px 60px -15px rgba(255, 107, 0, 0.35), 
-              0 25px 30px -5px rgba(0, 0, 0, 0.15);
+  transform: translateY(-6px);
+  box-shadow: 0 25px 50px -12px rgba(255, 107, 0, 0.3),
+              0 15px 25px -5px rgba(0, 0, 0, 0.12);
 }
 
 .featured-badge {
-  @apply text-white text-center py-3 px-6 font-semibold;
+  @apply text-white text-center py-1.5 px-4 text-sm font-semibold;
   background: linear-gradient(135deg, #ff6b00 0%, #ff8c33 100%);
 }
 
@@ -659,36 +658,28 @@ button {
   }
 
   #pricing-plans {
-    padding-top: 3rem;
-    padding-bottom: 3rem;
+    padding-top: 2rem;
+    padding-bottom: 2rem;
   }
 
   #feature-comparison,
   #pricing-faq,
   #testimonial {
-    padding-top: 3rem;
-    padding-bottom: 3rem;
+    padding-top: 2.5rem;
+    padding-bottom: 2.5rem;
   }
 
   .pricing-card.featured {
-    transform: scale(1.02);
+    border: 2px solid #ff6b00;
   }
 
   .pricing-card.featured:hover {
-    transform: scale(1.04) translateY(-4px);
+    transform: translateY(-4px);
   }
 
   /* Make table scrollable on mobile */
   .overflow-x-auto {
     -webkit-overflow-scrolling: touch;
-  }
-}
-
-/* Enhanced responsive spacing for larger screens */
-@media (min-width: 768px) {
-  section {
-    padding-top: 6rem;
-    padding-bottom: 6rem;
   }
 }
 
