@@ -13,30 +13,30 @@
       <div class="absolute bottom-10 right-10 w-56 h-56 bg-orange-300/10 rounded-full blur-3xl animate-float-delayed" aria-hidden="true"></div>
       
       <!-- Content Container -->
-      <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 text-center">
+      <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 text-center">
         <!-- Badge -->
-        <div class="inline-flex items-center px-4 py-2 rounded-full bg-white/90 backdrop-blur-sm shadow-lg mb-8">
+        <div class="inline-flex items-center px-4 py-2 rounded-full bg-white/90 backdrop-blur-sm shadow-lg mb-4">
           <span class="w-2 h-2 bg-orange-500 rounded-full mr-2 animate-pulse" aria-hidden="true"></span>
           <span class="text-sm font-semibold text-orange-600">Get in Touch</span>
         </div>
 
-        <h1 id="contact-title" class="hero-heading mb-6">
+        <h1 id="contact-title" class="hero-heading mb-3">
           <span class="text-gray-900">Talk to Our </span>
           <span class="text-transparent bg-clip-text bg-gradient-to-r from-orange-600 to-orange-500">Call Tracking Experts</span>
         </h1>
-        
+
         <!-- Subheading -->
-        <p class="text-xl text-gray-700 max-w-4xl mx-auto mb-4 leading-relaxed">
+        <p class="text-lg text-gray-700 max-w-3xl mx-auto mb-2 leading-relaxed">
           Have questions about pricing, features, or getting started? Our team is ready to help you find the right plan for your business — fast response guaranteed.
         </p>
-        <p class="text-lg text-gray-600 max-w-3xl mx-auto">
+        <p class="text-base text-gray-600 max-w-2xl mx-auto">
           Response within 24 hours. Secure communication. Real experts.
         </p>
       </div>
     </section>
 
     <!-- Contact Section -->
-    <section id="contact-form-section" class="py-24 bg-gray-50" aria-labelledby="form-title">
+    <section id="contact-form-section" class="py-14 bg-gray-50" aria-labelledby="form-title">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
           <!-- Contact Form -->
@@ -273,65 +273,79 @@
           </div>
 
           <!-- Contact Information -->
-          <div class="space-y-8">
+          <div class="space-y-6">
             <!-- Contact Cards -->
             <div class="bg-white rounded-2xl shadow-xl p-8">
               <h2 class="text-2xl font-bold text-gray-900 mb-6">Contact Information</h2>
-              
-              <div class="space-y-6">
-                <div class="flex items-start">
-                  <div class="w-12 h-12 rounded-lg flex items-center justify-center flex-shrink-0" style="background-color: #ffe6cc;">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="color: #ff6b00;">
+
+              <div class="space-y-5">
+                <div class="flex items-center p-4 rounded-xl bg-orange-50 border border-orange-100">
+                  <div class="w-11 h-11 rounded-lg flex items-center justify-center flex-shrink-0" style="background-color: #ffe6cc;">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="color: #ff6b00;" aria-hidden="true">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                     </svg>
                   </div>
                   <div class="ml-4">
-                    <h4 class="font-semibold text-gray-900 mb-1">Email</h4>
-                    <a href="mailto:hello@callytics.io" style="color: #ff6b00;" @mouseover="$event.target.style.color='#cc5500'" @mouseout="$event.target.style.color='#ff6b00'">
+                    <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-0.5">Email</p>
+                    <a href="mailto:hello@callytics.io" class="font-semibold text-gray-900 hover:text-orange-600 transition-colors">
                       hello@callytics.io
                     </a>
                   </div>
                 </div>
 
-                <div class="flex items-start">
-                  <div class="w-12 h-12 rounded-lg flex items-center justify-center flex-shrink-0" style="background-color: #ffe6cc;">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="color: #ff6b00;">
+                <div class="flex items-center p-4 rounded-xl bg-orange-50 border border-orange-100">
+                  <div class="w-11 h-11 rounded-lg flex items-center justify-center flex-shrink-0" style="background-color: #ffe6cc;">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="color: #ff6b00;" aria-hidden="true">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
                     </svg>
                   </div>
                   <div class="ml-4">
-                    <h4 class="font-semibold text-gray-900 mb-1">Phone</h4>
-                    <a href="tel:+919876543210" style="color: #ff6b00;" @mouseover="$event.target.style.color='#cc5500'" @mouseout="$event.target.style.color='#ff6b00'">
+                    <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-0.5">Phone</p>
+                    <a href="tel:+919876543210" class="font-semibold text-gray-900 hover:text-orange-600 transition-colors">
                       +91 98765 43210
                     </a>
                   </div>
                 </div>
 
+                <div class="flex items-center p-4 rounded-xl bg-orange-50 border border-orange-100">
+                  <div class="w-11 h-11 rounded-lg flex items-center justify-center flex-shrink-0" style="background-color: #ffe6cc;">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="color: #ff6b00;" aria-hidden="true">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                  </div>
+                  <div class="ml-4">
+                    <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-0.5">Support Hours</p>
+                    <p class="font-semibold text-gray-900">Mon – Sat, 9 AM – 7 PM IST</p>
+                  </div>
+                </div>
               </div>
             </div>
 
             <!-- Support Card -->
             <div class="relative rounded-2xl shadow-xl p-8 text-white overflow-hidden">
               <div class="absolute inset-0 bg-gradient-to-br from-orange-600 via-orange-500 to-orange-400"></div>
-              <div class="absolute inset-0 bg-[radial-gradient(circle_at_top_right,_rgba(255,255,255,0.1)_0%,_transparent_50%)]"></div>
-              
+              <div class="absolute inset-0 bg-[radial-gradient(circle_at_top_right,_rgba(255,255,255,0.15)_0%,_transparent_55%)]"></div>
+
               <div class="relative">
-                <h2 class="text-2xl font-bold mb-4">Need Immediate Help?</h2>
-                <p class="text-orange-50 mb-6">
+                <div class="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center mb-4">
+                  <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z" />
+                  </svg>
+                </div>
+                <h2 class="text-2xl font-bold mb-3">Need Immediate Help?</h2>
+                <p class="text-orange-100 mb-6 leading-relaxed">
                   Our support team is available Monday to Saturday to assist you with any urgent queries or issues.
                 </p>
-                <div>
-                  <a
-                    href="mailto:support@callytics.com"
-                    class="inline-flex items-center gap-2 bg-white font-bold px-6 py-3 rounded-lg hover:shadow-xl transition-all duration-300 hover:scale-105 text-center"
-                    style="color: #ff6b00;"
-                  >
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                    </svg>
-                    Email Support
-                  </a>
-                </div>
+                <a
+                  href="mailto:support@callytics.com"
+                  class="inline-flex items-center gap-2 bg-white font-bold px-6 py-3 rounded-xl transition-all duration-300 hover:shadow-2xl hover:scale-105 no-outline-btn"
+                  style="color: #ff6b00;"
+                >
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                  </svg>
+                  Email Support
+                </a>
               </div>
             </div>
           </div>
@@ -635,10 +649,24 @@ onMounted(() => {
   opacity: 0;
 }
 
+.no-outline-btn {
+  outline: none !important;
+  border: none !important;
+  box-shadow: none;
+  -webkit-tap-highlight-color: transparent;
+}
+.no-outline-btn:focus,
+.no-outline-btn:focus-visible,
+.no-outline-btn:active {
+  outline: none !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
 /* Premium Hero Section Styles */
 .hero-section {
-  padding-top: 2rem;
-  padding-bottom: 2rem;
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
   background: linear-gradient(180deg, #fff8f3 0%, #ffffff 100%);
   will-change: transform;
 }

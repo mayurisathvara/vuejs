@@ -13,23 +13,23 @@
       <div class="absolute bottom-10 right-10 w-56 h-56 bg-orange-300/10 rounded-full blur-3xl animate-float-delayed" aria-hidden="true"></div>
       
       <!-- Content Container -->
-      <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 text-center">
+      <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 text-center">
         <!-- Badge -->
-        <div class="inline-flex items-center px-4 py-2 rounded-full bg-white/90 backdrop-blur-sm shadow-lg mb-8">
+        <div class="inline-flex items-center px-4 py-2 rounded-full bg-white/90 backdrop-blur-sm shadow-lg mb-4">
           <span class="w-2 h-2 bg-orange-500 rounded-full mr-2 animate-pulse" aria-hidden="true"></span>
           <span class="text-sm font-semibold text-orange-600">Support Centre</span>
         </div>
 
-        <h1 id="help-title" class="hero-heading mb-6">
+        <h1 id="help-title" class="hero-heading mb-3">
           <span class="text-gray-900">Callytics Help & Support — </span>
           <span class="text-transparent bg-clip-text bg-gradient-to-r from-orange-600 to-orange-500">Get Expert Assistance</span>
         </h1>
         
         <!-- SEO Introduction Paragraph -->
-        <p class="text-xl text-gray-700 max-w-4xl mx-auto mb-4 leading-relaxed">
+        <p class="text-lg text-gray-700 max-w-3xl mx-auto mb-2 leading-relaxed">
           Access comprehensive call tracking support and call analytics assistance from our expert team. Get help with setup, troubleshooting, and maximising your business call monitoring platform.
         </p>
-        <p class="text-lg text-gray-600 max-w-3xl mx-auto">
+        <p class="text-base text-gray-600 max-w-2xl mx-auto">
           We are here Monday to Saturday to ensure you get the most out of Callytics.
         </p>
       </div>
@@ -38,7 +38,7 @@
     <!-- Trust Indicators -->
     <section id="trust-indicators" class="py-12 bg-white border-b border-gray-100" aria-label="Trust indicators">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
           <div class="fade-up" style="animation-delay: 0s;">
             <div class="text-4xl font-bold text-orange-600 mb-2">99.9%</div>
             <div class="text-sm text-gray-600 font-semibold">Uptime Guarantee</div>
@@ -56,72 +56,89 @@
             </div>
             <div class="text-sm text-gray-600 font-semibold">Cloud Infrastructure</div>
           </div>
+          <div class="fade-up" style="animation-delay: 0.3s;">
+            <div class="flex items-center justify-center mb-2">
+              <svg class="w-6 h-6 text-orange-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+              </svg>
+              <span class="text-2xl font-bold text-orange-600">Email</span>
+            </div>
+            <div class="text-sm text-gray-600 font-semibold">24/7 Available</div>
+            <div class="text-xs text-gray-500 mt-1">We respond within 24 hours</div>
+          </div>
         </div>
       </div>
     </section>
 
-    <!-- Quick Help Options -->
-    <section id="support-options" class="py-24 bg-gray-50" aria-labelledby="support-options-title">
+    <!-- Documentation & Resources -->
+    <section id="resources-section" class="py-24 bg-white" aria-labelledby="resources-title">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="text-center mb-12">
-          <h2 id="support-options-title" class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">How Can We Help You?</h2>
-          <p class="text-xl text-gray-600">Choose the best way to get support from our team.</p>
+          <h2 id="resources-title" class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Documentation & Resources</h2>
+          <p class="text-xl text-gray-600">Everything you need to master Callytics and maximise your call tracking ROI.</p>
         </div>
-        
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-          <div class="bg-white rounded-xl p-8 shadow-lg hover:shadow-2xl hover:scale-105 transition-all duration-300 border border-gray-100 hover:border-orange-200 text-center">
-            <div class="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6" style="background: linear-gradient(135deg, #ff6b00, #ff8c33);">
-              <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
-              </svg>
-            </div>
-            <h3 class="text-xl font-bold text-gray-900 mb-3">Live Chat</h3>
-            <p class="text-gray-700 mb-4">Get instant answers from our support team. Perfect for quick questions and troubleshooting.</p>
-            <div class="bg-green-50 border-l-4 border-green-500 p-3 mb-6 rounded-r">
-              <p class="text-sm font-semibold text-green-800"><span class="text-green-600">⚡</span> Response Time: Instant</p>
-            </div>
-            <button class="px-6 py-2.5 text-white font-semibold rounded-lg hover:shadow-lg transition-all w-full" style="background: linear-gradient(135deg, #ff6b00, #ff8c33);">
-              Start Chat
-            </button>
-          </div>
 
-          <div class="bg-white rounded-xl p-8 shadow-lg hover:shadow-2xl hover:scale-105 transition-all duration-300 border border-gray-100 hover:border-orange-200 text-center">
-            <div class="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6" style="background: linear-gradient(135deg, #ff8c33, #ffb366);">
-              <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div v-for="(resource, index) in resources" :key="index"
+               class="resource-card bg-white rounded-xl p-6 hover:border-orange-300 transition-all duration-300 cursor-pointer border-2 border-transparent">
+            <div class="text-4xl mb-4" aria-hidden="true">{{ resource.icon }}</div>
+            <h3 class="text-lg font-bold text-gray-900 mb-2">{{ resource.title }}</h3>
+            <p class="text-sm text-gray-600 mb-4">{{ resource.description }}</p>
+            <div class="flex items-center font-semibold text-sm" style="color: #ff6b00;">
+              Learn More
+              <svg class="w-4 h-4 ml-1 transition-transform duration-300 group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
               </svg>
             </div>
-            <h3 class="text-xl font-bold text-gray-900 mb-3">Email Support</h3>
-            <p class="text-gray-700 mb-4">Send us a detailed message for complex issues. Attach screenshots and get comprehensive solutions.</p>
-            <div class="bg-blue-50 border-l-4 border-blue-500 p-3 mb-6 rounded-r">
-              <p class="text-sm font-semibold text-blue-800"><span class="text-blue-600">⏱️</span> Response Time: Within 4 Hours</p>
-            </div>
-            <router-link to="/contact" class="inline-block px-6 py-2.5 text-white font-semibold rounded-lg hover:shadow-lg transition-all w-full" style="background: linear-gradient(135deg, #ff8c33, #ffb366);">
-              Send Email
+          </div>
+        </div>
+
+        <!-- Internal Linking Section -->
+        <div class="mt-16 bg-gray-50 rounded-2xl shadow-lg p-8 border border-gray-100">
+          <h3 class="text-2xl font-bold text-gray-900 mb-6 text-center">Explore More Callytics Resources</h3>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <router-link to="/features" class="p-4 rounded-xl hover:bg-orange-50 transition-all duration-300 border border-gray-200 hover:border-orange-300 group">
+              <div class="flex items-start">
+                <svg class="w-6 h-6 text-orange-600 mt-1 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                </svg>
+                <div>
+                  <h4 class="font-bold text-gray-900 mb-1 group-hover:text-orange-600 transition-colors">Explore Features</h4>
+                  <p class="text-sm text-gray-600">Discover powerful call tracking capabilities</p>
+                </div>
+              </div>
             </router-link>
-          </div>
 
-          <div class="bg-white rounded-xl p-8 shadow-lg hover:shadow-2xl hover:scale-105 transition-all duration-300 border border-gray-100 hover:border-orange-200 text-center">
-            <div class="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6" style="background: linear-gradient(135deg, #cc5500, #ff6b00);">
-              <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
-              </svg>
-            </div>
-            <h3 class="text-xl font-bold text-gray-900 mb-3">Phone Support</h3>
-            <p class="text-gray-700 mb-4">Speak directly with our experts for urgent issues or personalised guidance — available Monday to Saturday.</p>
-            <div class="bg-purple-50 border-l-4 border-purple-500 p-3 mb-6 rounded-r">
-              <p class="text-sm font-semibold text-purple-800"><span class="text-purple-600">📞</span> Mon–Sat: 9AM–7PM IST</p>
-            </div>
-            <a href="tel:+919876543210" class="inline-block px-6 py-2.5 text-white font-semibold rounded-lg hover:shadow-lg transition-all w-full" style="background: linear-gradient(135deg, #cc5500, #ff6b00);">
-              Call +91 98765 43210
-            </a>
+            <router-link to="/pricing" class="p-4 rounded-xl hover:bg-orange-50 transition-all duration-300 border border-gray-200 hover:border-orange-300 group">
+              <div class="flex items-start">
+                <svg class="w-6 h-6 text-orange-600 mt-1 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <div>
+                  <h4 class="font-bold text-gray-900 mb-1 group-hover:text-orange-600 transition-colors">View Pricing Plans</h4>
+                  <p class="text-sm text-gray-600">Find the perfect plan for your business</p>
+                </div>
+              </div>
+            </router-link>
+
+            <router-link to="/contact" class="p-4 rounded-xl hover:bg-orange-50 transition-all duration-300 border border-gray-200 hover:border-orange-300 group">
+              <div class="flex items-start">
+                <svg class="w-6 h-6 text-orange-600 mt-1 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                </svg>
+                <div>
+                  <h4 class="font-bold text-gray-900 mb-1 group-hover:text-orange-600 transition-colors">Contact Support</h4>
+                  <p class="text-sm text-gray-600">Get connected to an expert from our team</p>
+                </div>
+              </div>
+            </router-link>
           </div>
         </div>
       </div>
     </section>
 
     <!-- FAQ Section -->
-    <section id="faq-section" class="py-24 bg-white" aria-labelledby="faq-title">
+    <section id="faq-section" class="py-24 bg-gray-50" aria-labelledby="faq-title">
       <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="text-center mb-12">
           <h2 id="faq-title" class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Frequently Asked Questions</h2>
@@ -171,81 +188,14 @@
               </div>
             </transition>
           </div>
-          
+
           <!-- No Results Message -->
-          <div v-if="filteredFaqs.length === 0" class="text-center py-12 bg-gray-50 rounded-xl">
+          <div v-if="filteredFaqs.length === 0" class="text-center py-12 bg-white rounded-xl">
             <svg class="w-16 h-16 text-gray-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
             <p class="text-gray-600 text-lg mb-2">No matching help articles found</p>
             <p class="text-gray-500 text-sm">Try a different search term or <router-link to="/contact" class="text-orange-600 hover:underline font-semibold">contact our support team</router-link></p>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- Documentation & Resources -->
-    <section id="resources-section" class="py-24 bg-gray-50" aria-labelledby="resources-title">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="text-center mb-12">
-          <h2 id="resources-title" class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Documentation & Resources</h2>
-          <p class="text-xl text-gray-600">Everything you need to master Callytics and maximise your call tracking ROI.</p>
-        </div>
-
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <div v-for="(resource, index) in resources" :key="index" 
-               class="resource-card bg-white rounded-xl p-6 hover:border-orange-300 transition-all duration-300 cursor-pointer border-2 border-transparent">
-            <div class="text-4xl mb-4" aria-hidden="true">{{ resource.icon }}</div>
-            <h3 class="text-lg font-bold text-gray-900 mb-2">{{ resource.title }}</h3>
-            <p class="text-sm text-gray-600 mb-4">{{ resource.description }}</p>
-            <div class="flex items-center font-semibold text-sm" style="color: #ff6b00;">
-              Learn More
-              <svg class="w-4 h-4 ml-1 transition-transform duration-300 group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-              </svg>
-            </div>
-          </div>
-        </div>
-
-        <!-- Internal Linking Section -->
-        <div class="mt-16 bg-white rounded-2xl shadow-lg p-8 border border-gray-100">
-          <h3 class="text-2xl font-bold text-gray-900 mb-6 text-center">Explore More Callytics Resources</h3>
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <router-link to="/features" class="p-4 rounded-xl hover:bg-orange-50 transition-all duration-300 border border-gray-200 hover:border-orange-300 group">
-              <div class="flex items-start">
-                <svg class="w-6 h-6 text-orange-600 mt-1 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
-                </svg>
-                <div>
-                  <h4 class="font-bold text-gray-900 mb-1 group-hover:text-orange-600 transition-colors">Explore Features</h4>
-                  <p class="text-sm text-gray-600">Discover powerful call tracking capabilities</p>
-                </div>
-              </div>
-            </router-link>
-
-            <router-link to="/pricing" class="p-4 rounded-xl hover:bg-orange-50 transition-all duration-300 border border-gray-200 hover:border-orange-300 group">
-              <div class="flex items-start">
-                <svg class="w-6 h-6 text-orange-600 mt-1 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                <div>
-                  <h4 class="font-bold text-gray-900 mb-1 group-hover:text-orange-600 transition-colors">View Pricing Plans</h4>
-                  <p class="text-sm text-gray-600">Find the perfect plan for your business</p>
-                </div>
-              </div>
-            </router-link>
-
-            <router-link to="/contact" class="p-4 rounded-xl hover:bg-orange-50 transition-all duration-300 border border-gray-200 hover:border-orange-300 group">
-              <div class="flex items-start">
-                <svg class="w-6 h-6 text-orange-600 mt-1 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                </svg>
-                <div>
-                  <h4 class="font-bold text-gray-900 mb-1 group-hover:text-orange-600 transition-colors">Contact Support</h4>
-                  <p class="text-sm text-gray-600">Get connected to an expert from our team</p>
-                </div>
-              </div>
-            </router-link>
           </div>
         </div>
       </div>
@@ -286,36 +236,6 @@
       </div>
     </section>
 
-    <!-- Support Hours -->
-    <section class="py-16 bg-gray-50">
-      <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="bg-white rounded-2xl shadow-lg p-8 md:p-12 text-center">
-          <h2 class="text-2xl md:text-3xl font-bold text-gray-900 mb-6">Our Support Hours</h2>
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <div>
-              <div class="text-4xl mb-3">🕐</div>
-              <h3 class="font-bold text-gray-900 mb-2">Live Support</h3>
-              <p class="text-gray-600">Monday – Saturday<br/>9:00 AM – 7:00 PM IST</p>
-            </div>
-            <div>
-              <div class="text-4xl mb-3">📧</div>
-              <h3 class="font-bold text-gray-900 mb-2">Email Support</h3>
-              <p class="text-gray-600">24/7 Available<br/>We respond within 4 hours</p>
-            </div>
-          </div>
-          <div class="mt-8 pt-8 border-t border-gray-200">
-            <p class="text-gray-600 mb-4">Still need help?</p>
-            <router-link
-              to="/contact"
-              class="inline-block px-8 py-3 text-white font-bold rounded-lg shadow-lg hover:shadow-xl transition-all"
-              style="background: linear-gradient(135deg, #ff6b00, #ff8c33);"
-            >
-              Contact Our Team
-            </router-link>
-          </div>
-        </div>
-      </div>
-    </section>
   </div>
 </template>
 
@@ -509,8 +429,8 @@ onMounted(() => {
 }
 /* Premium Hero Section Styles */
 .hero-section {
-  padding-top: 2rem;
-  padding-bottom: 2rem;
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
   background: linear-gradient(180deg, #fff8f3 0%, #ffffff 100%);
 }
 
