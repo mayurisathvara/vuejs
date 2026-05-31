@@ -51,81 +51,141 @@
     <!-- Email Support Section -->
     <section id="email-support" class="py-16 bg-white border-b border-gray-100" aria-labelledby="email-support-title">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
 
-          <!-- Left: Email Info -->
-          <div>
-            <div class="inline-flex items-center px-3 py-1.5 rounded-full bg-orange-100 mb-5">
-              <span class="w-2 h-2 bg-orange-500 rounded-full mr-2 animate-pulse"></span>
-              <span class="text-sm font-semibold text-orange-600">Email Support</span>
-            </div>
+        <!-- Section Header -->
+        <div class="text-center mb-12">
+          <div class="inline-flex items-center px-3 py-1.5 rounded-full bg-orange-100 mb-4">
+            <span class="w-2 h-2 bg-orange-500 rounded-full mr-2 animate-pulse"></span>
+            <span class="text-sm font-semibold text-orange-600">Email Support</span>
+          </div>
+          <h2 id="email-support-title" class="text-3xl md:text-4xl font-bold text-gray-900 mb-3">
+            Reach Us by Email —
+            <span class="text-transparent bg-clip-text bg-gradient-to-r from-orange-600 to-orange-500"> We're Here to Help</span>
+          </h2>
+          <p class="text-lg text-gray-600 max-w-2xl mx-auto">
+            Whether you have a technical issue, billing question, or need guidance on getting started — our support team is always here.
+          </p>
+        </div>
 
-            <h2 id="email-support-title" class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-              Reach Us by Email —
-              <span class="text-transparent bg-clip-text bg-gradient-to-r from-orange-600 to-orange-500">24/7 Available</span>
-            </h2>
-            <p class="text-gray-600 mb-6 text-lg leading-relaxed">
-              Whether you have a technical issue, billing question, or need guidance on getting started — our support team is always here. Drop us an email and we will get back to you promptly.
-            </p>
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-10">
 
-            <!-- Email Address Card -->
-            <a href="mailto:support@callytics.com"
-               class="flex items-center p-4 bg-orange-50 rounded-xl border border-orange-200 mb-6 hover:border-orange-400 hover:shadow-md transition-all duration-300 group no-text-decoration">
-              <div class="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0" style="background: #ffe6cc;">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="color: #ff6b00;" aria-hidden="true">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                </svg>
-              </div>
-              <div class="ml-4">
-                <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-0.5">Email Us At</p>
-                <span class="text-lg font-bold group-hover:text-orange-700 transition-colors" style="color: #ff6b00;">
-                  support@callytics.com
-                </span>
-              </div>
-              <svg class="w-5 h-5 ml-auto text-orange-400 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-              </svg>
-            </a>
+          <!-- Left: Email info display -->
+          <div class="space-y-5">
 
-            <!-- Promises Grid -->
-            <div class="grid grid-cols-2 gap-3 mb-8">
-              <div v-for="promise in emailPromises" :key="promise" class="flex items-center gap-2">
-                <div class="w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0" style="background: #ffe6cc;">
-                  <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20" style="color: #ff6b00;" aria-hidden="true">
-                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+            <!-- Primary email display card -->
+            <div class="bg-gradient-to-br from-orange-50 to-orange-100/40 rounded-2xl p-6 border border-orange-200">
+              <div class="flex items-start gap-4">
+                <div class="w-14 h-14 rounded-xl flex items-center justify-center flex-shrink-0" style="background: linear-gradient(135deg, #ff6b00, #ff8c33);">
+                  <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                   </svg>
                 </div>
-                <span class="text-sm text-gray-700 font-medium">{{ promise }}</span>
+                <div class="flex-1 min-w-0">
+                  <p class="text-xs font-semibold text-orange-600 uppercase tracking-widest mb-1">Support Email Address</p>
+                  <p class="text-xl font-bold text-gray-900 mb-1 break-all">support@callytics.com</p>
+                  <p class="text-sm text-gray-600">Send us your query anytime — we respond within 24 hours on working days.</p>
+                </div>
               </div>
             </div>
 
-            <!-- CTA Button -->
-            <a
-              href="mailto:support@callytics.com"
-              class="inline-flex items-center gap-2 text-white font-bold px-8 py-3.5 rounded-xl shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300"
-              style="background: linear-gradient(135deg, #ff6b00 0%, #ff8c33 100%);"
-            >
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-              </svg>
-              Send Us an Email
-            </a>
+            <!-- Info stat cards -->
+            <div class="grid grid-cols-2 gap-4">
+              <div class="bg-gray-50 rounded-xl p-4 border border-gray-200">
+                <div class="flex items-center gap-2 mb-2">
+                  <svg class="w-5 h-5 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  <span class="text-xs font-semibold text-gray-500 uppercase tracking-wide">Response Time</span>
+                </div>
+                <p class="text-xl font-bold text-gray-900">Within 24 Hrs</p>
+                <p class="text-xs text-gray-500 mt-1">On all working days</p>
+              </div>
+
+              <div class="bg-gray-50 rounded-xl p-4 border border-gray-200">
+                <div class="flex items-center gap-2 mb-2">
+                  <svg class="w-5 h-5 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                  </svg>
+                  <span class="text-xs font-semibold text-gray-500 uppercase tracking-wide">Availability</span>
+                </div>
+                <p class="text-xl font-bold text-gray-900">Mon – Sat</p>
+                <p class="text-xs text-gray-500 mt-1">9 AM – 7 PM IST</p>
+              </div>
+
+              <div class="bg-gray-50 rounded-xl p-4 border border-gray-200">
+                <div class="flex items-center gap-2 mb-2">
+                  <svg class="w-5 h-5 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                  </svg>
+                  <span class="text-xs font-semibold text-gray-500 uppercase tracking-wide">Security</span>
+                </div>
+                <p class="text-xl font-bold text-gray-900">Encrypted</p>
+                <p class="text-xs text-gray-500 mt-1">100% confidential</p>
+              </div>
+
+              <div class="bg-gray-50 rounded-xl p-4 border border-gray-200">
+                <div class="flex items-center gap-2 mb-2">
+                  <svg class="w-5 h-5 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
+                  </svg>
+                  <span class="text-xs font-semibold text-gray-500 uppercase tracking-wide">Our Team</span>
+                </div>
+                <p class="text-xl font-bold text-gray-900">Real Humans</p>
+                <p class="text-xs text-gray-500 mt-1">No bots, ever</p>
+              </div>
+            </div>
+
+            <!-- Faster support tip -->
+            <div class="bg-blue-50 rounded-xl p-5 border border-blue-100">
+              <div class="flex items-start gap-3">
+                <svg class="w-5 h-5 text-blue-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <div>
+                  <p class="text-sm font-bold text-blue-800 mb-2">For Faster Support — Include in Your Email:</p>
+                  <ul class="text-sm text-blue-700 space-y-1">
+                    <li>• Your registered email address or account ID</li>
+                    <li>• A brief description of the issue or question</li>
+                    <li>• Screenshots or error messages if applicable</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
           </div>
 
-          <!-- Right: What we help with + Response stat -->
+          <!-- Right: Help topics + Support process + Response banner -->
           <div class="space-y-5">
-            <h3 class="text-xl font-bold text-gray-900 mb-2">What Can We Help With?</h3>
-            <div class="grid grid-cols-2 gap-4">
-              <div v-for="topic in helpTopics" :key="topic.title"
-                   class="p-5 bg-gray-50 rounded-xl border border-gray-200 hover:border-orange-300 hover:bg-orange-50 transition-all duration-300 group">
-                <div class="text-2xl mb-2" aria-hidden="true">{{ topic.icon }}</div>
-                <h4 class="font-bold text-gray-900 text-sm mb-1 group-hover:text-orange-600 transition-colors">{{ topic.title }}</h4>
-                <p class="text-xs text-gray-500">{{ topic.desc }}</p>
+
+            <div>
+              <h3 class="text-xl font-bold text-gray-900 mb-4">What Can We Help With?</h3>
+              <div class="grid grid-cols-2 gap-4">
+                <div v-for="topic in helpTopics" :key="topic.title"
+                     class="p-4 bg-gray-50 rounded-xl border border-gray-200 hover:border-orange-300 hover:bg-orange-50 transition-all duration-300 group">
+                  <div class="text-2xl mb-2" aria-hidden="true">{{ topic.icon }}</div>
+                  <h4 class="font-bold text-gray-900 text-sm mb-1 group-hover:text-orange-600 transition-colors">{{ topic.title }}</h4>
+                  <p class="text-xs text-gray-500">{{ topic.desc }}</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- How email support works -->
+            <div class="bg-gray-50 rounded-xl p-5 border border-gray-200">
+              <h3 class="text-base font-bold text-gray-900 mb-4">How Email Support Works</h3>
+              <div class="space-y-3">
+                <div v-for="(step, i) in supportSteps" :key="i" class="flex items-start gap-3">
+                  <div class="w-7 h-7 rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0" style="background: linear-gradient(135deg, #ff6b00, #ff8c33);">
+                    {{ i + 1 }}
+                  </div>
+                  <div>
+                    <p class="text-sm font-semibold text-gray-800">{{ step.title }}</p>
+                    <p class="text-xs text-gray-500">{{ step.desc }}</p>
+                  </div>
+                </div>
               </div>
             </div>
 
             <!-- Response Time Banner -->
-            <div class="relative rounded-xl p-6 text-white overflow-hidden">
+            <div class="relative rounded-xl p-5 text-white overflow-hidden">
               <div class="absolute inset-0 bg-gradient-to-r from-orange-600 to-orange-400"></div>
               <div class="absolute inset-0 bg-[radial-gradient(circle_at_top_right,_rgba(255,255,255,0.12)_0%,_transparent_60%)]"></div>
               <div class="relative flex items-center justify-between">
@@ -134,8 +194,8 @@
                   <p class="text-3xl font-bold">24 Hours</p>
                   <p class="text-orange-100 text-sm mt-1">Mon – Sat, 9 AM – 7 PM IST</p>
                 </div>
-                <div class="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center flex-shrink-0">
-                  <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                <div class="w-14 h-14 bg-white/20 rounded-full flex items-center justify-center flex-shrink-0">
+                  <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
                 </div>
@@ -425,13 +485,11 @@ const resources = [
   }
 ];
 
-const emailPromises = [
-  'Reply within 24 hours',
-  'Available Mon – Sat',
-  'Expert support team',
-  'Secure & confidential',
-  'No call waiting needed',
-  'Detailed written answers',
+const supportSteps = [
+  { title: 'Send your email', desc: 'Write to support@callytics.com with your query or issue' },
+  { title: 'Instant acknowledgement', desc: 'You receive an automatic confirmation within minutes' },
+  { title: 'Expert review', desc: 'Our team assigns a specialist to your case' },
+  { title: 'Detailed response', desc: 'A thorough written reply arrives within 24 hours' },
 ];
 
 const helpTopics = [
