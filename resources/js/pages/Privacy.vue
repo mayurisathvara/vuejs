@@ -1,26 +1,25 @@
 <template>
   <div>
-    <!-- Hero Section - Premium Modern Design -->
-    <section class="relative text-gray-900 overflow-hidden hero-section">
-      <!-- Soft Gradient Background -->
-      <div class="absolute inset-0 hero-gradient"></div>
-      
-      <!-- Subtle Pattern Overlay -->
-      <div class="absolute inset-0 hero-pattern"></div>
-      
-      <!-- Floating Geometric Shapes -->
-      <div class="absolute top-10 left-10 w-48 h-48 bg-orange-400/10 rounded-full blur-3xl animate-float"></div>
-      <div class="absolute bottom-10 right-10 w-56 h-56 bg-orange-300/10 rounded-full blur-3xl animate-float-delayed"></div>
-      
-      <!-- Content Container -->
-      <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 text-center">
-        <h1 class="hero-heading mb-4">
-          <span class="text-gray-900">Privacy </span>
-          <span class="text-transparent bg-clip-text bg-gradient-to-r from-orange-600 to-orange-500">Policy</span>
-        </h1>
-        <p class="text-lg text-gray-500">
-          Last updated: February 22, 2026
-        </p>
+    <!-- Hero Section -->
+    <section class="relative overflow-hidden" role="banner" aria-label="Privacy Policy">
+      <div class="absolute inset-0" style="background: linear-gradient(135deg, #F9FAFB 0%, #EEF2F7 50%, #F3F4F6 100%);" aria-hidden="true"></div>
+      <div class="absolute top-0 right-0 w-[500px] h-[500px] opacity-60" style="background: radial-gradient(circle, rgba(255, 115, 50, 0.18) 0%, transparent 70%);" aria-hidden="true"></div>
+      <div class="absolute bottom-0 left-0 w-[400px] h-[400px] opacity-40" style="background: radial-gradient(circle, rgba(59, 130, 246, 0.08) 0%, transparent 70%);" aria-hidden="true"></div>
+
+      <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14 md:py-16">
+        <div class="text-center max-w-3xl mx-auto">
+          <div class="inline-flex items-center px-3 py-1.5 rounded-full bg-orange-100 mb-4">
+            <svg class="w-4 h-4 text-orange-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+            </svg>
+            <span class="text-sm font-semibold text-orange-600 uppercase tracking-wide">Legal</span>
+          </div>
+          <h1 class="text-3xl md:text-4xl font-bold text-gray-900 mb-3 leading-tight">
+            Privacy
+            <span class="text-transparent bg-clip-text bg-gradient-to-r from-orange-600 to-orange-400"> Policy</span>
+          </h1>
+          <p class="text-base text-gray-500">Last updated: February 22, 2026</p>
+        </div>
       </div>
     </section>
 
@@ -181,11 +180,11 @@
                 <p class="mb-4">
                   If you have questions or concerns about this Privacy Policy, please contact us:
                 </p>
-                <div class="bg-gray-50 p-6 rounded-lg">
-                  <p><strong>Callytics Privacy Team</strong></p>
-                  <p>Email: privacy@callytics.com</p>
-                  <p>Phone: +1 (800) 123-4567</p>
-                  <p>Address: 123 Business Avenue, San Francisco, CA 94102</p>
+                <div class="bg-orange-50 border border-orange-100 p-6 rounded-xl">
+                  <p class="font-bold text-gray-900 mb-2">Callytics Privacy Team</p>
+                  <p class="text-gray-700">Email: <a href="mailto:privacy@callytics.com" class="text-orange-600 font-medium hover:underline">privacy@callytics.com</a></p>
+                  <p class="text-gray-700">Phone: +1 (800) 123-4567</p>
+                  <p class="text-gray-700">Address: 123 Business Avenue, San Francisco, CA 94102</p>
                 </div>
               </div>
             </section>
@@ -220,68 +219,15 @@
 </script>
 
 <style scoped>
-.prose h2 {
-  margin-top: 2rem;
-  margin-bottom: 1rem;
-}
+.prose h2 { margin-top: 2rem; margin-bottom: 1rem; }
+.prose h3 { margin-top: 1.5rem; margin-bottom: 0.5rem; }
+.prose p { margin-bottom: 1rem; }
+.prose ul { margin-bottom: 1rem; }
 
-.prose h3 {
-  margin-top: 1.5rem;
-  margin-bottom: 0.5rem;
-}
-
-.prose p {
-  margin-bottom: 1rem;
-}
-
-.prose ul {
-  margin-bottom: 1rem;
-}
-
-/* Premium Hero Section Styles */
-.hero-section {
-  padding-top: 2rem;
-  padding-bottom: 2rem;
-  background: linear-gradient(180deg, #fff8f3 0%, #ffffff 100%);
-}
-
-.hero-gradient {
-  background: radial-gradient(ellipse at top, rgba(255, 140, 51, 0.12) 0%, transparent 60%),
-              radial-gradient(ellipse at bottom right, rgba(255, 107, 0, 0.08) 0%, transparent 50%);
-}
-
-.hero-pattern {
-  background-image: 
-    linear-gradient(rgba(255, 140, 51, 0.03) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 140, 51, 0.03) 1px, transparent 1px);
-  background-size: 50px 50px;
-  opacity: 0.5;
-}
-
-@keyframes float {
-  0%, 100% {
-    transform: translateY(0px) scale(1);
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
   }
-  50% {
-    transform: translateY(-20px) scale(1.05);
-  }
-}
-
-@keyframes float-delayed {
-  0%, 100% {
-    transform: translateY(0px) scale(1);
-  }
-  50% {
-    transform: translateY(20px) scale(1.05);
-  }
-}
-
-.animate-float {
-  animation: float 8s ease-in-out infinite;
-}
-
-.animate-float-delayed {
-  animation: float-delayed 10s ease-in-out infinite;
-  animation-delay: 1s;
 }
 </style>

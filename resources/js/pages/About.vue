@@ -1,31 +1,32 @@
 <template>
   <div>
-    <!-- Hero Section - Premium Modern Design -->
-    <section id="about-hero" class="relative text-gray-900 overflow-hidden hero-section" aria-labelledby="about-title">
-      <!-- Soft Gradient Background -->
-      <div class="absolute inset-0 hero-gradient"></div>
-      
-      <!-- Subtle Pattern Overlay -->
-      <div class="absolute inset-0 hero-pattern"></div>
-      
-      <!-- Floating Geometric Shapes -->
-      <div class="absolute top-10 left-10 w-48 h-48 bg-orange-400/10 rounded-full blur-3xl animate-float" aria-hidden="true"></div>
-      <div class="absolute bottom-10 right-10 w-56 h-56 bg-orange-300/10 rounded-full blur-3xl animate-float-delayed" aria-hidden="true"></div>
-      
-      <!-- Content Container -->
-      <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 text-center">
-        <h1 id="about-title" class="hero-heading mb-6">
-          <span class="text-gray-900">About Callytics – Intelligent </span>
-          <span class="text-transparent bg-clip-text bg-gradient-to-r from-orange-600 to-orange-500">Call Tracking & Analytics Software</span>
-        </h1>
-        
-        <!-- SEO Introduction Paragraph -->
-        <p class="text-xl text-gray-700 max-w-4xl mx-auto mb-4 leading-relaxed">
-          We're transforming how businesses measure marketing success with our <strong>call tracking software</strong> and <strong>call analytics platform</strong>. Callytics provides <strong>business call monitoring</strong> solutions that optimize <strong>marketing ROI</strong>, helping companies bridge the gap between digital campaigns and real customer conversations.
-        </p>
-        <p class="text-lg text-gray-600 max-w-3xl mx-auto">
-          Join 10,000+ businesses that trust Callytics to track, analyze, and optimize their phone communications.
-        </p>
+    <!-- Hero Section -->
+    <section id="about-hero" class="relative overflow-hidden" role="banner" aria-labelledby="about-title">
+      <div class="absolute inset-0" style="background: linear-gradient(135deg, #F9FAFB 0%, #EEF2F7 50%, #F3F4F6 100%);" aria-hidden="true"></div>
+      <div class="absolute top-0 right-0 w-[500px] h-[500px] opacity-60" style="background: radial-gradient(circle, rgba(255, 115, 50, 0.18) 0%, transparent 70%);" aria-hidden="true"></div>
+      <div class="absolute bottom-0 left-0 w-[400px] h-[400px] opacity-40" style="background: radial-gradient(circle, rgba(59, 130, 246, 0.08) 0%, transparent 70%);" aria-hidden="true"></div>
+
+      <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-20 lg:py-24">
+        <div class="text-center max-w-3xl mx-auto">
+          <div class="inline-flex items-center px-3 py-1.5 rounded-full bg-orange-100 mb-5">
+            <svg class="w-4 h-4 text-orange-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+            </svg>
+            <span class="text-sm font-semibold text-orange-600 uppercase tracking-wide">Our Story</span>
+          </div>
+
+          <h1 id="about-title" class="text-3xl md:text-4xl font-bold text-gray-900 mb-5 leading-tight">
+            About Callytics — Intelligent
+            <span class="text-transparent bg-clip-text bg-gradient-to-r from-orange-600 to-orange-400"> Call Tracking & Analytics</span>
+          </h1>
+
+          <p class="text-lg md:text-xl text-gray-600 leading-relaxed mb-4 max-w-2xl mx-auto">
+            We're transforming how businesses measure marketing success with powerful call tracking and analytics tools.
+          </p>
+          <p class="text-base text-gray-500 max-w-xl mx-auto">
+            Join 10,000+ businesses that trust Callytics to track, analyze, and optimize their phone communications.
+          </p>
+        </div>
       </div>
     </section>
 
@@ -34,6 +35,9 @@
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
           <div>
+            <div class="inline-flex items-center px-3 py-1.5 rounded-full bg-orange-100 mb-4">
+              <span class="text-sm font-semibold text-orange-600 uppercase tracking-wide">How We Started</span>
+            </div>
             <h2 id="story-title" class="text-3xl md:text-4xl font-bold text-gray-900 mb-6">Our Story</h2>
             <div class="space-y-5 text-gray-700 text-lg leading-relaxed">
               <p>
@@ -108,8 +112,14 @@
     </section>
 
     <!-- Mission & Vision -->
-    <section id="mission-vision" class="py-20 bg-gray-50" aria-labelledby="mission-title">
+    <section id="mission-vision" class="py-16 bg-gray-50" aria-labelledby="mission-title">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center mb-10">
+          <div class="inline-flex items-center px-3 py-1.5 rounded-full bg-orange-100 mb-4">
+            <span class="text-sm font-semibold text-orange-600 uppercase tracking-wide">Mission & Vision</span>
+          </div>
+          <h2 class="text-3xl md:text-4xl font-bold text-gray-900">Guided by Purpose</h2>
+        </div>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-12">
           <div class="bg-white p-10 rounded-2xl shadow-lg hover:shadow-2xl hover:scale-105 transition-all duration-300">
             <div class="w-16 h-16 rounded-lg flex items-center justify-center mb-6" style="background-color: #ffe6cc;">
@@ -141,9 +151,12 @@
     <!-- Our Values -->
     <section id="our-values" class="py-20 bg-white" aria-labelledby="values-title">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="text-center mb-16">
+        <div class="text-center mb-12">
+          <div class="inline-flex items-center px-3 py-1.5 rounded-full bg-orange-100 mb-4">
+            <span class="text-sm font-semibold text-orange-600 uppercase tracking-wide">What We Stand For</span>
+          </div>
           <h2 id="values-title" class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Our Values</h2>
-          <p class="text-xl text-gray-600 max-w-2xl mx-auto">
+          <p class="text-lg text-gray-600 max-w-2xl mx-auto">
             The principles that guide everything we do
           </p>
         </div>
@@ -163,9 +176,12 @@
     <!-- Why Businesses Trust Callytics -->
     <section id="trust" class="py-20 bg-gradient-to-br from-gray-50 to-gray-100" aria-labelledby="trust-title">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="text-center mb-16">
+        <div class="text-center mb-12">
+          <div class="inline-flex items-center px-3 py-1.5 rounded-full bg-orange-100 mb-4">
+            <span class="text-sm font-semibold text-orange-600 uppercase tracking-wide">Trust & Reliability</span>
+          </div>
           <h2 id="trust-title" class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Why Businesses Trust Callytics</h2>
-          <p class="text-xl text-gray-600 max-w-3xl mx-auto">
+          <p class="text-lg text-gray-600 max-w-3xl mx-auto">
             Industry-leading security, reliability, and support that powers your business growth
           </p>
         </div>
@@ -243,22 +259,31 @@
     </section>
 
     <!-- CTA -->
-    <section id="final-cta" class="py-20 text-white" style="background: linear-gradient(135deg, #ff6b00 0%, #ff8c33 100%);" aria-labelledby="cta-title">
-      <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+    <section id="final-cta" class="relative py-12 text-white overflow-hidden" aria-labelledby="cta-title">
+      <div class="absolute inset-0 bg-gradient-to-br from-orange-600 via-orange-500 to-orange-400"></div>
+      <div class="absolute inset-0 bg-[radial-gradient(circle_at_top_right,_rgba(255,255,255,0.1)_0%,_transparent_50%)]"></div>
+      <div class="absolute inset-0 bg-[radial-gradient(circle_at_bottom_left,_rgba(0,0,0,0.1)_0%,_transparent_50%)]"></div>
+      <div class="relative max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
         <h2 id="cta-title" class="text-3xl md:text-4xl font-bold mb-6">Join Us on Our Journey</h2>
-        <p class="text-xl text-orange-50 mb-4">
-          Be part of the next generation of data-driven marketing
-        </p>
-        <p class="text-lg text-orange-100 mb-8 font-medium">
+        <p class="text-xl text-orange-50 mb-8">
           Start your 14-day free trial today — no credit card required.
         </p>
-        <router-link
-          to="/contact"
-          class="inline-block px-8 py-4 bg-white font-bold rounded-lg shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-105"
-          style="color: #ff6b00;"
-        >
-          Get Started Today
-        </router-link>
+        <div class="flex flex-col sm:flex-row gap-4 justify-center mb-6">
+          <router-link
+            to="/contact"
+            class="inline-block px-8 py-4 bg-white font-bold rounded-lg shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-105"
+            style="color: #ff6b00;"
+          >
+            Get Started Today
+          </router-link>
+          <router-link
+            to="/pricing"
+            class="inline-block px-8 py-4 bg-white/10 backdrop-blur-sm border-2 border-white/30 text-white font-bold rounded-lg hover:bg-white/20 transition-all duration-300"
+          >
+            View Pricing
+          </router-link>
+        </div>
+        <p class="text-sm text-orange-100">No credit card required · Cancel anytime · Dedicated support</p>
       </div>
     </section>
   </div>
@@ -373,83 +398,9 @@ onMounted(() => {
 </script>
 
 <style scoped>
-/* Performance Optimizations */
-/* Convert images to WebP format for 25-35% smaller file sizes */
-/* Minify and bundle CSS/JS in production builds */
-/* Use GPU acceleration for animations via transform and opacity properties */
-
-/* Accessibility - Reduced Motion Support */
-@media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-  }
-}
-
-/* Premium Hero Section Styles */
-.hero-section {
-  padding-top: 2rem;
-  padding-bottom: 2rem;
-  background: linear-gradient(180deg, #fff8f3 0%, #ffffff 100%);
-  will-change: transform;
-}
-
-.hero-gradient {
-  background: radial-gradient(ellipse at top, rgba(255, 140, 51, 0.12) 0%, transparent 60%),
-              radial-gradient(ellipse at bottom right, rgba(255, 107, 0, 0.08) 0%, transparent 50%);
-}
-
-.hero-pattern {
-  background-image: 
-    linear-gradient(rgba(255, 140, 51, 0.03) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 140, 51, 0.03) 1px, transparent 1px);
-  background-size: 50px 50px;
-  opacity: 0.5;
-}
-
-/* Enhanced Float Animations with GPU Acceleration */
-@keyframes float {
-  0%, 100% {
-    transform: translateY(0px) translateZ(0) scale(1);
-  }
-  50% {
-    transform: translateY(-20px) translateZ(0) scale(1.05);
-  }
-}
-
-@keyframes float-delayed {
-  0%, 100% {
-    transform: translateY(0px) translateZ(0) scale(1);
-  }
-  50% {
-    transform: translateY(20px) translateZ(0) scale(1.05);
-  }
-}
-
-.animate-float {
-  animation: float 8s ease-in-out infinite;
-  will-change: transform;
-}
-
-.animate-float-delayed {
-  animation: float-delayed 10s ease-in-out infinite;
-  animation-delay: 1s;
-  will-change: transform;
-}
-
-/* Fade-up Animation for Values Section */
 @keyframes fadeUp {
-  from {
-    opacity: 0;
-    transform: translateY(30px) translateZ(0);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0) translateZ(0);
-  }
+  from { opacity: 0; transform: translateY(30px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 .fade-up {
@@ -457,105 +408,14 @@ onMounted(() => {
   opacity: 0;
 }
 
-/* Card Hover Effects with GPU Acceleration */
-.hover\:shadow-xl,
-.hover\:shadow-2xl {
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  will-change: transform, box-shadow;
-}
-
-.hover\:shadow-xl:hover,
-.hover\:shadow-2xl:hover {
-  transform: translateY(-4px) translateZ(0);
-}
-
-.hover\:scale-105:hover {
-  transform: scale(1.05) translateZ(0);
-}
-
-/* Button and Link Transitions */
-a,
-button {
+a, button {
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* Smooth Scrolling for Internal Links */
-html {
-  scroll-behavior: smooth;
-}
-
-/* Stats Cards Enhanced Animations */
-@keyframes pulse-glow {
-  0%, 100% {
-    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-  }
-  50% {
-    box-shadow: 0 20px 25px -5px rgba(255, 107, 0, 0.2), 0 10px 10px -5px rgba(255, 107, 0, 0.1);
-  }
-}
-
-/* Icon Animations */
-svg {
-  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-button:hover svg,
-a:hover svg {
-  transform: scale(1.1) translateZ(0);
-}
-
-/* Focus States for Accessibility */
-a:focus,
-button:focus {
-  outline: 3px solid rgba(255, 140, 51, 0.5);
-  outline-offset: 2px;
-}
-
-/* Loading Optimization */
-img {
-  content-visibility: auto;
-}
-
-/* Mobile Responsive Adjustments */
-@media (max-width: 768px) {
-  .hero-section {
-    padding-top: 1.5rem;
-    padding-bottom: 1.5rem;
-  }
-  
-  /* Disable hover effects on touch devices */
-  .hover\:scale-105:hover,
-  .hover\:shadow-xl:hover,
-  .hover\:shadow-2xl:hover {
-    transform: none;
-  }
-}
-
-/* High Contrast Mode Support */
-@media (prefers-contrast: high) {
-  .text-gray-600,
-  .text-gray-700 {
-    color: #000;
-  }
-  
-  .bg-gray-50 {
-    background-color: #fff;
-  }
-}
-
-/* Print Styles */
-@media print {
-  .hero-gradient,
-  .hero-pattern,
-  .animate-float,
-  .animate-float-delayed,
-  button,
-  a[class*="router-link"] {
-    display: none;
-  }
-  
-  section {
-    page-break-inside: avoid;
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
   }
 }
 </style>

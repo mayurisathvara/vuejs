@@ -1,38 +1,32 @@
 <template>
   <div>
-    <!-- Hero Section - Premium Modern Design -->
-    <section id="services-hero" class="relative text-gray-900 overflow-hidden hero-section" aria-labelledby="services-title">
-      <!-- Soft Gradient Background -->
-      <div class="absolute inset-0 hero-gradient"></div>
-      
-      <!-- Subtle Pattern Overlay -->
-      <div class="absolute inset-0 hero-pattern"></div>
-      
-      <!-- Floating Geometric Shapes -->
-      <div class="absolute top-10 left-10 w-48 h-48 bg-orange-400/10 rounded-full blur-3xl animate-float" aria-hidden="true"></div>
-      <div class="absolute bottom-10 right-10 w-56 h-56 bg-orange-300/10 rounded-full blur-3xl animate-float-delayed" aria-hidden="true"></div>
-      
-      <!-- Content Container -->
-      <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 text-center">
-        <!-- Badge -->
-        <div class="inline-flex items-center px-4 py-2 rounded-full bg-white/90 backdrop-blur-sm shadow-lg mb-8">
-          <span class="w-2 h-2 bg-orange-500 rounded-full mr-2 animate-pulse" aria-hidden="true"></span>
-          <span class="text-sm font-semibold text-orange-600">Our Services</span>
-        </div>
+    <!-- Hero Section -->
+    <section id="services-hero" class="relative overflow-hidden" role="banner" aria-labelledby="services-title">
+      <div class="absolute inset-0" style="background: linear-gradient(135deg, #F9FAFB 0%, #EEF2F7 50%, #F3F4F6 100%);" aria-hidden="true"></div>
+      <div class="absolute top-0 right-0 w-[500px] h-[500px] opacity-60" style="background: radial-gradient(circle, rgba(255, 115, 50, 0.18) 0%, transparent 70%);" aria-hidden="true"></div>
+      <div class="absolute bottom-0 left-0 w-[400px] h-[400px] opacity-40" style="background: radial-gradient(circle, rgba(59, 130, 246, 0.08) 0%, transparent 70%);" aria-hidden="true"></div>
 
-        <h1 id="services-title" class="hero-heading mb-6">
-          <span class="text-gray-900">Call Tracking & </span>
-          <span class="text-transparent bg-clip-text bg-gradient-to-r from-orange-600 to-orange-500">Analytics Services</span>
-          <span class="text-gray-900"> Built for Indian Businesses</span>
-        </h1>
-        
-        <!-- Subheading -->
-        <p class="text-xl text-gray-700 max-w-4xl mx-auto mb-4 leading-relaxed">
-          Track, analyse, and optimise every business call with real-time insights, source attribution, and performance tracking — all from one powerful platform.
-        </p>
-        <p class="text-lg text-gray-600 max-w-3xl mx-auto">
-          Trusted by 2,000+ businesses across India from Real Estate, Healthcare, E-commerce &amp; more.
-        </p>
+      <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-20 lg:py-24">
+        <div class="text-center max-w-3xl mx-auto">
+          <div class="inline-flex items-center px-3 py-1.5 rounded-full bg-orange-100 mb-5">
+            <svg class="w-4 h-4 text-orange-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+            </svg>
+            <span class="text-sm font-semibold text-orange-600 uppercase tracking-wide">Our Services</span>
+          </div>
+
+          <h1 id="services-title" class="text-3xl md:text-4xl font-bold text-gray-900 mb-5 leading-tight">
+            Call Tracking & Analytics Services
+            <span class="text-transparent bg-clip-text bg-gradient-to-r from-orange-600 to-orange-400"> Built for Indian Businesses</span>
+          </h1>
+
+          <p class="text-lg md:text-xl text-gray-600 leading-relaxed mb-4 max-w-2xl mx-auto">
+            Track, analyse, and optimise every business call with real-time insights, source attribution, and performance tracking — all from one powerful platform.
+          </p>
+          <p class="text-base text-gray-500 max-w-xl mx-auto">
+            Trusted by 2,000+ businesses across India from Real Estate, Healthcare, E-commerce & more.
+          </p>
+        </div>
       </div>
     </section>
 
@@ -61,9 +55,16 @@
     </section>
 
     <!-- Main Services -->
-    <section id="main-services" class="py-24 bg-white" aria-labelledby="main-services-title">
+    <section id="main-services" class="py-16 bg-white" aria-labelledby="main-services-title">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="space-y-24">
+        <div class="text-center mb-14">
+          <div class="inline-flex items-center px-3 py-1.5 rounded-full bg-orange-100 mb-4">
+            <span class="text-sm font-semibold text-orange-600 uppercase tracking-wide">Core Services</span>
+          </div>
+          <h2 id="main-services-title" class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Everything You Need to Track & Grow</h2>
+          <p class="text-lg text-gray-600 max-w-2xl mx-auto">Powerful services designed to give your business complete call intelligence — from attribution to analytics.</p>
+        </div>
+        <div class="space-y-16">
           <div v-for="(service, index) in mainServices" :key="index" class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center" :class="{ 'lg:flex-row-reverse': index % 2 !== 0 }">
             <div :class="{ 'lg:order-2': index % 2 !== 0 }">
               <div class="inline-block px-4 py-1 rounded-full text-sm font-semibold mb-4" style="background-color: #ffe6cc; color: #ff6b00;">
@@ -124,11 +125,14 @@
     <!-- Additional Features -->
     <section id="additional-features" class="py-24 bg-gray-50" aria-labelledby="additional-features-title">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="text-center mb-16">
+        <div class="text-center mb-12">
+          <div class="inline-flex items-center px-3 py-1.5 rounded-full bg-orange-100 mb-4">
+            <span class="text-sm font-semibold text-orange-600 uppercase tracking-wide">More Capabilities</span>
+          </div>
           <h2 id="additional-features-title" class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
             Additional Features
           </h2>
-          <p class="text-xl text-gray-600 max-w-2xl mx-auto">
+          <p class="text-lg text-gray-600 max-w-2xl mx-auto">
             Everything you need to manage, track, and grow your business calls.
           </p>
         </div>
@@ -150,11 +154,14 @@
     <!-- Why Choose Callytics for Call Tracking Services -->
     <section id="why-choose" class="py-24 bg-white" aria-labelledby="why-choose-title">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="text-center mb-16">
+        <div class="text-center mb-12">
+          <div class="inline-flex items-center px-3 py-1.5 rounded-full bg-orange-100 mb-4">
+            <span class="text-sm font-semibold text-orange-600 uppercase tracking-wide">Why Callytics</span>
+          </div>
           <h2 id="why-choose-title" class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
             Why Choose Callytics for Call Tracking Services
           </h2>
-          <p class="text-xl text-gray-600 max-w-3xl mx-auto">
+          <p class="text-lg text-gray-600 max-w-3xl mx-auto">
             Trusted by Indian businesses for reliability, accuracy, and results that impact the bottom line.
           </p>
         </div>
@@ -233,11 +240,14 @@
     <!-- Industries We Serve -->
     <section id="industries" class="py-24 bg-gray-50" aria-labelledby="industries-title">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="text-center mb-16">
+        <div class="text-center mb-12">
+          <div class="inline-flex items-center px-3 py-1.5 rounded-full bg-orange-100 mb-4">
+            <span class="text-sm font-semibold text-orange-600 uppercase tracking-wide">Sectors We Power</span>
+          </div>
           <h2 id="industries-title" class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
             Industries We Serve
           </h2>
-          <p class="text-xl text-gray-600 max-w-2xl mx-auto">
+          <p class="text-lg text-gray-600 max-w-2xl mx-auto">
             Trusted by businesses across diverse sectors all over India.
           </p>
         </div>
@@ -274,21 +284,24 @@
     </section>
 
     <!-- CTA -->
-    <section id="final-cta" class="py-24 text-white" style="background: linear-gradient(135deg, #ff6b00 0%, #ff8c33 100%);" aria-labelledby="cta-title">
-      <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+    <section id="final-cta" class="relative py-12 text-white overflow-hidden" aria-labelledby="cta-title">
+      <div class="absolute inset-0 bg-gradient-to-br from-orange-600 via-orange-500 to-orange-400"></div>
+      <div class="absolute inset-0 bg-[radial-gradient(circle_at_top_right,_rgba(255,255,255,0.1)_0%,_transparent_50%)]"></div>
+      <div class="absolute inset-0 bg-[radial-gradient(circle_at_bottom_left,_rgba(0,0,0,0.1)_0%,_transparent_50%)]"></div>
+      <div class="relative max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
         <h2 id="cta-title" class="text-3xl md:text-4xl font-bold mb-6">
           Ready to Get Started?
         </h2>
-        <p class="text-xl text-orange-50 mb-4">
-          Join thousands of Indian businesses using Callytics to track calls and grow revenue. No credit card required.
+        <p class="text-xl text-orange-50 mb-8">
+          Join thousands of Indian businesses using Callytics to track calls and grow revenue.
         </p>
-        <div class="flex flex-col sm:flex-row gap-4 justify-center">
+        <div class="flex flex-col sm:flex-row gap-4 justify-center mb-6">
           <router-link
             to="/contact"
             class="px-8 py-4 bg-white font-bold rounded-lg shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-105"
             style="color: #ff6b00;"
           >
-            Contact Us
+            Start Free Trial
           </router-link>
           <router-link
             to="/pricing"
@@ -297,6 +310,7 @@
             View Pricing
           </router-link>
         </div>
+        <p class="text-sm text-orange-100">No credit card required · Cancel anytime · Dedicated support</p>
       </div>
     </section>
   </div>
@@ -488,87 +502,9 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.hero-heading {
-  font-size: clamp(1.75rem, 2vw + 0.875rem, 2.5rem);
-}
-
-/* Performance Optimizations */
-/* Convert images to WebP format for 25-35% file size reduction */
-/* Lazy load non-critical images using loading="lazy" attribute */
-/* Use GPU acceleration via transform and opacity properties */
-
-/* Accessibility - Reduced Motion Support */
-@media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-  }
-}
-
-/* Premium Hero Section Styles */
-.hero-section {
-  padding-top: 2rem;
-  padding-bottom: 2rem;
-  background: linear-gradient(180deg, #fff8f3 0%, #ffffff 100%);
-  will-change: transform;
-}
-
-.hero-gradient {
-  background: radial-gradient(ellipse at top, rgba(255, 140, 51, 0.12) 0%, transparent 60%),
-              radial-gradient(ellipse at bottom right, rgba(255, 107, 0, 0.08) 0%, transparent 50%);
-}
-
-.hero-pattern {
-  background-image: 
-    linear-gradient(rgba(255, 140, 51, 0.03) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 140, 51, 0.03) 1px, transparent 1px);
-  background-size: 50px 50px;
-  opacity: 0.5;
-}
-
-/* Enhanced Float Animations with GPU Acceleration */
-@keyframes float {
-  0%, 100% {
-    transform: translateY(0px) translateZ(0) scale(1);
-  }
-  50% {
-    transform: translateY(-20px) translateZ(0) scale(1.05);
-  }
-}
-
-@keyframes float-delayed {
-  0%, 100% {
-    transform: translateY(0px) translateZ(0) scale(1);
-  }
-  50% {
-    transform: translateY(20px) translateZ(0) scale(1.05);
-  }
-}
-
-.animate-float {
-  animation: float 8s ease-in-out infinite;
-  will-change: transform;
-}
-
-.animate-float-delayed {
-  animation: float-delayed 10s ease-in-out infinite;
-  animation-delay: 1s;
-  will-change: transform;
-}
-
-/* Fade-up Animation for Trust Badges */
 @keyframes fadeUp {
-  from {
-    opacity: 0;
-    transform: translateY(30px) translateZ(0);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0) translateZ(0);
-  }
+  from { opacity: 0; transform: translateY(30px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 .fade-up {
@@ -576,127 +512,14 @@ onMounted(() => {
   opacity: 0;
 }
 
-/* Card Hover Effects with GPU Acceleration */
-.hover\:shadow-xl,
-.hover\:shadow-2xl,
-.hover\:shadow-3xl {
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  will-change: transform, box-shadow;
-}
-
-.hover\:shadow-xl:hover,
-.hover\:shadow-2xl:hover,
-.hover\:shadow-3xl:hover {
-  transform: translateY(-4px) translateZ(0);
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-}
-
-.hover\:scale-105:hover {
-  transform: scale(1.05) translateZ(0);
-}
-
-/* Service Card Image Hover */
-.hover\:scale-105:hover {
+a, button {
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* Button and Link Transitions */
-a,
-button {
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-/* Icon Animations */
-svg {
-  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-button:hover svg,
-a:hover svg {
-  transform: scale(1.1) translateZ(0);
-}
-
-/* Focus States for Accessibility */
-a:focus,
-button:focus {
-  outline: 3px solid rgba(255, 140, 51, 0.5);
-  outline-offset: 2px;
-}
-
-/* Smooth Scrolling */
-html {
-  scroll-behavior: smooth;
-}
-
-/* Loading Optimization */
-img {
-  content-visibility: auto;
-}
-
-/* Mobile Responsive Adjustments */
-@media (max-width: 768px) {
-  .hero-section {
-    padding-top: 1.5rem;
-    padding-bottom: 1.5rem;
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
   }
-  
-  /* Disable hover effects on touch devices */
-  .hover\:scale-105:hover,
-  .hover\:shadow-xl:hover,
-  .hover\:shadow-2xl:hover,
-  .hover\:shadow-3xl:hover {
-    transform: none;
-  }
-  
-  /* Increase touch target sizes */
-  button,
-  a {
-    min-height: 44px;
-    min-width: 44px;
-  }
-}
-
-/* High Contrast Mode Support */
-@media (prefers-contrast: high) {
-  .text-gray-600,
-  .text-gray-700 {
-    color: #000;
-  }
-  
-  .bg-gray-50 {
-    background-color: #fff;
-  }
-}
-
-/* Print Styles */
-@media print {
-  .hero-gradient,
-  .hero-pattern,
-  .animate-float,
-  .animate-float-delayed,
-  button,
-  a[class*="router-link"] {
-    display: none;
-  }
-  
-  section {
-    page-break-inside: avoid;
-  }
-}
-
-/* Testimonial Pulse Animation */
-@keyframes pulse-glow {
-  0%, 100% {
-    box-shadow: 0 10px 25px -5px rgba(255, 107, 0, 0.2);
-  }
-  50% {
-    box-shadow: 0 20px 35px -5px rgba(255, 107, 0, 0.3);
-  }
-}
-
-/* Loading States */
-[aria-busy="true"] {
-  cursor: wait;
-  opacity: 0.7;
 }
 </style>
