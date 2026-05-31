@@ -1,37 +1,50 @@
 <template>
   <div>
-    <!-- Hero Section - Premium Modern Design -->
-    <section id="contact-hero" class="relative text-gray-900 overflow-hidden hero-section" aria-labelledby="contact-title">
-      <!-- Soft Gradient Background -->
-      <div class="absolute inset-0 hero-gradient"></div>
-      
-      <!-- Subtle Pattern Overlay -->
-      <div class="absolute inset-0 hero-pattern"></div>
-      
-      <!-- Floating Geometric Shapes -->
-      <div class="absolute top-10 left-10 w-48 h-48 bg-orange-400/10 rounded-full blur-3xl animate-float" aria-hidden="true"></div>
-      <div class="absolute bottom-10 right-10 w-56 h-56 bg-orange-300/10 rounded-full blur-3xl animate-float-delayed" aria-hidden="true"></div>
-      
-      <!-- Content Container -->
-      <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 text-center">
-        <!-- Badge -->
-        <div class="inline-flex items-center px-4 py-2 rounded-full bg-white/90 backdrop-blur-sm shadow-lg mb-4">
-          <span class="w-2 h-2 bg-orange-500 rounded-full mr-2 animate-pulse" aria-hidden="true"></span>
-          <span class="text-sm font-semibold text-orange-600">Get in Touch</span>
+    <!-- Hero Section -->
+    <section id="contact-hero" class="relative overflow-hidden" role="banner" aria-labelledby="contact-title">
+      <div class="absolute inset-0" style="background: linear-gradient(135deg, #F9FAFB 0%, #EEF2F7 50%, #F3F4F6 100%);" aria-hidden="true"></div>
+      <div class="absolute top-0 right-0 w-[500px] h-[500px] opacity-60" style="background: radial-gradient(circle, rgba(255, 115, 50, 0.18) 0%, transparent 70%);" aria-hidden="true"></div>
+      <div class="absolute bottom-0 left-0 w-[400px] h-[400px] opacity-40" style="background: radial-gradient(circle, rgba(59, 130, 246, 0.08) 0%, transparent 70%);" aria-hidden="true"></div>
+
+      <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-20 lg:py-24">
+        <div class="text-center max-w-3xl mx-auto">
+          <div class="inline-flex items-center px-3 py-1.5 rounded-full bg-orange-100 mb-5">
+            <svg class="w-4 h-4 text-orange-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+            </svg>
+            <span class="text-sm font-semibold text-orange-600 uppercase tracking-wide">Get in Touch</span>
+          </div>
+
+          <h1 id="contact-title" class="text-3xl md:text-4xl font-bold text-gray-900 mb-5 leading-tight">
+            Talk to Our
+            <span class="text-transparent bg-clip-text bg-gradient-to-r from-orange-600 to-orange-400"> Call Tracking Experts</span>
+          </h1>
+
+          <p class="text-lg md:text-xl text-gray-600 leading-relaxed mb-8 max-w-2xl mx-auto">
+            Have questions about pricing, features, or getting started? Our team is ready to help you find the right plan for your business — fast response guaranteed.
+          </p>
+
+          <div class="flex flex-wrap justify-center gap-6 text-sm">
+            <div class="flex items-center gap-2 text-gray-600">
+              <svg class="w-4 h-4 text-green-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7" />
+              </svg>
+              <span class="font-medium">Response within 24 Hours</span>
+            </div>
+            <div class="flex items-center gap-2 text-gray-600">
+              <svg class="w-4 h-4 text-green-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7" />
+              </svg>
+              <span class="font-medium">Secure Communication</span>
+            </div>
+            <div class="flex items-center gap-2 text-gray-600">
+              <svg class="w-4 h-4 text-green-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7" />
+              </svg>
+              <span class="font-medium">Real Experts</span>
+            </div>
+          </div>
         </div>
-
-        <h1 id="contact-title" class="hero-heading mb-3">
-          <span class="text-gray-900">Talk to Our </span>
-          <span class="text-transparent bg-clip-text bg-gradient-to-r from-orange-600 to-orange-500">Call Tracking Experts</span>
-        </h1>
-
-        <!-- Subheading -->
-        <p class="text-lg text-gray-700 max-w-3xl mx-auto mb-2 leading-relaxed">
-          Have questions about pricing, features, or getting started? Our team is ready to help you find the right plan for your business — fast response guaranteed.
-        </p>
-        <p class="text-base text-gray-600 max-w-2xl mx-auto">
-          Response within 24 hours. Secure communication. Real experts.
-        </p>
       </div>
     </section>
 
@@ -617,10 +630,6 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.hero-heading {
-  font-size: clamp(1.75rem, 2vw + 0.875rem, 2.5rem);
-}
-
 /* Performance Optimizations */
 /* Use GPU acceleration for animations via transform and opacity properties */
 /* Recommend converting images to WebP format for faster loading */
@@ -661,57 +670,6 @@ onMounted(() => {
   outline: none !important;
   border: none !important;
   box-shadow: none !important;
-}
-
-/* Premium Hero Section Styles */
-.hero-section {
-  padding-top: 0.5rem;
-  padding-bottom: 0.5rem;
-  background: linear-gradient(180deg, #fff8f3 0%, #ffffff 100%);
-  will-change: transform;
-}
-
-.hero-gradient {
-  background: radial-gradient(ellipse at top, rgba(255, 140, 51, 0.12) 0%, transparent 60%),
-              radial-gradient(ellipse at bottom right, rgba(255, 107, 0, 0.08) 0%, transparent 50%);
-}
-
-.hero-pattern {
-  background-image: 
-    linear-gradient(rgba(255, 140, 51, 0.03) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 140, 51, 0.03) 1px, transparent 1px);
-  background-size: 50px 50px;
-  opacity: 0.5;
-}
-
-/* Enhanced Float Animations with GPU Acceleration */
-@keyframes float {
-  0%, 100% {
-    transform: translateY(0px) translateZ(0) scale(1);
-  }
-  50% {
-    transform: translateY(-20px) translateZ(0) scale(1.05);
-  }
-}
-
-@keyframes float-delayed {
-  0%, 100% {
-    transform: translateY(0px) translateZ(0) scale(1);
-  }
-  50% {
-    transform: translateY(20px) translateZ(0) scale(1.05);
-  }
-}
-
-.animate-float {
-  animation: float 8s ease-in-out infinite;
-  will-change: transform;
-}
-
-.animate-float-delayed {
-  animation: float-delayed 10s ease-in-out infinite;
-  animation-delay: 1s;
-  will-change: transform;
 }
 
 /* Enhanced Form Focus States */
@@ -860,11 +818,6 @@ a:hover svg {
 
 /* Mobile Responsive Adjustments */
 @media (max-width: 768px) {
-  .hero-section {
-    padding-top: 1.5rem;
-    padding-bottom: 1.5rem;
-  }
-  
   input, select, textarea {
     font-size: 16px; /* Prevent zoom on iOS */
   }
@@ -880,7 +833,7 @@ a:hover svg {
 
 /* Print Styles for SEO/Accessibility */
 @media print {
-  nav, button, .animate-float, .animate-float-delayed {
+  nav, button {
     display: none;
   }
 }

@@ -1,37 +1,50 @@
 <template>
   <div>
-    <!-- Hero Section - Premium Modern Design -->
-    <section id="help-hero" class="relative text-gray-900 overflow-hidden hero-section" aria-labelledby="help-title">
-      <!-- Soft Gradient Background -->
-      <div class="absolute inset-0 hero-gradient"></div>
-      
-      <!-- Subtle Pattern Overlay -->
-      <div class="absolute inset-0 hero-pattern"></div>
-      
-      <!-- Floating Geometric Shapes -->
-      <div class="absolute top-10 left-10 w-48 h-48 bg-orange-400/10 rounded-full blur-3xl animate-float" aria-hidden="true"></div>
-      <div class="absolute bottom-10 right-10 w-56 h-56 bg-orange-300/10 rounded-full blur-3xl animate-float-delayed" aria-hidden="true"></div>
-      
-      <!-- Content Container -->
-      <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 text-center">
-        <!-- Badge -->
-        <div class="inline-flex items-center px-4 py-2 rounded-full bg-white/90 backdrop-blur-sm shadow-lg mb-4">
-          <span class="w-2 h-2 bg-orange-500 rounded-full mr-2 animate-pulse" aria-hidden="true"></span>
-          <span class="text-sm font-semibold text-orange-600">Support Centre</span>
-        </div>
+    <!-- Hero Section -->
+    <section id="help-hero" class="relative overflow-hidden" role="banner" aria-labelledby="help-title">
+      <div class="absolute inset-0" style="background: linear-gradient(135deg, #F9FAFB 0%, #EEF2F7 50%, #F3F4F6 100%);" aria-hidden="true"></div>
+      <div class="absolute top-0 right-0 w-[500px] h-[500px] opacity-60" style="background: radial-gradient(circle, rgba(255, 115, 50, 0.18) 0%, transparent 70%);" aria-hidden="true"></div>
+      <div class="absolute bottom-0 left-0 w-[400px] h-[400px] opacity-40" style="background: radial-gradient(circle, rgba(59, 130, 246, 0.08) 0%, transparent 70%);" aria-hidden="true"></div>
 
-        <h1 id="help-title" class="hero-heading mb-3">
-          <span class="text-gray-900">Callytics Help & Support — </span>
-          <span class="text-transparent bg-clip-text bg-gradient-to-r from-orange-600 to-orange-500">Get Expert Assistance</span>
-        </h1>
-        
-        <!-- SEO Introduction Paragraph -->
-        <p class="text-lg text-gray-700 max-w-3xl mx-auto mb-2 leading-relaxed">
-          Access comprehensive call tracking support and call analytics assistance from our expert team. Get help with setup, troubleshooting, and maximising your business call monitoring platform.
-        </p>
-        <p class="text-base text-gray-600 max-w-2xl mx-auto">
-          We are here Monday to Saturday to ensure you get the most out of Callytics.
-        </p>
+      <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-20 lg:py-24">
+        <div class="text-center max-w-3xl mx-auto">
+          <div class="inline-flex items-center px-3 py-1.5 rounded-full bg-orange-100 mb-5">
+            <svg class="w-4 h-4 text-orange-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z" />
+            </svg>
+            <span class="text-sm font-semibold text-orange-600 uppercase tracking-wide">Support Centre</span>
+          </div>
+
+          <h1 id="help-title" class="text-3xl md:text-4xl font-bold text-gray-900 mb-5 leading-tight">
+            Callytics Help & Support —
+            <span class="text-transparent bg-clip-text bg-gradient-to-r from-orange-600 to-orange-400"> Get Expert Assistance</span>
+          </h1>
+
+          <p class="text-lg md:text-xl text-gray-600 leading-relaxed mb-8 max-w-2xl mx-auto">
+            Access comprehensive call tracking support and analytics assistance from our expert team. Get help with setup, troubleshooting, and maximising your business call monitoring platform.
+          </p>
+
+          <div class="flex flex-wrap justify-center gap-6 text-sm">
+            <div class="flex items-center gap-2 text-gray-600">
+              <svg class="w-4 h-4 text-green-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7" />
+              </svg>
+              <span class="font-medium">Monday to Saturday</span>
+            </div>
+            <div class="flex items-center gap-2 text-gray-600">
+              <svg class="w-4 h-4 text-green-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7" />
+              </svg>
+              <span class="font-medium">24-Hour Response</span>
+            </div>
+            <div class="flex items-center gap-2 text-gray-600">
+              <svg class="w-4 h-4 text-green-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7" />
+              </svg>
+              <span class="font-medium">Expert Team</span>
+            </div>
+          </div>
+        </div>
       </div>
     </section>
 
@@ -504,29 +517,6 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.hero-heading {
-  font-size: clamp(1.75rem, 2vw + 0.875rem, 2.5rem);
-}
-/* Premium Hero Section Styles */
-.hero-section {
-  padding-top: 0.5rem;
-  padding-bottom: 0.5rem;
-  background: linear-gradient(180deg, #fff8f3 0%, #ffffff 100%);
-}
-
-.hero-gradient {
-  background: radial-gradient(ellipse at top, rgba(255, 140, 51, 0.12) 0%, transparent 60%),
-              radial-gradient(ellipse at bottom right, rgba(255, 107, 0, 0.08) 0%, transparent 50%);
-}
-
-.hero-pattern {
-  background-image: 
-    linear-gradient(rgba(255, 140, 51, 0.03) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 140, 51, 0.03) 1px, transparent 1px);
-  background-size: 50px 50px;
-  opacity: 0.5;
-}
-
 /* Fade-up animations with GPU acceleration */
 @keyframes fadeUp {
   from {
@@ -543,38 +533,6 @@ onMounted(() => {
   animation: fadeUp 0.6s ease-out forwards;
   transform: translateZ(0);
   will-change: transform, opacity;
-}
-
-/* Float animations with GPU acceleration */
-@keyframes float {
-  0%, 100% {
-    transform: translateY(0px) scale(1) translateZ(0);
-  }
-  50% {
-    transform: translateY(-20px) scale(1.05) translateZ(0);
-  }
-}
-
-@keyframes float-delayed {
-  0%, 100% {
-    transform: translateY(0px) scale(1) translateZ(0);
-  }
-  50% {
-    transform: translateY(20px) scale(1.05) translateZ(0);
-  }
-}
-
-.animate-float {
-  animation: float 8s ease-in-out infinite;
-  transform: translateZ(0);
-  will-change: transform;
-}
-
-.animate-float-delayed {
-  animation: float-delayed 10s ease-in-out infinite;
-  animation-delay: 1s;
-  transform: translateZ(0);
-  will-change: transform;
 }
 
 /* FAQ Section with GPU acceleration */
@@ -647,7 +605,7 @@ input[type="search"]:focus {
     transition-duration: 0.01ms !important;
   }
   
-  .fade-up, .animate-float, .animate-float-delayed {
+  .fade-up {
     animation: none;
   }
   
