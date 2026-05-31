@@ -139,155 +139,6 @@
       </div>
     </section>
 
-    <!-- Feature Comparison -->
-    <section id="feature-comparison" class="py-12 bg-white" aria-labelledby="comparison-title">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="text-center mb-8">
-          <h2 id="comparison-title" class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-            Feature Comparison
-          </h2>
-          <p class="text-xl text-gray-600 max-w-2xl mx-auto">
-            See exactly what's included in each plan
-          </p>
-        </div>
-
-        <div class="overflow-x-auto shadow-lg rounded-lg">
-          <table class="w-full bg-white">
-            <thead>
-              <tr class="border-b-2 border-gray-200">
-                <th class="text-left py-4 px-6 font-semibold text-gray-900">Feature</th>
-                <th class="text-center py-4 px-6 font-semibold text-gray-900">Starter</th>
-                <th class="text-center py-4 px-6 font-semibold text-gray-900" style="background-color: #fff5e6;">Professional</th>
-                <th class="text-center py-4 px-6 font-semibold text-gray-900">Enterprise</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr v-for="(row, index) in comparisonTable" :key="index" class="border-b border-gray-200 hover:bg-gray-50 transition-colors">
-                <td class="py-4 px-6 font-medium text-gray-900">{{ row.feature }}</td>
-                <td class="text-center py-4 px-6">
-                  <span v-if="typeof row.starter === 'boolean'">
-                    <svg v-if="row.starter" class="w-6 h-6 text-green-500 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-label="Included">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-                    </svg>
-                    <svg v-else class="w-6 h-6 text-gray-300 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-label="Not included">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                  </span>
-                  <span v-else class="text-gray-700">{{ row.starter }}</span>
-                </td>
-                <td class="text-center py-4 px-6" style="background-color: #fff5e6;">
-                  <span v-if="typeof row.professional === 'boolean'">
-                    <svg v-if="row.professional" class="w-6 h-6 text-green-500 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-label="Included">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-                    </svg>
-                    <svg v-else class="w-6 h-6 text-gray-300 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-label="Not included">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                  </span>
-                  <span v-else class="text-gray-700 font-medium">{{ row.professional }}</span>
-                </td>
-                <td class="text-center py-4 px-6">
-                  <span v-if="typeof row.enterprise === 'boolean'">
-                    <svg v-if="row.enterprise" class="w-6 h-6 text-green-500 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-label="Included">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-                    </svg>
-                    <svg v-else class="w-6 h-6 text-gray-300 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-label="Not included">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                  </span>
-                  <span v-else class="text-gray-700">{{ row.enterprise }}</span>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-        
-        <!-- Mini CTA Below Comparison -->
-        <div class="mt-8 text-center">
-          <p class="text-gray-700 mb-6 text-lg">Ready to choose your plan?</p>
-          <router-link to="/contact" 
-            class="inline-flex items-center px-8 py-4 bg-gradient-to-r from-orange-600 to-orange-500 text-white font-bold rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105">
-            Start Your Free Trial
-            <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-            </svg>
-          </router-link>
-          <p class="text-sm text-gray-500 mt-4">No credit card required • Cancel anytime</p>
-        </div>
-      </div>
-    </section>
-
-    <!-- FAQ -->
-    <section id="pricing-faq" class="py-12 bg-gray-50" aria-labelledby="faq-title">
-      <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="text-center mb-8">
-          <h2 id="faq-title" class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-            Pricing FAQs
-          </h2>
-          <p class="text-lg text-gray-600">Common questions about our pricing plans</p>
-        </div>
-
-        <div class="space-y-4">
-          <article v-for="(faq, index) in faqs" :key="index" class="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow">
-            <button
-              @click="toggleFaq(index)"
-              class="w-full flex justify-between items-center p-6 text-left focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 rounded-lg"
-              :aria-expanded="openFaqIndex === index"
-            >
-              <span class="text-lg font-semibold text-gray-900 pr-8">{{ faq.question }}</span>
-              <svg
-                class="w-6 h-6 transition-transform duration-300 flex-shrink-0"
-                :class="{ 'rotate-180': openFaqIndex === index }"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-                style="color: #ff6b00;"
-                aria-hidden="true"
-              >
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-              </svg>
-            </button>
-            <transition
-              name="faq-slide"
-              @enter="startTransition"
-              @after-enter="endTransition"
-              @before-leave="startTransition"
-              @after-leave="endTransition"
-            >
-              <div v-if="openFaqIndex === index" class="faq-content">
-                <div class="px-6 pb-6">
-                  <p class="text-gray-700 leading-relaxed">{{ faq.answer }}</p>
-                </div>
-              </div>
-            </transition>
-          </article>
-        </div>
-      </div>
-    </section>
-
-    <!-- Testimonial Section -->
-    <section id="testimonial" class="py-10 bg-white" aria-label="Customer testimonial">
-      <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="bg-gradient-to-br from-orange-50 to-orange-100 rounded-2xl p-8 md:p-12 shadow-xl">
-          <div class="flex flex-col items-center text-center">
-            <div class="flex mb-4">
-              <svg v-for="i in 5" :key="i" class="w-6 h-6 text-orange-500" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
-                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-              </svg>
-            </div>
-            <blockquote class="text-xl md:text-2xl text-gray-900 font-medium mb-6 italic max-w-3xl">
-              "Callytics transformed how we track leads. We moved from guesswork to data-driven decisions. Within 60 days, our call conversion rate improved by 38%. The flexible pricing makes it very accessible for businesses like ours."
-            </blockquote>
-            <div class="w-16 h-16 rounded-full bg-gradient-to-br from-orange-400 to-orange-600 flex items-center justify-center text-white font-bold text-xl mb-3">
-              RK
-            </div>
-            <div class="font-bold text-gray-900 text-lg">Rajesh Kumar</div>
-            <div class="text-gray-600">Head of Marketing, Bharat Digital Solutions</div>
-          </div>
-        </div>
-      </div>
-    </section>
-
     <!-- Final CTA -->
     <section id="final-cta" class="relative py-12 text-white overflow-hidden" aria-labelledby="cta-title">
       <!-- Enhanced Gradient Background -->
@@ -327,7 +178,6 @@
 import { ref, onMounted } from 'vue';
 
 const billingType = ref('monthly');
-const openFaqIndex = ref(null);
 
 const pricingPlans = [
   {
@@ -388,56 +238,6 @@ const pricingPlans = [
   }
 ];
 
-const comparisonTable = [
-  { feature: 'Tracking Numbers', starter: '1', professional: '5', enterprise: 'Unlimited' },
-  { feature: 'Monthly Minutes', starter: '500', professional: '2000', enterprise: 'Unlimited' },
-  { feature: 'Call Recording', starter: false, professional: true, enterprise: true },
-  { feature: 'Dynamic Number Insertion', starter: false, professional: true, enterprise: true },
-  { feature: 'Call Analytics', starter: 'Basic', professional: 'Advanced', enterprise: 'Custom' },
-  { feature: 'IVR System', starter: false, professional: true, enterprise: true },
-  { feature: 'Call Routing', starter: false, professional: true, enterprise: true },
-  { feature: 'API Access', starter: false, professional: true, enterprise: true },
-  { feature: 'White Label', starter: false, professional: false, enterprise: true },
-  { feature: 'AI Analysis', starter: false, professional: false, enterprise: true },
-  { feature: 'Support', starter: 'Email', professional: 'Priority', enterprise: 'Dedicated' }
-];
-
-const faqs = [
-  {
-    question: 'Can I get virtual numbers for call tracking?',
-    answer: 'Yes! We provide dedicated virtual numbers across all major regions. These numbers are DND-compliant and ready to use instantly after sign-up.'
-  },
-  {
-    question: 'Which payment methods do you accept?',
-    answer: 'We accept all major payment methods — UPI (PhonePe, GPay, Paytm), Net Banking, Debit/Credit Cards, and EMI options. Annual plans can also be paid via NEFT/RTGS. All transactions are processed with proper invoices provided.'
-  },
-  {
-    question: 'Can I upgrade or downgrade my plan?',
-    answer: 'Absolutely! You can upgrade your plan at any time and the change takes effect immediately. Downgrades are applied at the start of your next billing cycle. There are no penalties or hidden charges for changing plans.'
-  },
-  {
-    question: 'What happens if I exceed my minute limit?',
-    answer: 'You\'ll receive an alert when you reach 80% of your monthly minutes. Additional minutes are billed at a nominal per-minute rate. You can also upgrade your plan mid-cycle to avoid any interruptions in service.'
-  },
-  {
-    question: 'Is there a free trial available?',
-    answer: 'Yes! Every plan comes with a 14-day free trial — no credit card required. You get full access to all features of your chosen plan so you can experience the value before committing.'
-  }
-];
-
-const toggleFaq = (index) => {
-  openFaqIndex.value = openFaqIndex.value === index ? null : index;
-};
-
-// FAQ accordion transition handlers
-const startTransition = (el) => {
-  el.style.height = '0';
-};
-
-const endTransition = (el) => {
-  el.style.height = '';
-};
-
 // Add structured data for SEO
 onMounted(() => {
   // Product/Offer Schema for each pricing plan
@@ -491,30 +291,11 @@ onMounted(() => {
     }
   };
 
-  // FAQPage Schema
-  const faqSchema = {
-    "@context": "https://schema.org",
-    "@type": "FAQPage",
-    "mainEntity": faqs.map(faq => ({
-      "@type": "Question",
-      "name": faq.question,
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": faq.answer
-      }
-    }))
-  };
-
-  // Insert schemas into document head
+  // Insert schema into document head
   const productScript = document.createElement('script');
   productScript.type = 'application/ld+json';
   productScript.text = JSON.stringify(productsSchema);
   document.head.appendChild(productScript);
-
-  const faqScript = document.createElement('script');
-  faqScript.type = 'application/ld+json';
-  faqScript.text = JSON.stringify(faqSchema);
-  document.head.appendChild(faqScript);
 });
 </script>
 
@@ -603,44 +384,6 @@ onMounted(() => {
   background: linear-gradient(135deg, #ff6b00 0%, #ff8c33 100%);
 }
 
-/* Improved FAQ accordion animations */
-.faq-slide-enter-active {
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-  overflow: hidden;
-}
-
-.faq-slide-leave-active {
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  overflow: hidden;
-}
-
-.faq-slide-enter-from,
-.faq-slide-leave-to {
-  opacity: 0;
-  transform: translateY(-10px);
-}
-
-.faq-slide-enter-to,
-.faq-slide-leave-from {
-  opacity: 1;
-  transform: translateY(0);
-}
-
-.faq-content {
-  animation: slideDown 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-@keyframes slideDown {
-  from {
-    opacity: 0;
-    transform: translateY(-10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
 /* Performance optimizations */
 /* Use GPU acceleration for transforms */
 article,
@@ -660,13 +403,6 @@ button {
   #pricing-plans {
     padding-top: 2rem;
     padding-bottom: 2rem;
-  }
-
-  #feature-comparison,
-  #pricing-faq,
-  #testimonial {
-    padding-top: 2.5rem;
-    padding-bottom: 2.5rem;
   }
 
   .pricing-card.featured {

@@ -26,9 +26,9 @@
           </router-link>
 
           <router-link
-            to="/#features"
+            to="/how-it-works"
             class="nav-link"
-            :class="{ 'active': isActive('/#features') }"
+            :class="{ 'active': isActive('/how-it-works') }"
           >
             How it Works
           </router-link>
@@ -138,11 +138,11 @@
           </router-link>
 
           <router-link
-            to="/#features"
+            to="/how-it-works"
             @click="mobileMenuOpen = false"
             class="block px-4 py-2.5 rounded-lg text-gray-700 transition-colors font-medium"
-            :class="{ 'text-white': isActive('/#features') }"
-            :style="isActive('/#features') ? 'background-color: #ffe6cc; color: #ff6b00;' : ''"
+            :class="{ 'text-white': isActive('/how-it-works') }"
+            :style="isActive('/how-it-works') ? 'background-color: #ffe6cc; color: #ff6b00;' : ''"
           >
             How it Works
           </router-link>

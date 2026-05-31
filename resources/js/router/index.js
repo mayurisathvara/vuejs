@@ -2,6 +2,7 @@ import { createRouter, createWebHistory } from 'vue-router';
 
 // Import pages
 import Features from '../pages/Features.vue';
+import HowItWorks from '../pages/HowItWorks.vue';
 import About from '../pages/About.vue';
 import Services from '../pages/Services.vue';
 import Help from '../pages/Help.vue';
@@ -19,6 +20,15 @@ const routes = [
     meta: { 
       title: 'Callytics - Track, Analyze & Optimize Every Business Call',
       description: 'Track every business call with Callytics. Real-time analytics, call recording, and powerful insights to optimize your marketing ROI.'
+    }
+  },
+  {
+    path: '/how-it-works',
+    name: 'HowItWorks',
+    component: HowItWorks,
+    meta: {
+      title: 'How Callytics Works – 4 Simple Steps to Track Business Calls',
+      description: 'Learn how Callytics works in 4 easy steps: register, install the app, let calls sync automatically, and analyse performance with real-time dashboards.'
     }
   },
   {
