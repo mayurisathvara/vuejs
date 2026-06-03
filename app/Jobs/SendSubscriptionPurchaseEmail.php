@@ -21,7 +21,6 @@ class SendSubscriptionPurchaseEmail implements ShouldQueue
 
     public function __construct(
         public OrganizationSubscription $subscription,
-        public string $emailType = 'renewal',
     ) {}
 
     public function handle(): void
@@ -33,6 +32,6 @@ class SendSubscriptionPurchaseEmail implements ShouldQueue
             return;
         }
 
-        Mail::to($email)->send(new SubscriptionPurchaseMail($subscription, $this->emailType));
+        Mail::to($email)->send(new SubscriptionPurchaseMail($subscription));
     }
 }

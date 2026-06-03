@@ -147,23 +147,16 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/subscription/addon-invoices/{addon}', [\App\Http\Controllers\SubscriptionController::class, 'addonInvoiceView']);
         Route::get('/subscription/addon-invoices/{addon}/download', [\App\Http\Controllers\SubscriptionController::class, 'addonInvoiceDownload']);
 
-        // Auto-renew toggle — moderate limit
-        Route::middleware('throttle:20,1')->group(function () {
-            Route::post('/subscription/auto-renew/toggle', [\App\Http\Controllers\SubscriptionController::class, 'toggleAutoRenew']);
-        });
-
         // Payment order creation — 10 attempts per minute per user
         Route::middleware('throttle:10,1')->group(function () {
             Route::post('/subscription/renew/order', [\App\Http\Controllers\SubscriptionController::class, 'createRenewalOrder']);
             Route::post('/subscription/addon-sim/order', [\App\Http\Controllers\SubscriptionController::class, 'createAddonOrder']);
-            Route::post('/subscription/recurring/order', [\App\Http\Controllers\SubscriptionController::class, 'createRecurringOrder']);
         });
 
         // Payment verification — 5 attempts per minute (tighter; replaying is suspicious)
         Route::middleware('throttle:5,1')->group(function () {
             Route::post('/subscription/renew/verify', [\App\Http\Controllers\SubscriptionController::class, 'verifyRenewalPayment']);
             Route::post('/subscription/addon-sim/verify', [\App\Http\Controllers\SubscriptionController::class, 'verifyAddonPayment']);
-            Route::post('/subscription/recurring/verify', [\App\Http\Controllers\SubscriptionController::class, 'verifyRecurringPayment']);
         });
     });
 
@@ -262,10 +255,3 @@ Route::prefix('v1/app')->group(function () {
     );
 });
 
-// =========================================
-// Razorpay Webhook (no auth — signature verified in handler)
-// =========================================
-Route::middleware('throttle:60,1')->post(
-    '/webhooks/razorpay',
-    [\App\Http\Controllers\Api\V1\Webhook\RazorpayWebhookController::class, 'handle']
-);

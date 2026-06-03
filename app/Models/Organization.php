@@ -20,7 +20,6 @@ class Organization extends Model
         'mobile',
         'industry',
         'app_login_code',
-        'razorpay_customer_id',
         'description',
         'status',
     ];

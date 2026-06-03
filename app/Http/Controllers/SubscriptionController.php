@@ -10,7 +10,6 @@ use App\Models\OrganizationSubscription;
 use App\Models\Plan;
 use App\Services\InvoiceService;
 use App\Services\RazorpayAddonSimService;
-use App\Services\RazorpayRecurringService;
 use App\Services\RazorpaySubscriptionService;
 use App\Services\SubscriptionService;
 use Illuminate\Http\JsonResponse;
@@ -23,7 +22,6 @@ class SubscriptionController extends Controller
     public function __construct(
         private readonly RazorpaySubscriptionService $razorpaySubscriptions,
         private readonly RazorpayAddonSimService $razorpayAddons,
-        private readonly RazorpayRecurringService $razorpayRecurring,
     ) {}
 
     // -------------------------------------------------------------------------
@@ -88,10 +86,6 @@ class SubscriptionController extends Controller
                 'start_date',
                 'end_date',
                 'status',
-                'auto_renew',
-                'razorpay_subscription_id',
-                'auto_renew_failed_at',
-                'auto_renew_failure_reason',
                 'features',
                 'total_amount',
                 'created_at',
@@ -235,7 +229,7 @@ class SubscriptionController extends Controller
 
         if ($subscription->wasRecentlyCreated) {
             InvoiceService::ensureSubscriptionInvoice($subscription);
-            SendSubscriptionPurchaseEmail::dispatch($subscription, 'renewal');
+            SendSubscriptionPurchaseEmail::dispatch($subscription);
         }
 
         Log::info('Renewal payment verified', [
@@ -542,168 +536,6 @@ class SubscriptionController extends Controller
             'data'    => [
                 'addon' => $addon,
                 'stats' => SubscriptionService::getStats($organizationId),
-            ],
-        ]);
-    }
-
-    // -------------------------------------------------------------------------
-    // Auto-renewal endpoints
-    // -------------------------------------------------------------------------
-
-    /**
-     * POST /subscription/auto-renew/toggle
-     *
-     * Enable or disable auto-renewal for the current active subscription.
-     * When disabling, cancel the associated Razorpay subscription (at cycle end).
-     */
-    public function toggleAutoRenew(Request $request): JsonResponse
-    {
-        $user = $request->user();
-        $organizationId = (int) $user->organization_id;
-
-        if (! $organizationId) {
-            return response()->json(['message' => 'No organization linked to this account.'], 404);
-        }
-
-        $validated = $request->validate([
-            'auto_renew' => 'required|boolean',
-        ]);
-
-        $subscription = OrganizationSubscription::where('organization_id', $organizationId)
-            ->whereIn('status', ['active', 'upcoming'])
-            ->latest()
-            ->first();
-
-        if (! $subscription) {
-            return response()->json(['message' => 'No active subscription found.'], 404);
-        }
-
-        $enable = (bool) $validated['auto_renew'];
-
-        // If disabling and a Razorpay subscription exists, cancel it at cycle end
-        if (! $enable && $subscription->razorpay_subscription_id) {
-            $this->razorpayRecurring->cancelSubscription($subscription->razorpay_subscription_id);
-        }
-
-        $subscription->update([
-            'auto_renew'              => $enable,
-            'auto_renew_failure_reason' => $enable ? null : $subscription->auto_renew_failure_reason,
-            'auto_renew_failed_at'    => $enable ? null : $subscription->auto_renew_failed_at,
-        ]);
-
-        Log::info('Auto-renew toggled', [
-            'organization_id'  => $organizationId,
-            'subscription_id'  => $subscription->id,
-            'auto_renew'       => $enable,
-            'ip'               => $request->ip(),
-        ]);
-
-        return response()->json([
-            'success' => true,
-            'message' => $enable ? 'Auto-renewal enabled.' : 'Auto-renewal disabled.',
-            'data'    => ['auto_renew' => $enable],
-        ]);
-    }
-
-    /**
-     * POST /subscription/recurring/order
-     *
-     * Create a Razorpay Subscription (recurring) for the selected plan + SIM count.
-     * Returns the Razorpay key + subscription object so the frontend can open checkout.
-     */
-    public function createRecurringOrder(Request $request): JsonResponse
-    {
-        $user = $request->user();
-        $organizationId = (int) $user->organization_id;
-
-        if (! $organizationId) {
-            return response()->json(['message' => 'No organization linked to this account.'], 404);
-        }
-
-        $validated = $request->validate([
-            'subscription_plan_id' => 'required|integer|exists:plans,id',
-            'sim_quantity'         => 'required|integer|min:5|max:10000',
-        ]);
-
-        $organization = Organization::findOrFail($organizationId);
-        $plan         = Plan::where('id', $validated['subscription_plan_id'])
-            ->where('is_active', true)
-            ->whereIn('billing_type', ['monthly', 'yearly'])
-            ->firstOrFail();
-
-        $data = $this->razorpayRecurring->createSubscription(
-            organization: $organization,
-            plan: $plan,
-            simQuantity: (int) $validated['sim_quantity']
-        );
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Razorpay recurring subscription created.',
-            'data'    => $data,
-        ]);
-    }
-
-    /**
-     * POST /subscription/recurring/verify
-     *
-     * Verify the recurring subscription payment signature and activate auto-renewal.
-     * The actual subscription row will be created/updated when the webhook fires
-     * (subscription.charged). This endpoint just records the razorpay_subscription_id
-     * and marks the current subscription as auto_renew=true.
-     */
-    public function verifyRecurringPayment(Request $request): JsonResponse
-    {
-        $user = $request->user();
-        $organizationId = (int) $user->organization_id;
-
-        if (! $organizationId) {
-            return response()->json(['message' => 'No organization linked to this account.'], 404);
-        }
-
-        $validated = $request->validate([
-            'razorpay_subscription_id' => 'required|string|max:255',
-            'razorpay_payment_id'      => 'required|string|max:255',
-            'razorpay_signature'       => 'required|string|max:255',
-        ]);
-
-        $this->razorpayRecurring->verifySignature(
-            subscriptionId: $validated['razorpay_subscription_id'],
-            paymentId:      $validated['razorpay_payment_id'],
-            signature:      $validated['razorpay_signature']
-        );
-
-        // Link the razorpay_subscription_id to the active subscription so the webhook
-        // can match future charge events to this organization.
-        $subscription = OrganizationSubscription::where('organization_id', $organizationId)
-            ->whereIn('status', ['active', 'upcoming'])
-            ->latest()
-            ->first();
-
-        if ($subscription) {
-            $subscription->update([
-                'razorpay_subscription_id' => $validated['razorpay_subscription_id'],
-                'auto_renew'              => true,
-                'auto_renew_failed_at'    => null,
-                'auto_renew_failure_reason' => null,
-            ]);
-        }
-
-        Log::info('Recurring subscription payment verified', [
-            'organization_id'          => $organizationId,
-            'subscription_id'          => $subscription?->id,
-            'razorpay_subscription_id' => $validated['razorpay_subscription_id'],
-            'razorpay_payment_id'      => $validated['razorpay_payment_id'],
-            'ip'                       => $request->ip(),
-        ]);
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Recurring subscription verified. Auto-renewal is now active.',
-            'data'    => [
-                'razorpay_subscription_id' => $validated['razorpay_subscription_id'],
-                'auto_renew'               => true,
-                'stats'                    => SubscriptionService::getStats($organizationId),
             ],
         ]);
     }

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>{{ $emailType === 'auto_renewal' ? 'Auto-Renewal Successful' : 'Subscription Confirmed' }} – Callytics</title>
+  <title>Subscription Confirmed – Callytics</title>
 </head>
 <body style="margin:0;padding:0;background:#f1f5f9;font-family:Arial,Helvetica,sans-serif;">
 
@@ -21,7 +21,6 @@
   $paymentId    = $subscription->razorpay_payment_id ?? '-';
   $customerName = $org?->name ?? 'Valued Customer';
   $appUrl       = rtrim(config('app.url'), '/');
-  $isAutoRenew  = $emailType === 'auto_renewal';
 @endphp
 
 <table width="100%" cellpadding="0" cellspacing="0" style="background:#f1f5f9;padding:40px 16px;">
@@ -37,12 +36,12 @@
                 <td>
                   <span style="font-size:22px;font-weight:900;color:#ffffff;letter-spacing:-0.02em;">Callytics</span>
                   <p style="margin:4px 0 0;font-size:12px;color:#94a3b8;">
-                    {{ $isAutoRenew ? 'Auto-Renewal Confirmation' : 'Subscription Confirmation' }}
+                    Subscription Confirmation
                   </p>
                 </td>
                 <td align="right">
                   <span style="background:rgba(249,115,22,0.15);border:1px solid rgba(249,115,22,0.4);color:#fb923c;font-size:11px;font-weight:700;padding:5px 12px;border-radius:20px;letter-spacing:0.06em;">
-                    {{ $isAutoRenew ? 'AUTO-RENEWED' : 'PAYMENT CONFIRMED' }}
+                    PAYMENT CONFIRMED
                   </span>
                 </td>
               </tr>
@@ -61,7 +60,7 @@
 
             <!-- Greeting -->
             <h1 style="font-size:22px;font-weight:800;color:#10233f;text-align:center;margin:0 0 10px;letter-spacing:-0.02em;">
-              {{ $isAutoRenew ? 'Your Plan Has Been Auto-Renewed!' : 'Your Subscription is Active!' }}
+              Your Subscription is Active!
             </h1>
             <p style="font-size:15px;color:#6b7280;text-align:center;margin:0 0 28px;line-height:1.6;">
               Hi <strong style="color:#10233f;">{{ $customerName }}</strong>, your payment was successful.<br>

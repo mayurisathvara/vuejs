@@ -15,16 +15,13 @@ class SubscriptionPurchaseMail extends Mailable
 
     public function __construct(
         public OrganizationSubscription $subscription,
-        public string $emailType = 'renewal',
     ) {
         $this->invoiceNumber = InvoiceService::ensureSubscriptionInvoice($subscription);
     }
 
     public function envelope(): Envelope
     {
-        $subject = $this->emailType === 'auto_renewal'
-            ? "Auto-Renewal Successful – {$this->invoiceNumber}"
-            : "Subscription Confirmed – {$this->invoiceNumber}";
+        $subject = "Subscription Confirmed – {$this->invoiceNumber}";
 
         return new Envelope(subject: $subject);
     }

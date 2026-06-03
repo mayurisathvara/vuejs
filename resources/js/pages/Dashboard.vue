@@ -753,7 +753,6 @@ const subscriptionStats = ref(null)
 const showExpiryBanner = computed(() => {
   const s = subscriptionStats.value
   if (!s) return false
-  if (s.auto_renew !== false) return false
   if (s.subscription_status !== 'active') return false
   const days = s.days_until_expiry
   if (days === null || days === undefined) return false

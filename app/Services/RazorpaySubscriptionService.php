@@ -248,7 +248,9 @@ class RazorpaySubscriptionService
 
     private function calculateAmount(Plan $plan, int $simQuantity): float
     {
-        return round(((float) $plan->price_per_sim) * $simQuantity, 2);
+        $months = $plan->billing_type === 'yearly' ? 12 : 1;
+
+        return round(((float) $plan->price_per_sim) * $simQuantity * $months, 2);
     }
 
     private function fetchOrder(string $orderId): array

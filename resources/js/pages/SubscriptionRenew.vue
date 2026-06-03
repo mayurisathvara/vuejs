@@ -107,7 +107,7 @@
               <!-- Price -->
               <div class="plan-price">
                 <strong>{{ formatCurrency(plan.price_per_sim) }}</strong>
-                <span>per SIM / mo</span>
+                <span>{{ plan.billing_type === 'yearly' ? 'per SIM / mo · billed yearly' : 'per SIM / mo' }}</span>
               </div>
             </button>
           </div>
@@ -180,7 +180,11 @@
             <div class="calc-rows">
               <div class="calc-row">
                 <span>Price per SIM</span>
-                <strong>{{ selectedPlan ? formatCurrency(selectedPlan.price_per_sim) : '–' }}</strong>
+                <strong>{{ selectedPlan ? formatCurrency(selectedPlan.price_per_sim) + ' / mo' : '–' }}</strong>
+              </div>
+              <div v-if="selectedPlan?.billing_type === 'yearly'" class="calc-row calc-row--accent">
+                <span>× Months</span>
+                <strong>12</strong>
               </div>
               <div class="calc-row">
                 <span>SIM Quantity</span>
@@ -202,40 +206,16 @@
               <strong>{{ selectedPlan ? formatCurrency(total) : '–' }}</strong>
             </div>
 
-            <!-- Auto-renew toggle -->
-            <div class="auto-renew-toggle-row">
-              <div class="auto-renew-toggle-info">
-                <i class="fas fa-sync-alt" :class="autoRenew ? 'ar-icon--on' : 'ar-icon--off'"></i>
-                <div>
-                  <strong>Auto-Renewal</strong>
-                  <span>{{ autoRenew ? 'Renews automatically each cycle.' : 'One-time payment — renew manually.' }}</span>
-                </div>
-              </div>
-              <button
-                type="button"
-                class="toggle-sw"
-                :class="{ 'is-on': autoRenew }"
-                :aria-label="autoRenew ? 'Disable auto-renewal' : 'Enable auto-renewal'"
-                @click="autoRenew = !autoRenew"
-              >
-                <span class="toggle-th"></span>
-              </button>
-            </div>
-
             <!-- Payment note -->
             <p v-if="paymentMessage" class="pay-note" :class="paymentMessageType">{{ paymentMessage }}</p>
-            <p v-else class="pay-note">
-              {{ autoRenew
-                ? 'Your card will be charged automatically each billing cycle via Razorpay.'
-                : 'One-time Razorpay payment — you control each renewal manually.' }}
-            </p>
+            <p v-else class="pay-note">One-time Razorpay payment — you control each renewal manually.</p>
 
             <!-- Pay button -->
             <button type="button" class="pay-btn" :disabled="!canRenew" @click="renewPlan">
               <span v-if="paymentLoading" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-              <i v-else :class="autoRenew ? 'fas fa-sync-alt' : 'fas fa-lock'"></i>
+              <i v-else class="fas fa-lock"></i>
               <span v-if="paymentLoading">Opening Checkout…</span>
-              <span v-else>{{ autoRenew ? 'Subscribe &amp; Auto-Renew' : 'Pay Once' }}</span>
+              <span v-else>Pay Once</span>
             </button>
           </div>
         </aside>
@@ -264,8 +244,6 @@ const activeBillingCycle = ref('monthly')
 const paymentLoading = ref(false)
 const paymentMessage = ref('')
 const paymentMessageType = ref('')
-const autoRenew = ref(true)
-
 const billingTabs = [
   { value: 'monthly', label: 'Monthly' },
   { value: 'yearly', label: 'Yearly' }
@@ -347,7 +325,8 @@ const quotedQuantity = computed(() => {
   const quantity = Number.parseInt(simQuantity.value, 10)
   return Number.isFinite(quantity) ? Math.max(MIN_SIM_QUANTITY, quantity) : MIN_SIM_QUANTITY
 })
-const subtotal = computed(() => Number(selectedPlan.value?.price_per_sim || 0) * quotedQuantity.value)
+const billingMonths = computed(() => selectedPlan.value?.billing_type === 'yearly' ? 12 : 1)
+const subtotal = computed(() => Number(selectedPlan.value?.price_per_sim || 0) * quotedQuantity.value * billingMonths.value)
 const total = computed(() => subtotal.value)
 const canRenew = computed(() => Boolean(selectedPlan.value) && !loading.value && !paymentLoading.value)
 const paymentStatusLabel = computed(() => {
@@ -409,112 +388,11 @@ const loadRazorpayCheckout = () => {
 const renewPlan = async () => {
   if (!selectedPlan.value) return
   normalizeQuantity()
-
-  if (autoRenew.value) {
-    await startRecurringCheckout()
-  } else {
-    await startOneTimeCheckout()
-  }
+  await startOneTimeCheckout()
 }
 
 // ---------------------------------------------------------------------------
-// Recurring (auto-renew) checkout via Razorpay Subscriptions API
-// ---------------------------------------------------------------------------
-
-const startRecurringCheckout = async () => {
-  paymentLoading.value = true
-  paymentMessage.value = ''
-  paymentMessageType.value = ''
-
-  try {
-    await loadRazorpayCheckout()
-
-    const response = await api.post('/subscription/recurring/order', {
-      subscription_plan_id: selectedPlan.value.id,
-      sim_quantity: quotedQuantity.value
-    })
-
-    const data         = response.data?.data || {}
-    const rzpSub       = data.subscription  || {}
-    const quote        = data.quote         || {}
-
-    if (!rzpSub.id || !data.key) {
-      throw new Error('Razorpay subscription response is incomplete.')
-    }
-
-    const user           = JSON.parse(localStorage.getItem('user') || '{}')
-    let paymentHandled   = false
-
-    const checkout = new window.Razorpay({
-      key:             data.key,
-      subscription_id: rzpSub.id,
-      name:            'Callytics',
-      description:     `${quote.plan_name || selectedPlan.value.display_name} — auto-renewing subscription`,
-      recurring:       true,
-      prefill: {
-        name:    user.name    || '',
-        email:   user.email   || '',
-        contact: user.mobile  || user.phone || ''
-      },
-      notes: {
-        type:         'recurring',
-        app_plan_id:  String(selectedPlan.value.id),
-        sim_quantity: String(quotedQuantity.value)
-      },
-      theme: { color: '#f97316' },
-      handler: async (payment) => {
-        paymentHandled = true
-        await verifyRecurringPayment(payment)
-      },
-      modal: {
-        ondismiss: () => {
-          if (paymentHandled) return
-          paymentLoading.value = false
-          paymentMessage.value = 'Checkout closed before payment completion.'
-          paymentMessageType.value = 'danger'
-        }
-      }
-    })
-
-    checkout.on('payment.failed', (failure) => {
-      paymentHandled = true
-      paymentLoading.value = false
-      paymentMessage.value = failure.error?.description || 'Payment failed. Please try again.'
-      paymentMessageType.value = 'danger'
-      showError(paymentMessage.value)
-    })
-
-    checkout.open()
-  } catch (err) {
-    paymentLoading.value = false
-    paymentMessage.value = err.response?.data?.message || err.message || 'Unable to start recurring checkout.'
-    paymentMessageType.value = 'danger'
-    showError(paymentMessage.value)
-  }
-}
-
-const verifyRecurringPayment = async (payment) => {
-  try {
-    const response = await api.post('/subscription/recurring/verify', {
-      razorpay_subscription_id: payment.razorpay_subscription_id,
-      razorpay_payment_id:      payment.razorpay_payment_id,
-      razorpay_signature:       payment.razorpay_signature
-    })
-
-    const message = response.data?.message || 'Recurring subscription activated. Auto-renewal is now enabled.'
-    showSuccess(message)
-    router.replace('/subscription')
-  } catch (err) {
-    paymentMessage.value = err.response?.data?.message || 'Payment verification failed. Please contact support.'
-    paymentMessageType.value = 'danger'
-    showError(paymentMessage.value)
-  } finally {
-    paymentLoading.value = false
-  }
-}
-
-// ---------------------------------------------------------------------------
-// One-time checkout via Razorpay Orders API (auto-renew disabled)
+// One-time checkout via Razorpay Orders API
 // ---------------------------------------------------------------------------
 
 const startOneTimeCheckout = async () => {
@@ -703,35 +581,37 @@ onMounted(fetchRenewalData)
   align-items: flex-start;
   justify-content: space-between;
   gap: 16px;
-  padding: 20px 24px;
+  padding: 22px 26px;
+  background: #fff;
 }
 
 .back-link {
   display: inline-flex;
   align-items: center;
   gap: 7px;
-  font-size: 0.82rem;
-  font-weight: 800;
-  color: var(--blue);
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--muted);
   text-decoration: none;
-  margin-bottom: 10px;
+  margin-bottom: 12px;
+  transition: color 0.15s;
 }
 
-.back-link:hover { color: var(--navy); }
+.back-link:hover { color: var(--ink); }
 
 .rn-hdr-title {
-  margin: 0 0 4px;
-  font-size: 1.1rem;
+  margin: 0 0 6px;
+  font-size: clamp(1.2rem, 1.8vw, 1.45rem);
   font-weight: 900;
   color: var(--ink);
-  letter-spacing: -0.02em;
+  letter-spacing: -0.03em;
 }
 
 .rn-hdr-sub {
   margin: 0;
-  font-size: 0.82rem;
+  font-size: 0.83rem;
   color: var(--muted);
-  line-height: 1.5;
+  line-height: 1.55;
   max-width: 480px;
 }
 
@@ -739,12 +619,13 @@ onMounted(fetchRenewalData)
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 7px 12px;
+  padding: 7px 14px;
   border-radius: 999px;
   font-size: 0.78rem;
   font-weight: 800;
-  color: #175cd3;
-  background: #eff8ff;
+  color: var(--orange);
+  background: rgba(249, 115, 22, 0.1);
+  border: 1px solid rgba(249, 115, 22, 0.25);
   white-space: nowrap;
   flex-shrink: 0;
   margin-top: 4px;
@@ -794,6 +675,7 @@ onMounted(fetchRenewalData)
   background: #fff;
   color: var(--ink);
   box-shadow: 0 2px 16px rgba(15, 23, 42, 0.10);
+  border: 1.5px solid rgba(249, 115, 22, 0.3);
 }
 
 /* Icon square */
@@ -954,7 +836,7 @@ onMounted(fetchRenewalData)
 }
 
 .plan-avatar--advance    { background: linear-gradient(135deg, var(--orange), #ffb454); }
-.plan-avatar--basic      { background: linear-gradient(135deg, var(--blue), #60a5fa); }
+.plan-avatar--basic      { background: linear-gradient(135deg, #fb923c, #fbbf24); }
 .plan-avatar--free_trial { background: linear-gradient(135deg, #7c3aed, #a78bfa); }
 
 /* ── Selection dot ── */
@@ -1028,11 +910,11 @@ onMounted(fetchRenewalData)
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  padding: 3px 8px;
+  padding: 3px 9px;
   border-radius: 999px;
-  color: #175cd3;
-  background: #eff8ff;
-  border: 1px solid #dbeafe;
+  color: #92400e;
+  background: #fef3c7;
+  border: 1px solid #fde68a;
   font-size: 0.67rem;
   font-weight: 700;
 }
@@ -1130,24 +1012,25 @@ onMounted(fetchRenewalData)
 .sel-plan {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 12px;
+  gap: 12px;
+  padding: 13px 14px;
   border-radius: 14px;
-  background: #f8fafc;
-  border: 1px solid var(--line);
+  background: linear-gradient(135deg, #fff8f2, #fff3e6);
+  border: 1px solid rgba(249, 115, 22, 0.18);
   margin-bottom: 14px;
 }
 
 .sel-plan-icon {
-  width: 38px;
-  height: 38px;
+  width: 40px;
+  height: 40px;
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 11px;
+  border-radius: 12px;
   color: #fff;
-  background: linear-gradient(135deg, var(--navy), var(--blue));
+  background: linear-gradient(135deg, var(--orange), #ffb454);
   flex-shrink: 0;
+  box-shadow: 0 3px 10px rgba(249, 115, 22, 0.3);
 }
 
 .sel-plan strong {
@@ -1161,9 +1044,9 @@ onMounted(fetchRenewalData)
 /* ── Quantity block ── */
 .qty-block {
   padding: 14px;
-  border: 1px solid var(--line);
+  border: 1px solid rgba(249, 115, 22, 0.18);
   border-radius: 14px;
-  background: linear-gradient(180deg, #fbfdff 0%, #f5f9ff 100%);
+  background: linear-gradient(160deg, #fff8f2 0%, #fff3e6 100%);
   margin-bottom: 14px;
 }
 
@@ -1189,8 +1072,8 @@ onMounted(fetchRenewalData)
   border-radius: 999px;
   font-size: 0.7rem;
   font-weight: 800;
-  color: #175cd3;
-  background: #eff8ff;
+  color: #c2410c;
+  background: rgba(249, 115, 22, 0.1);
   white-space: nowrap;
   flex-shrink: 0;
 }
@@ -1198,32 +1081,32 @@ onMounted(fetchRenewalData)
 /* ── Quantity control ── */
 .qty-ctrl {
   display: grid;
-  grid-template-columns: 40px 1fr 40px;
+  grid-template-columns: 44px 1fr 44px;
   gap: 8px;
   align-items: center;
 }
 
 .qty-ctrl button,
 .qty-ctrl input {
-  height: 40px;
-  border: 1px solid var(--line);
-  border-radius: 11px;
+  height: 44px;
+  border: 1px solid rgba(249, 115, 22, 0.25);
+  border-radius: 12px;
 }
 
 .qty-ctrl button {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #fff;
-  color: var(--navy);
+  background: rgba(249, 115, 22, 0.08);
+  color: #c2410c;
   font-weight: 900;
   cursor: pointer;
   transition: background 0.15s, border-color 0.15s;
 }
 
 .qty-ctrl button:hover:not(:disabled) {
-  background: #f0f4fa;
-  border-color: #c9d3e0;
+  background: rgba(249, 115, 22, 0.16);
+  border-color: rgba(249, 115, 22, 0.45);
 }
 
 .qty-ctrl button:disabled { opacity: 0.45; cursor: not-allowed; }
@@ -1239,8 +1122,8 @@ onMounted(fetchRenewalData)
 }
 
 .qty-ctrl input:focus {
-  border-color: var(--blue);
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+  border-color: var(--orange);
+  box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.15);
 }
 
 /* ── Quantity note ── */
@@ -1253,8 +1136,9 @@ onMounted(fetchRenewalData)
   border-radius: 10px;
   font-size: 0.78rem;
   font-weight: 700;
-  color: #175cd3;
-  background: #eff8ff;
+  color: #c2410c;
+  background: rgba(249, 115, 22, 0.08);
+  border: 1px solid rgba(249, 115, 22, 0.15);
 }
 
 /* ── Calculation rows ── */
@@ -1287,6 +1171,17 @@ onMounted(fetchRenewalData)
   color: var(--ink);
 }
 
+.calc-row--accent {
+  background: rgba(249, 115, 22, 0.06);
+  border-radius: 8px;
+  padding: 9px 8px;
+  margin: 0 -8px;
+  border-bottom: none;
+}
+
+.calc-row--accent span { color: #c2410c; font-weight: 700; }
+.calc-row--accent strong { color: var(--orange); font-size: 0.9rem; }
+
 /* ── Total row ── */
 .total-row {
   display: flex;
@@ -1294,22 +1189,21 @@ onMounted(fetchRenewalData)
   justify-content: space-between;
   gap: 12px;
   margin: 12px 0 0;
-  padding: 14px 16px;
-  border-radius: 14px;
-  background:
-    radial-gradient(circle at 0 0, rgba(249, 115, 22, 0.28), transparent 40%),
-    linear-gradient(135deg, var(--navy), #173e62);
+  padding: 16px 18px;
+  border-radius: 16px;
+  background: #f1f5f9;
+  border: 1px solid #e2e8f0;
 }
 
 .total-row span {
-  color: rgba(255, 255, 255, 0.72);
+  color: var(--muted);
   font-size: 0.82rem;
   font-weight: 700;
 }
 
 .total-row strong {
-  color: #fff;
-  font-size: 1.5rem;
+  color: var(--ink);
+  font-size: 1.6rem;
   font-weight: 900;
   letter-spacing: -0.04em;
 }
@@ -1325,97 +1219,30 @@ onMounted(fetchRenewalData)
 .pay-note.success { color: #067647; font-weight: 700; }
 .pay-note.danger  { color: #b42318; font-weight: 700; }
 
-/* ── Auto-renew toggle row ── */
-.auto-renew-toggle-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-  margin: 14px 0 0;
-  padding: 12px 14px;
-  border-radius: 14px;
-  border: 1px solid var(--line);
-  background: #f8fafc;
-}
-
-.auto-renew-toggle-info {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  flex: 1;
-  min-width: 0;
-}
-
-.ar-icon--on  { color: var(--orange); font-size: 0.9rem; flex-shrink: 0; }
-.ar-icon--off { color: #94a3b8; font-size: 0.9rem; flex-shrink: 0; }
-
-.auto-renew-toggle-info strong {
-  display: block;
-  font-size: 0.83rem;
-  font-weight: 800;
-  color: var(--ink);
-}
-
-.auto-renew-toggle-info span {
-  display: block;
-  font-size: 0.73rem;
-  color: var(--muted);
-  font-weight: 600;
-  margin-top: 1px;
-  line-height: 1.35;
-}
-
-.toggle-sw {
-  position: relative;
-  width: 44px;
-  height: 24px;
-  border: none;
-  border-radius: 999px;
-  background: #e2e8f0;
-  cursor: pointer;
-  flex-shrink: 0;
-  padding: 0;
-  transition: background 0.2s;
-}
-
-.toggle-sw.is-on { background: var(--orange); }
-
-.toggle-th {
-  position: absolute;
-  top: 2px;
-  left: 2px;
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
-  background: #fff;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.16);
-  transition: transform 0.2s;
-}
-
-.toggle-sw.is-on .toggle-th { transform: translateX(20px); }
-
 /* ── Pay button ── */
 .pay-btn {
-  margin-top: 14px;
+  margin-top: 16px;
   width: 100%;
-  padding: 12px 16px;
+  padding: 15px 16px;
   border: 0;
-  border-radius: 13px;
+  border-radius: 14px;
   color: #fff;
-  font-size: 0.88rem;
-  font-weight: 800;
+  font-size: 0.94rem;
+  font-weight: 900;
+  letter-spacing: -0.01em;
   background: linear-gradient(135deg, var(--orange), #ffb454);
-  box-shadow: 0 6px 20px rgba(249, 115, 22, 0.28);
+  box-shadow: 0 6px 22px rgba(249, 115, 22, 0.32);
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
-  transition: box-shadow 0.15s, opacity 0.15s;
+  gap: 9px;
+  transition: box-shadow 0.15s, transform 0.15s, opacity 0.15s;
 }
 
 .pay-btn:hover:not(:disabled) {
-  box-shadow: 0 8px 24px rgba(249, 115, 22, 0.38);
+  box-shadow: 0 8px 28px rgba(249, 115, 22, 0.42);
+  transform: translateY(-1px);
 }
 
 .pay-btn:disabled {

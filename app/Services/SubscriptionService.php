@@ -273,7 +273,6 @@ class SubscriptionService
             'subscription_status'  => $subscription?->status ?? 'none',
             'start_date'           => $subscription?->start_date?->toDateString(),
             'end_date'             => $subscription?->end_date?->toDateString(),
-            'auto_renew'           => $subscription?->auto_renew ?? true,
             'days_until_expiry'    => $daysUntilExpiry,
             'renewal_days_before'  => config('subscription.renewal_days_before'),
             'features'             => $subscription?->features ?? $subscription?->plan?->features ?? [],
