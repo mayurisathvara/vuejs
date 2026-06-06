@@ -123,11 +123,9 @@ const router = createRouter({
 });
 
 // Update document title and meta tags for SEO
-router.beforeEach((to, from, next) => {
-  // Update title
+router.beforeEach((to) => {
   document.title = to.meta.title || 'Callytics - Call Tracking & Analytics';
   
-  // Update or create meta description
   let metaDescription = document.querySelector('meta[name="description"]');
   if (to.meta.description) {
     if (metaDescription) {
@@ -140,7 +138,6 @@ router.beforeEach((to, from, next) => {
     }
   }
   
-  // Update canonical URL
   let canonical = document.querySelector('link[rel="canonical"]');
   const currentUrl = window.location.origin + to.path;
   if (canonical) {
@@ -152,7 +149,6 @@ router.beforeEach((to, from, next) => {
     document.head.appendChild(canonical);
   }
   
-  next();
 });
 
 export default router;
