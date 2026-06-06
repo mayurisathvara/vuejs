@@ -18,9 +18,11 @@ export default defineConfig({
         },
     },
     server: {
+        host: '0.0.0.0',
         hmr: {
-            host: 'localhost',
+            host: '192.168.1.7',
         },
+        cors: true,
     },
     build: {
         rollupOptions: {
