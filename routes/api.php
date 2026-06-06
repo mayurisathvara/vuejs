@@ -201,8 +201,8 @@ Route::prefix('v1/org')->group(function () {
         Route::post('/auth/login', [\App\Http\Controllers\Api\V1\Organization\AuthController::class, 'login']);
     });
 
-    // Protected: require a valid Bearer token issued by the login above
-    Route::middleware(['auth:sanctum', 'role:organization'])->group(function () {
+    // Protected: require a valid Bearer token + organization role + api plan feature
+    Route::middleware(['auth:sanctum', 'role:organization', 'plan.feature:api'])->group(function () {
         // Call logs — filtered to the authenticated organization automatically
         Route::get('/call-logs', [\App\Http\Controllers\Api\V1\Organization\CallLogController::class, 'index']);
     });

@@ -259,7 +259,7 @@ const routes = [
         path: '',
         name: 'DeveloperApi',
         component: DeveloperApi,
-        meta: { requiresAuth: true, roles: ['admin', 'organization'], title: 'Developer API' }
+        meta: { requiresAuth: true, roles: ['admin', 'organization'], planFeature: 'api', title: 'Developer API' }
       }
     ]
   },
@@ -324,11 +324,15 @@ router.beforeEach(async (to, from, next) => {
   const requiredRoles = to.meta.roles
   const userRole = authStore.userRole
 
+  const requiredPlanFeature = to.meta.planFeature
+
   if (requiresAuth && !authStore.isAuthenticated) {
     next('/login')
   } else if (requiresGuest && authStore.isAuthenticated) {
     next('/dashboard')
   } else if (requiredRoles && !requiredRoles.includes(userRole)) {
+    next('/dashboard')
+  } else if (requiredPlanFeature && userRole === 'organization' && !authStore.hasPlanFeature(requiredPlanFeature)) {
     next('/dashboard')
   } else {
     next()

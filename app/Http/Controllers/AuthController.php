@@ -85,6 +85,11 @@ class AuthController extends Controller
             'ip'      => $request->ip(),
         ]);
 
+        if ($user->role === 'organization' && $user->organization_id) {
+            $stats = \App\Services\SubscriptionService::getStats($user->organization_id);
+            $user->plan_features = $stats['features'] ?? [];
+        }
+
         return response()->json([
             'user'    => $user,
             'token'   => $token,
@@ -214,6 +219,11 @@ class AuthController extends Controller
             }
         }
         $user->date_format = $dateFormat;
+
+        if ($user->role === 'organization' && $user->organization_id) {
+            $stats = \App\Services\SubscriptionService::getStats($user->organization_id);
+            $user->plan_features = $stats['features'] ?? [];
+        }
 
         return response()->json($user);
     }

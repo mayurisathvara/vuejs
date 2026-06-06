@@ -169,7 +169,7 @@ const showSummaryReport = computed(() => isAdmin.value || isOrganization.value |
 const showPlans = computed(() => isAdmin.value)
 const showSubscription = computed(() => isOrganization.value)
 const showExcludedNumbers = computed(() => isAdmin.value || isOrganization.value || isManager.value)
-const showDeveloperApi = computed(() => isAdmin.value || isOrganization.value)
+const showDeveloperApi = computed(() => isAdmin.value || (isOrganization.value && authStore.hasPlanFeature('api')))
 const hasManagementSection = computed(() => showUsers.value || showOrganizations.value || showTeams.value || showSims.value)
 const hasReportsSection = computed(() => showCallReports.value || showSummaryReport.value)
 const hasBillingSection = computed(() => showPlans.value || showSubscription.value)

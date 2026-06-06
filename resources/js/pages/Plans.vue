@@ -132,13 +132,33 @@
           </div>
           <div class="col-12 mb-3">
             <label class="form-label">Features</label>
-            <input
-              v-model="featuresText"
-              type="text"
-              class="form-control"
-              placeholder="call_tracking, reports, ai, api"
-            />
-            <small class="text-muted">Use comma-separated feature keys.</small>
+            <div class="feature-multiselect" :class="{ open: featureDropdownOpen, 'is-invalid': errors.features }">
+              <button type="button" ref="featureTriggerRef" class="feature-multiselect__trigger" @click="toggleFeatureDropdown">
+                <span v-if="form.features.length" class="feature-multiselect__pills">
+                  <span v-for="f in form.features" :key="f" class="fms-pill">
+                    {{ featureLabel(f) }}
+                    <i class="fas fa-times" @click.stop="removeFeature(f)"></i>
+                  </span>
+                </span>
+                <span v-else class="feature-multiselect__placeholder">Select features…</span>
+                <i class="fas fa-chevron-down feature-multiselect__caret"></i>
+              </button>
+              <div v-if="featureDropdownOpen" class="feature-multiselect__dropdown"
+                   :style="{ position: 'fixed', top: dropdownPos.top + 'px', left: dropdownPos.left + 'px', width: dropdownPos.width + 'px', zIndex: 9999 }">
+                <label
+                  v-for="opt in FEATURE_OPTIONS"
+                  :key="opt.value"
+                  class="fms-option"
+                  :class="{ selected: form.features.includes(opt.value) }"
+                  @click="toggleFeature(opt.value)"
+                >
+                  <span class="fms-checkbox">
+                    <i v-if="form.features.includes(opt.value)" class="fas fa-check"></i>
+                  </span>
+                  <span class="fms-option-label">{{ opt.label }}</span>
+                </label>
+              </div>
+            </div>
             <div v-if="errors.features" class="invalid-feedback d-block">{{ getError(errors.features) }}</div>
           </div>
         </div>
@@ -167,12 +187,19 @@
 </template>
 
 <script setup>
-import { onMounted, reactive, ref } from 'vue'
+import { onMounted, onUnmounted, reactive, ref } from 'vue'
 import api from '@/services/api'
 import Button from '@/components/Button.vue'
 import InputField from '@/components/InputField.vue'
 import Modal from '@/components/Modal.vue'
 import { showError, showSuccess } from '@/services/toast'
+
+const FEATURE_OPTIONS = [
+  { value: 'call_tracking', label: 'Call Tracking' },
+  { value: 'reports',       label: 'Reports' },
+  { value: 'ai',            label: 'AI Insights' },
+  { value: 'api',           label: 'Developer API' },
+]
 
 const loading = ref(false)
 const saving = ref(false)
@@ -184,8 +211,37 @@ const showDeleteModal = ref(false)
 const isEditing = ref(false)
 const selectedPlan = ref(null)
 const planToDelete = ref(null)
-const featuresText = ref('')
+const featureDropdownOpen = ref(false)
+const featureTriggerRef = ref(null)
+const dropdownPos = reactive({ top: 0, left: 0, width: 0 })
 const errors = ref({})
+
+const toggleFeatureDropdown = () => {
+  if (!featureDropdownOpen.value && featureTriggerRef.value) {
+    const rect = featureTriggerRef.value.getBoundingClientRect()
+    dropdownPos.top = rect.bottom + 4
+    dropdownPos.left = rect.left
+    dropdownPos.width = rect.width
+  }
+  featureDropdownOpen.value = !featureDropdownOpen.value
+}
+
+const toggleFeature = (value) => {
+  const idx = form.features.indexOf(value)
+  if (idx === -1) form.features.push(value)
+  else form.features.splice(idx, 1)
+}
+
+const removeFeature = (value) => {
+  const idx = form.features.indexOf(value)
+  if (idx !== -1) form.features.splice(idx, 1)
+}
+
+const onClickOutside = (e) => {
+  if (!e.target.closest('.feature-multiselect')) featureDropdownOpen.value = false
+}
+onMounted(() => document.addEventListener('click', onClickOutside))
+onUnmounted(() => document.removeEventListener('click', onClickOutside))
 
 const filters = reactive({
   search: '',
@@ -230,7 +286,7 @@ const resetForm = () => {
   form.trial_days = null
   form.features = []
   form.is_active = true
-  featuresText.value = ''
+  featureDropdownOpen.value = false
   errors.value = {}
   selectedPlan.value = null
 }
@@ -249,9 +305,9 @@ const openEditModal = (plan) => {
   form.billing_type = plan.billing_type || 'monthly'
   form.price_per_sim = Number(plan.price_per_sim || 0)
   form.trial_days = plan.trial_days || null
-  form.features = Array.isArray(plan.features) ? plan.features : []
+  form.features = Array.isArray(plan.features) ? [...plan.features] : []
   form.is_active = Boolean(plan.is_active)
-  featuresText.value = form.features.join(', ')
+  featureDropdownOpen.value = false
   errors.value = {}
   showModal.value = true
 }
@@ -265,10 +321,7 @@ const planPayload = () => ({
   ...form,
   price_per_sim: Number(form.price_per_sim || 0),
   trial_days: form.billing_type === 'trial' ? Number(form.trial_days || 0) : null,
-  features: featuresText.value
-    .split(',')
-    .map((feature) => feature.trim())
-    .filter(Boolean)
+  features: [...form.features],
 })
 
 const savePlan = async () => {
@@ -531,6 +584,144 @@ onMounted(fetchPlans)
 .delete-card strong,
 .delete-card span {
   display: block;
+}
+
+/* ── Feature multi-select ── */
+.feature-multiselect {
+  position: relative;
+}
+
+.feature-multiselect__trigger {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  min-height: 38px;
+  padding: 5px 10px;
+  background: #fff;
+  border: 1px solid #dee2e6;
+  border-radius: 6px;
+  cursor: pointer;
+  gap: 6px;
+  text-align: left;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.feature-multiselect.open .feature-multiselect__trigger,
+.feature-multiselect__trigger:focus {
+  border-color: #86b7fe;
+  box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+  outline: none;
+}
+
+.feature-multiselect.is-invalid .feature-multiselect__trigger {
+  border-color: #dc3545;
+}
+
+.feature-multiselect__pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  flex: 1;
+}
+
+.fms-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 2px 8px;
+  background: #eff8ff;
+  color: #175cd3;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.fms-pill i {
+  font-size: 10px;
+  cursor: pointer;
+  opacity: 0.6;
+  transition: opacity 0.1s;
+}
+
+.fms-pill i:hover {
+  opacity: 1;
+}
+
+.feature-multiselect__placeholder {
+  flex: 1;
+  color: #6c757d;
+  font-size: 0.9rem;
+}
+
+.feature-multiselect__caret {
+  margin-left: auto;
+  color: #9ca3af;
+  font-size: 11px;
+  transition: transform 0.2s;
+}
+
+.feature-multiselect.open .feature-multiselect__caret {
+  transform: rotate(180deg);
+}
+
+.feature-multiselect__dropdown {
+  background: #fff;
+  border: 1px solid #dee2e6;
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.1);
+  overflow: hidden;
+}
+
+.fms-option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  cursor: pointer;
+  transition: background 0.12s;
+  user-select: none;
+}
+
+.fms-option:hover {
+  background: #f8fafc;
+}
+
+.fms-option.selected {
+  background: #eff8ff;
+}
+
+.fms-checkbox {
+  width: 18px;
+  height: 18px;
+  border: 1.5px solid #d1d5db;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #fff;
+  transition: background 0.12s, border-color 0.12s;
+  flex-shrink: 0;
+}
+
+.fms-option.selected .fms-checkbox {
+  background: #175cd3;
+  border-color: #175cd3;
+}
+
+.fms-checkbox i {
+  color: #fff;
+  font-size: 10px;
+}
+
+.fms-option-label {
+  font-size: 0.875rem;
+  color: #374151;
+  font-weight: 500;
+}
+
+.fms-option.selected .fms-option-label {
+  color: #175cd3;
+  font-weight: 700;
 }
 
 @media (max-width: 767.98px) {

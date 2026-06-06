@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\V1\Organization;
 use App\Http\Controllers\Controller;
 use App\Http\Traits\ApiResponse;
 use App\Models\User;
+use App\Services\SubscriptionService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -65,6 +66,17 @@ class AuthController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'Your organization has been deactivated. Please contact administrator.',
+            ], 403);
+        }
+
+        // Organization's active plan must include the 'api' feature
+        $stats    = SubscriptionService::getStats($user->organization->id);
+        $features = $stats['features'] ?? [];
+
+        if (! in_array('api', $features, true)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Your current plan does not include Developer API access. Please upgrade to the Advance plan.',
             ], 403);
         }
 

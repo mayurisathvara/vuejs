@@ -21,8 +21,9 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
 
         $middleware->alias([
-            'role'    => \App\Http\Middleware\CheckRole::class,
-            'sim.auth' => \App\Http\Middleware\EnsureSimAuthenticated::class,
+            'role'         => \App\Http\Middleware\CheckRole::class,
+            'sim.auth'     => \App\Http\Middleware\EnsureSimAuthenticated::class,
+            'plan.feature' => \App\Http\Middleware\CheckPlanFeature::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

@@ -24,6 +24,8 @@ export const useAuthStore = defineStore('auth', () => {
   // Getters
   const isAuthenticated = computed(() => !!token.value)
   const userRole = computed(() => user.value?.role || null)
+  const planFeatures = computed(() => user.value?.plan_features ?? [])
+  const hasPlanFeature = (feature) => planFeatures.value.includes(feature)
 
   const normalizeDateFormat = (value) => {
     const allowed = ['Y-m-d', 'd-m-Y', 'm-d-Y', 'd/m/Y', 'm/d/Y', 'Y/m/d']
@@ -314,6 +316,8 @@ export const useAuthStore = defineStore('auth', () => {
     // Getters
     isAuthenticated,
     userRole,
+    planFeatures,
+    hasPlanFeature,
     // Actions
     login,
     register,
