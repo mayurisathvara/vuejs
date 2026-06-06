@@ -1,10 +1,16 @@
 import React from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Linking } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { useTheme } from '../../contexts/ThemeContext';
+import { useNavigation } from '@react-navigation/native';
+import { StackNavigationProp } from '@react-navigation/stack';
+import { SettingsStackParamList } from '../../navigation/SettingsStack';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+
+type PrivacyScreenNavigationProp = StackNavigationProp<SettingsStackParamList, 'Privacy'>;
 
 const PrivacyScreen: React.FC = () => {
   const { theme } = useTheme();
+  const navigation = useNavigation<PrivacyScreenNavigationProp>();
 
   const privacyItems = [
     {
@@ -30,12 +36,8 @@ const PrivacyScreen: React.FC = () => {
     },
   ];
 
-  const handleViewPolicy = () => {
-    Linking.openURL('https://yourapp.com/privacy-policy');
-  };
-
   return (
-    <ScrollView 
+    <ScrollView
       style={[styles.container, { backgroundColor: theme.colors.background }]}
       contentContainerStyle={styles.content}
     >
@@ -64,21 +66,39 @@ const PrivacyScreen: React.FC = () => {
         ))}
       </View>
 
-      <TouchableOpacity 
+      <TouchableOpacity
         style={[styles.policyButton, { backgroundColor: theme.colors.surface }]}
-        onPress={handleViewPolicy}
+        onPress={() => navigation.navigate('WebView', { url: 'http://192.168.1.7:8000/privacy', title: 'Privacy Policy' })}
         activeOpacity={0.7}
       >
         <View style={[styles.iconContainer, { backgroundColor: '#FEE2E2' }]}>
           <MaterialCommunityIcons name="file-document" size={20} color="#EF4444" />
         </View>
         <Text style={[styles.settingTitle, { color: theme.colors.textPrimary, flex: 1 }]}>
-          View Privacy Policy
+          Privacy Policy
         </Text>
-        <MaterialCommunityIcons 
-          name="chevron-right" 
-          size={22} 
-          color={theme.colors.textSecondary} 
+        <MaterialCommunityIcons
+          name="chevron-right"
+          size={22}
+          color={theme.colors.textSecondary}
+        />
+      </TouchableOpacity>
+
+      <TouchableOpacity
+        style={[styles.policyButton, { backgroundColor: theme.colors.surface }]}
+        onPress={() => navigation.navigate('WebView', { url: 'http://192.168.1.7:8000/terms', title: 'Terms & Conditions' })}
+        activeOpacity={0.7}
+      >
+        <View style={[styles.iconContainer, { backgroundColor: '#DBEAFE' }]}>
+          <MaterialCommunityIcons name="file-document-outline" size={20} color="#3B82F6" />
+        </View>
+        <Text style={[styles.settingTitle, { color: theme.colors.textPrimary, flex: 1 }]}>
+          Terms &amp; Conditions
+        </Text>
+        <MaterialCommunityIcons
+          name="chevron-right"
+          size={22}
+          color={theme.colors.textSecondary}
         />
       </TouchableOpacity>
 

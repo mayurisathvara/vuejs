@@ -6,7 +6,7 @@ import { RETRY_CONFIG } from '../constants';
 
 // API Configuration - can be overridden by environment variables
 const API_CONFIG = {
-  BASE_URL: process.env.API_BASE_URL || 'https://novauix.xyz/public/api',
+  BASE_URL: process.env.API_BASE_URL || 'http://192.168.1.7:8000/api',
   TIMEOUT: 30000,
 };
 
@@ -15,8 +15,8 @@ const BASE_URL = API_CONFIG.BASE_URL;
 // Helper function to retry API calls
 const retryWithBackoff = async <T>(
   fn: () => Promise<T>,
-  retries = RETRY_CONFIG.API_RETRY_ATTEMPTS,
-  delay = RETRY_CONFIG.API_RETRY_DELAY
+  retries: number = RETRY_CONFIG.API_RETRY_ATTEMPTS,
+  delay: number = RETRY_CONFIG.API_RETRY_DELAY
 ): Promise<T> => {
   try {
     return await fn();

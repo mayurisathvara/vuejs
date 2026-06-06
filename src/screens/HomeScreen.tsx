@@ -19,7 +19,6 @@ import AppHeader from '../components/AppHeader';
 import DateRangeFilter from '../components/DateRangeFilter';
 import Toast from 'react-native-toast-message';
 import { dashboardAPI } from '../services/api';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { formatDate } from '../utils/date';
 import { appEvents, APP_EVENTS } from '../utils/eventEmitter';
 import { getErrorMessage, logError } from '../utils/errorHandler';
@@ -63,12 +62,9 @@ const HomeScreen: React.FC = () => {
 
   const handleMissedCallsClick = async () => {
     try {
-      // Store the filter preference to be read by CallLogsScreen
-      await AsyncStorage.setItem('callLogsFilter', 'Missed');
-      // Emit navigation event instead of using global variable
-      appEvents.emit(APP_EVENTS.NAVIGATE_TO_CALL_LOGS);
+      appEvents.emit(APP_EVENTS.NAVIGATE_TO_CALL_LOGS, { filter: 'Missed' });
     } catch (error) {
-      console.error('Error setting filter:', error);
+      if (__DEV__) console.error('Error emitting navigate event:', error);
     }
   };
 
@@ -146,11 +142,11 @@ const HomeScreen: React.FC = () => {
         text2: 'Call logs synced successfully',
         position: 'bottom',
       });
-    } catch (err) {
+    } catch (err: any) {
       Toast.show({
         type: 'error',
         text1: 'Sync Failed',
-        text2: error || 'Failed to sync call logs',
+        text2: err?.message || 'Failed to sync call logs',
         position: 'bottom',
       });
     }

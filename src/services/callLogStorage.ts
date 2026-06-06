@@ -329,6 +329,26 @@ class CallLogStorageService {
       console.error('Error clearing synced log IDs:', error);
     }
   }
+
+  /**
+   * Clear all call log storage — call on logout or user switch to avoid
+   * one user's timestamps/synced-IDs leaking into the next session.
+   */
+  async clearAllData(): Promise<void> {
+    try {
+      await AsyncStorage.multiRemove([
+        STORAGE_KEYS.UNSYNCED_LOGS,
+        STORAGE_KEYS.SYNCED_LOG_IDS,
+        STORAGE_KEYS.LAST_SYNC_TIME,
+        STORAGE_KEYS.LAST_PROCESSED_TIMESTAMP,
+      ]);
+    } catch (error) {
+      if (__DEV__) {
+        console.error('Error clearing all call log data:', error);
+      }
+      throw error;
+    }
+  }
 }
 
 export const callLogStorage = new CallLogStorageService();

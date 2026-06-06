@@ -54,22 +54,20 @@ class CallLogSyncService {
       const netInfo = await NetInfo.fetch();
       const isConnected = netInfo.isConnected ?? false;
       const isInternetReachable = netInfo.isInternetReachable;
-      
-      console.log('Network status:', {
-        isConnected,
-        isInternetReachable,
-        type: netInfo.type,
-        details: netInfo.details,
-      });
-      
-      // Consider connected if isConnected is true and isInternetReachable is not explicitly false
-      // This handles null/undefined cases where internet reachability is unknown
+
+      if (__DEV__) {
+        console.log('Network status:', {
+          isConnected,
+          isInternetReachable,
+          type: netInfo.type,
+        });
+      }
+
       return isConnected && isInternetReachable !== false;
     } catch (error) {
       if (__DEV__) {
         console.error('Error checking network:', error);
       }
-      // On error, assume disconnected to prevent failed sync attempts
       return false;
     }
   }
@@ -88,38 +86,33 @@ class CallLogSyncService {
         : await this.requestCallLogPermission();
         
       if (!hasPermission) {
-        console.warn('Call log permission not granted');
+        if (__DEV__) console.warn('Call log permission not granted');
         return [];
       }
 
-      // Get logs from the last processed timestamp or last 7 days
       const timestamp = fromTimestamp || (await callLogStorage.getLastProcessedTimestamp());
-      
-      const filter = {
-        minTimestamp: timestamp,
-      };
 
-      const callLogs = await CallLogs.load(-1, filter); // -1 means load all matching logs
-      
-      console.log(`Read ${callLogs.length} call logs from device`);
-      
+      const callLogs = await CallLogs.load(-1, { minTimestamp: timestamp });
+
+      if (__DEV__) {
+        console.log(`Read ${callLogs.length} call logs from device`);
+      }
+
       return callLogs.map((log: any) => {
-        // Validate and log the raw data
-        if (!log.timestamp || isNaN(log.timestamp)) {
+        if (__DEV__ && (!log.timestamp || isNaN(log.timestamp))) {
           console.warn('Invalid timestamp in raw call log:', log);
         }
-        
         return {
           phoneNumber: log.phoneNumber || 'Unknown',
-          type: log.type, // 'INCOMING', 'OUTGOING', 'MISSED'
+          type: log.type,
           dateTime: log.timestamp,
-          duration: log.duration || 0, // in seconds
+          duration: log.duration || 0,
           name: log.name || null,
           timestamp: log.timestamp,
         };
       });
     } catch (error) {
-      console.error('Error reading call logs:', error);
+      if (__DEV__) console.error('Error reading call logs:', error);
       return [];
     }
   }
@@ -253,38 +246,29 @@ class CallLogSyncService {
    */
   async processNewCallLogs(headlessMode: boolean = false): Promise<number> {
     try {
-      console.log('📱 ========== PROCESSING NEW CALL LOGS ==========');
-      
+      if (__DEV__) console.log('📱 Processing new call logs...');
+
       const userData = await storageService.getUserData();
       if (!userData || !userData.id) {
-        console.warn('❌ User not authenticated, skipping call log processing');
+        if (__DEV__) console.warn('User not authenticated, skipping call log processing');
         return 0;
       }
 
       const userId = userData.id.toString();
-      console.log('✅ User ID:', userId);
-      
       const lastProcessed = await callLogStorage.getLastProcessedTimestamp();
-      console.log('📅 Last processed timestamp:', lastProcessed, lastProcessed ? new Date(lastProcessed).toISOString() : 'Never');
-      
-      // Read new call logs since last processed time
-      // In headless mode, only check permission without requesting
+
+      if (__DEV__) {
+        console.log('Last processed timestamp:', lastProcessed ? new Date(lastProcessed).toISOString() : 'Never');
+      }
+
       const rawLogs = await this.readCallLogs(lastProcessed, headlessMode);
-      console.log(`📥 Read ${rawLogs.length} call logs from device`);
-      
+
       if (rawLogs.length === 0) {
-        console.log('✅ No new call logs to process');
+        if (__DEV__) console.log('No new call logs to process');
         return 0;
       }
 
-      console.log('📋 First call log sample:', {
-        phoneNumber: rawLogs[0].phoneNumber,
-        type: rawLogs[0].type,
-        timestamp: rawLogs[0].timestamp,
-        duration: rawLogs[0].duration,
-      });
-
-      console.log(` Processing ${rawLogs.length} new call logs...`);
+      if (__DEV__) console.log(`Processing ${rawLogs.length} new call logs...`);
 
       // Convert and save to offline storage
       let savedCount = 0;
@@ -294,10 +278,9 @@ class CallLogSyncService {
       const existingLogs = await callLogStorage.getUnsyncedLogs();
       const existingIds = new Set(existingLogs.map(log => log.id));
       
-      // Get already synced IDs to prevent re-syncing (prevents 422 duplicate errors)
       const syncedIds = await callLogStorage.getSyncedLogIds();
       const syncedIdsSet = new Set(syncedIds);
-      console.log(`📋 Tracking ${syncedIds.length} previously synced log IDs`);
+      if (__DEV__) console.log(`Tracking ${syncedIds.length} previously synced log IDs`);
       
       // WARNING: Check queue size to prevent runaway growth
       if (existingLogs.length > UI_TIMINGS.QUEUE_WARNING_THRESHOLD) {
@@ -339,43 +322,28 @@ class CallLogSyncService {
         try {
           const callLogData = await this.convertToCallLogData(rawLog, userId);
           
-          // Check if already synced to server (prevents 422 duplicate errors)
           if (syncedIdsSet.has(callLogData.unique_id)) {
-            console.log(`✅ Skipping - already synced to server: ${callLogData.unique_id}`);
             skippedCount++;
             continue;
           }
-          
-          // Check if already in unsynced queue (prevents queue bloat)
+
           if (existingIds.has(callLogData.unique_id)) {
-            console.log(`⏭️ Skipping - already in queue: ${callLogData.unique_id}`);
             skippedCount++;
             continue;
           }
-          
-          // Log the converted data for debugging
-          console.log(`💾 Saving log ${savedCount + 1}/${rawLogs.length}:`, {
-            unique_id: callLogData.unique_id,
-            date_time: callLogData.date_time,
-            caller_number: callLogData.caller_number,
-            call_type: callLogData.call_type,
-            call_status: callLogData.call_status,
-          });
-          
+
           await callLogStorage.addUnsyncedLog(callLogData);
           savedCount++;
         } catch (error: any) {
-          console.error('❌ Error converting call log (skipping):', {
-            error: error.message,
-            phoneNumber: rawLog.phoneNumber,
-            timestamp: rawLog.timestamp,
-          });
+          if (__DEV__) {
+            console.error('Error converting call log (skipping):', error.message);
+          }
           skippedCount++;
           // Skip this invalid log instead of crashing
         }
       }
 
-      console.log(`📊 Summary: Saved ${savedCount}, Skipped ${skippedCount}, Total ${rawLogs.length}`);
+      if (__DEV__) console.log(`Summary: Saved ${savedCount}, Skipped ${skippedCount}, Total ${rawLogs.length}`);
 
       // Update last processed timestamp
       // IMPORTANT: Add 1ms to avoid re-reading the same call in next query
@@ -394,77 +362,70 @@ class CallLogSyncService {
         
         if (nextTimestamp > currentStoredTimestamp) {
           await callLogStorage.setLastProcessedTimestamp(nextTimestamp);
-          console.log(`✅ Updated last processed timestamp: ${nextTimestamp} (+1ms from latest: ${latestTimestamp})`);
-        } else {
-          console.log(`⚠️ Skipped timestamp update: ${nextTimestamp} <= current ${currentStoredTimestamp}`);
+          if (__DEV__) console.log(`Updated last processed timestamp: ${nextTimestamp}`);
         }
       }
 
-      console.log(`Saved ${savedCount} call logs to offline storage`);
+      if (__DEV__) console.log(`Saved ${savedCount} call logs to offline storage`);
       return savedCount;
     } catch (error) {
-      console.error('Error processing new call logs:', error);
+      if (__DEV__) console.error('Error processing new call logs:', error);
       return 0;
     }
   }
 
   /**
-   * Sync unsynced logs to the API
+   * Sync unsynced logs to the API.
+   * @param headlessMode - When true (background/headless task), skip Toast UI calls.
    */
-  async syncUnsyncedLogs(): Promise<{ success: boolean; syncedCount: number; error?: string }> {
+  async syncUnsyncedLogs(headlessMode: boolean = false): Promise<{ success: boolean; syncedCount: number; error?: string }> {
     if (this.isSyncing) {
-      console.log('⏭️ Sync already in progress, skipping...');
+      if (__DEV__) console.log('Sync already in progress, skipping...');
       return { success: false, syncedCount: 0, error: 'Sync already in progress' };
     }
 
     try {
       this.isSyncing = true;
-      console.log('🔄 Starting sync process...');
+      if (__DEV__) console.log('Starting sync process...');
 
-      // Check if we have call log permission
       if (Platform.OS === 'android') {
         const hasPermission = await PermissionsAndroid.check(
           PermissionsAndroid.PERMISSIONS.READ_CALL_LOG
         );
         if (!hasPermission) {
-          console.warn('❌ Call log permission not granted, skipping sync');
+          if (__DEV__) console.warn('Call log permission not granted, skipping sync');
           return { success: false, syncedCount: 0, error: 'Call log permission not granted' };
         }
       }
 
-      // Check network connection
       const isConnected = await this.checkNetworkConnection();
       if (!isConnected) {
-        console.warn('❌ No network connection detected, sync postponed');
-        Toast.show({
-          type: 'info',
-          text1: 'No Internet',
-          text2: 'Call logs will sync automatically when internet is available',
-          position: 'bottom',
-          visibilityTime: 3000,
-        });
+        if (__DEV__) console.warn('No network connection, sync postponed');
+        if (!headlessMode) {
+          Toast.show({
+            type: 'info',
+            text1: 'No Internet',
+            text2: 'Call logs will sync automatically when internet is available',
+            position: 'bottom',
+            visibilityTime: 3000,
+          });
+        }
         return { success: false, syncedCount: 0, error: 'No internet. Will retry upload automatically.' };
       }
-      
-      console.log('✅ Network connection verified');
 
-      // Check if user is authenticated
       const token = await storageService.getAuthToken();
       if (!token) {
-        console.warn('❌ User not authenticated, skipping sync');
+        if (__DEV__) console.warn('User not authenticated, skipping sync');
         return { success: false, syncedCount: 0, error: 'Not authenticated' };
       }
-      
-      console.log('✅ User authenticated');
 
-      // Get unsynced logs
       const unsyncedLogs = await callLogStorage.getUnsyncedLogs();
       if (unsyncedLogs.length === 0) {
-        console.log('✅ No unsynced logs to push');
+        if (__DEV__) console.log('No unsynced logs to push');
         return { success: true, syncedCount: 0 };
       }
 
-      console.log(`📤 Syncing ${unsyncedLogs.length} unsynced logs...`);
+      if (__DEV__) console.log(`Syncing ${unsyncedLogs.length} unsynced logs...`);
 
       let syncedCount = 0;
       const syncedIds: string[] = [];
@@ -544,38 +505,34 @@ class CallLogSyncService {
         }
       }
 
-      // Remove successfully synced logs from queue
       if (syncedIds.length > 0) {
         await callLogStorage.removeSyncedLogs(syncedIds);
-        // Track synced IDs to prevent future duplicate attempts
         await callLogStorage.addSyncedLogIds(syncedIds);
-        console.log(`✅ Sync complete! Successfully synced ${syncedCount}/${unsyncedLogs.length} logs`);
-        console.log(`📊 Removed ${syncedIds.length} logs from queue`);
-        
-        // Show success toast
-        Toast.show({
-          type: 'success',
-          text1: 'Call Logs Synced',
-          text2: `Successfully uploaded ${syncedCount} call log${syncedCount > 1 ? 's' : ''}`,
-          position: 'bottom',
-          visibilityTime: 3000,
-        });
+        if (__DEV__) console.log(`Sync complete: ${syncedCount}/${unsyncedLogs.length} logs synced`);
+
+        if (!headlessMode && syncedCount > 0) {
+          Toast.show({
+            type: 'success',
+            text1: 'Call Logs Synced',
+            text2: `Successfully uploaded ${syncedCount} call log${syncedCount > 1 ? 's' : ''}`,
+            position: 'bottom',
+            visibilityTime: 3000,
+          });
+        }
       } else {
-        console.log(`⚠️ Sync complete but no logs were successfully synced (0/${unsyncedLogs.length})`);
+        if (__DEV__) console.log(`Sync complete but no logs were successfully synced (0/${unsyncedLogs.length})`);
       }
 
-      // Update last sync time
       await callLogStorage.setLastSyncTime(Date.now());
 
-      // Show notification on success
       if (syncedCount > 0) {
         this.showSyncNotification(syncedCount);
       }
 
-      console.log(`Successfully synced ${syncedCount} call logs`);
+      if (__DEV__) console.log(`Successfully synced ${syncedCount} call logs`);
       return { success: true, syncedCount };
     } catch (error: any) {
-      console.error('Error syncing call logs:', error);
+      if (__DEV__) console.error('Error syncing call logs:', error);
       return { success: false, syncedCount: 0, error: error.message };
     } finally {
       this.isSyncing = false;
@@ -587,7 +544,7 @@ class CallLogSyncService {
    */
   async manualSync(): Promise<{ success: boolean; processedCount: number; syncedCount: number; error?: string }> {
     try {
-      console.log('Starting manual sync...');
+      if (__DEV__) console.log('Starting manual sync...');
 
       // Step 1: Process new call logs
       const processedCount = await this.processNewCallLogs();
@@ -602,7 +559,7 @@ class CallLogSyncService {
         error: syncResult.error,
       };
     } catch (error: any) {
-      console.error('Error in manual sync:', error);
+      if (__DEV__) console.error('Error in manual sync:', error);
       return {
         success: false,
         processedCount: 0,
@@ -618,7 +575,7 @@ class CallLogSyncService {
    */
   async backgroundSync(): Promise<void> {
     try {
-      console.log('[BackgroundSync] Starting background sync...');
+      if (__DEV__) console.log('[BackgroundSync] Starting background sync...');
       
       // Check if we already have permission (don't request in headless mode)
       if (Platform.OS === 'android') {
@@ -632,17 +589,13 @@ class CallLogSyncService {
         }
       }
       
-      // Process new logs (headless mode = true, won't request permissions)
       const processedCount = await this.processNewCallLogs(true);
-      console.log(`[BackgroundSync] Processed ${processedCount} new call logs`);
-      
-      // Sync unsynced logs
-      const syncResult = await this.syncUnsyncedLogs();
-      console.log(`[BackgroundSync] Synced ${syncResult.syncedCount} call logs`);
-      
-      console.log('[BackgroundSync] Background sync completed successfully');
+      if (__DEV__) console.log(`[BackgroundSync] Processed ${processedCount} new call logs`);
+
+      const syncResult = await this.syncUnsyncedLogs(true);
+      if (__DEV__) console.log(`[BackgroundSync] Synced ${syncResult.syncedCount} call logs`);
     } catch (error) {
-      console.error('[BackgroundSync] Error in background sync:', error);
+      if (__DEV__) console.error('[BackgroundSync] Error in background sync:', error);
     }
   }
 

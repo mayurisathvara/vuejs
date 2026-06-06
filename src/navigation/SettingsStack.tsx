@@ -5,6 +5,7 @@ import ProfileScreen from '../screens/Settings/ProfileScreen';
 import PrivacyScreen from '../screens/Settings/PrivacyScreen';
 import HelpSupportScreen from '../screens/Settings/HelpSupportScreen';
 import AboutScreen from '../screens/Settings/AboutScreen';
+import WebViewScreen from '../screens/WebViewScreen';
 import { useTheme } from '../contexts/ThemeContext';
 
 export type SettingsStackParamList = {
@@ -13,6 +14,7 @@ export type SettingsStackParamList = {
   Privacy: undefined;
   HelpSupport: undefined;
   About: undefined;
+  WebView: { url: string; title: string };
 };
 
 const Stack = createStackNavigator<SettingsStackParamList>();
@@ -55,10 +57,15 @@ const SettingsStack: React.FC = () => {
         component={HelpSupportScreen}
         options={{ title: 'Help & Support' }}
       />
-      <Stack.Screen 
-        name="About" 
+      <Stack.Screen
+        name="About"
         component={AboutScreen}
         options={{ title: 'About' }}
+      />
+      <Stack.Screen
+        name="WebView"
+        component={WebViewScreen}
+        options={({ route }) => ({ title: route.params.title })}
       />
     </Stack.Navigator>
   );

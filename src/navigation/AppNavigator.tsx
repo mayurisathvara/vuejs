@@ -155,10 +155,7 @@ const AppNavigator: React.FC = () => {
   }
 
   return (
-    <NavigationContainer 
-      ref={navigationRef}
-      key={`auth-${isAuthenticated}-onboarding-${isOnboardingCompleted}`}
-    >
+    <NavigationContainer ref={navigationRef}>
       <Stack.Navigator
         screenOptions={{
           headerShown: false,

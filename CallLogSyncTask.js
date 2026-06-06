@@ -3,6 +3,20 @@
  * This runs when triggered by native Android service
  */
 import PushNotification from 'react-native-push-notification';
+import { Platform, PermissionsAndroid } from 'react-native';
+
+const hasNotificationPermission = async () => {
+  if (Platform.OS === 'android' && Platform.Version >= 33) {
+    try {
+      return await PermissionsAndroid.check(
+        PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS
+      );
+    } catch {
+      return false;
+    }
+  }
+  return true;
+};
 
 const CallLogSyncTask = async (taskData) => {
   console.log('[CallLogSyncTask] Starting headless sync...');
@@ -32,31 +46,32 @@ const CallLogSyncTask = async (taskData) => {
       const syncResult = await callLogSyncService.syncUnsyncedLogs();
       console.log(`[CallLogSyncTask] Sync result:`, syncResult);
       
-      // Show notification based on result
       if (syncResult.success && syncResult.syncedCount > 0) {
-        PushNotification.localNotification({
-          channelId: 'call-log-sync',
-          title: '📞 Call Log Synced',
-          message: `Successfully uploaded ${syncResult.syncedCount} call log${syncResult.syncedCount > 1 ? 's' : ''}`,
-          playSound: true,
-          soundName: 'default',
-          priority: 'high',
-          visibility: 'public',
-        });
-        console.log(`[CallLogSyncTask] ✅ Notification sent for ${syncResult.syncedCount} logs`);
-      } else if (syncResult.error) {
-        console.log(`[CallLogSyncTask] ⚠️ Sync failed: ${syncResult.error}`);
-        
-        // Show notification if no internet
-        if (syncResult.error.includes('internet') || syncResult.error.includes('network')) {
+        const canNotify = await hasNotificationPermission();
+        if (canNotify) {
           PushNotification.localNotification({
             channelId: 'call-log-sync',
-            title: 'ℹ️ No Internet',
-            message: 'Call log will sync when internet is available',
-            playSound: false,
-            priority: 'low',
+            title: '📞 Call Log Synced',
+            message: `Successfully uploaded ${syncResult.syncedCount} call log${syncResult.syncedCount > 1 ? 's' : ''}`,
+            playSound: true,
+            soundName: 'default',
+            priority: 'high',
             visibility: 'public',
           });
+        }
+      } else if (syncResult.error) {
+        if (syncResult.error.includes('internet') || syncResult.error.includes('network')) {
+          const canNotify = await hasNotificationPermission();
+          if (canNotify) {
+            PushNotification.localNotification({
+              channelId: 'call-log-sync',
+              title: 'ℹ️ No Internet',
+              message: 'Call log will sync when internet is available',
+              playSound: false,
+              priority: 'low',
+              visibility: 'public',
+            });
+          }
         }
       }
     }

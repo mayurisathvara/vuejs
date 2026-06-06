@@ -7,9 +7,9 @@ import DateRangeFilter from '../components/DateRangeFilter';
 import FilterBar from '../components/FilterBar';
 import Toast from 'react-native-toast-message';
 import { callLogsAPI } from '../services/api';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { formatDate } from '../utils/date';
 import { getErrorMessage, logError } from '../utils/errorHandler';
+import { appEvents, APP_EVENTS } from '../utils/eventEmitter';
 
 interface CallLog {
   id: number;
@@ -92,10 +92,7 @@ const CallLogsScreen: React.FC = () => {
       }
     } catch (err: any) {
       logError('CallLogsScreen.fetchCallLogs', err);
-      
       const errorResponse = getErrorMessage(err);
-      
-      // Only show toast if error should be shown to user
       if (errorResponse.shouldShowToUser) {
         Toast.show({
           type: 'error',
@@ -105,15 +102,6 @@ const CallLogsScreen: React.FC = () => {
           visibilityTime: 3000,
         });
       }
-      if (__DEV__) {
-        console.error('Error fetching call logs:', err);
-      }
-      Toast.show({
-        type: 'error',
-        text1: 'Failed to load call logs',
-        text2: err.response?.data?.message || 'Please try again',
-        position: 'bottom',
-      });
     } finally {
       setIsLoading(false);
       setRefreshing(false);
@@ -149,44 +137,21 @@ const CallLogsScreen: React.FC = () => {
   // Initial load
   useEffect(() => {
     const today = new Date();
-    
-    // Check if there's a filter set from navigation
-    AsyncStorage.getItem('callLogsFilter')
-      .then(filter => {
-        if (filter) {
-          if (__DEV__) {
-            console.log('Setting filter from navigation:', filter);
-          }
-          setSelectedFilter(filter);
-          setCurrentDateRange({ start: today, end: today });
-          fetchCallLogs(today, today, filter, 1);
-          // Clear the filter after using it
-          AsyncStorage.removeItem('callLogsFilter');
-        } else {
-          fetchCallLogs(today, today, 'All', 1);
-        }
-      })
-      .catch(() => {
-        fetchCallLogs(today, today, 'All', 1);
-      });
+    fetchCallLogs(today, today, 'All', 1);
   }, []);
 
-  // Listen for navigation trigger to check for filter updates
+  // Navigate-to-call-logs event (e.g. from HomeScreen missed-calls tap)
   useEffect(() => {
-    const checkFilterInterval = setInterval(() => {
-      AsyncStorage.getItem('callLogsFilter').then(filter => {
-        if (filter) {
-          console.log('Filter update detected:', filter);
-          setSelectedFilter(filter);
-          const today = new Date();
-          setCurrentDateRange({ start: today, end: today });
-          fetchCallLogs(today, today, filter, 1);
-          AsyncStorage.removeItem('callLogsFilter');
-        }
-      });
-    }, 200);
-
-    return () => clearInterval(checkFilterInterval);
+    const unsubscribe = appEvents.on(APP_EVENTS.NAVIGATE_TO_CALL_LOGS, ({ filter }: { filter?: string } = {}) => {
+      if (filter) {
+        const today = new Date();
+        setSelectedFilter(filter);
+        setCurrentDateRange({ start: today, end: today });
+        setCurrentPage(1);
+        fetchCallLogs(today, today, filter, 1);
+      }
+    });
+    return () => unsubscribe();
   }, []);
 
   const getCallIcon = (callType: string, callStatus: string) => {

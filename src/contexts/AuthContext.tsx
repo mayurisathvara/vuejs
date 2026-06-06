@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useEffect, useState, ReactNode, useRef } from 'react';
 import { Alert } from 'react-native';
-import { authAPI } from '../services/api';
+import { authAPI, dashboardAPI } from '../services/api';
 import { storageService } from '../services/storage';
 import { LoginRequest, AuthState } from '../types';
 import { appEvents, APP_EVENTS } from '../utils/eventEmitter';
@@ -42,13 +42,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       if (token && mobile && userData) {
         // Validate token by making a test API call to dashboard
         try {
-          const axios = require('axios');
           const today = new Date().toISOString().split('T')[0];
-          await axios.get('https://novauix.xyz/public/api/v1/app/dashboard', {
-            headers: { Authorization: `Bearer ${token}` },
-            params: { start_date: today, end_date: today },
-            timeout: 10000, // LOW PRIORITY BUG FIX: Increased from 5s to 10s for slow networks
-          });
+          await dashboardAPI.fetchDashboard(today, today);
           
           // Token is valid
           setAuthState({
@@ -148,16 +143,15 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       // Call logout API to revoke token
       await authAPI.logout();
       
-      // FIX: Clear call log queue and stop background processing
       try {
         const { callLogStorage } = require('../services/callLogStorage');
-        await callLogStorage.clearAllUnsyncedLogs();
+        await callLogStorage.clearAllData();
         if (__DEV__) {
-          console.log('[AuthContext] Cleared call log queue on logout');
+          console.log('[AuthContext] Cleared all call log data on logout');
         }
       } catch (error) {
         if (__DEV__) {
-          console.error('[AuthContext] Error clearing call log queue:', error);
+          console.error('[AuthContext] Error clearing call log data:', error);
         }
       }
       
@@ -200,11 +194,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       try {
         await storageService.clearAuthData();
         
-        // FIX: Clear call log queue on token expiration
         const { callLogStorage } = require('../services/callLogStorage');
-        await callLogStorage.clearAllUnsyncedLogs();
+        await callLogStorage.clearAllData();
         if (__DEV__) {
-          console.log('[AuthContext] Cleared call log queue on token expiration');
+          console.log('[AuthContext] Cleared all call log data on token expiration');
         }
       } catch (error) {
         if (__DEV__) {

@@ -1,17 +1,21 @@
-import React, { useEffect, useState } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Alert, SafeAreaView, StatusBar, ScrollView, BackHandler, Modal } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
-import { useAuth } from '../../contexts/AuthContext';
+import React, { useState } from 'react';
+import { View, Text, TouchableOpacity, StyleSheet, Alert, SafeAreaView, StatusBar, ScrollView, BackHandler, Modal, ActivityIndicator } from 'react-native';
+import { WebView } from 'react-native-webview';
 import { useTheme } from '../../contexts/ThemeContext';
 import { useBackHandler } from '../../hooks/useBackHandler';
 import { storageService } from '../../services/storage';
-import PrivacyPolicyScreen from '../Settings/PrivacyPolicyScreen';
 
 const ConsentScreen: React.FC = () => {
-  const navigation = useNavigation();
-  const { isAuthenticated } = useAuth();
   const { theme } = useTheme();
-  const [showPrivacyPolicy, setShowPrivacyPolicy] = useState(false);
+  const [webViewUrl, setWebViewUrl] = useState<string | null>(null);
+  const [webViewTitle, setWebViewTitle] = useState('');
+  const [webViewLoading, setWebViewLoading] = useState(true);
+
+  const openWebView = (url: string, title: string) => {
+    setWebViewUrl(url);
+    setWebViewTitle(title);
+    setWebViewLoading(true);
+  };
 
   // Prevent going back from consent screen
   useBackHandler({
@@ -98,15 +102,25 @@ const ConsentScreen: React.FC = () => {
             </View>
           </View>
 
-          <TouchableOpacity 
-            style={styles.privacyLink}
-            onPress={() => setShowPrivacyPolicy(true)}
-            activeOpacity={0.7}
-          >
-            <Text style={[styles.privacyLinkText, { color: theme.colors.primary }]}>
-              Read our Privacy Policy
-            </Text>
-          </TouchableOpacity>
+          <View style={styles.linksRow}>
+            <TouchableOpacity
+              onPress={() => openWebView('http://192.168.1.7:8000/privacy', 'Privacy Policy')}
+              activeOpacity={0.7}
+            >
+              <Text style={[styles.privacyLinkText, { color: theme.colors.primary }]}>
+                Privacy Policy
+              </Text>
+            </TouchableOpacity>
+            <Text style={[styles.linkSeparator, { color: theme.colors.textSecondary }]}>•</Text>
+            <TouchableOpacity
+              onPress={() => openWebView('http://192.168.1.7:8000/terms', 'Terms & Conditions')}
+              activeOpacity={0.7}
+            >
+              <Text style={[styles.privacyLinkText, { color: theme.colors.primary }]}>
+                Terms &amp; Conditions
+              </Text>
+            </TouchableOpacity>
+          </View>
 
           <View style={[styles.divider, { backgroundColor: theme.colors.divider }]} />
 
@@ -144,21 +158,35 @@ const ConsentScreen: React.FC = () => {
         </View>
       </ScrollView>
 
-      {/* Privacy Policy Modal */}
+      {/* WebView Modal for Privacy Policy / Terms */}
       <Modal
-        visible={showPrivacyPolicy}
+        visible={webViewUrl !== null}
         animationType="slide"
         presentationStyle="pageSheet"
-        onRequestClose={() => setShowPrivacyPolicy(false)}
+        onRequestClose={() => setWebViewUrl(null)}
       >
         <SafeAreaView style={{ flex: 1, backgroundColor: theme.colors.background }}>
           <View style={[styles.modalHeader, { backgroundColor: theme.colors.background, borderBottomColor: theme.colors.border }]}>
-            <Text style={[styles.modalHeaderText, { color: theme.colors.textPrimary }]}>Privacy Policy</Text>
-            <TouchableOpacity onPress={() => setShowPrivacyPolicy(false)} style={styles.closeButton}>
+            <Text style={[styles.modalHeaderText, { color: theme.colors.textPrimary }]}>{webViewTitle}</Text>
+            <TouchableOpacity onPress={() => setWebViewUrl(null)} style={styles.closeButton}>
               <Text style={[styles.closeButtonText, { color: theme.colors.primary }]}>Close</Text>
             </TouchableOpacity>
           </View>
-          <PrivacyPolicyScreen />
+          {webViewUrl && (
+            <>
+              <WebView
+                source={{ uri: webViewUrl }}
+                onLoadStart={() => setWebViewLoading(true)}
+                onLoadEnd={() => setWebViewLoading(false)}
+                style={{ flex: 1 }}
+              />
+              {webViewLoading && (
+                <View style={[styles.webViewLoading, { backgroundColor: theme.colors.background }]}>
+                  <ActivityIndicator size="large" color={theme.colors.primary} />
+                </View>
+              )}
+            </>
+          )}
         </SafeAreaView>
       </Modal>
     </SafeAreaView>
@@ -244,16 +272,26 @@ const styles = StyleSheet.create({
     fontSize: 15,
     lineHeight: 22,
   },
-  privacyLink: {
+  linksRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
     marginTop: 8,
     marginBottom: 16,
-    paddingVertical: 8,
+    gap: 8,
   },
   privacyLinkText: {
     fontSize: 14,
     fontWeight: '600',
     textDecorationLine: 'underline',
-    textAlign: 'center',
+  },
+  linkSeparator: {
+    fontSize: 14,
+  },
+  webViewLoading: {
+    ...StyleSheet.absoluteFillObject,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   divider: {
     height: 1,

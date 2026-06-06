@@ -31,7 +31,8 @@ export const CallLogProvider: React.FC<CallLogProviderProps> = ({ children }) =>
   });
 
   const isSyncingRef = React.useRef(false);
-  const isMountedRef = React.useRef(true); // LOW PRIORITY BUG FIX: Track mounted state
+  const isMountedRef = React.useRef(true);
+  const wasConnectedRef = React.useRef<boolean | null>(null);
 
   // Keep ref in sync with state
   React.useEffect(() => {
@@ -125,18 +126,19 @@ export const CallLogProvider: React.FC<CallLogProviderProps> = ({ children }) =>
     }
     
     const unsubscribe = NetInfo.addEventListener(state => {
-      if (__DEV__) {
-        console.log('[Network Status]', {
-          isConnected: state.isConnected,
-          isInternetReachable: state.isInternetReachable,
-          type: state.type,
-          isSyncing: isSyncingRef.current,
-        });
+      const isNowConnected = !!state.isConnected;
+      const wasConnected = wasConnectedRef.current;
+      wasConnectedRef.current = isNowConnected;
+
+      // Only sync when recovering from offline (null = initial state, treated as unknown)
+      const reconnected = isNowConnected && wasConnected === false;
+      if (!reconnected || isSyncingRef.current) {
+        return;
       }
-      
-      if (state.isConnected && !isSyncingRef.current) {
+
+      {
         if (__DEV__) {
-          console.log('✅ Network connected, triggering auto-sync...');
+          console.log('Network reconnected, triggering auto-sync...');
         }
         // Delay sync to ensure stable connection
         setTimeout(async () => {
