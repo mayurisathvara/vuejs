@@ -7,11 +7,11 @@ const HelpSupportScreen: React.FC = () => {
   const { theme } = useTheme();
 
   const handleEmail = () => {
-    Linking.openURL('mailto:support@yourapp.com');
+    Linking.openURL('mailto:support@callytics.com');
   };
 
   const handleWebsite = () => {
-    Linking.openURL('https://yourapp.com/support');
+    Linking.openURL('https://callytics.com/support');
   };
 
   const handleFAQ = () => {
@@ -28,7 +28,7 @@ const HelpSupportScreen: React.FC = () => {
       iconBg: '#DBEAFE',
       iconColor: '#3B82F6',
       title: 'Email Support',
-      description: 'support@yourapp.com',
+      description: 'support@callytics.com',
       onPress: handleEmail,
     },
     {

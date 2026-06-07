@@ -57,3 +57,9 @@ export const DATE_LIMITS = {
   MIN_TIMESTAMP: 946684800000, // Jan 1, 2000
   MAX_TIMESTAMP: 4102444800000, // Jan 1, 2100
 } as const;
+
+// Legal URLs — update these to public HTTPS URLs before Play Store submission
+export const LEGAL_URLS = {
+  PRIVACY_POLICY: 'http://192.168.1.7:8000/privacy',
+  TERMS_CONDITIONS: 'http://192.168.1.7:8000/terms',
+} as const;

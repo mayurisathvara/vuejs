@@ -4,6 +4,7 @@ import { WebView } from 'react-native-webview';
 import { useTheme } from '../../contexts/ThemeContext';
 import { useBackHandler } from '../../hooks/useBackHandler';
 import { storageService } from '../../services/storage';
+import { LEGAL_URLS } from '../../constants';
 
 const ConsentScreen: React.FC = () => {
   const { theme } = useTheme();
@@ -104,7 +105,7 @@ const ConsentScreen: React.FC = () => {
 
           <View style={styles.linksRow}>
             <TouchableOpacity
-              onPress={() => openWebView('http://192.168.1.7:8000/privacy', 'Privacy Policy')}
+              onPress={() => openWebView(LEGAL_URLS.PRIVACY_POLICY, 'Privacy Policy')}
               activeOpacity={0.7}
             >
               <Text style={[styles.privacyLinkText, { color: theme.colors.primary }]}>
@@ -113,7 +114,7 @@ const ConsentScreen: React.FC = () => {
             </TouchableOpacity>
             <Text style={[styles.linkSeparator, { color: theme.colors.textSecondary }]}>•</Text>
             <TouchableOpacity
-              onPress={() => openWebView('http://192.168.1.7:8000/terms', 'Terms & Conditions')}
+              onPress={() => openWebView(LEGAL_URLS.TERMS_CONDITIONS, 'Terms & Conditions')}
               activeOpacity={0.7}
             >
               <Text style={[styles.privacyLinkText, { color: theme.colors.primary }]}>

@@ -1,10 +1,17 @@
 import React from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Linking } from 'react-native';
 import { useTheme } from '../../contexts/ThemeContext';
+import { useNavigation } from '@react-navigation/native';
+import { StackNavigationProp } from '@react-navigation/stack';
+import { SettingsStackParamList } from '../../navigation/SettingsStack';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import { LEGAL_URLS } from '../../constants';
+
+type AboutScreenNavigationProp = StackNavigationProp<SettingsStackParamList, 'About'>;
 
 const AboutScreen: React.FC = () => {
   const { theme } = useTheme();
+  const navigation = useNavigation<AboutScreenNavigationProp>();
 
   const appInfo = [
     { label: 'Version', value: '1.0.0' },
@@ -13,15 +20,15 @@ const AboutScreen: React.FC = () => {
   ];
 
   const handleRateApp = () => {
-    Linking.openURL('https://play.google.com/store/apps/details?id=com.yourapp');
+    Linking.openURL('https://play.google.com/store/apps/details?id=com.myfirstapp');
   };
 
   const handleShareApp = () => {
-    // Implement share functionality
+    Linking.openURL('https://play.google.com/store/apps/details?id=com.myfirstapp');
   };
 
   const handleTerms = () => {
-    Linking.openURL('https://yourapp.com/terms');
+    navigation.navigate('WebView', { url: LEGAL_URLS.TERMS_CONDITIONS, title: 'Terms & Conditions' });
   };
 
   const handleLicenses = () => {

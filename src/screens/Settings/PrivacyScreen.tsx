@@ -5,6 +5,7 @@ import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { SettingsStackParamList } from '../../navigation/SettingsStack';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import { LEGAL_URLS } from '../../constants';
 
 type PrivacyScreenNavigationProp = StackNavigationProp<SettingsStackParamList, 'Privacy'>;
 
@@ -68,7 +69,7 @@ const PrivacyScreen: React.FC = () => {
 
       <TouchableOpacity
         style={[styles.policyButton, { backgroundColor: theme.colors.surface }]}
-        onPress={() => navigation.navigate('WebView', { url: 'http://192.168.1.7:8000/privacy', title: 'Privacy Policy' })}
+        onPress={() => navigation.navigate('WebView', { url: LEGAL_URLS.PRIVACY_POLICY, title: 'Privacy Policy' })}
         activeOpacity={0.7}
       >
         <View style={[styles.iconContainer, { backgroundColor: '#FEE2E2' }]}>
@@ -86,7 +87,7 @@ const PrivacyScreen: React.FC = () => {
 
       <TouchableOpacity
         style={[styles.policyButton, { backgroundColor: theme.colors.surface }]}
-        onPress={() => navigation.navigate('WebView', { url: 'http://192.168.1.7:8000/terms', title: 'Terms & Conditions' })}
+        onPress={() => navigation.navigate('WebView', { url: LEGAL_URLS.TERMS_CONDITIONS, title: 'Terms & Conditions' })}
         activeOpacity={0.7}
       >
         <View style={[styles.iconContainer, { backgroundColor: '#DBEAFE' }]}>

@@ -200,15 +200,36 @@ class CallLogSyncService {
     const contactStatus: ContactStatus = rawLog.name ? 'Saved' : 'Not Saved';
     const name = rawLog.name || 'Unknown';
 
-    // Calculate durations
+    // Calculate durations.
+    // Android CallLog.DURATION for OUTGOING calls:
+    //   - Answered: talk time only (ring time not recorded)
+    //   - No Answer: ring time (time from dial to user hangup) on most devices, 0 on some
+    // Android CallLog.DURATION for INCOMING calls:
+    //   - Answered: talk time
+    //   - Missed: ring time until caller gave up (or 0 on some devices)
     const totalDuration = rawLog.duration.toString();
-    const conversationDuration = rawLog.duration > 0 ? rawLog.duration.toString() : '0';
-    const ringDuration = rawLog.duration > 0 ? '5' : '0'; // Estimate ring duration
+    let conversationDuration: string;
+    let ringDuration: string;
 
-    // Determine who hung up (simplified logic)
-    const hangupBy: HangupBy = callStatus === 'Missed' || callStatus === 'No Answer' 
-      ? 'remote' 
-      : 'user';
+    if (callStatus === 'Answered') {
+      // Duration is talk time; ring time is not available from Android call log
+      conversationDuration = rawLog.duration.toString();
+      ringDuration = '0';
+    } else {
+      // No Answer / Missed: duration from Android is the ring time (if device records it)
+      conversationDuration = '0';
+      ringDuration = rawLog.duration.toString();
+    }
+
+    // Determine who hung up
+    let hangupBy: HangupBy;
+    if (callStatus === 'No Answer') {
+      hangupBy = 'user'; // outbound unanswered — user gave up and hung up
+    } else if (callStatus === 'Missed') {
+      hangupBy = 'remote'; // inbound unanswered — caller gave up
+    } else {
+      hangupBy = 'user'; // answered call ended by user
+    }
 
     return {
       unique_id: uniqueId,
