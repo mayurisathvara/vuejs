@@ -108,9 +108,10 @@ class CallService : Service() {
                 val conversationDuration = if (offhookTime > 0 && idleTime > 0) (idleTime - offhookTime) / 1000 else duration
 
                 // Refine call_type and call_status for API
+                // apiCallStatus values must match what the JS layer sends: "Answered", "No Answer", "Missed", "Declined"
                 val (apiCallType, apiCallStatus) = when (typeInt) {
                     CallLog.Calls.INCOMING_TYPE -> if (duration > 0) Pair("inbound", "Answered") else Pair("inbound", "Missed")
-                    CallLog.Calls.OUTGOING_TYPE -> if (duration > 0) Pair("outbound", "Answered") else Pair("outbound", "Declined")
+                    CallLog.Calls.OUTGOING_TYPE -> if (duration > 0) Pair("outbound", "Answered") else Pair("outbound", "No Answer")
                     CallLog.Calls.MISSED_TYPE -> Pair("inbound", "Missed")
                     CallLog.Calls.REJECTED_TYPE -> Pair("inbound", "Declined")
                     CallLog.Calls.BLOCKED_TYPE -> Pair("inbound", "Blocked")
@@ -119,10 +120,15 @@ class CallService : Service() {
                 }
 
                 // Infer who hung up the call
+                // Outbound unanswered: user gave up and hung up → "user"
+                // Inbound rejected/declined: user rejected → "user"
+                // Inbound missed: caller gave up → "remote"
+                // Answered calls: user ended the call → "user"
                 val hangupBy = when {
-                    typeInt == CallLog.Calls.INCOMING_TYPE && callType == "Declined" -> "user"
-                    typeInt == CallLog.Calls.OUTGOING_TYPE && duration == 0L -> "remote"
-                    else -> "unknown"
+                    typeInt == CallLog.Calls.OUTGOING_TYPE && duration == 0L -> "user"
+                    typeInt == CallLog.Calls.REJECTED_TYPE -> "user"
+                    typeInt == CallLog.Calls.MISSED_TYPE -> "remote"
+                    else -> "user"
                 }
 
                 val callData = mapOf(
@@ -152,7 +158,20 @@ class CallService : Service() {
 
     private fun uploadCallData(data: Map<String, String>, onSuccess: (() -> Unit)? = null) {
         thread {
-            val apiUrl = "https://www.webssphere.com/api/postdata"
+            // Read auth token from SharedPreferences (stored by React Native AsyncStorage)
+            // NOTE: This native path is a fallback. The primary sync path is the React Native
+            // callLogSyncService which uses the proper API client with auth interceptors.
+            val tokenPrefs = getSharedPreferences("RCTAsyncLocalStorage_V1", Context.MODE_PRIVATE)
+            val authToken = tokenPrefs.getString("auth_token", null)
+                ?: run {
+                    Log.w("CallService", "No auth token available, skipping upload")
+                    savePendingUpload(JSONObject(data).toString())
+                    return@thread
+                }
+
+            // Use the same API base URL as the React Native layer
+            // TODO: Replace with production URL before release (update api.ts BASE_URL as well)
+            val apiUrl = "${getSharedPreferences("app_config", Context.MODE_PRIVATE).getString("api_base_url", "http://192.168.1.9:8000/api")}/v1/app/call-logs/push"
             val json = JSONObject(data).toString()
             var success = false
             var attempts = 0
@@ -163,6 +182,7 @@ class CallService : Service() {
                     val conn = url.openConnection() as HttpURLConnection
                     conn.requestMethod = "POST"
                     conn.setRequestProperty("Content-Type", "application/json")
+                    conn.setRequestProperty("Authorization", "Bearer $authToken")
                     conn.doOutput = true
                     val os: OutputStream = conn.outputStream
                     os.write(json.toByteArray())
@@ -172,10 +192,7 @@ class CallService : Service() {
                     if (responseCode in 200..299) {
                         success = true
                         Handler(Looper.getMainLooper()).post {
-                            Toast.makeText(this, "Call data pushed to Callytics.", Toast.LENGTH_LONG).show()
-                            Log.d("CallService", "Showing push notification after data upload.")
                             showPushNotification()
-                            // showOverlayPopup() // Temporarily disabled popup
                         }
                         onSuccess?.invoke()
                     } else {
@@ -191,9 +208,6 @@ class CallService : Service() {
             if (!success) {
                 savePendingUpload(json)
                 scheduleUploadWorker()
-                Handler(Looper.getMainLooper()).post {
-                    Toast.makeText(this, "No internet. Will retry upload automatically.", Toast.LENGTH_LONG).show()
-                }
             }
         }
     }

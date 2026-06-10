@@ -170,21 +170,21 @@ const CallLogsScreen: React.FC = () => {
     return { name: 'phone', color: '#6B7280' };
   };
 
-  const getContactInitial = (name: string, number: string) => {
+  const getContactInitial = (name: string | null, number: string) => {
     if (name && name.trim()) {
       return name.charAt(0).toUpperCase();
     }
     return '#';
   };
 
-  const getAvatarColor = (name: string, number: string) => {
+  const getAvatarColor = (name: string | null, number: string) => {
     const colors = ['#FFE5E5', '#E3F2FD', '#E8F5E9', '#FFF3E0', '#F3E5F5', '#E1F5FE'];
     const str = name && name.trim() ? name : number;
     const index = str.charCodeAt(0) % colors.length;
     return colors[index];
   };
 
-  const getAvatarTextColor = (name: string, number: string) => {
+  const getAvatarTextColor = (name: string | null, number: string) => {
     const colors = ['#FF6B6B', '#2196F3', '#4CAF50', '#FF9800', '#9C27B0', '#00BCD4'];
     const str = name && name.trim() ? name : number;
     const index = str.charCodeAt(0) % colors.length;
@@ -255,7 +255,7 @@ const CallLogsScreen: React.FC = () => {
         return `${monthName} ${dayNum}`;
       }
     } catch (error) {
-      console.error('Error formatting call time:', error, dateTimeStr);
+      if (__DEV__) console.error('Error formatting call time:', error, dateTimeStr);
       return dateTimeStr || 'N/A';
     }
   };

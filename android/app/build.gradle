@@ -105,6 +105,16 @@ android {
             proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
         }
     }
+
+    lint {
+        // Only lint our own app code, not third-party node_modules libraries.
+        // Run `./gradlew :app:lintDebug` or `:app:lintRelease` to check only our code.
+        checkDependencies false
+        abortOnError true
+        warningsAsErrors false
+        htmlReport true
+        xmlReport false
+    }
 }
 
 configurations.all {

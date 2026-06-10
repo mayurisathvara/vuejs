@@ -50,7 +50,7 @@ interface DashboardData {
 
 const HomeScreen: React.FC = () => {
   const { theme } = useTheme();
-  const { lastSyncTime, isSyncing, manualSync, error } = useCallLogSync();
+  const { lastSyncTime, isSyncing, pendingCount, manualSync, error } = useCallLogSync();
   const [dateRangeLabel, setDateRangeLabel] = useState('Today');
   const [dashboardData, setDashboardData] = useState<DashboardData | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -430,29 +430,40 @@ const HomeScreen: React.FC = () => {
         </View>
 
         {/* Sync Status Card */}
-        <View style={[styles.syncCard, { backgroundColor: theme.colors.surface }]}>
-          <View style={styles.syncLeft}>
-            <View style={styles.syncIconBox}>
-              <MaterialCommunityIcons name="cloud-check" size={18} color="#4CAF50" />
+        {(() => {
+          const hasPending = pendingCount > 0;
+          const hasError = !!error;
+          const borderColor = hasError ? '#F44336' : hasPending ? '#FF9800' : '#4CAF50';
+          const iconColor = hasError ? '#F44336' : hasPending ? '#FF9800' : '#4CAF50';
+          const iconBg = hasError ? '#FFEBEE' : hasPending ? '#FFF3E0' : '#E8F5E9';
+          const iconName = hasError ? 'cloud-alert' : hasPending ? 'cloud-upload' : 'cloud-check';
+          const statusText = hasError ? 'Sync error' : hasPending ? `${pendingCount} pending` : 'All synced';
+          return (
+            <View style={[styles.syncCard, { backgroundColor: theme.colors.surface, borderLeftColor: borderColor }]}>
+              <View style={styles.syncLeft}>
+                <View style={[styles.syncIconBox, { backgroundColor: iconBg }]}>
+                  <MaterialCommunityIcons name={iconName} size={18} color={iconColor} />
+                </View>
+                <View style={styles.syncTextContainer}>
+                  <Text style={[styles.syncTitle, { color: theme.colors.textPrimary }]}>{statusText}</Text>
+                  <Text style={[styles.syncSubtitle, { color: theme.colors.textSecondary }]}>Last sync: {formatLastSync()}</Text>
+                </View>
+              </View>
+              <TouchableOpacity
+                style={styles.syncActionIcon}
+                onPress={handleSync}
+                disabled={isSyncing}
+                activeOpacity={0.7}
+              >
+                {isSyncing ? (
+                  <ActivityIndicator size="small" color="#FF9800" />
+                ) : (
+                  <MaterialCommunityIcons name="sync" size={20} color="#FF9800" />
+                )}
+              </TouchableOpacity>
             </View>
-            <View style={styles.syncTextContainer}>
-              <Text style={[styles.syncTitle, { color: theme.colors.textPrimary }]}>All synced</Text>
-              <Text style={[styles.syncSubtitle, { color: theme.colors.textSecondary }]}>Last sync: {formatLastSync()}</Text>
-            </View>
-          </View>
-          <TouchableOpacity 
-            style={styles.syncActionIcon}
-            onPress={handleSync}
-            disabled={isSyncing}
-            activeOpacity={0.7}
-          >
-            {isSyncing ? (
-              <ActivityIndicator size="small" color="#FF9800" />
-            ) : (
-              <MaterialCommunityIcons name="sync" size={20} color="#FF9800" />
-            )}
-          </TouchableOpacity>
-        </View>
+          );
+        })()}
         </>
         )}
       </ScrollView>

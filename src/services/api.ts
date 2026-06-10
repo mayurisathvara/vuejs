@@ -6,7 +6,7 @@ import { RETRY_CONFIG } from '../constants';
 
 // API Configuration - can be overridden by environment variables
 const API_CONFIG = {
-  BASE_URL: process.env.API_BASE_URL || 'http://192.168.1.7:8000/api',
+  BASE_URL: process.env.API_BASE_URL || 'http://192.168.1.9:8000/api',
   TIMEOUT: 30000,
 };
 
@@ -99,20 +99,23 @@ export const callLogSyncAPI = {
    */
   pushCallLog: async (callLog: CallLogPushRequest): Promise<CallLogPushResponse> => {
     try {
-      console.log('📡 Pushing call log to API:', {
-        url: `${BASE_URL}/v1/app/call-logs/push`,
-        unique_id: callLog.unique_id,
-        caller_number: callLog.caller_number,
-      });
-      
+      if (__DEV__) {
+        console.log('📡 Pushing call log to API:', {
+          url: `${BASE_URL}/v1/app/call-logs/push`,
+          unique_id: callLog.unique_id,
+        });
+      }
+
       const response = await retryWithBackoff(
         () => apiClient.post('/v1/app/call-logs/push', callLog),
         RETRY_CONFIG.API_RETRY_ATTEMPTS,
         RETRY_CONFIG.API_RETRY_DELAY
       );
-      
-      console.log('✅ API Response:', response.data);
-      
+
+      if (__DEV__) {
+        console.log('✅ API Response:', response.data);
+      }
+
       // API returns: { "message": "Data received and logged." }
       // Convert to our expected format
       return {
@@ -121,20 +124,17 @@ export const callLogSyncAPI = {
         data: response.data,
       };
     } catch (error: any) {
-      console.error('❌ Error pushing call log after retries:', {
-        message: error.message,
-        code: error.code,
-        response: error.response?.data,
-        status: error.response?.status,
-        url: error.config?.url,
-      });
-      
-      // Don't throw on 422 (duplicate) - let caller handle it
-      // This prevents the retry logic from retrying duplicates
-      if (error.response?.status === 422) {
-        console.log('⚠️ Duplicate unique_id (422) - not retrying');
+      if (__DEV__) {
+        console.error('❌ Error pushing call log after retries:', {
+          message: error.message,
+          code: error.code,
+          status: error.response?.status,
+          url: error.config?.url,
+        });
+        if (error.response?.status === 422) {
+          console.log('⚠️ Duplicate unique_id (422) - not retrying');
+        }
       }
-      
       throw error;
     }
   },
@@ -152,7 +152,7 @@ export const callLogSyncAPI = {
       const successCount = results.filter(r => r.status === 'fulfilled').length;
       const failedCount = results.filter(r => r.status === 'rejected').length;
 
-      if (failedCount > 0) {
+      if (__DEV__ && failedCount > 0) {
         console.warn(`Batch push: ${successCount} succeeded, ${failedCount} failed`);
       }
 
@@ -162,7 +162,9 @@ export const callLogSyncAPI = {
         data: { successCount, failedCount, total: callLogs.length },
       };
     } catch (error: any) {
-      console.error('Error pushing call logs batch:', error);
+      if (__DEV__) {
+        console.error('Error pushing call logs batch:', error);
+      }
       throw error;
     }
   },
@@ -174,23 +176,28 @@ export const dashboardAPI = {
    */
   fetchDashboard: async (startDate: string, endDate: string): Promise<any> => {
     try {
-      console.log('📊 Fetching dashboard data:', { startDate, endDate });
-      
+      if (__DEV__) {
+        console.log('📊 Fetching dashboard data:', { startDate, endDate });
+      }
+
       const response = await apiClient.get('/v1/app/dashboard', {
         params: {
           start_date: startDate,
           end_date: endDate,
         },
       });
-      
-      console.log('✅ Dashboard data received:', response.data);
+
+      if (__DEV__) {
+        console.log('✅ Dashboard data received');
+      }
       return response.data;
     } catch (error: any) {
-      console.error('❌ Error fetching dashboard data:', {
-        message: error.message,
-        status: error.response?.status,
-        data: error.response?.data,
-      });
+      if (__DEV__) {
+        console.error('❌ Error fetching dashboard data:', {
+          message: error.message,
+          status: error.response?.status,
+        });
+      }
       throw error;
     }
   },
@@ -207,8 +214,10 @@ export const callLogsAPI = {
     page: number = 1
   ): Promise<any> => {
     try {
-      console.log('📞 Fetching call logs:', { startDate, endDate, filterType, page });
-      
+      if (__DEV__) {
+        console.log('📞 Fetching call logs:', { startDate, endDate, filterType, page });
+      }
+
       const params: any = {
         start_date: startDate,
         end_date: endDate,
@@ -219,17 +228,20 @@ export const callLogsAPI = {
       if (filterType !== 'all') {
         params.filter_type = filterType;
       }
-      
+
       const response = await apiClient.get('/v1/app/call-logs', { params });
-      
-      console.log('✅ Call logs received:', response.data.data.total, 'records');
+
+      if (__DEV__) {
+        console.log('✅ Call logs received:', response.data.data?.total, 'records');
+      }
       return response.data;
     } catch (error: any) {
-      console.error('❌ Error fetching call logs:', {
-        message: error.message,
-        status: error.response?.status,
-        data: error.response?.data,
-      });
+      if (__DEV__) {
+        console.error('❌ Error fetching call logs:', {
+          message: error.message,
+          status: error.response?.status,
+        });
+      }
       throw error;
     }
   },
@@ -241,18 +253,23 @@ export const analyticsAPI = {
    */
   fetchDailyCallVolume: async (): Promise<any> => {
     try {
-      console.log('📊 Fetching daily call volume...');
-      
+      if (__DEV__) {
+        console.log('📊 Fetching daily call volume...');
+      }
+
       const response = await apiClient.get('/v1/app/analytics/daily-call-volume');
-      
-      console.log('✅ Daily call volume received:', response.data);
+
+      if (__DEV__) {
+        console.log('✅ Daily call volume received');
+      }
       return response.data;
     } catch (error: any) {
-      console.error('❌ Error fetching daily call volume:', {
-        message: error.message,
-        status: error.response?.status,
-        data: error.response?.data,
-      });
+      if (__DEV__) {
+        console.error('❌ Error fetching daily call volume:', {
+          message: error.message,
+          status: error.response?.status,
+        });
+      }
       throw error;
     }
   },
@@ -262,23 +279,28 @@ export const analyticsAPI = {
    */
   fetchPeakHours: async (startDate: string, endDate: string): Promise<any> => {
     try {
-      console.log('📊 Fetching peak hours:', { startDate, endDate });
-      
+      if (__DEV__) {
+        console.log('📊 Fetching peak hours:', { startDate, endDate });
+      }
+
       const response = await apiClient.get('/v1/app/analytics/peak-hours', {
         params: {
           start_date: startDate,
           end_date: endDate,
         },
       });
-      
-      console.log('✅ Peak hours received:', response.data);
+
+      if (__DEV__) {
+        console.log('✅ Peak hours received');
+      }
       return response.data;
     } catch (error: any) {
-      console.error('❌ Error fetching peak hours:', {
-        message: error.message,
-        status: error.response?.status,
-        data: error.response?.data,
-      });
+      if (__DEV__) {
+        console.error('❌ Error fetching peak hours:', {
+          message: error.message,
+          status: error.response?.status,
+        });
+      }
       throw error;
     }
   },
@@ -288,23 +310,28 @@ export const analyticsAPI = {
    */
   fetchMissedCalls: async (startDate: string, endDate: string): Promise<any> => {
     try {
-      console.log('📊 Fetching missed calls:', { startDate, endDate });
-      
+      if (__DEV__) {
+        console.log('📊 Fetching missed calls:', { startDate, endDate });
+      }
+
       const response = await apiClient.get('/v1/app/analytics/missed-calls', {
         params: {
           start_date: startDate,
           end_date: endDate,
         },
       });
-      
-      console.log('✅ Missed calls received:', response.data);
+
+      if (__DEV__) {
+        console.log('✅ Missed calls received');
+      }
       return response.data;
     } catch (error: any) {
-      console.error('❌ Error fetching missed calls:', {
-        message: error.message,
-        status: error.response?.status,
-        data: error.response?.data,
-      });
+      if (__DEV__) {
+        console.error('❌ Error fetching missed calls:', {
+          message: error.message,
+          status: error.response?.status,
+        });
+      }
       throw error;
     }
   },

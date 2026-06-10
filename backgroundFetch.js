@@ -12,25 +12,15 @@ import { Platform, PermissionsAndroid } from 'react-native';
  * Ready for Sentry/Crashlytics integration when needed
  */
 const reportError = (error, context) => {
-  // Always log errors in production for monitoring
-  console.error('[BackgroundFetch Error Report]', {
-    context,
-    error: error.message,
-    stack: error.stack,
-    timestamp: new Date().toISOString(),
-  });
-  
-  // CODE QUALITY FIX: Error reporting ready for integration
-  // To add Sentry: npm install @sentry/react-native
-  // Then uncomment:
-  // import * as Sentry from '@sentry/react-native';
-  // Sentry.captureException(error, { extra: context });
-  
-  // To add Firebase Crashlytics: npm install @react-native-firebase/crashlytics
-  // Then uncomment:
-  // import crashlytics from '@react-native-firebase/crashlytics';
-  // crashlytics().recordError(error);
-  // crashlytics().log(`Background fetch error: ${error.message}`);
+  if (__DEV__) {
+    console.error('[BackgroundFetch Error Report]', {
+      context,
+      error: error.message,
+      timestamp: new Date().toISOString(),
+    });
+  }
+  // To integrate Sentry: Sentry.captureException(error, { extra: context });
+  // To integrate Crashlytics: crashlytics().recordError(error);
 };
 
 /**
@@ -129,8 +119,7 @@ const BackgroundFetchHeadlessTask = async (event) => {
     
     if (__DEV__) console.log('[BackgroundFetch HeadlessTask] completed:', taskId);
   } catch (error) {
-    // CODE QUALITY FIX: Always log errors for monitoring
-    console.error('[BackgroundFetch HeadlessTask] error:', error);
+    if (__DEV__) console.error('[BackgroundFetch HeadlessTask] error:', error);
     
     // Report error to crash reporting service
     reportError(error, {

@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<lint>
+    <!--
+        These suppressions cover known bugs in third-party React Native libraries
+        inside node_modules. They do NOT suppress checks in our own app code.
+
+        react-native-push-notification uses Intent.ACTION_CLOSE_SYSTEM_DIALOGS
+        without BROADCAST_CLOSE_SYSTEM_DIALOGS — this is their bug, fixed upstream
+        but not yet released. Suppressed here so `gradlew lint` doesn't abort.
+    -->
+    <issue id="MissingPermission">
+        <ignore path="**/node_modules/**" />
+    </issue>
+
+    <!-- JCenter is EOL — suppressed for node_modules build.gradle files only -->
+    <issue id="JcenterRepositoryObsolete">
+        <ignore path="**/node_modules/**" />
+    </issue>
+
+    <!-- Outdated AGP/dependency versions in node_modules are not our responsibility -->
+    <issue id="AndroidGradlePluginVersion">
+        <ignore path="**/node_modules/**" />
+    </issue>
+    <issue id="GradleDependency">
+        <ignore path="**/node_modules/**" />
+    </issue>
+    <issue id="GradleDynamicVersion">
+        <ignore path="**/node_modules/**" />
+    </issue>
+</lint>

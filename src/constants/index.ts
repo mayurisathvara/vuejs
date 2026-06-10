@@ -60,6 +60,6 @@ export const DATE_LIMITS = {
 
 // Legal URLs — update these to public HTTPS URLs before Play Store submission
 export const LEGAL_URLS = {
-  PRIVACY_POLICY: 'http://192.168.1.7:8000/privacy',
-  TERMS_CONDITIONS: 'http://192.168.1.7:8000/terms',
+  PRIVACY_POLICY: 'http://192.168.1.9:8000/privacy',
+  TERMS_CONDITIONS: 'http://192.168.1.9:8000/terms',
 } as const;

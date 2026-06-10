@@ -1,10 +1,11 @@
-import { NativeModules, NativeEventEmitter, Platform, AppState, PermissionsAndroid } from 'react-native';
+import { AppState, PermissionsAndroid, Platform } from 'react-native';
 import PushNotification from 'react-native-push-notification';
 import { callLogSyncService } from './callLogSync';
 
 class CallStateListener {
   private subscription: any = null;
   private isListening = false;
+  private isProcessing = false; // guard against concurrent interval ticks
   private lastCheckTime = 0;
   private checkInterval = 3000; // Check every 3 seconds
 
@@ -14,12 +15,10 @@ class CallStateListener {
   private async hasNotificationPermission(): Promise<boolean> {
     if (Platform.OS === 'android' && Platform.Version >= 33) {
       try {
-        const granted = await PermissionsAndroid.check(
+        return await PermissionsAndroid.check(
           PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS
         );
-        return granted;
-      } catch (error) {
-        console.error('Error checking notification permission:', error);
+      } catch {
         return false;
       }
     }
@@ -31,79 +30,77 @@ class CallStateListener {
    */
   startListening() {
     if (this.isListening) {
-      console.log('[CallStateListener] Already listening');
+      if (__DEV__) console.log('[CallStateListener] Already listening');
       return;
     }
 
     if (Platform.OS !== 'android') {
-      console.log('[CallStateListener] Only supported on Android');
+      if (__DEV__) console.log('[CallStateListener] Only supported on Android');
       return;
     }
 
     try {
-      console.log('[CallStateListener] 🎧 Starting call state listener...');
+      if (__DEV__) console.log('[CallStateListener] Starting call state listener...');
       this.isListening = true;
       this.lastCheckTime = Date.now();
 
-      // Set up a timer to check for new calls periodically (every 3 seconds)
+      // Poll for new call logs every 3 seconds
       this.subscription = setInterval(async () => {
+        // Skip if a previous tick is still running (prevents overlapping async calls)
+        if (this.isProcessing) return;
+
+        const now = Date.now();
+        if (now - this.lastCheckTime < this.checkInterval) return;
+        this.lastCheckTime = now;
+
+        this.isProcessing = true;
         try {
-          const now = Date.now();
-          
-          // Skip if last check was too recent (prevent duplicate checks)
-          if (now - this.lastCheckTime < this.checkInterval) {
-            return;
-          }
-          
-          this.lastCheckTime = now;
-          
-          // Process any new call logs
           const processedCount = await callLogSyncService.processNewCallLogs();
-          
+
           if (processedCount > 0) {
-            console.log(`[CallStateListener] 📞 Detected ${processedCount} new call(s), syncing immediately...`);
-            
-            // Small delay to ensure call log is fully written
+            if (__DEV__) {
+              console.log(`[CallStateListener] Detected ${processedCount} new call(s), syncing immediately...`);
+            }
+
+            // Small delay to ensure call log is fully written to device
             await new Promise(resolve => setTimeout(resolve, 1000));
-            
-            // Immediately sync the new logs
+
             const result = await callLogSyncService.syncUnsyncedLogs();
-            
+
             if (result.success && result.syncedCount > 0) {
-              console.log(`[CallStateListener] ✅ Successfully synced ${result.syncedCount} call log(s) after call ended`);
-              
-              // Show notification even if app is in background
+              if (__DEV__) {
+                console.log(`[CallStateListener] Synced ${result.syncedCount} call log(s) after call ended`);
+              }
+
+              // Show notification only when app is in background
               const appState = AppState.currentState;
               if (appState !== 'active') {
                 const hasPermission = await this.hasNotificationPermission();
-                
                 if (hasPermission) {
                   PushNotification.localNotification({
                     channelId: 'call-log-sync',
-                    title: '📞 Call Log Synced',
-                    message: `Call log uploaded successfully`,
+                    title: 'Call Log Synced',
+                    message: 'Call log uploaded successfully',
                     playSound: true,
                     soundName: 'default',
                     priority: 'high',
                     visibility: 'public',
                   });
-                  console.log('[CallStateListener] 📲 Notification sent (app in background)');
-                } else {
-                  console.warn('[CallStateListener] ⚠️ Cannot show notification: Permission not granted');
                 }
               }
             } else if (result.error) {
-              console.log(`[CallStateListener] ⚠️ Sync postponed: ${result.error}`);
-              
-              // Show notification if no internet and app is in background
+              if (__DEV__) {
+                console.log(`[CallStateListener] Sync postponed: ${result.error}`);
+              }
+
+              // Show offline notification when app is in background
               const appState = AppState.currentState;
               if (appState !== 'active' && result.error.includes('internet')) {
                 const hasPermission = await this.hasNotificationPermission();
-                
                 if (hasPermission) {
                   PushNotification.localNotification({
                     channelId: 'call-log-sync',
-                    title: 'ℹ️ No Internet',
+                    title: 'No Internet',
                     message: 'Call log will sync when internet is available',
                     playSound: false,
                     priority: 'low',
@@ -114,13 +111,15 @@ class CallStateListener {
             }
           }
         } catch (error) {
-          console.error('[CallStateListener] Error checking for new calls:', error);
+          if (__DEV__) console.error('[CallStateListener] Error checking for new calls:', error);
+        } finally {
+          this.isProcessing = false;
         }
       }, this.checkInterval);
 
-      console.log('[CallStateListener] ✅ Call state listener started (checking every 3 seconds)');
+      if (__DEV__) console.log('[CallStateListener] Call state listener started (checking every 3 seconds)');
     } catch (error) {
-      console.error('[CallStateListener] Error starting listener:', error);
+      if (__DEV__) console.error('[CallStateListener] Error starting listener:', error);
       this.isListening = false;
     }
   }
@@ -129,20 +128,18 @@ class CallStateListener {
    * Stop listening for call state changes
    */
   stopListening() {
-    if (!this.isListening) {
-      return;
-    }
+    if (!this.isListening) return;
 
     try {
       if (this.subscription) {
         clearInterval(this.subscription);
         this.subscription = null;
       }
-
       this.isListening = false;
-      console.log('[CallStateListener] 🛑 Call state listener stopped');
+      this.isProcessing = false;
+      if (__DEV__) console.log('[CallStateListener] Call state listener stopped');
     } catch (error) {
-      console.error('[CallStateListener] Error stopping listener:', error);
+      if (__DEV__) console.error('[CallStateListener] Error stopping listener:', error);
     }
   }
 }

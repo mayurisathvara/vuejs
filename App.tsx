@@ -41,45 +41,44 @@ const App: React.FC = () => {
       },
       async (taskId) => {
         // This runs when app is in foreground/background (not killed)
-        console.log('[BackgroundFetch] In-app task:', taskId);
+        if (__DEV__) console.log('[BackgroundFetch] In-app task:', taskId);
         try {
           await callLogSyncService.processNewCallLogs();
           await callLogSyncService.syncUnsyncedLogs();
-          console.log('[BackgroundFetch] ✅ Task completed:', taskId);
+          if (__DEV__) console.log('[BackgroundFetch] Task completed:', taskId);
         } catch (error: any) {
-          console.error('[BackgroundFetch] ❌ In-app error:', {
-            taskId,
-            message: error?.message,
-            stack: error?.stack,
-          });
-          // Task failed but finish it to avoid retry loop
+          if (__DEV__) {
+            console.error('[BackgroundFetch] In-app error:', {
+              taskId,
+              message: error?.message,
+            });
+          }
         }
         BackgroundFetch.finish(taskId);
       },
       (taskId) => {
-        console.log('[BackgroundFetch] TIMEOUT:', taskId);
+        if (__DEV__) console.log('[BackgroundFetch] TIMEOUT:', taskId);
         BackgroundFetch.finish(taskId);
       }
     ).then(status => {
-      console.log('[BackgroundFetch] Configured, status:', status);
+      if (__DEV__) console.log('[BackgroundFetch] Configured, status:', status);
     }).catch(error => {
-      console.error('[BackgroundFetch] Config error:', error);
+      if (__DEV__) console.error('[BackgroundFetch] Config error:', error);
     });
 
     // Listen for WorkManager sync triggers from native side
     const subscription = DeviceEventEmitter.addListener(
       'CallLogSyncTrigger',
       async () => {
-        console.log('📱 WorkManager triggered call log sync');
+        if (__DEV__) console.log('[WorkManager] Triggered call log sync');
         try {
           await callLogSyncService.processNewCallLogs();
           await callLogSyncService.syncUnsyncedLogs();
-          console.log('✅ WorkManager sync completed');
+          if (__DEV__) console.log('[WorkManager] Sync completed');
         } catch (error: any) {
-          console.error('❌ WorkManager sync error:', {
-            message: error?.message,
-            stack: error?.stack,
-          });
+          if (__DEV__) {
+            console.error('[WorkManager] Sync error:', error?.message);
+          }
         }
       }
     );

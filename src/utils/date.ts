@@ -20,7 +20,7 @@ export const formatDate = (date: Date): string => {
  * @returns True if valid format
  */
 export const isValidAppLoginCode = (code: string): boolean => {
-  // Format: ORG-XXXX-XXXX or XXX-XXXX-XXXX (3-4 chars, 4 chars, 4 chars)
-  const pattern = /^[A-Z]{3,4}-[A-Z0-9]{4}-[A-Z0-9]{4}$/i;
+  // Format: XXX-XXXX-XXXX (exactly 3 alpha prefix, 4 alphanumeric, 4 alphanumeric)
+  const pattern = /^[A-Z]{3}-[A-Z0-9]{4}-[A-Z0-9]{4}$/i;
   return pattern.test(code.trim());
 };

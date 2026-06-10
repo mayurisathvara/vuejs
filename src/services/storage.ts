@@ -17,7 +17,7 @@ export const storageService = {
         [STORAGE_KEYS.USER_DATA, JSON.stringify(userData)],
       ]);
     } catch (error) {
-      console.error('Error storing auth data:', error);
+      if (__DEV__) console.error('Error storing auth data:', error);
       throw error;
     }
   },
@@ -27,7 +27,7 @@ export const storageService = {
     try {
       return await AsyncStorage.getItem(STORAGE_KEYS.AUTH_TOKEN);
     } catch (error) {
-      console.error('Error getting auth token:', error);
+      if (__DEV__) console.error('Error getting auth token:', error);
       return null;
     }
   },
@@ -37,7 +37,7 @@ export const storageService = {
     try {
       return await AsyncStorage.getItem(STORAGE_KEYS.USER_MOBILE);
     } catch (error) {
-      console.error('Error getting user mobile:', error);
+      if (__DEV__) console.error('Error getting user mobile:', error);
       return null;
     }
   },
@@ -48,7 +48,7 @@ export const storageService = {
       const userData = await AsyncStorage.getItem(STORAGE_KEYS.USER_DATA);
       return userData ? JSON.parse(userData) : null;
     } catch (error) {
-      console.error('Error getting user data:', error);
+      if (__DEV__) console.error('Error getting user data:', error);
       return null;
     }
   },
@@ -62,7 +62,7 @@ export const storageService = {
         STORAGE_KEYS.USER_DATA,
       ]);
     } catch (error) {
-      console.error('Error clearing auth data:', error);
+      if (__DEV__) console.error('Error clearing auth data:', error);
       throw error;
     }
   },
@@ -73,7 +73,7 @@ export const storageService = {
       const token = await AsyncStorage.getItem(STORAGE_KEYS.AUTH_TOKEN);
       return !!token;
     } catch (error) {
-      console.error('Error checking authentication:', error);
+      if (__DEV__) console.error('Error checking authentication:', error);
       return false;
     }
   },
@@ -83,7 +83,7 @@ export const storageService = {
     try {
       await AsyncStorage.setItem(key, value);
     } catch (error) {
-      console.error('Error setting item:', error);
+      if (__DEV__) console.error('Error setting item:', error);
       throw error;
     }
   },
@@ -92,7 +92,7 @@ export const storageService = {
     try {
       return await AsyncStorage.getItem(key);
     } catch (error) {
-      console.error('Error getting item:', error);
+      if (__DEV__) console.error('Error getting item:', error);
       return null;
     }
   },
@@ -101,7 +101,7 @@ export const storageService = {
     try {
       await AsyncStorage.removeItem(key);
     } catch (error) {
-      console.error('Error removing item:', error);
+      if (__DEV__) console.error('Error removing item:', error);
       throw error;
     }
   },
@@ -111,7 +111,7 @@ export const storageService = {
     try {
       await AsyncStorage.setItem(STORAGE_KEYS.USER_CONSENT, consented ? 'true' : 'false');
     } catch (error) {
-      console.error('Error setting user consent:', error);
+      if (__DEV__) console.error('Error setting user consent:', error);
       throw error;
     }
   },
@@ -121,7 +121,7 @@ export const storageService = {
       const value = await AsyncStorage.getItem(STORAGE_KEYS.USER_CONSENT);
       return value === 'true';
     } catch (error) {
-      console.error('Error getting user consent:', error);
+      if (__DEV__) console.error('Error getting user consent:', error);
       return false;
     }
   },

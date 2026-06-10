@@ -9,21 +9,16 @@ class NotificationService {
    */
   configure(): void {
     PushNotification.configure({
-      // Called when a remote or local notification is opened or received
-      onNotification: function (notification: any) {
-        console.log('NOTIFICATION:', notification);
+      onNotification: function (_notification: any) {
+        // Notification received or opened — no action needed
       },
-
-      // Should the initial notification be popped automatically
       popInitialNotification: true,
-
-      // Permissions (iOS only)
       requestPermissions: Platform.OS === 'ios',
     });
 
     // Create notification channel for Android
     this.createChannels();
-    
+
     // Check notification permission
     this.checkPermission();
   }
@@ -40,10 +35,9 @@ class NotificationService {
             PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS
           );
           this.hasPermission = granted;
-          console.log('Notification permission:', granted ? 'Granted' : 'Not granted');
           return granted;
         } catch (error) {
-          console.error('Error checking notification permission:', error);
+          if (__DEV__) console.error('Error checking notification permission:', error);
           this.hasPermission = false;
           return false;
         }
@@ -54,7 +48,7 @@ class NotificationService {
       }
     } else {
       // iOS
-      this.hasPermission = true; // Assume granted, or check using different method
+      this.hasPermission = true;
       return true;
     }
   }
@@ -74,7 +68,7 @@ class NotificationService {
           importance: 4, // IMPORTANCE_HIGH
           vibrate: false,
         },
-        (created) => console.log(`Channel created: ${created}`)
+        (_created) => {}
       );
     }
   }
@@ -83,16 +77,13 @@ class NotificationService {
    * Show local notification (checks permission first)
    */
   async showNotification(title: string, message: string, channelId: string = 'call-log-sync'): Promise<void> {
-    // Re-check permission before showing notification
     const hasPermission = await this.checkPermission();
-    
+
     if (!hasPermission) {
-      console.warn('⚠️ Cannot show notification: Permission not granted');
+      if (__DEV__) console.warn('Cannot show notification: Permission not granted');
       return;
     }
 
-    console.log('📲 Showing notification:', { title, message });
-    
     PushNotification.localNotification({
       channelId,
       title,

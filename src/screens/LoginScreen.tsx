@@ -83,17 +83,28 @@ const LoginScreen: React.FC = () => {
       app_login_code: appLoginCode.trim(),
     });
 
-    if (success) {
-      // Navigation will be handled by the auth state change
-      console.log('Login successful');
-    }
+    // Navigation is handled automatically by auth state change in AppNavigator
   };
 
   const formatMobileNumber = (text: string) => {
-    // Remove all non-numeric characters
     const cleaned = text.replace(/\D/g, '');
-    // Limit to max digits
     return cleaned.slice(0, PHONE_FORMAT.MAX_DIGITS);
+  };
+
+  const formatAppLoginCode = (text: string, prevValue: string) => {
+    const cleaned = text.replace(/[^A-Za-z0-9]/g, '').toUpperCase().slice(0, 11);
+    const isDeleting = text.length < prevValue.length;
+
+    if (cleaned.length <= 3) {
+      // Add trailing dash immediately after 3rd char when typing forward
+      return cleaned.length === 3 && !isDeleting ? `${cleaned}-` : cleaned;
+    }
+    if (cleaned.length <= 7) {
+      const part = `${cleaned.slice(0, 3)}-${cleaned.slice(3)}`;
+      // Add trailing dash immediately after 7th cleaned char when typing forward
+      return cleaned.length === 7 && !isDeleting ? `${part}-` : part;
+    }
+    return `${cleaned.slice(0, 3)}-${cleaned.slice(3, 7)}-${cleaned.slice(7)}`;
   };
 
   return (
@@ -156,10 +167,12 @@ const LoginScreen: React.FC = () => {
                 <TextInput
                   style={[styles.input, { color: theme.colors.textPrimary }]}
                   value={appLoginCode}
-                  onChangeText={setAppLoginCode}
-                  placeholder="Enter app login code (e.g., ORG-XXXX-XXXX)"
+                  onChangeText={(text) => setAppLoginCode(formatAppLoginCode(text, appLoginCode))}
+                  placeholder="e.g., DOS-1234-5678"
                   placeholderTextColor={theme.colors.textSecondary}
                   autoCapitalize="characters"
+                  autoCorrect={false}
+                  maxLength={13}
                   editable={!isLoading}
                 />
               </View>

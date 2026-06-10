@@ -19,6 +19,7 @@ import {
 
 class CallLogSyncService {
   private isSyncing = false;
+  private isProcessingLogs = false;
 
   /**
    * Request READ_CALL_LOG permission (Android)
@@ -41,7 +42,7 @@ class CallLogSyncService {
       );
       return granted === PermissionsAndroid.RESULTS.GRANTED;
     } catch (error) {
-      console.error('Error requesting call log permission:', error);
+      if (__DEV__) console.error('Error requesting call log permission:', error);
       return false;
     }
   }
@@ -266,7 +267,13 @@ class CallLogSyncService {
    * @param headlessMode - If true, running in background without Activity context
    */
   async processNewCallLogs(headlessMode: boolean = false): Promise<number> {
+    if (this.isProcessingLogs) {
+      if (__DEV__) console.log('Already processing call logs, skipping concurrent call');
+      return 0;
+    }
+
     try {
+      this.isProcessingLogs = true;
       if (__DEV__) console.log('📱 Processing new call logs...');
 
       const userData = await storageService.getUserData();
@@ -392,6 +399,8 @@ class CallLogSyncService {
     } catch (error) {
       if (__DEV__) console.error('Error processing new call logs:', error);
       return 0;
+    } finally {
+      this.isProcessingLogs = false;
     }
   }
 
@@ -605,7 +614,7 @@ class CallLogSyncService {
         );
         
         if (!hasPermission) {
-          console.log('[BackgroundSync] No call log permission - skipping sync');
+          if (__DEV__) console.log('[BackgroundSync] No call log permission - skipping sync');
           return;
         }
       }
@@ -632,14 +641,12 @@ class CallLogSyncService {
         );
         
         if (!granted) {
-          console.warn('⚠️ Cannot show notification: POST_NOTIFICATIONS permission not granted');
+          if (__DEV__) console.warn('⚠️ Cannot show notification: POST_NOTIFICATIONS permission not granted');
           return;
         }
       }
       // For Android < 13, notifications work by default (no runtime permission needed)
-      
-      console.log('📲 Showing sync notification for', count, 'logs');
-      
+
       PushNotification.localNotification({
         channelId: 'call-log-sync',
         title: '✅ Call Logs Synced',
@@ -650,7 +657,7 @@ class CallLogSyncService {
         visibility: 'public',
       });
     } catch (error) {
-      console.error('Error showing notification:', error);
+      if (__DEV__) console.error('Error showing notification:', error);
     }
   }
 
