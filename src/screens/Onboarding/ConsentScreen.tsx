@@ -2,12 +2,13 @@ import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Alert, SafeAreaView, StatusBar, ScrollView, BackHandler, Modal, ActivityIndicator } from 'react-native';
 import { WebView } from 'react-native-webview';
 import { useTheme } from '../../contexts/ThemeContext';
+import { useOnboarding } from '../../contexts/OnboardingContext';
 import { useBackHandler } from '../../hooks/useBackHandler';
-import { storageService } from '../../services/storage';
 import { LEGAL_URLS } from '../../constants';
 
 const ConsentScreen: React.FC = () => {
   const { theme } = useTheme();
+  const { updateConsent } = useOnboarding();
   const [webViewUrl, setWebViewUrl] = useState<string | null>(null);
   const [webViewTitle, setWebViewTitle] = useState('');
   const [webViewLoading, setWebViewLoading] = useState(true);
@@ -44,9 +45,7 @@ const ConsentScreen: React.FC = () => {
 
   const handleAgree = async () => {
     try {
-      await storageService.setUserConsent(true);
-      // Navigation will be automatically handled by AppNavigator based on consent state change
-      // No manual navigation needed to avoid "not handled by any navigator" error
+      await updateConsent(true);
     } catch (error) {
       Alert.alert('Error', 'Failed to save your consent. Please try again.');
     }

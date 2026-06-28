@@ -22,7 +22,7 @@ const CallLogSyncTask = async (_taskData) => {
   if (__DEV__) console.log('[CallLogSyncTask] Starting headless sync...');
 
   try {
-    const { storageService } = require('./src/services/storage');
+    const { storageService } = require('../services/storage');
     const token = await storageService.getAuthToken();
     const userData = await storageService.getUserData();
 
@@ -31,7 +31,7 @@ const CallLogSyncTask = async (_taskData) => {
       return;
     }
 
-    const { callLogSyncService } = require('./src/services/callLogSync');
+    const { callLogSyncService } = require('../services/callLogSync');
 
     // Process any new call logs from device
     const processedCount = await callLogSyncService.processNewCallLogs();

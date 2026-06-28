@@ -93,15 +93,19 @@ const LoginScreen: React.FC = () => {
 
   const formatAppLoginCode = (text: string, prevValue: string) => {
     const cleaned = text.replace(/[^A-Za-z0-9]/g, '').toUpperCase().slice(0, 11);
-    const isDeleting = text.length < prevValue.length;
+    const prevCleaned = prevValue.replace(/[^A-Za-z0-9]/g, '').toUpperCase();
+    // Compare cleaned lengths so autocomplete jumps (e.g. '' → 'DOS-1234-5678') are never
+    // misread as deletion. Fall back to raw length only when cleaned lengths are equal,
+    // which is the specific case of the user backspacing an auto-inserted dash.
+    const isDeleting =
+      cleaned.length < prevCleaned.length ||
+      (cleaned.length === prevCleaned.length && text.length < prevValue.length);
 
     if (cleaned.length <= 3) {
-      // Add trailing dash immediately after 3rd char when typing forward
       return cleaned.length === 3 && !isDeleting ? `${cleaned}-` : cleaned;
     }
     if (cleaned.length <= 7) {
       const part = `${cleaned.slice(0, 3)}-${cleaned.slice(3)}`;
-      // Add trailing dash immediately after 7th cleaned char when typing forward
       return cleaned.length === 7 && !isDeleting ? `${part}-` : part;
     }
     return `${cleaned.slice(0, 3)}-${cleaned.slice(3, 7)}-${cleaned.slice(7)}`;

@@ -1,4 +1,4 @@
-package com.myfirstapp
+package io.callytics.app
 
 import android.app.Application
 import com.facebook.react.PackageList
@@ -14,17 +14,7 @@ class MainApplication : Application(), ReactApplication {
 
   override val reactNativeHost: ReactNativeHost =
       object : DefaultReactNativeHost(this) {
-        override fun getPackages(): List<ReactPackage> =
-            PackageList(this).packages.apply {
-              // Packages that cannot be autolinked yet can be added manually here, for example:
-              // add(MyReactNativePackage())
-              add(object : ReactPackage {
-                  override fun createNativeModules(reactContext: com.facebook.react.bridge.ReactApplicationContext) =
-                      listOf(CallModule(reactContext))
-                  override fun createViewManagers(reactContext: com.facebook.react.bridge.ReactApplicationContext) =
-                      emptyList<com.facebook.react.uimanager.ViewManager<*, *>>()
-              })
-            }
+        override fun getPackages(): List<ReactPackage> = PackageList(this).packages
 
         override fun getJSMainModuleName(): String = "index"
 
@@ -40,10 +30,5 @@ class MainApplication : Application(), ReactApplication {
   override fun onCreate() {
     super.onCreate()
     loadReactNative(this)
-    
-    // Schedule periodic sync via AlarmManager (works even when app is killed)
-    // Set alignToClock = true for clock-aligned intervals (:00, :15, :30, :45)
-    // Set alignToClock = false for 15 minutes from now
-    PeriodicSyncReceiver.schedule(this, alignToClock = true)
   }
 }

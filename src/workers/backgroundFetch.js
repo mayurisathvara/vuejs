@@ -56,18 +56,17 @@ const BackgroundFetchHeadlessTask = async (event) => {
 
   try {
     // FIX: Check authentication before processing
-    const { storageService } = require('./src/services/storage');
+    const { storageService } = require('../services/storage');
     const token = await storageService.getAuthToken();
     const userData = await storageService.getUserData();
-    
+
     if (!token || !userData) {
       if (__DEV__) console.log('[BackgroundFetch HeadlessTask] User not authenticated, skipping sync');
       BackgroundFetch.finish(taskId);
       return;
     }
-    
-    // Import the sync service dynamically to avoid initialization issues
-    const { callLogSyncService } = require('./src/services/callLogSync');
+
+    const { callLogSyncService } = require('../services/callLogSync');
     
     if (__DEV__) console.log('[BackgroundFetch HeadlessTask] Processing new call logs...');
     

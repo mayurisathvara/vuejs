@@ -8,14 +8,10 @@ import App from './App';
 import { name as appName } from './app.json';
 
 // Register background fetch headless task
-import './backgroundFetch';
+import './src/workers/backgroundFetch';
 
-// Register call log sync headless task (triggered by native broadcast receiver)
-import CallLogSyncTask from './CallLogSyncTask';
+// Register call log sync headless task (triggered by native CallLogSyncService)
+import CallLogSyncTask from './src/workers/callLogSync';
 AppRegistry.registerHeadlessTask('CallLogSync', () => CallLogSyncTask);
-
-// Register periodic sync headless task (triggered by AlarmManager)
-import PeriodicSyncTask from './PeriodicSyncTask';
-AppRegistry.registerHeadlessTask('PeriodicSync', () => PeriodicSyncTask);
 
 AppRegistry.registerComponent(appName, () => App);

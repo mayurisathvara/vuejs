@@ -44,7 +44,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         try {
           const today = new Date().toISOString().split('T')[0];
           await dashboardAPI.fetchDashboard(today, today);
-          
+
           // Token is valid
           setAuthState({
             isAuthenticated: true,
@@ -54,18 +54,38 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
             mobile,
           });
         } catch (error: any) {
-          // Token validation failed (expired or invalid)
-          if (__DEV__) {
-            console.log('Token validation failed:', error.response?.status);
+          const status = error?.response?.status;
+          // Only clear auth on definitive auth errors (401/403).
+          // Network errors (no response) mean the device is offline —
+          // clearing auth here would log out users whenever they open
+          // the app without internet, which is wrong.
+          const isAuthError = status === 401 || status === 403;
+
+          if (isAuthError) {
+            if (__DEV__) {
+              console.log('Token validation failed (auth error):', status);
+            }
+            await storageService.clearAuthData();
+            setAuthState({
+              isAuthenticated: false,
+              isLoading: false,
+              user: null,
+              token: null,
+              mobile: null,
+            });
+          } else {
+            // Network error or server error — keep the user logged in
+            if (__DEV__) {
+              console.log('Token validation skipped (offline/server error):', error?.code, status);
+            }
+            setAuthState({
+              isAuthenticated: true,
+              isLoading: false,
+              user: userData,
+              token,
+              mobile,
+            });
           }
-          await storageService.clearAuthData();
-          setAuthState({
-            isAuthenticated: false,
-            isLoading: false,
-            user: null,
-            token: null,
-            mobile: null,
-          });
         }
       } else {
         setAuthState({

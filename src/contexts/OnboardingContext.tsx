@@ -4,8 +4,10 @@ import { storageService } from '../services/storage';
 interface OnboardingContextType {
   isOnboardingCompleted: boolean;
   isLoading: boolean;
+  hasConsent: boolean;
   completeOnboarding: () => Promise<void>;
   resetOnboarding: () => Promise<void>;
+  updateConsent: (value: boolean) => Promise<void>;
 }
 
 const OnboardingContext = createContext<OnboardingContextType | undefined>(undefined);
@@ -18,25 +20,29 @@ const ONBOARDING_KEY = 'onboarding_completed';
 
 export const OnboardingProvider: React.FC<OnboardingProviderProps> = ({ children }) => {
   const [isOnboardingCompleted, setIsOnboardingCompleted] = useState(false);
+  const [hasConsent, setHasConsent] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Check onboarding status on mount
   const checkOnboardingStatus = React.useCallback(async () => {
     try {
       setIsLoading(true);
-      const completed = await storageService.getItem(ONBOARDING_KEY);
+      const [completed, consented] = await Promise.all([
+        storageService.getItem(ONBOARDING_KEY),
+        storageService.getUserConsent(),
+      ]);
       setIsOnboardingCompleted(completed === 'true');
+      setHasConsent(!!consented);
     } catch (error) {
       if (__DEV__) {
         console.error('Error checking onboarding status:', error);
       }
       setIsOnboardingCompleted(false);
+      setHasConsent(false);
     } finally {
       setIsLoading(false);
     }
   }, []);
 
-  // Complete onboarding
   const completeOnboarding = async () => {
     try {
       await storageService.setItem(ONBOARDING_KEY, 'true');
@@ -48,13 +54,24 @@ export const OnboardingProvider: React.FC<OnboardingProviderProps> = ({ children
     }
   };
 
-  // Reset onboarding (for testing or logout)
+  const updateConsent = async (value: boolean) => {
+    try {
+      await storageService.setUserConsent(value);
+      setHasConsent(value);
+    } catch (error) {
+      if (__DEV__) {
+        console.error('Error updating consent:', error);
+      }
+      throw error;
+    }
+  };
+
   const resetOnboarding = async () => {
     try {
-      // Clear both onboarding completion and user consent
       await storageService.removeItem(ONBOARDING_KEY);
       await storageService.removeItem('user_consent');
       setIsOnboardingCompleted(false);
+      setHasConsent(false);
       if (__DEV__) {
         console.log('[OnboardingContext] Onboarding and consent reset');
       }
@@ -72,8 +89,10 @@ export const OnboardingProvider: React.FC<OnboardingProviderProps> = ({ children
   const contextValue: OnboardingContextType = {
     isOnboardingCompleted,
     isLoading,
+    hasConsent,
     completeOnboarding,
     resetOnboarding,
+    updateConsent,
   };
 
   return (
@@ -83,7 +102,6 @@ export const OnboardingProvider: React.FC<OnboardingProviderProps> = ({ children
   );
 };
 
-// Custom hook to use onboarding context
 export const useOnboarding = (): OnboardingContextType => {
   const context = useContext(OnboardingContext);
   if (context === undefined) {

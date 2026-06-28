@@ -7,7 +7,6 @@ import CallLogsScreen from '../screens/CallLogsScreen';
 import AnalyticsScreen from '../screens/AnalyticsScreen';
 import SettingsStack from './SettingsStack';
 import { useTheme } from '../contexts/ThemeContext';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { TAB_INDICES } from '../constants';
 import { appEvents, APP_EVENTS } from '../utils/eventEmitter';
 

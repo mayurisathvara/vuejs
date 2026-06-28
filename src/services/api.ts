@@ -4,9 +4,11 @@ import { LoginRequest, LoginResponse, CallLogPushRequest, CallLogPushResponse } 
 import { appEvents, APP_EVENTS } from '../utils/eventEmitter';
 import { RETRY_CONFIG } from '../constants';
 
-// API Configuration - can be overridden by environment variables
+// API Configuration.
+// Set API_BASE_URL in your .env file (use HTTPS in production).
+// The fallback is for local development only — never ship this to production.
 const API_CONFIG = {
-  BASE_URL: process.env.API_BASE_URL || 'http://192.168.1.9:8000/api',
+  BASE_URL: process.env.API_BASE_URL || 'http://192.168.1.5:8000/api', // dev fallback
   TIMEOUT: 30000,
 };
 

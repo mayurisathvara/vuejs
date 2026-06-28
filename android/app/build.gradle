@@ -57,7 +57,7 @@ react {
 /**
  * Set this to true to Run Proguard on Release builds to minify the Java bytecode.
  */
-def enableProguardInReleaseBuilds = false
+def enableProguardInReleaseBuilds = true
 
 /**
  * The preferred build flavor of JavaScriptCore (JSC)
@@ -72,18 +72,33 @@ def enableProguardInReleaseBuilds = false
  */
 def jscFlavor = 'io.github.react-native-community:jsc-android:2026004.+'
 
+// Read version from android/version.properties
+def versionPropsFile = file('../version.properties')
+def versionProps = new Properties()
+if (versionPropsFile.exists()) {
+    versionProps.load(new FileInputStream(versionPropsFile))
+}
+
+// Read release keystore credentials from keystore.properties (gitignored).
+// Falls back to debug keystore if the file is absent (e.g. CI without signing).
+def keystorePropsFile = file('keystore.properties')
+def keystoreProps = new Properties()
+if (keystorePropsFile.exists()) {
+    keystoreProps.load(new FileInputStream(keystorePropsFile))
+}
+
 android {
     ndkVersion rootProject.ext.ndkVersion
     buildToolsVersion rootProject.ext.buildToolsVersion
     compileSdk rootProject.ext.compileSdkVersion
 
-    namespace "com.myfirstapp"
+    namespace "io.callytics.app"
     defaultConfig {
-        applicationId "com.myfirstapp"
+        applicationId "io.callytics.app"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 1
-        versionName "1.0"
+        versionCode versionProps.getProperty('VERSION_CODE', '1').toInteger()
+        versionName versionProps.getProperty('VERSION_NAME', '1.0.0')
     }
     signingConfigs {
         debug {
@@ -92,15 +107,19 @@ android {
             keyAlias 'androiddebugkey'
             keyPassword 'android'
         }
+        release {
+            storeFile keystorePropsFile.exists() ? file(keystoreProps['STORE_FILE']) : file('debug.keystore')
+            storePassword keystorePropsFile.exists() ? keystoreProps['STORE_PASSWORD'] : 'android'
+            keyAlias keystorePropsFile.exists() ? keystoreProps['KEY_ALIAS'] : 'androiddebugkey'
+            keyPassword keystorePropsFile.exists() ? keystoreProps['KEY_PASSWORD'] : 'android'
+        }
     }
     buildTypes {
         debug {
             signingConfig signingConfigs.debug
         }
         release {
-            // Caution! In production, you need to generate your own keystore file.
-            // see https://reactnative.dev/docs/signed-apk-android.
-            signingConfig signingConfigs.debug
+            signingConfig signingConfigs.release
             minifyEnabled enableProguardInReleaseBuilds
             proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
         }

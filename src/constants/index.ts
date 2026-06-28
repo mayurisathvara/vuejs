@@ -29,7 +29,6 @@ export const RETRY_CONFIG = {
 // UI and Animation Timings
 export const UI_TIMINGS = {
   CONSENT_CHECK_INTERVAL: 500, // Consent recheck interval (milliseconds)
-  NAVIGATION_CHECK_INTERVAL: 100, // Navigation state check (deprecated - now using events)
   QUEUE_WARNING_THRESHOLD: 500, // Show warning when queue exceeds this size
   SPLASH_DURATION: 3000, // Splash screen display duration (ms)
 } as const;
@@ -58,8 +57,9 @@ export const DATE_LIMITS = {
   MAX_TIMESTAMP: 4102444800000, // Jan 1, 2100
 } as const;
 
-// Legal URLs — update these to public HTTPS URLs before Play Store submission
+// Legal URLs — MUST be public HTTPS URLs for Play Store submission.
+// Replace with production domain before release.
 export const LEGAL_URLS = {
-  PRIVACY_POLICY: 'http://192.168.1.9:8000/privacy',
-  TERMS_CONDITIONS: 'http://192.168.1.9:8000/terms',
+  PRIVACY_POLICY: process.env.PRIVACY_POLICY_URL || 'https://callytics.io/privacy',
+  TERMS_CONDITIONS: process.env.TERMS_URL || 'https://callytics.io/terms',
 } as const;
