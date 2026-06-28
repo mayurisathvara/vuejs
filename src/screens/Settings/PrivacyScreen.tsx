@@ -5,7 +5,7 @@ import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { SettingsStackParamList } from '../../navigation/SettingsStack';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-import { LEGAL_URLS } from '../../constants';
+import { LEGAL_URLS } from '../../config';
 
 type PrivacyScreenNavigationProp = StackNavigationProp<SettingsStackParamList, 'Privacy'>;
 

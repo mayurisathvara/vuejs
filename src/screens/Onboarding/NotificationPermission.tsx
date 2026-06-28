@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -8,19 +8,15 @@ import {
   Platform,
   StyleSheet,
 } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
 import Toast from 'react-native-toast-message';
 import { usePermissions } from '../../hooks/usePermissions';
 import { useOnboarding } from '../../contexts/OnboardingContext';
-import { useAuth } from '../../contexts/AuthContext';
 import { useTheme } from '../../contexts/ThemeContext';
 import PermissionScreen from '../../components/PermissionScreen';
 
 const NotificationPermission: React.FC = () => {
-  const navigation = useNavigation();
-  const { requestPermission, permissions, openAppSettings, checkAllPermissions } = usePermissions();
+  const { requestPermission, permissions, openAppSettings } = usePermissions();
   const { completeOnboarding } = useOnboarding();
-  const { isAuthenticated } = useAuth();
   const { theme } = useTheme();
   const [isLoading, setIsLoading] = useState(false);
   const [showSettingsModal, setShowSettingsModal] = useState(false);
@@ -109,11 +105,6 @@ const NotificationPermission: React.FC = () => {
       // Try requesting again
       await handleRequestPermission();
     }
-  };
-
-  const handleAppStateChange = async () => {
-    // Recheck permission when app becomes active, but do not auto-navigate
-    await checkAllPermissions();
   };
 
   return (

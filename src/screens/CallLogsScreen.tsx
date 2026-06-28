@@ -170,7 +170,7 @@ const CallLogsScreen: React.FC = () => {
     return { name: 'phone', color: '#6B7280' };
   };
 
-  const getContactInitial = (name: string | null, number: string) => {
+  const getContactInitial = (name: string | null, _number: string) => {
     if (name && name.trim()) {
       return name.charAt(0).toUpperCase();
     }
@@ -266,24 +266,15 @@ const CallLogsScreen: React.FC = () => {
     Linking.canOpenURL(phoneUrl)
       .then((supported) => {
         if (supported) {
-          return Linking.openURL(phoneUrl);
-        } else {
-          Toast.show({
-            type: 'error',
-            text1: 'Cannot make call',
-            text2: 'Phone dialer not available',
-            position: 'bottom',
+          Linking.openURL(phoneUrl).catch(() => {
+            Toast.show({ type: 'error', text1: 'Failed to dial', text2: 'Please try again', position: 'bottom' });
           });
+        } else {
+          Toast.show({ type: 'error', text1: 'Cannot make call', text2: 'Phone dialer not available', position: 'bottom' });
         }
       })
-      .catch((err) => {
-        console.error('Error making call:', err);
-        Toast.show({
-          type: 'error',
-          text1: 'Failed to dial',
-          text2: 'Please try again',
-          position: 'bottom',
-        });
+      .catch(() => {
+        Toast.show({ type: 'error', text1: 'Failed to dial', text2: 'Please try again', position: 'bottom' });
       });
   };
 
@@ -323,9 +314,11 @@ const CallLogsScreen: React.FC = () => {
           </View>
         </View>
         <View style={styles.callRight}>
-          {item.caller_duration !== '00:00:00' && (
+          {item.caller_duration && item.caller_duration !== '00:00:00' && item.caller_duration !== '0' && (
             <Text style={[styles.duration, { color: theme.colors.textSecondary }]}>
-              {item.caller_duration.substring(3)}
+              {item.caller_duration.includes(':')
+                ? item.caller_duration.substring(3)
+                : `${Math.floor(Number(item.caller_duration) / 60)}:${String(Number(item.caller_duration) % 60).padStart(2, '0')}`}
             </Text>
           )}
           <TouchableOpacity 
@@ -377,6 +370,10 @@ const CallLogsScreen: React.FC = () => {
             renderItem={renderCallItem}
             contentContainerStyle={styles.listContent}
             showsVerticalScrollIndicator={false}
+            removeClippedSubviews
+            maxToRenderPerBatch={15}
+            windowSize={10}
+            initialNumToRender={15}
             refreshControl={
               <RefreshControl
                 refreshing={refreshing}

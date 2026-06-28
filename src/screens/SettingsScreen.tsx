@@ -13,7 +13,7 @@ type SettingsScreenNavigationProp = StackNavigationProp<SettingsStackParamList, 
 
 const SettingsScreen: React.FC = () => {
   const { theme, isDark, toggleTheme } = useTheme();
-  const { user, logout } = useAuth();
+  const { logout } = useAuth();
   const navigation = useNavigation<SettingsScreenNavigationProp>();
 
   const handleLogout = async () => {

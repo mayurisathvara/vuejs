@@ -1,46 +1,6 @@
-/**
- * Background Fetch Headless Task
- * This task runs when the app is not in foreground or even killed
- */
 import BackgroundFetch from 'react-native-background-fetch';
 import PushNotification from 'react-native-push-notification';
-import { Platform, PermissionsAndroid } from 'react-native';
-
-/**
- * Report error to logging service
- * CODE QUALITY FIX: Implemented proper error reporting with structured logging
- * Ready for Sentry/Crashlytics integration when needed
- */
-const reportError = (error, context) => {
-  if (__DEV__) {
-    console.error('[BackgroundFetch Error Report]', {
-      context,
-      error: error.message,
-      timestamp: new Date().toISOString(),
-    });
-  }
-  // To integrate Sentry: Sentry.captureException(error, { extra: context });
-  // To integrate Crashlytics: crashlytics().recordError(error);
-};
-
-/**
- * Check if notification permission is granted
- */
-const hasNotificationPermission = async () => {
-  if (Platform.OS === 'android' && Platform.Version >= 33) {
-    try {
-      const granted = await PermissionsAndroid.check(
-        PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS
-      );
-      return granted;
-    } catch (error) {
-      // CODE QUALITY FIX: Always log errors for monitoring
-      console.error('Error checking notification permission:', error);
-      return false;
-    }
-  }
-  return true; // Android < 13
-};
+import hasNotificationPermission from './notificationPermission';
 
 const BackgroundFetchHeadlessTask = async (event) => {
   const taskId = event.taskId;
@@ -119,14 +79,6 @@ const BackgroundFetchHeadlessTask = async (event) => {
     if (__DEV__) console.log('[BackgroundFetch HeadlessTask] completed:', taskId);
   } catch (error) {
     if (__DEV__) console.error('[BackgroundFetch HeadlessTask] error:', error);
-    
-    // Report error to crash reporting service
-    reportError(error, {
-      taskId,
-      isTimeout,
-      timestamp: new Date().toISOString(),
-      context: 'background-fetch-headless-task',
-    });
   } finally {
     // IMPORTANT: Signal completion
     BackgroundFetch.finish(taskId);

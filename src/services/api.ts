@@ -3,16 +3,9 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { LoginRequest, LoginResponse, CallLogPushRequest, CallLogPushResponse } from '../types';
 import { appEvents, APP_EVENTS } from '../utils/eventEmitter';
 import { RETRY_CONFIG } from '../constants';
+import { API_BASE_URL } from '../config';
 
-// API Configuration.
-// Set API_BASE_URL in your .env file (use HTTPS in production).
-// The fallback is for local development only — never ship this to production.
-const API_CONFIG = {
-  BASE_URL: process.env.API_BASE_URL || 'http://192.168.1.5:8000/api', // dev fallback
-  TIMEOUT: 30000,
-};
-
-const BASE_URL = API_CONFIG.BASE_URL;
+const BASE_URL = API_BASE_URL;
 
 // Helper function to retry API calls
 const retryWithBackoff = async <T>(
@@ -141,35 +134,6 @@ export const callLogSyncAPI = {
     }
   },
 
-  /**
-   * Push multiple call logs in a batch
-   */
-  pushCallLogsBatch: async (callLogs: CallLogPushRequest[]): Promise<CallLogPushResponse> => {
-    try {
-      // Push each log individually (can be optimized to batch API if backend supports it)
-      const results = await Promise.allSettled(
-        callLogs.map(log => apiClient.post('/v1/app/call-logs/push', log))
-      );
-
-      const successCount = results.filter(r => r.status === 'fulfilled').length;
-      const failedCount = results.filter(r => r.status === 'rejected').length;
-
-      if (__DEV__ && failedCount > 0) {
-        console.warn(`Batch push: ${successCount} succeeded, ${failedCount} failed`);
-      }
-
-      return {
-        success: successCount > 0,
-        message: `Successfully pushed ${successCount} out of ${callLogs.length} call logs`,
-        data: { successCount, failedCount, total: callLogs.length },
-      };
-    } catch (error: any) {
-      if (__DEV__) {
-        console.error('Error pushing call logs batch:', error);
-      }
-      throw error;
-    }
-  },
 };
 
 export const dashboardAPI = {

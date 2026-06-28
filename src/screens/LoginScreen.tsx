@@ -78,7 +78,7 @@ const LoginScreen: React.FC = () => {
   const handleLogin = async () => {
     if (!validateInputs()) return;
 
-    const success = await login({
+    await login({
       mobile: mobile.trim(),
       app_login_code: appLoginCode.trim(),
     });

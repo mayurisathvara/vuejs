@@ -2,8 +2,6 @@ import PushNotification from 'react-native-push-notification';
 import { Platform, PermissionsAndroid } from 'react-native';
 
 class NotificationService {
-  private hasPermission: boolean = false;
-
   /**
    * Initialize push notification configuration
    */
@@ -34,21 +32,15 @@ class NotificationService {
           const granted = await PermissionsAndroid.check(
             PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS
           );
-          this.hasPermission = granted;
           return granted;
         } catch (error) {
           if (__DEV__) console.error('Error checking notification permission:', error);
-          this.hasPermission = false;
           return false;
         }
       } else {
-        // Android < 13 doesn't require runtime permission
-        this.hasPermission = true;
         return true;
       }
     } else {
-      // iOS
-      this.hasPermission = true;
       return true;
     }
   }

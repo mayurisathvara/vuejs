@@ -1,5 +1,5 @@
 import { StyleSheet } from 'react-native';
-import { spacing, borderRadius, elevation, shadows } from './spacing';
+import { spacing, borderRadius, shadows } from './spacing';
 import { typography } from './typography';
 
 export const createComponentStyles = (colors: any) => StyleSheet.create({

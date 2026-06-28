@@ -3,11 +3,10 @@ import PushNotification from 'react-native-push-notification';
 import { callLogSyncService } from './callLogSync';
 
 class CallStateListener {
-  private subscription: any = null;
+  private subscription: ReturnType<typeof setInterval> | null = null;
   private isListening = false;
   private isProcessing = false; // guard against concurrent interval ticks
-  private lastCheckTime = 0;
-  private checkInterval = 3000; // Check every 3 seconds
+  private readonly checkInterval = 3000;
 
   /**
    * Check if notification permission is granted
@@ -42,17 +41,9 @@ class CallStateListener {
     try {
       if (__DEV__) console.log('[CallStateListener] Starting call state listener...');
       this.isListening = true;
-      this.lastCheckTime = Date.now();
 
-      // Poll for new call logs every 3 seconds
       this.subscription = setInterval(async () => {
-        // Skip if a previous tick is still running (prevents overlapping async calls)
         if (this.isProcessing) return;
-
-        const now = Date.now();
-        if (now - this.lastCheckTime < this.checkInterval) return;
-        this.lastCheckTime = now;
-
         this.isProcessing = true;
         try {
           const processedCount = await callLogSyncService.processNewCallLogs();

@@ -1,15 +1,15 @@
-import React, { useState, useEffect } from 'react';
-import { Alert, Linking } from 'react-native';
+import React, { useState } from 'react';
+import { Alert } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import Toast from 'react-native-toast-message';
 import { usePermissions } from '../../hooks/usePermissions';
-import { useAuth } from '../../contexts/AuthContext';
+
 import PermissionScreen from '../../components/PermissionScreen';
 
 const ContactsPermission: React.FC = () => {
   const navigation = useNavigation();
   const { requestPermission, permissions } = usePermissions();
-  const { isAuthenticated } = useAuth();
+
   const [isLoading, setIsLoading] = useState(false);
 
   const handleRequestPermission = async () => {

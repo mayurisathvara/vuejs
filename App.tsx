@@ -46,12 +46,9 @@ const App: React.FC = () => {
           await callLogSyncService.processNewCallLogs();
           await callLogSyncService.syncUnsyncedLogs();
           if (__DEV__) console.log('[BackgroundFetch] Task completed:', taskId);
-        } catch (error: any) {
+        } catch (error: unknown) {
           if (__DEV__) {
-            console.error('[BackgroundFetch] In-app error:', {
-              taskId,
-              message: error?.message,
-            });
+            console.error('[BackgroundFetch] In-app error:', taskId, error);
           }
         }
         BackgroundFetch.finish(taskId);
@@ -75,9 +72,9 @@ const App: React.FC = () => {
           await callLogSyncService.processNewCallLogs();
           await callLogSyncService.syncUnsyncedLogs();
           if (__DEV__) console.log('[WorkManager] Sync completed');
-        } catch (error: any) {
+        } catch (error: unknown) {
           if (__DEV__) {
-            console.error('[WorkManager] Sync error:', error?.message);
+            console.error('[WorkManager] Sync error:', error);
           }
         }
       }

@@ -6,7 +6,7 @@ import {
   View,
   StatusBar,
   ScrollView,
-  Dimensions,
+
   TouchableOpacity,
   ActivityIndicator,
   RefreshControl,
@@ -23,7 +23,6 @@ import { formatDate } from '../utils/date';
 import { appEvents, APP_EVENTS } from '../utils/eventEmitter';
 import { getErrorMessage, logError } from '../utils/errorHandler';
 
-const { width } = Dimensions.get('window');
 
 interface DashboardData {
   summary: {

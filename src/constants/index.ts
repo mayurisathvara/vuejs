@@ -13,7 +13,6 @@ export const TAB_INDICES = {
 // Background Sync
 export const SYNC_INTERVALS = {
   BACKGROUND_FETCH: 15, // 15 minutes
-  STATS_UPDATE: 30000, // 30 seconds
   NETWORK_RECONNECT_DELAY: 2000, // 2 seconds
   INITIAL_SYNC_DELAY: 3000, // 3 seconds after onboarding
 } as const;
@@ -28,7 +27,6 @@ export const RETRY_CONFIG = {
 
 // UI and Animation Timings
 export const UI_TIMINGS = {
-  CONSENT_CHECK_INTERVAL: 500, // Consent recheck interval (milliseconds)
   QUEUE_WARNING_THRESHOLD: 500, // Show warning when queue exceeds this size
   SPLASH_DURATION: 3000, // Splash screen display duration (ms)
 } as const;
@@ -45,21 +43,9 @@ export const QUEUE_CLEANUP = {
   MAX_ATTEMPTS: 10, // Remove logs with more attempts than this
 } as const;
 
-// Timeouts
-export const TIMEOUTS = {
-  API_REQUEST: 30000, // 30 seconds
-  NETWORK_CHECK: 5000, // 5 seconds
-} as const;
-
 // Date Validation
 export const DATE_LIMITS = {
   MIN_TIMESTAMP: 946684800000, // Jan 1, 2000
   MAX_TIMESTAMP: 4102444800000, // Jan 1, 2100
 } as const;
 
-// Legal URLs — MUST be public HTTPS URLs for Play Store submission.
-// Replace with production domain before release.
-export const LEGAL_URLS = {
-  PRIVACY_POLICY: process.env.PRIVACY_POLICY_URL || 'https://callytics.io/privacy',
-  TERMS_CONDITIONS: process.env.TERMS_URL || 'https://callytics.io/terms',
-} as const;

@@ -1,22 +1,5 @@
-/**
- * Headless JS Task for Call Log Sync
- * This runs when triggered by native Android service (CallLogSyncService)
- */
 import PushNotification from 'react-native-push-notification';
-import { Platform, PermissionsAndroid } from 'react-native';
-
-const hasNotificationPermission = async () => {
-  if (Platform.OS === 'android' && Platform.Version >= 33) {
-    try {
-      return await PermissionsAndroid.check(
-        PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS
-      );
-    } catch {
-      return false;
-    }
-  }
-  return true;
-};
+import hasNotificationPermission from './notificationPermission';
 
 const CallLogSyncTask = async (_taskData) => {
   if (__DEV__) console.log('[CallLogSyncTask] Starting headless sync...');

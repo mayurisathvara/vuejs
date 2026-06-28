@@ -4,7 +4,7 @@ import { WebView } from 'react-native-webview';
 import { useTheme } from '../../contexts/ThemeContext';
 import { useOnboarding } from '../../contexts/OnboardingContext';
 import { useBackHandler } from '../../hooks/useBackHandler';
-import { LEGAL_URLS } from '../../constants';
+import { LEGAL_URLS } from '../../config';
 
 const ConsentScreen: React.FC = () => {
   const { theme } = useTheme();

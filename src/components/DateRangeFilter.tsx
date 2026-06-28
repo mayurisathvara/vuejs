@@ -91,10 +91,6 @@ const DateRangeFilter: React.FC<DateRangeFilterProps> = ({ onApply, selectedLabe
     setModalVisible(false);
   };
 
-  const formatDate = (date: Date) => {
-    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-  };
-
   return (
     <View style={styles.container}>
       <TouchableOpacity
