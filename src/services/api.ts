@@ -1,11 +1,29 @@
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { LoginRequest, LoginResponse, CallLogPushRequest, CallLogPushResponse } from '../types';
+import {
+  LoginRequest,
+  LoginResponse,
+  CallLogPushRequest,
+  CallLogPushResponse,
+  ApiResponse,
+  PaginatedData,
+  DashboardData,
+  CallLogListItem,
+  DailyCallVolumeData,
+  MissedCallsData,
+} from '../types';
 import { appEvents, APP_EVENTS } from '../utils/eventEmitter';
 import { RETRY_CONFIG } from '../constants';
 import { API_BASE_URL } from '../config';
 
 const BASE_URL = API_BASE_URL;
+
+type AxiosErrorLike = {
+  message?: string;
+  code?: string;
+  response?: { status?: number; data?: { message?: string } };
+  config?: { url?: string };
+};
 
 // Helper function to retry API calls
 const retryWithBackoff = async <T>(
@@ -15,16 +33,14 @@ const retryWithBackoff = async <T>(
 ): Promise<T> => {
   try {
     return await fn();
-  } catch (error: any) {
-    // Don't retry on:
-    // - 401/403: Auth errors
-    // - 422: Validation errors (duplicate unique_id, bad data)
-    // - 400: Bad request errors
+  } catch (err: unknown) {
+    const e = err as AxiosErrorLike;
     const noRetryStatuses = [400, 401, 403, 422];
-    if (retries === 0 || noRetryStatuses.includes(error.response?.status)) {
-      throw error;
+    const status = e.response?.status;
+    if (retries === 0 || (status !== undefined && noRetryStatuses.includes(status))) {
+      throw err;
     }
-    
+
     if (__DEV__) {
       console.log(`⚠️ Request failed, retrying in ${delay}ms... (${retries} retries left)`);
     }
@@ -79,7 +95,7 @@ export const authAPI = {
   logout: async (): Promise<void> => {
     try {
       await apiClient.post('/v1/app/logout');
-    } catch (error) {
+    } catch (error: unknown) {
       if (__DEV__) {
         console.error('Logout API error:', error);
       }
@@ -115,22 +131,23 @@ export const callLogSyncAPI = {
       // Convert to our expected format
       return {
         success: true,
-        message: response.data?.message || 'Success',
-        data: response.data,
+        message: (response.data as { message?: string })?.message || 'Success',
+        data: response.data as Record<string, unknown>,
       };
-    } catch (error: any) {
+    } catch (err: unknown) {
+      const e = err as AxiosErrorLike;
       if (__DEV__) {
         console.error('❌ Error pushing call log after retries:', {
-          message: error.message,
-          code: error.code,
-          status: error.response?.status,
-          url: error.config?.url,
+          message: e.message,
+          code: e.code,
+          status: e.response?.status,
+          url: e.config?.url,
         });
-        if (error.response?.status === 422) {
+        if (e.response?.status === 422) {
           console.log('⚠️ Duplicate unique_id (422) - not retrying');
         }
       }
-      throw error;
+      throw err;
     }
   },
 
@@ -140,13 +157,13 @@ export const dashboardAPI = {
   /**
    * Fetch dashboard data for a specific date range
    */
-  fetchDashboard: async (startDate: string, endDate: string): Promise<any> => {
+  fetchDashboard: async (startDate: string, endDate: string): Promise<ApiResponse<DashboardData>> => {
     try {
       if (__DEV__) {
         console.log('📊 Fetching dashboard data:', { startDate, endDate });
       }
 
-      const response = await apiClient.get('/v1/app/dashboard', {
+      const response = await apiClient.get<ApiResponse<DashboardData>>('/v1/app/dashboard', {
         params: {
           start_date: startDate,
           end_date: endDate,
@@ -157,14 +174,15 @@ export const dashboardAPI = {
         console.log('✅ Dashboard data received');
       }
       return response.data;
-    } catch (error: any) {
+    } catch (err: unknown) {
+      const e = err as AxiosErrorLike;
       if (__DEV__) {
         console.error('❌ Error fetching dashboard data:', {
-          message: error.message,
-          status: error.response?.status,
+          message: e.message,
+          status: e.response?.status,
         });
       }
-      throw error;
+      throw err;
     }
   },
 };
@@ -178,13 +196,13 @@ export const callLogsAPI = {
     endDate: string,
     filterType: string = 'all',
     page: number = 1
-  ): Promise<any> => {
+  ): Promise<ApiResponse<PaginatedData<CallLogListItem>>> => {
     try {
       if (__DEV__) {
         console.log('📞 Fetching call logs:', { startDate, endDate, filterType, page });
       }
 
-      const params: any = {
+      const params: Record<string, string | number> = {
         start_date: startDate,
         end_date: endDate,
         page: page,
@@ -195,20 +213,24 @@ export const callLogsAPI = {
         params.filter_type = filterType;
       }
 
-      const response = await apiClient.get('/v1/app/call-logs', { params });
+      const response = await apiClient.get<ApiResponse<PaginatedData<CallLogListItem>>>(
+        '/v1/app/call-logs',
+        { params }
+      );
 
       if (__DEV__) {
         console.log('✅ Call logs received:', response.data.data?.total, 'records');
       }
       return response.data;
-    } catch (error: any) {
+    } catch (err: unknown) {
+      const e = err as AxiosErrorLike;
       if (__DEV__) {
         console.error('❌ Error fetching call logs:', {
-          message: error.message,
-          status: error.response?.status,
+          message: e.message,
+          status: e.response?.status,
         });
       }
-      throw error;
+      throw err;
     }
   },
 };
@@ -217,88 +239,99 @@ export const analyticsAPI = {
   /**
    * Fetch daily call volume for last 7 days
    */
-  fetchDailyCallVolume: async (): Promise<any> => {
+  fetchDailyCallVolume: async (): Promise<ApiResponse<DailyCallVolumeData>> => {
     try {
       if (__DEV__) {
         console.log('📊 Fetching daily call volume...');
       }
 
-      const response = await apiClient.get('/v1/app/analytics/daily-call-volume');
+      const response = await apiClient.get<ApiResponse<DailyCallVolumeData>>(
+        '/v1/app/analytics/daily-call-volume'
+      );
 
       if (__DEV__) {
         console.log('✅ Daily call volume received');
       }
       return response.data;
-    } catch (error: any) {
+    } catch (err: unknown) {
+      const e = err as AxiosErrorLike;
       if (__DEV__) {
         console.error('❌ Error fetching daily call volume:', {
-          message: error.message,
-          status: error.response?.status,
+          message: e.message,
+          status: e.response?.status,
         });
       }
-      throw error;
+      throw err;
     }
   },
 
   /**
    * Fetch peak call hours for a date range
    */
-  fetchPeakHours: async (startDate: string, endDate: string): Promise<any> => {
+  fetchPeakHours: async (startDate: string, endDate: string): Promise<ApiResponse<Record<string, unknown>>> => {
     try {
       if (__DEV__) {
         console.log('📊 Fetching peak hours:', { startDate, endDate });
       }
 
-      const response = await apiClient.get('/v1/app/analytics/peak-hours', {
-        params: {
-          start_date: startDate,
-          end_date: endDate,
-        },
-      });
+      const response = await apiClient.get<ApiResponse<Record<string, unknown>>>(
+        '/v1/app/analytics/peak-hours',
+        {
+          params: {
+            start_date: startDate,
+            end_date: endDate,
+          },
+        }
+      );
 
       if (__DEV__) {
         console.log('✅ Peak hours received');
       }
       return response.data;
-    } catch (error: any) {
+    } catch (err: unknown) {
+      const e = err as AxiosErrorLike;
       if (__DEV__) {
         console.error('❌ Error fetching peak hours:', {
-          message: error.message,
-          status: error.response?.status,
+          message: e.message,
+          status: e.response?.status,
         });
       }
-      throw error;
+      throw err;
     }
   },
 
   /**
    * Fetch missed calls analytics for a date range
    */
-  fetchMissedCalls: async (startDate: string, endDate: string): Promise<any> => {
+  fetchMissedCalls: async (startDate: string, endDate: string): Promise<ApiResponse<MissedCallsData>> => {
     try {
       if (__DEV__) {
         console.log('📊 Fetching missed calls:', { startDate, endDate });
       }
 
-      const response = await apiClient.get('/v1/app/analytics/missed-calls', {
-        params: {
-          start_date: startDate,
-          end_date: endDate,
-        },
-      });
+      const response = await apiClient.get<ApiResponse<MissedCallsData>>(
+        '/v1/app/analytics/missed-calls',
+        {
+          params: {
+            start_date: startDate,
+            end_date: endDate,
+          },
+        }
+      );
 
       if (__DEV__) {
         console.log('✅ Missed calls received');
       }
       return response.data;
-    } catch (error: any) {
+    } catch (err: unknown) {
+      const e = err as AxiosErrorLike;
       if (__DEV__) {
         console.error('❌ Error fetching missed calls:', {
-          message: error.message,
-          status: error.response?.status,
+          message: e.message,
+          status: e.response?.status,
         });
       }
-      throw error;
+      throw err;
     }
   },
 };

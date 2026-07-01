@@ -2,6 +2,7 @@ import React, { createContext, useContext, useEffect, useState, ReactNode, useRe
 import { Alert } from 'react-native';
 import { authAPI, dashboardAPI } from '../services/api';
 import { storageService } from '../services/storage';
+import { callLogStorage } from '../services/callLogStorage';
 import { LoginRequest, AuthState } from '../types';
 import { appEvents, APP_EVENTS } from '../utils/eventEmitter';
 import { getErrorMessage, logError } from '../utils/errorHandler';
@@ -53,8 +54,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
             token,
             mobile,
           });
-        } catch (error: any) {
-          const status = error?.response?.status;
+        } catch (err: unknown) {
+          const status = (err as { response?: { status?: number } }).response?.status;
           // Only clear auth on definitive auth errors (401/403).
           // Network errors (no response) mean the device is offline —
           // clearing auth here would log out users whenever they open
@@ -76,7 +77,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           } else {
             // Network error or server error — keep the user logged in
             if (__DEV__) {
-              console.log('Token validation skipped (offline/server error):', error?.code, status);
+              console.log('Token validation skipped (offline/server error):', (err as { code?: string }).code, status);
             }
             setAuthState({
               isAuthenticated: true,
@@ -142,16 +143,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       });
 
       return true;
-    } catch (error: any) {
-      // Use centralized error handler for proper logging (dev only)
-      logError('AuthContext.login', error);
-      
-      // Get user-friendly error message
-      const errorResponse = getErrorMessage(error);
-      
-      // Show user-friendly alert (not the raw error)
+    } catch (err: unknown) {
+      logError('AuthContext.login', err);
+      const errorResponse = getErrorMessage(err);
       Alert.alert(errorResponse.title, errorResponse.message);
-      
       setAuthState(prev => ({ ...prev, isLoading: false }));
       return false;
     }
@@ -164,12 +159,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       await authAPI.logout();
       
       try {
-        const { callLogStorage } = require('../services/callLogStorage');
         await callLogStorage.clearAllData();
         if (__DEV__) {
           console.log('[AuthContext] Cleared all call log data on logout');
         }
-      } catch (error) {
+      } catch (error: unknown) {
         if (__DEV__) {
           console.error('[AuthContext] Error clearing call log data:', error);
         }
@@ -214,12 +208,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       try {
         await storageService.clearAuthData();
         
-        const { callLogStorage } = require('../services/callLogStorage');
         await callLogStorage.clearAllData();
         if (__DEV__) {
           console.log('[AuthContext] Cleared all call log data on token expiration');
         }
-      } catch (error) {
+      } catch (error: unknown) {
         if (__DEV__) {
           console.error('[AuthContext] Error clearing auth data:', error);
         }

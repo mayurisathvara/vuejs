@@ -1,8 +1,11 @@
 import { StyleSheet } from 'react-native';
 import { spacing, borderRadius, shadows } from './spacing';
 import { typography } from './typography';
+import { getColors } from './colors';
 
-export const createComponentStyles = (colors: any) => StyleSheet.create({
+type ThemeColors = ReturnType<typeof getColors>;
+
+export const createComponentStyles = (colors: ThemeColors) => StyleSheet.create({
   // Button styles
   primaryButton: {
     backgroundColor: colors.primary,

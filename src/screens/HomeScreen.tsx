@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   SafeAreaView,
   Text,
@@ -22,30 +22,7 @@ import { dashboardAPI } from '../services/api';
 import { formatDate } from '../utils/date';
 import { appEvents, APP_EVENTS } from '../utils/eventEmitter';
 import { getErrorMessage, logError } from '../utils/errorHandler';
-
-
-interface DashboardData {
-  summary: {
-    total_calls: { value: number; change: string };
-    answer_rate: { value: string; change: string };
-    avg_duration: { value: string; change: string };
-  };
-  outbound: {
-    answered: number;
-    no_answer: number;
-    total: number;
-    change: string;
-  };
-  inbound: {
-    answered: number;
-    missed: number;
-    total: number;
-    change: string;
-  };
-  alerts: {
-    missed_calls: { value: number };
-  };
-}
+import { DashboardData } from '../types';
 
 const HomeScreen: React.FC = () => {
   const { theme } = useTheme();
@@ -59,27 +36,27 @@ const HomeScreen: React.FC = () => {
     end: new Date()
   });
 
-  const handleMissedCallsClick = async () => {
+  const handleMissedCallsClick = useCallback(async () => {
     try {
       appEvents.emit(APP_EVENTS.NAVIGATE_TO_CALL_LOGS, { filter: 'Missed' });
-    } catch (error) {
-      if (__DEV__) console.error('Error emitting navigate event:', error);
+    } catch (err: unknown) {
+      if (__DEV__) console.error('Error emitting navigate event:', err);
     }
-  };
+  }, []);
 
-  const fetchDashboard = async (startDate: Date, endDate: Date, isPullRefresh = false) => {
+  const fetchDashboard = useCallback(async (startDate: Date, endDate: Date, isPullRefresh = false) => {
     if (isPullRefresh) {
       setRefreshing(true);
     } else {
       setIsLoading(true);
     }
-    
+
     try {
       const startDateStr = formatDate(startDate);
       const endDateStr = formatDate(endDate);
-      
+
       const response = await dashboardAPI.fetchDashboard(startDateStr, endDateStr);
-      
+
       if (response.status && response.data) {
         setDashboardData(response.data);
         if (isPullRefresh) {
@@ -92,12 +69,9 @@ const HomeScreen: React.FC = () => {
           });
         }
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       logError('HomeScreen.fetchDashboard', err);
-      
       const errorResponse = getErrorMessage(err);
-      
-      // Only show toast if error should be shown to user
       if (errorResponse.shouldShowToUser) {
         Toast.show({
           type: 'error',
@@ -114,25 +88,25 @@ const HomeScreen: React.FC = () => {
         setIsLoading(false);
       }
     }
-  };
+  }, []);
 
-  const handleDateRangeApply = (startDate: Date, endDate: Date, label: string) => {
+  const handleDateRangeApply = useCallback((startDate: Date, endDate: Date, label: string) => {
     setDateRangeLabel(label);
     setCurrentDateRange({ start: startDate, end: endDate });
     fetchDashboard(startDate, endDate);
-  };
+  }, [fetchDashboard]);
 
-  const handleRefresh = () => {
+  const handleRefresh = useCallback(() => {
     fetchDashboard(currentDateRange.start, currentDateRange.end, true);
-  };
+  }, [fetchDashboard, currentDateRange]);
 
   // Initial load - fetch today's data
   useEffect(() => {
     const today = new Date();
     fetchDashboard(today, today);
-  }, []);
+  }, [fetchDashboard]);
 
-  const handleSync = async () => {
+  const handleSync = useCallback(async () => {
     try {
       await manualSync();
       Toast.show({
@@ -141,19 +115,19 @@ const HomeScreen: React.FC = () => {
         text2: 'Call logs synced successfully',
         position: 'bottom',
       });
-    } catch (err: any) {
+    } catch (err: unknown) {
       Toast.show({
         type: 'error',
         text1: 'Sync Failed',
-        text2: err?.message || 'Failed to sync call logs',
+        text2: err instanceof Error ? err.message : 'Failed to sync call logs',
         position: 'bottom',
       });
     }
-  };
+  }, [manualSync]);
 
   const formatLastSync = () => {
     if (!lastSyncTime) return 'Never synced';
-    
+
     const now = Date.now();
     const diff = now - lastSyncTime;
     const minutes = Math.floor(diff / 60000);
@@ -177,23 +151,59 @@ const HomeScreen: React.FC = () => {
     if (change.startsWith('-')) return '↓';
     return '';
   };
+
+  const renderSyncCard = () => {
+    const hasPending = pendingCount > 0;
+    const hasError = !!error;
+    const borderColor = hasError ? '#F44336' : hasPending ? '#FF9800' : '#4CAF50';
+    const iconColor = hasError ? '#F44336' : hasPending ? '#FF9800' : '#4CAF50';
+    const iconBg = hasError ? '#FFEBEE' : hasPending ? '#FFF3E0' : '#E8F5E9';
+    const iconName = hasError ? 'cloud-alert' : hasPending ? 'cloud-upload' : 'cloud-check';
+    const statusText = hasError ? 'Sync error' : hasPending ? `${pendingCount} pending` : 'All synced';
+    return (
+      <View style={[styles.syncCard, { backgroundColor: theme.colors.surface, borderLeftColor: borderColor }]}>
+        <View style={styles.syncLeft}>
+          <View style={[styles.syncIconBox, { backgroundColor: iconBg }]}>
+            <MaterialCommunityIcons name={iconName} size={18} color={iconColor} />
+          </View>
+          <View style={styles.syncTextContainer}>
+            <Text style={[styles.syncTitle, { color: theme.colors.textPrimary }]}>{statusText}</Text>
+            <Text style={[styles.syncSubtitle, { color: theme.colors.textSecondary }]}>Last sync: {formatLastSync()}</Text>
+          </View>
+        </View>
+        <TouchableOpacity
+          style={styles.syncActionIcon}
+          onPress={handleSync}
+          disabled={isSyncing}
+          activeOpacity={0.7}
+        >
+          {isSyncing ? (
+            <ActivityIndicator size="small" color="#FF9800" />
+          ) : (
+            <MaterialCommunityIcons name="sync" size={20} color="#FF9800" />
+          )}
+        </TouchableOpacity>
+      </View>
+    );
+  };
+
   const isDark = theme.colorScheme === 'dark';
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: theme.colors.background }]}>
-      <StatusBar 
+      <StatusBar
         barStyle={isDark ? 'light-content' : 'dark-content'}
-        backgroundColor={theme.colors.background} 
+        backgroundColor={theme.colors.background}
       />
       <View style={styles.headerContainer}>
         <AppHeader title="Dashboard" />
-        
+
         {/* Date Range Filter */}
         <DateRangeFilter onApply={handleDateRangeApply} selectedLabel={dateRangeLabel} />
       </View>
-      
-      <ScrollView 
-        style={styles.scrollView} 
+
+      <ScrollView
+        style={styles.scrollView}
         contentContainerStyle={styles.scrollContainer}
         showsVerticalScrollIndicator={false}
         refreshControl={
@@ -236,7 +246,7 @@ const HomeScreen: React.FC = () => {
             {dashboardData?.summary.total_calls.value || 0}
           </Text>
           <Text style={styles.heroSubtext}>All call activity</Text>
-          
+
           {/* Decorative curve */}
           <View style={styles.curveContainer}>
             <View style={styles.curvePoint} />
@@ -251,8 +261,8 @@ const HomeScreen: React.FC = () => {
                 <MaterialCommunityIcons name="phone-check" size={20} color="#4CAF50" />
               </View>
               {dashboardData && (
-                <Text style={[styles.statBadge, { 
-                  color: getChangeColor(dashboardData.summary.answer_rate.change) 
+                <Text style={[styles.statBadge, {
+                  color: getChangeColor(dashboardData.summary.answer_rate.change)
                 }]}>
                   {getChangeIcon(dashboardData.summary.answer_rate.change)} {dashboardData.summary.answer_rate.change}
                 </Text>
@@ -270,8 +280,8 @@ const HomeScreen: React.FC = () => {
                 <MaterialCommunityIcons name="clock-outline" size={20} color="#FF9800" />
               </View>
               {dashboardData && (
-                <Text style={[styles.statBadge, { 
-                  color: getChangeColor(dashboardData.summary.avg_duration.change) 
+                <Text style={[styles.statBadge, {
+                  color: getChangeColor(dashboardData.summary.avg_duration.change)
                 }]}>
                   {getChangeIcon(dashboardData.summary.avg_duration.change)} {dashboardData.summary.avg_duration.change}
                 </Text>
@@ -292,8 +302,8 @@ const HomeScreen: React.FC = () => {
                 <MaterialCommunityIcons name="phone-outgoing" size={20} color="#FF6B6B" />
               </View>
               {dashboardData && (
-                <Text style={[styles.statBadge, { 
-                  color: getChangeColor(dashboardData.outbound.change) 
+                <Text style={[styles.statBadge, {
+                  color: getChangeColor(dashboardData.outbound.change)
                 }]}>
                   {getChangeIcon(dashboardData.outbound.change)} {dashboardData.outbound.change}
                 </Text>
@@ -311,8 +321,8 @@ const HomeScreen: React.FC = () => {
                 <MaterialCommunityIcons name="phone-incoming" size={20} color="#2196F3" />
               </View>
               {dashboardData && (
-                <Text style={[styles.statBadge, { 
-                  color: getChangeColor(dashboardData.inbound.change) 
+                <Text style={[styles.statBadge, {
+                  color: getChangeColor(dashboardData.inbound.change)
                 }]}>
                   {getChangeIcon(dashboardData.inbound.change)} {dashboardData.inbound.change}
                 </Text>
@@ -326,8 +336,8 @@ const HomeScreen: React.FC = () => {
         </View>
 
         {/* Missed Calls Alert */}
-        <TouchableOpacity 
-          style={[styles.alertCard, { backgroundColor: isDark ? '#2A2A2A' : '#FFF9F5' }]} 
+        <TouchableOpacity
+          style={[styles.alertCard, { backgroundColor: isDark ? '#2A2A2A' : '#FFF9F5' }]}
           activeOpacity={0.7}
           onPress={handleMissedCallsClick}
         >
@@ -348,7 +358,7 @@ const HomeScreen: React.FC = () => {
         {/* Call Breakdown */}
         <View style={styles.detailSection}>
           <Text style={[styles.sectionTitle, { color: theme.colors.textPrimary }]}>Call Breakdown</Text>
-          
+
           {/* Outbound Card */}
           <View style={[styles.breakdownCard, { backgroundColor: theme.colors.surface }]}>
             <View style={styles.cardHeader}>
@@ -429,40 +439,7 @@ const HomeScreen: React.FC = () => {
         </View>
 
         {/* Sync Status Card */}
-        {(() => {
-          const hasPending = pendingCount > 0;
-          const hasError = !!error;
-          const borderColor = hasError ? '#F44336' : hasPending ? '#FF9800' : '#4CAF50';
-          const iconColor = hasError ? '#F44336' : hasPending ? '#FF9800' : '#4CAF50';
-          const iconBg = hasError ? '#FFEBEE' : hasPending ? '#FFF3E0' : '#E8F5E9';
-          const iconName = hasError ? 'cloud-alert' : hasPending ? 'cloud-upload' : 'cloud-check';
-          const statusText = hasError ? 'Sync error' : hasPending ? `${pendingCount} pending` : 'All synced';
-          return (
-            <View style={[styles.syncCard, { backgroundColor: theme.colors.surface, borderLeftColor: borderColor }]}>
-              <View style={styles.syncLeft}>
-                <View style={[styles.syncIconBox, { backgroundColor: iconBg }]}>
-                  <MaterialCommunityIcons name={iconName} size={18} color={iconColor} />
-                </View>
-                <View style={styles.syncTextContainer}>
-                  <Text style={[styles.syncTitle, { color: theme.colors.textPrimary }]}>{statusText}</Text>
-                  <Text style={[styles.syncSubtitle, { color: theme.colors.textSecondary }]}>Last sync: {formatLastSync()}</Text>
-                </View>
-              </View>
-              <TouchableOpacity
-                style={styles.syncActionIcon}
-                onPress={handleSync}
-                disabled={isSyncing}
-                activeOpacity={0.7}
-              >
-                {isSyncing ? (
-                  <ActivityIndicator size="small" color="#FF9800" />
-                ) : (
-                  <MaterialCommunityIcons name="sync" size={20} color="#FF9800" />
-                )}
-              </TouchableOpacity>
-            </View>
-          );
-        })()}
+        {renderSyncCard()}
         </>
         )}
       </ScrollView>
@@ -495,7 +472,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '500',
   },
-  
+
   // Hero Card
   heroCard: {
     borderRadius: 24,
@@ -603,10 +580,6 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     marginBottom: 8,
   },
-  statUpdate: {
-    fontSize: 11,
-    color: '#999',
-  },
 
   // Detail Section
   detailSection: {
@@ -617,7 +590,7 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     marginBottom: 16,
   },
-  
+
   // Breakdown Cards
   breakdownCard: {
     borderRadius: 16,
@@ -646,7 +619,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '700',
   },
-  
+
   // Metrics List
   metricsList: {
     gap: 16,
@@ -670,7 +643,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '700',
   },
-  
+
   // Total Row
   totalRow: {
     flexDirection: 'row',

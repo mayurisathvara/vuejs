@@ -6,7 +6,7 @@
 export interface ApiError {
   status?: number;
   message?: string;
-  data?: any;
+  data?: unknown;
 }
 
 export interface ErrorResponse {
@@ -19,12 +19,17 @@ export interface ErrorResponse {
  * Get user-friendly error message based on HTTP status code.
  * API response message always takes priority over generic fallbacks.
  */
-export const getErrorMessage = (error: any): ErrorResponse => {
-  const status = error?.response?.status;
-  const apiMessage = error?.response?.data?.message;
+export const getErrorMessage = (error: unknown): ErrorResponse => {
+  const e = error as {
+    response?: { status?: number; data?: { message?: string } };
+    code?: string;
+    message?: string;
+  };
+  const status = e?.response?.status;
+  const apiMessage = e?.response?.data?.message;
 
   // Network errors (no HTTP response at all)
-  if (error?.code === 'ECONNABORTED' || error?.message?.includes('timeout')) {
+  if (e?.code === 'ECONNABORTED' || e?.message?.includes('timeout')) {
     return {
       title: 'Request Timeout',
       message: 'The request took too long. Please check your connection and try again.',
@@ -32,7 +37,7 @@ export const getErrorMessage = (error: any): ErrorResponse => {
     };
   }
 
-  if (error?.code === 'ERR_NETWORK' || !error?.response) {
+  if (e?.code === 'ERR_NETWORK' || !e?.response) {
     return {
       title: 'Network Error',
       message: 'Please check your internet connection and try again.',
@@ -144,13 +149,18 @@ export const getErrorMessage = (error: any): ErrorResponse => {
 /**
  * Log error for debugging (only in dev mode)
  */
-export const logError = (context: string, error: any) => {
+export const logError = (context: string, error: unknown) => {
   if (__DEV__) {
+    const e = error as {
+      response?: { status?: number; data?: unknown };
+      message?: string;
+      code?: string;
+    };
     console.warn(`[${context}] Error:`, {
-      status: error?.response?.status,
-      message: error?.message,
-      data: error?.response?.data,
-      code: error?.code,
+      status: e?.response?.status,
+      message: e?.message,
+      data: e?.response?.data,
+      code: e?.code,
     });
   }
 };

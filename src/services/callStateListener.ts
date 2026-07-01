@@ -1,28 +1,13 @@
-import { AppState, PermissionsAndroid, Platform } from 'react-native';
+import { AppState, Platform } from 'react-native';
 import PushNotification from 'react-native-push-notification';
 import { callLogSyncService } from './callLogSync';
+import hasNotificationPermission from '../workers/notificationPermission';
 
 class CallStateListener {
   private subscription: ReturnType<typeof setInterval> | null = null;
   private isListening = false;
   private isProcessing = false; // guard against concurrent interval ticks
   private readonly checkInterval = 3000;
-
-  /**
-   * Check if notification permission is granted
-   */
-  private async hasNotificationPermission(): Promise<boolean> {
-    if (Platform.OS === 'android' && Platform.Version >= 33) {
-      try {
-        return await PermissionsAndroid.check(
-          PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS
-        );
-      } catch {
-        return false;
-      }
-    }
-    return true; // Android < 13 or iOS
-  }
 
   /**
    * Start listening for call state changes
@@ -66,8 +51,8 @@ class CallStateListener {
               // Show notification only when app is in background
               const appState = AppState.currentState;
               if (appState !== 'active') {
-                const hasPermission = await this.hasNotificationPermission();
-                if (hasPermission) {
+                const canNotify = await hasNotificationPermission();
+                if (canNotify) {
                   PushNotification.localNotification({
                     channelId: 'call-log-sync',
                     title: 'Call Log Synced',
@@ -87,8 +72,8 @@ class CallStateListener {
               // Show offline notification when app is in background
               const appState = AppState.currentState;
               if (appState !== 'active' && result.error.includes('internet')) {
-                const hasPermission = await this.hasNotificationPermission();
-                if (hasPermission) {
+                const canNotify = await hasNotificationPermission();
+                if (canNotify) {
                   PushNotification.localNotification({
                     channelId: 'call-log-sync',
                     title: 'No Internet',

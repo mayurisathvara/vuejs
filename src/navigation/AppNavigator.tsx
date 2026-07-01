@@ -29,7 +29,10 @@ const Stack = createStackNavigator<RootStackParamList>();
 
 export const navigationRef = React.createRef<NavigationContainerRef<RootStackParamList>>();
 
-export function navigate(name: keyof RootStackParamList, params?: any) {
+export function navigate<T extends keyof RootStackParamList>(
+  name: T,
+  params?: RootStackParamList[T]
+) {
   if (navigationRef.current?.isReady()) {
     navigationRef.current.navigate(name as never, params as never);
   }

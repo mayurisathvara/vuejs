@@ -1,4 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { User } from '../types';
 
 export const STORAGE_KEYS = {
   AUTH_TOKEN: 'auth_token',
@@ -9,7 +10,7 @@ export const STORAGE_KEYS = {
 
 export const storageService = {
   // Store authentication data
-  storeAuthData: async (token: string, mobile: string, userData: any) => {
+  storeAuthData: async (token: string, mobile: string, userData: User) => {
     try {
       await AsyncStorage.multiSet([
         [STORAGE_KEYS.AUTH_TOKEN, token],
@@ -43,10 +44,10 @@ export const storageService = {
   },
 
   // Get user data
-  getUserData: async (): Promise<any | null> => {
+  getUserData: async (): Promise<User | null> => {
     try {
       const userData = await AsyncStorage.getItem(STORAGE_KEYS.USER_DATA);
-      return userData ? JSON.parse(userData) : null;
+      return userData ? (JSON.parse(userData) as User) : null;
     } catch (error) {
       if (__DEV__) console.error('Error getting user data:', error);
       return null;

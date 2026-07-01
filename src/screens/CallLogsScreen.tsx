@@ -10,24 +10,13 @@ import { callLogsAPI } from '../services/api';
 import { formatDate } from '../utils/date';
 import { getErrorMessage, logError } from '../utils/errorHandler';
 import { appEvents, APP_EVENTS } from '../utils/eventEmitter';
-
-interface CallLog {
-  id: number;
-  unique_id: string;
-  time: string;
-  date_time: string;
-  call_type: string;
-  call_status: string;
-  caller_number: string;
-  caller_duration: string;
-  contact_name: string | null;
-}
+import { CallLogListItem } from '../types';
 
 const CallLogsScreen: React.FC = () => {
   const { theme } = useTheme();
   const [dateRangeLabel, setDateRangeLabel] = useState('Today');
   const [selectedFilter, setSelectedFilter] = useState('All');
-  const [callLogs, setCallLogs] = useState<CallLog[]>([]);
+  const [callLogs, setCallLogs] = useState<CallLogListItem[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
@@ -90,7 +79,7 @@ const CallLogsScreen: React.FC = () => {
           });
         }
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       logError('CallLogsScreen.fetchCallLogs', err);
       const errorResponse = getErrorMessage(err);
       if (errorResponse.shouldShowToUser) {
@@ -278,7 +267,7 @@ const CallLogsScreen: React.FC = () => {
       });
   };
 
-  const renderCallItem = ({ item }: { item: CallLog }) => {
+  const renderCallItem = ({ item }: { item: CallLogListItem }) => {
     const callIcon = getCallIcon(item.call_type, item.call_status);
     const hasName = item.contact_name && item.contact_name.trim();
     const displayName = hasName ? item.contact_name : 'Unknown';

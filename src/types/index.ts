@@ -112,7 +112,74 @@ export interface CallLogPushRequest {
 export interface CallLogPushResponse {
   success: boolean;
   message: string;
-  data?: any;
+  data?: Record<string, unknown>;
+}
+
+// Generic API response wrappers
+export interface ApiResponse<T> {
+  status: boolean;
+  data: T;
+}
+
+export interface PaginatedData<T> {
+  data: T[];
+  current_page: number;
+  last_page: number;
+  total: number;
+}
+
+// Dashboard API types
+export interface DashboardData {
+  summary: {
+    total_calls: { value: number; change: string };
+    answer_rate: { value: string; change: string };
+    avg_duration: { value: string; change: string };
+  };
+  outbound: {
+    answered: number;
+    no_answer: number;
+    total: number;
+    change: string;
+  };
+  inbound: {
+    answered: number;
+    missed: number;
+    total: number;
+    change: string;
+  };
+  alerts: {
+    missed_calls: { value: number };
+  };
+}
+
+// Call log list item (API list response format)
+export interface CallLogListItem {
+  id: number;
+  unique_id: string;
+  time: string;
+  date_time: string;
+  call_type: string;
+  call_status: string;
+  caller_number: string;
+  caller_duration: string;
+  contact_name: string | null;
+}
+
+// Analytics API types
+export interface DailyVolumeDay {
+  date: string;
+  count: number;
+}
+
+export interface DailyCallVolumeData {
+  days: DailyVolumeDay[];
+  avg_per_day: number;
+}
+
+export interface MissedCallsData {
+  total_missed: number;
+  returned_calls: number;
+  callback_pending: number;
 }
 
 export interface UnsyncedCallLog {

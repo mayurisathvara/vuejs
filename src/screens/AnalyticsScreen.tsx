@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { View, StyleSheet, SafeAreaView, StatusBar, ScrollView, ActivityIndicator, Text, RefreshControl } from 'react-native';
 import { useTheme } from '../contexts/ThemeContext';
 import AppHeader from '../components/AppHeader';
@@ -10,13 +10,19 @@ import { analyticsAPI } from '../services/api';
 import Toast from 'react-native-toast-message';
 import { formatDate } from '../utils/date';
 import { getErrorMessage, logError } from '../utils/errorHandler';
+import { MissedCallsData, DailyVolumeDay } from '../types';
+
+interface DailyVolumeChartData {
+  labels: string[];
+  values: number[];
+}
 
 const AnalyticsScreen: React.FC = () => {
   const { theme } = useTheme();
   const [dateRangeLabel, setDateRangeLabel] = useState('Today');
-  const [dailyVolumeData, setDailyVolumeData] = useState<any>(null);
-  const [peakHoursData, setPeakHoursData] = useState<any>(null);
-  const [missedCallsData, setMissedCallsData] = useState<any>(null);
+  const [dailyVolumeData, setDailyVolumeData] = useState<DailyVolumeChartData | null>(null);
+  const [peakHoursData, setPeakHoursData] = useState<Record<string, unknown> | null>(null);
+  const [missedCallsData, setMissedCallsData] = useState<MissedCallsData | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [avgPerDay, setAvgPerDay] = useState(0);
@@ -25,27 +31,24 @@ const AnalyticsScreen: React.FC = () => {
     end: new Date(),
   });
 
-  const fetchDailyCallVolume = async () => {
+  const fetchDailyCallVolume = useCallback(async () => {
     try {
       const response = await analyticsAPI.fetchDailyCallVolume();
-      
+
       if (response.status && response.data) {
-        // Transform API data to chart format
-        const labels = response.data.days.map((day: any) => {
+        const labels = response.data.days.map((day: DailyVolumeDay) => {
           const date = new Date(day.date);
-          return date.toLocaleDateString('en-US', { weekday: 'short' }); // Mon, Tue, Wed...
+          return date.toLocaleDateString('en-US', { weekday: 'short' });
         });
-        
-        const values = response.data.days.map((day: any) => day.count);
-        
+
+        const values = response.data.days.map((day: DailyVolumeDay) => day.count);
+
         setDailyVolumeData({ labels, values });
         setAvgPerDay(response.data.avg_per_day);
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       logError('AnalyticsScreen.fetchDailyCallVolume', err);
-      
       const errorResponse = getErrorMessage(err);
-      
       if (errorResponse.shouldShowToUser) {
         Toast.show({
           type: 'error',
@@ -56,23 +59,21 @@ const AnalyticsScreen: React.FC = () => {
         });
       }
     }
-  };
+  }, []);
 
-  const fetchPeakHours = async (startDate: Date, endDate: Date) => {
+  const fetchPeakHours = useCallback(async (startDate: Date, endDate: Date) => {
     try {
       const startDateStr = formatDate(startDate);
       const endDateStr = formatDate(endDate);
-      
+
       const response = await analyticsAPI.fetchPeakHours(startDateStr, endDateStr);
-      
+
       if (response.status && response.data) {
         setPeakHoursData(response.data);
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       logError('AnalyticsScreen.fetchPeakHours', err);
-      
       const errorResponse = getErrorMessage(err);
-      
       if (errorResponse.shouldShowToUser) {
         Toast.show({
           type: 'error',
@@ -83,23 +84,21 @@ const AnalyticsScreen: React.FC = () => {
         });
       }
     }
-  };
+  }, []);
 
-  const fetchMissedCalls = async (startDate: Date, endDate: Date) => {
+  const fetchMissedCalls = useCallback(async (startDate: Date, endDate: Date) => {
     try {
       const startDateStr = formatDate(startDate);
       const endDateStr = formatDate(endDate);
-      
+
       const response = await analyticsAPI.fetchMissedCalls(startDateStr, endDateStr);
-      
+
       if (response.status && response.data) {
         setMissedCallsData(response.data);
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       logError('AnalyticsScreen.fetchMissedCalls', err);
-      
       const errorResponse = getErrorMessage(err);
-      
       if (errorResponse.shouldShowToUser) {
         Toast.show({
           type: 'error',
@@ -110,9 +109,9 @@ const AnalyticsScreen: React.FC = () => {
         });
       }
     }
-  };
+  }, []);
 
-  const fetchAllAnalytics = async (startDate: Date, endDate: Date) => {
+  const fetchAllAnalytics = useCallback(async (startDate: Date, endDate: Date) => {
     setIsLoading(true);
     await Promise.all([
       fetchDailyCallVolume(),
@@ -120,9 +119,9 @@ const AnalyticsScreen: React.FC = () => {
       fetchMissedCalls(startDate, endDate),
     ]);
     setIsLoading(false);
-  };
+  }, [fetchDailyCallVolume, fetchPeakHours, fetchMissedCalls]);
 
-  const handleRefresh = async () => {
+  const handleRefresh = useCallback(async () => {
     setRefreshing(true);
     await Promise.all([
       fetchDailyCallVolume(),
@@ -137,35 +136,34 @@ const AnalyticsScreen: React.FC = () => {
       position: 'bottom',
       visibilityTime: 2000,
     });
-  };
+  }, [fetchDailyCallVolume, fetchPeakHours, fetchMissedCalls, currentDateRange]);
 
   useEffect(() => {
     const today = new Date();
     fetchAllAnalytics(today, today);
-  }, []);
+  }, [fetchAllAnalytics]);
 
-  const handleDateRangeApply = (startDate: Date, endDate: Date, label: string) => {
+  const handleDateRangeApply = useCallback((startDate: Date, endDate: Date, label: string) => {
     setDateRangeLabel(label);
     setCurrentDateRange({ start: startDate, end: endDate });
-    // Fetch date-range dependent analytics
     fetchPeakHours(startDate, endDate);
     fetchMissedCalls(startDate, endDate);
-  };
+  }, [fetchPeakHours, fetchMissedCalls]);
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: theme.colors.background }]}>
-      <StatusBar 
-        barStyle={theme.colorScheme === 'dark' ? 'light-content' : 'dark-content'} 
-        backgroundColor={theme.colors.background} 
+      <StatusBar
+        barStyle={theme.colorScheme === 'dark' ? 'light-content' : 'dark-content'}
+        backgroundColor={theme.colors.background}
       />
       <View style={styles.headerContainer}>
         <AppHeader title="Analytics" />
-        
+
         {/* Date Range Filter */}
         <DateRangeFilter onApply={handleDateRangeApply} selectedLabel={dateRangeLabel} />
       </View>
-      
-      <ScrollView 
+
+      <ScrollView
         style={styles.scrollView}
         contentContainerStyle={styles.scrollContainer}
         showsVerticalScrollIndicator={false}
@@ -210,8 +208,8 @@ const AnalyticsScreen: React.FC = () => {
 };
 
 const styles = StyleSheet.create({
-  container: { 
-    flex: 1 
+  container: {
+    flex: 1
   },
   headerContainer: {
     paddingHorizontal: 16,

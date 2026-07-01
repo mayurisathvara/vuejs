@@ -8,6 +8,7 @@ import { storageService } from './storage';
 import PushNotification from 'react-native-push-notification';
 import { DATE_LIMITS, RETRY_CONFIG, UI_TIMINGS, QUEUE_CLEANUP } from '../constants';
 import { generateCompactCallLogId } from '../utils/uniqueIdGenerator';
+import hasNotificationPermission from '../workers/notificationPermission';
 import {
   RawCallLog,
   CallLogData,
@@ -362,9 +363,9 @@ class CallLogSyncService {
 
           await callLogStorage.addUnsyncedLog(callLogData);
           savedCount++;
-        } catch (error: any) {
+        } catch (err: unknown) {
           if (__DEV__) {
-            console.error('Error converting call log (skipping):', error.message);
+            console.error('Error converting call log (skipping):', err instanceof Error ? err.message : String(err));
           }
           skippedCount++;
           // Skip this invalid log instead of crashing
@@ -491,22 +492,23 @@ class CallLogSyncService {
             }
             await callLogStorage.updateLogAttempt(log.id);
           }
-        } catch (error: any) {
+        } catch (err: unknown) {
+          const syncErr = err as { message?: string; response?: { status?: number; data?: unknown } };
           if (__DEV__) {
             console.error(`❌ Error syncing log ${log.id}:`, {
-              message: error.message,
-              status: error.response?.status,
-              data: error.response?.data,
+              message: syncErr.message,
+              status: syncErr.response?.status,
+              data: syncErr.response?.data,
             });
           }
-          
+
           // MEDIUM PRIORITY BUG FIX: Distinguish between retryable and permanent errors
-          const status = error.response?.status;
+          const status = syncErr.response?.status;
           const isPermanentError = status && (status === 400 || status === 422);
           
           // Handle permanent errors (validation/duplicate) - remove from queue immediately
           if (isPermanentError) {
-            const errorMessage = error.response?.data?.message || '';
+            const errorMessage = (syncErr.response?.data as { message?: string } | undefined)?.message || '';
             if (__DEV__) {
               console.log(`🗑️ Permanent error (${status}) for log ${log.id}: ${errorMessage}`);
               console.log('Removing from queue to prevent infinite retry');
@@ -561,9 +563,9 @@ class CallLogSyncService {
 
       if (__DEV__) console.log(`Successfully synced ${syncedCount} call logs`);
       return { success: true, syncedCount };
-    } catch (error: any) {
-      if (__DEV__) console.error('Error syncing call logs:', error);
-      return { success: false, syncedCount: 0, error: error.message };
+    } catch (err: unknown) {
+      if (__DEV__) console.error('Error syncing call logs:', err);
+      return { success: false, syncedCount: 0, error: err instanceof Error ? err.message : 'Sync failed' };
     } finally {
       this.isSyncing = false;
     }
@@ -588,13 +590,13 @@ class CallLogSyncService {
         syncedCount: syncResult.syncedCount,
         error: syncResult.error,
       };
-    } catch (error: any) {
-      if (__DEV__) console.error('Error in manual sync:', error);
+    } catch (err: unknown) {
+      if (__DEV__) console.error('Error in manual sync:', err);
       return {
         success: false,
         processedCount: 0,
         syncedCount: 0,
-        error: error.message,
+        error: err instanceof Error ? err.message : 'Manual sync failed',
       };
     }
   }
@@ -634,29 +636,22 @@ class CallLogSyncService {
    */
   private async showSyncNotification(count: number): Promise<void> {
     try {
-      // Check if notification permission is granted (Android 13+ requires explicit permission)
-      if (Platform.OS === 'android' && Platform.Version >= 33) {
-        const granted = await PermissionsAndroid.check(
-          PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS
-        );
-        
-        if (!granted) {
-          if (__DEV__) console.warn('⚠️ Cannot show notification: POST_NOTIFICATIONS permission not granted');
-          return;
-        }
+      const granted = await hasNotificationPermission();
+      if (!granted) {
+        if (__DEV__) console.warn('⚠️ Cannot show notification: POST_NOTIFICATIONS permission not granted');
+        return;
       }
-      // For Android < 13, notifications work by default (no runtime permission needed)
 
       PushNotification.localNotification({
         channelId: 'call-log-sync',
-        title: '✅ Call Logs Synced',
+        title: 'Call Logs Synced',
         message: `Successfully synced ${count} call log${count > 1 ? 's' : ''}`,
         playSound: false,
         vibrate: false,
         priority: 'high',
         visibility: 'public',
       });
-    } catch (error) {
+    } catch (error: unknown) {
       if (__DEV__) console.error('Error showing notification:', error);
     }
   }
