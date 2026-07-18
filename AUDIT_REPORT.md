@@ -3,7 +3,7 @@
 **Audited by:** Claude Code (Lead RN Architect / Senior Android Engineer)  
 **Stack:** React Native 0.80.1 · React 19 · TypeScript 5.0.4 · Hermes · New Architecture (Fabric)  
 **Package:** `io.callytics.app`  
-**Dev API:** `http://192.168.1.5:8000/api` — update to HTTPS before go-live  
+**Dev API:** `http://192.168.1.6:8000/api` — update to HTTPS before go-live  
 
 ---
 
@@ -53,7 +53,7 @@ App.tsx (ErrorBoundary → GestureHandlerRoot → Providers → AppNavigator)
 
 #### C1 — Dev IP hardcoded as current API URL
 **File:** [src/config.ts:15](src/config.ts)  
-**Issue:** `DEV_API_URL = 'http://192.168.1.5:8000/api'` is the active URL for all `__DEV__` builds. Release builds use `PROD_API_URL` from `process.env.API_BASE_URL || 'https://api.callytics.io/api'`. Before building a release APK, confirm the production HTTPS URL is correct and set.  
+**Issue:** `DEV_API_URL = 'http://192.168.1.6:8000/api'` is the active URL for all `__DEV__` builds. Release builds use `PROD_API_URL` from `process.env.API_BASE_URL || 'https://api.callytics.io/api'`. Before building a release APK, confirm the production HTTPS URL is correct and set.  
 **Action:** Before go-live, set the real prod URL in `PROD_API_URL` or set `$env:API_BASE_URL` in the build shell.
 
 #### C2 — `tsconfig.json` excludes a file that does not exist

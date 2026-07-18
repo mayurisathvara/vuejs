@@ -18,16 +18,16 @@ Items marked 🔴 are blockers — the app will not work or will be rejected wit
 
 | Done | # | What to Change | Current Value | File | Line |
 |------|---|---------------|---------------|------|------|
-| ☐ | 1 | **API Base URL** | `http://192.168.1.5:8000/api` | `src/services/api.ts` | 9 |
-| ☐ | 2 | **Privacy Policy URL** | `http://192.168.1.5:8000/privacy` | `src/constants/index.ts` | 63 |
-| ☐ | 3 | **Terms & Conditions URL** | `http://192.168.1.5:8000/terms` | `src/constants/index.ts` | 64 |
+| ☐ | 1 | **API Base URL** | `http://192.168.1.6:8000/api` | `src/services/api.ts` | 9 |
+| ☐ | 2 | **Privacy Policy URL** | `http://192.168.1.6:8000/privacy` | `src/constants/index.ts` | 63 |
+| ☐ | 3 | **Terms & Conditions URL** | `http://192.168.1.6:8000/terms` | `src/constants/index.ts` | 64 |
 | ☐ | 4 | **Production Keystore** | Using `debug.keystore` for release builds | `android/app/build.gradle` | 103 |
 | ☐ | 5 | **Android Package ID** | `com.myfirstapp` — confirm this is your final ID (cannot be changed after first release) | `android/app/build.gradle` | 82 |
 
 ### Notes on Critical Items
 
 **Item 1 — API Base URL:**  
-Change `http://192.168.1.5:8000/api` to your production server URL.  
+Change `http://192.168.1.6:8000/api` to your production server URL.  
 Example: `https://api.callytics.com/api`  
 Also change from HTTP to HTTPS.
 

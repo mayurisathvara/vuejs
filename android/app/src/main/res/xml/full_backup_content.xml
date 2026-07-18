@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Legacy (pre-Android-12) backup config, kept in sync with data_extraction_rules.xml.
+  android:allowBackup="false" already disables backup entirely on API 24-30, so this
+  has no real effect — it exists only to satisfy the Android Lint DataExtractionRules
+  check, which wants both attributes set once minSdkVersion is below 31.
+-->
+<full-backup-content>
+    <exclude domain="sharedpref" />
+    <exclude domain="database" />
+    <exclude domain="file" />
+    <exclude domain="external" />
+</full-backup-content>

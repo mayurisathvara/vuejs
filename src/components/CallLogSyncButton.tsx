@@ -4,6 +4,7 @@ import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityI
 import { useCallLogSync } from '../contexts/CallLogContext';
 import { useTheme } from '../contexts/ThemeContext';
 import Toast from 'react-native-toast-message';
+import { getErrorMessage } from '../utils/errorHandler';
 
 const CallLogSyncButton: React.FC = () => {
   const { isSyncing, pendingCount, lastSyncTime, manualSync, error } = useCallLogSync();
@@ -18,12 +19,12 @@ const CallLogSyncButton: React.FC = () => {
         text2: 'Call logs synced successfully',
         position: 'bottom',
       });
-    } catch (err: any) {
-      const errorMessage = err?.message || error || 'Failed to sync call logs';
+    } catch (err: unknown) {
+      const errorResponse = getErrorMessage(err);
       Toast.show({
         type: 'error',
         text1: 'Sync Failed',
-        text2: errorMessage,
+        text2: errorResponse.message || error || 'Failed to sync call logs',
         position: 'bottom',
       });
     }

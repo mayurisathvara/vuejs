@@ -1,6 +1,7 @@
 {
   "extends": "@react-native/typescript-config",
   "compilerOptions": {
+    "types": ["react-native"],
     "strict": true,
     "strictNullChecks": true,
     "strictFunctionTypes": true,

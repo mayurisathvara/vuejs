@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Release network security config: blocks all cleartext (HTTP) traffic.
+  minSdkVersion is 24, and Android only disallows cleartext by default
+  starting at API 28 — this config closes that gap on API 24-27 devices.
+  The debug variant overrides this file (android/app/src/debug/res/xml)
+  to allow cleartext so the local dev IP in src/config.ts keeps working.
+-->
+<network-security-config>
+    <base-config cleartextTrafficPermitted="false" />
+</network-security-config>

@@ -37,7 +37,9 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
           setColorScheme(systemColorScheme || 'light');
         }
       } catch (error) {
-        console.warn('Failed to load theme preference:', error);
+        if (__DEV__) {
+          console.warn('Failed to load theme preference:', error);
+        }
         setColorScheme(systemColorScheme || 'light');
       } finally {
         setIsInitialized(true);
@@ -51,7 +53,9 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
   useEffect(() => {
     if (isInitialized) {
       AsyncStorage.setItem(THEME_STORAGE_KEY, colorScheme).catch((error) => {
-        console.warn('Failed to save theme preference:', error);
+        if (__DEV__) {
+          console.warn('Failed to save theme preference:', error);
+        }
       });
     }
   }, [colorScheme, isInitialized]);

@@ -29,7 +29,9 @@ export const NetworkProvider: React.FC<NetworkProviderProps> = ({ children }) =>
       setIsInternetReachable(state.isInternetReachable);
       setNetworkType(state.type);
     } catch (error) {
-      console.warn('Error checking network connection:', error);
+      if (__DEV__) {
+        console.warn('Error checking network connection:', error);
+      }
       setIsConnected(false);
       setIsInternetReachable(false);
     } finally {

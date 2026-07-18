@@ -15,16 +15,16 @@ const AboutScreen: React.FC = () => {
 
   const appInfo = [
     { label: 'Version', value: '1.0.0' },
-    { label: 'Build Number', value: '100' },
+    { label: 'Build Number', value: '1' },
     { label: 'Last Updated', value: 'November 23, 2025' },
   ];
 
   const handleRateApp = () => {
-    Linking.openURL('https://play.google.com/store/apps/details?id=com.myfirstapp');
+    Linking.openURL('https://play.google.com/store/apps/details?id=io.callytics.app');
   };
 
   const handleShareApp = () => {
-    Linking.openURL('https://play.google.com/store/apps/details?id=com.myfirstapp');
+    Linking.openURL('https://play.google.com/store/apps/details?id=io.callytics.app');
   };
 
   const handleTerms = () => {

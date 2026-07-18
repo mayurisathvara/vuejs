@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { View, StyleSheet, FlatList, SafeAreaView, StatusBar, Text, TouchableOpacity, ActivityIndicator, RefreshControl, Linking, Platform } from 'react-native';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { useTheme } from '../contexts/ThemeContext';
@@ -34,7 +34,7 @@ const CallLogsScreen: React.FC = () => {
     return filter.toLowerCase();
   };
 
-  const fetchCallLogs = async (
+  const fetchCallLogs = useCallback(async (
     startDate: Date,
     endDate: Date,
     filter: string,
@@ -96,7 +96,7 @@ const CallLogsScreen: React.FC = () => {
       setRefreshing(false);
       setIsLoadingMore(false);
     }
-  };
+  }, []);
 
   const handleDateRangeApply = (startDate: Date, endDate: Date, label: string) => {
     setDateRangeLabel(label);
@@ -127,7 +127,7 @@ const CallLogsScreen: React.FC = () => {
   useEffect(() => {
     const today = new Date();
     fetchCallLogs(today, today, 'All', 1);
-  }, []);
+  }, [fetchCallLogs]);
 
   // Navigate-to-call-logs event (e.g. from HomeScreen missed-calls tap)
   useEffect(() => {
@@ -141,7 +141,7 @@ const CallLogsScreen: React.FC = () => {
       }
     });
     return () => unsubscribe();
-  }, []);
+  }, [fetchCallLogs]);
 
   const getCallIcon = (callType: string, callStatus: string) => {
     if (callType === 'inbound') {

@@ -12,7 +12,7 @@
  * They will be undefined if not set in the shell before building.
  */
 
-const DEV_API_URL = 'http://192.168.1.5:8000/api';
+const DEV_API_URL = 'http://192.168.1.6:8000/api';
 const PROD_API_URL = process.env.API_BASE_URL || 'https://api.callytics.io/api';
 
 export const API_BASE_URL: string = __DEV__ ? DEV_API_URL : PROD_API_URL;

@@ -54,7 +54,9 @@ export const usePermissions = (): UsePermissionsReturn => {
         const { status } = await checkNotifications();
         return status;
       } catch (error) {
-        console.error('Error checking notifications permission:', error);
+        if (__DEV__) {
+          console.error('Error checking notifications permission:', error);
+        }
         return 'unavailable';
       }
     }
@@ -62,7 +64,9 @@ export const usePermissions = (): UsePermissionsReturn => {
     // Handle other permissions normally
     const permission = PERMISSION_MAP[permissionKey as Exclude<keyof PermissionState, 'notifications'>];
     if (!permission) {
-      console.warn(`Unknown permission type: ${permissionKey}`);
+      if (__DEV__) {
+        console.warn(`Unknown permission type: ${permissionKey}`);
+      }
       return 'unavailable';
     }
 
@@ -70,7 +74,9 @@ export const usePermissions = (): UsePermissionsReturn => {
       const status = await check(permission);
       return status;
     } catch (error) {
-      console.error(`Error checking ${permissionKey} permission:`, error);
+      if (__DEV__) {
+        console.error(`Error checking ${permissionKey} permission:`, error);
+      }
       return 'unavailable';
     }
   }, []);
@@ -92,7 +98,9 @@ export const usePermissions = (): UsePermissionsReturn => {
         notifications,
       });
     } catch (error) {
-      console.error('Error checking permissions:', error);
+      if (__DEV__) {
+        console.error('Error checking permissions:', error);
+      }
     } finally {
       setIsLoading(false);
     }
@@ -112,7 +120,9 @@ export const usePermissions = (): UsePermissionsReturn => {
         setPermissions(prev => ({ ...prev, notifications: status }));
         return status;
       } catch (error) {
-        console.error('Error requesting notifications permission:', error);
+        if (__DEV__) {
+          console.error('Error requesting notifications permission:', error);
+        }
         return 'unavailable';
       }
     }
@@ -120,7 +130,9 @@ export const usePermissions = (): UsePermissionsReturn => {
     // Handle other permissions normally
     const permission = PERMISSION_MAP[permissionKey as Exclude<keyof PermissionState, 'notifications'>];
     if (!permission) {
-      console.warn(`Unknown permission type: ${permissionKey}`);
+      if (__DEV__) {
+        console.warn(`Unknown permission type: ${permissionKey}`);
+      }
       return 'unavailable';
     }
 
@@ -129,7 +141,9 @@ export const usePermissions = (): UsePermissionsReturn => {
       setPermissions(prev => ({ ...prev, [permissionKey]: status }));
       return status;
     } catch (error) {
-      console.error(`Error requesting ${permissionKey} permission:`, error);
+      if (__DEV__) {
+        console.error(`Error requesting ${permissionKey} permission:`, error);
+      }
       return 'unavailable';
     }
   }, []);
@@ -138,7 +152,9 @@ export const usePermissions = (): UsePermissionsReturn => {
     try {
       await openSettings();
     } catch (error) {
-      console.error('Error opening app settings:', error);
+      if (__DEV__) {
+        console.error('Error opening app settings:', error);
+      }
       // Fallback to general settings
       await Linking.openSettings();
     }
